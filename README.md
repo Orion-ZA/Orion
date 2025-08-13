@@ -18,12 +18,24 @@
 ## 🚀 Getting Started
 
 ### 1. Clone the repo
-
 In terminal in desired dest:
 ```bash
 git clone https://github.com/Orion-ZA/Orion
 cd Orion
 ```
+# Install Node 20 and use it
+nvm install node (latest version)
+nvm use node (latest version)
+
+# Verify version
+node -v (should be 24.X)
+nvm -v (should be 10.X or higher)
+
+# Install dependencies
+npm install 
+
+# Start server
+npm start
 
 ### 2. Create your branch
 

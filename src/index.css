@@ -1,0 +1,124 @@
+.auth-container {
+    width: 375px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #7faa68;
+    border-radius: 15px;
+    text-align: center;
+    height: 425px;
+    background: #7FAA68;
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+    color: white;
+}
+
+.auth-container input {
+    width: 350px;
+    color: white !important;
+    padding: 10px;
+    margin: 10px 0;
+    border: 0.5px solid #ddd;
+    border-radius: 15px;
+    background: #7FAA68;
+
+}
+
+.auth-container button {
+    width: 373px;
+    padding: 10px;
+    background: #05240D;
+    color: white;
+    border: 0.5px solid #05240D;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+.auth-container button:hover {
+    background: #026102f3;
+}
+
+.auth-container p {
+    margin-top: 13px;
+    color: white;
+}
+
+.auth-container a {
+    color: #05240D;
+    text-decoration: none;
+}
+
+.auth-container a:hover {
+    text-decoration: underline;
+}
+
+.forgot-password-link {
+    display: block;
+    text-align: left;
+    margin: 5px 0 15px 12px; /* Matches input field padding */
+    color: #05240D !important;
+}
+
+/*Google button styling*/
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 373px;
+    padding: 10px;
+    background: white !important;
+    color: #05240D !important;
+    border: 0.5px solid #ddd !important;
+    border-radius: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.google-btn:hover {
+    background: #f5f5f5 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Auth Layout */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-header {
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.auth-logo {
+    height: 120px; /* Adjust as needed */
+    width: auto;
+}
+
+.auth-container {
+    max-width: 400px;
+    margin: 100px auto 0; /* Extra top margin for logo */
+    padding: 20px;
+}
+
+/* Divider with "Or" text */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: white;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.5); /* Semi-transparent white line */
+    margin: 0 10px;
+}

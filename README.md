@@ -3,6 +3,7 @@
 ## 💪 Team
 
 - 2653934 aka Zayd ready for business 💼
+- Leethee at work 🫡
 
 ## 🛠 Tech Stack
 

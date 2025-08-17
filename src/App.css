@@ -1,0 +1,132 @@
+.auth-header {
+  
+  top: 15px;
+  left: 20px;
+  z-index: 1000; 
+}
+
+/* Logo styling */
+.auth-logo {
+  width: 100px;   
+  height: auto;
+  cursor: pointer;
+}
+
+/* Container for Auth Forms */
+.auth-container {
+  width: 90%;                /* Use relative width */
+  max-width: 400px;          /* Prevent it from being too wide */
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #7faa68;
+  border-radius: 15px;
+  text-align: center;
+  background: #7FAA68;
+  min-height: 500px;         /* Allow container to grow */
+  box-sizing: border-box;
+}
+
+/* Headings */
+.auth-container h2 {
+  margin-bottom: 20px;
+  color: white;
+  font-size: 1.8rem;
+}
+
+/* Inputs */
+.auth-container input {
+  width: 100%;               /* Full width */
+  color: white;
+  padding: 12px 10px;
+  margin: 10px 0;
+  border: 0.5px solid #ddd;
+  border-radius: 15px;
+  background: #7FAA68;
+  box-sizing: border-box;
+}
+
+
+/* Buttons */
+.auth-container button {
+  width: 100%;
+  padding: 12px;
+  background: #05240D;
+  color: white;
+  border: 0.5px solid #05240D;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.auth-container button:hover {
+  background: #026102f3;
+}
+
+/* Google button */
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  color: #05240D;
+  border: 0.5px solid #ddd;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.google-btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Paragraphs and Links */
+.auth-container p {
+  margin-top: 15px;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.auth-container a {
+  color: #05240D;
+  text-decoration: none;
+}
+
+.auth-container a:hover {
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  color: white;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 0 10px;
+}
+
+/* Responsive tweaks for small screens */
+@media (max-width: 450px) {
+  .auth-container {
+    padding: 15px;
+    min-height: 550px; /* More room for content */
+  }
+
+  .auth-container input,
+  .auth-container button,
+  .google-btn {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+}

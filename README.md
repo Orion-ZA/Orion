@@ -4,6 +4,8 @@
 
 - 2653934 aka Zayd ready for business 💼
 - 2485124 aka Ndums ready for business 🤝
+- 2715815 aka Ash ready for business :/
+- 
 
 ## 🛠 Tech Stack
 

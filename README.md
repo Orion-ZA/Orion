@@ -5,6 +5,7 @@
 - 2653934 aka Zayd ready for business 💼
 - 2678768 aka Terence
 - 2686994 aka Jaairdan
+- 2713248 aka Leethee at work 🫡
 
 ## 🛠 Tech Stack
 

@@ -3,6 +3,7 @@
 ## 💪 Team
 
 - 2653934 aka Zayd ready for business 💼
+- 2485124 aka Ndums ready for business 🤝
 
 ## 🛠 Tech Stack
 

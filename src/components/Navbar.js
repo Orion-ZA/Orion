@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
+import LogoutButton from './LogoutButton';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -26,6 +27,9 @@ export default function Navbar() {
           <NavLink to="/reviews">Reviews & Media</NavLink>
           <NavLink to="/mytrails">MyTrails</NavLink>
           <NavLink to="/alerts">Alerts & Updates</NavLink>
+          <div style={{ marginLeft: '0.5rem' }}>
+            <LogoutButton />
+          </div>
         </nav>
       </div>
     </header>

@@ -1,0 +1,32 @@
+ .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(28,37,65,0.9);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: .75rem 0; }
+.brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 800; letter-spacing: .5px; }
+.brand-icon { font-size: 1.25rem; }
+.brand-text { font-size: 1.1rem; }
+
+.nav-links { display: flex; gap: 1rem; align-items: center; }
+.nav-links a { position: relative; padding: .5rem .75rem; border-radius: 8px; color: #cbd5e1; transition: background .2s ease, color .2s ease, transform .1s ease; }
+.nav-links a::after { content: ""; position: absolute; left: .75rem; right: .75rem; bottom: .35rem; height: 2px; background: linear-gradient(90deg, var(--primary), #9be7e5); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; border-radius: 2px; opacity: .8; }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+.nav-links a:hover { background: rgba(255,255,255,.06); color: #ffffff; }
+.nav-links a:active { transform: translateY(1px); }
+.nav-links a.active { background: rgba(91,192,190,.15); color: #e6fffa; }
+
+.burger { display: none; width: 44px; height: 44px; border: 0; background: transparent; border-radius: 8px; align-items: center; justify-content: center; padding: 6px; transition: background .2s ease; }
+.burger:hover { background: rgba(255,255,255,.06); }
+.burger:active { transform: translateY(1px); }
+.burger span { display: block; width: 22px; height: 2px; background: #e6edf3; border-radius: 2px; margin: 3px 0; transition: transform .2s ease, opacity .2s ease; }
+
+@media (max-width: 900px) {
+  .burger { display: inline-flex; }
+  .nav-links { position: absolute; left: 0; right: 0; top: 56px; display: grid; gap: 0; background: rgba(10,15,30,0.98); border-bottom: 1px solid rgba(255,255,255,0.08); transform-origin: top; transform: scaleY(0); opacity: 0; pointer-events: none; transition: transform .2s cubic-bezier(.2,.8,.2,1), opacity .2s ease; }
+  .nav-links.open { transform: scaleY(1); opacity: 1; pointer-events: auto; }
+  .nav-links a { padding: 1rem; border-radius: 0; border-top: 1px solid rgba(255,255,255,0.06); }
+}

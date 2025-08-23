@@ -1,25 +1,65 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import GoogleIcon from '../components/GoogleIcon';
-import AuthLayout from '../components/AuthLayout';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../firebaseConfig";
+import GoogleIcon from "../components/GoogleIcon";
+import AuthLayout from "../components/AuthLayout";
 
-function Login(){
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); 
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard"); 
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      navigate("/dashboard"); 
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   return (
-    <AuthLayout title="Log in">
-      <form>
-        <input type="email" placeholder="Email" required />
-        <input type="password" placeholder="Password" required />
-        <Link to="/forgot-password" className="forgot-password-link">Forgot Password?</Link>
-        <br />
-        <button type="submit">Log in</button>
-        <section className="divider">Or</section>
-        <button type="button" className="google-btn"><GoogleIcon/>Continue with Google</button>
+    <AuthLayout title="Log In">
+      <form onSubmit={handleEmailLogin}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Log in with Email</button>
       </form>
+
+      <section className="divider">Or</section>
+
+      <button type="button" onClick={loginWithGoogle} className="google-btn">
+        <GoogleIcon /> Log in with Google
+      </button>
+
       <p>
         Don't have an account? <Link to="/signup">Sign Up</Link>
       </p>
     </AuthLayout>
   );
-};
+}
 
 export default Login;

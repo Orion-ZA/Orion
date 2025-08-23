@@ -1,7 +1,8 @@
 // src/components/AuthLayout.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/orion_logo.png';
+import logo from '../assets/orion_logo_clear.png';
+import "../App.css";
 
 const AuthLayout = ({ children, title }) => {
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -16,7 +16,10 @@ import ReviewsMedia from './pages/ReviewsMedia';
 import MyTrails from './pages/MyTrails';
 import AlertsUpdates from './pages/AlertsUpdates';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
     if (!('IntersectionObserver' in window)) {
@@ -38,39 +41,45 @@ function App() {
   }, []);
 
   return (
+    <div className="app-shell">
+      {!hideNavFooter && <Navbar />}
+      
+      <main>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/create-profile" element={<CreateProfile />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/explorer" element={<TrailExplorer />} />
+          <Route path="/submit" element={<TrailSubmission />} />
+          <Route path="/reviews" element={<ReviewsMedia />} />
+          <Route path="/mytrails" element={<MyTrails />} />
+          <Route path="/alerts" element={<AlertsUpdates />} />
+
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
+      </main>
+
+      {!hideNavFooter && <Footer />}
+    </div>
+  );
+}
+
+function App() {
+  return (
     <Router>
-      <div className="app-shell">
-        <Navbar />
-
-        <main>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/create-profile" element={<CreateProfile />} />
-
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="/explorer" element={<TrailExplorer />} />
-            <Route path="/submit" element={<TrailSubmission />} />
-            <Route path="/reviews" element={<ReviewsMedia />} />
-            <Route path="/mytrails" element={<MyTrails />} />
-            <Route path="/alerts" element={<AlertsUpdates />} />
-
-            <Route path="*" element={<Dashboard />} />
-          </Routes>
-        </main>
-
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   );
 }

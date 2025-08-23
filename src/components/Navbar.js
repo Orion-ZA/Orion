@@ -8,7 +8,7 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div className="container nav-inner">
-        <Link className="brand" to="/Dashboard">
+        <Link className="brand" to="/dashboard">
           <span className="brand-icon" aria-hidden>🌌</span>
           <span className="brand-text">Orion</span>
         </Link>

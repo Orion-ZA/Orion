@@ -1,146 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth, db } from '../firebaseConfig';
-import { doc, onSnapshot, getDoc } from 'firebase/firestore';
-import BottomNav from '../components/BottomNav';
-import Home from './Dashboard/Home';
-import Stats from './Dashboard/Stats';
-import Challenges from './Dashboard/Challenges';
-import Account from './Dashboard/Account';
-import './Dashboard.css';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import '../index.css';
+// removed GlassCard; using original card content with glass styling
 
-function Dashboard({ user }) {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
-  const [trailDetails, setTrailDetails] = useState({
-    completedHikes: [],
-    favourites: [],
-    wishlist: [],
-    submittedTrails: []
-  });
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  useEffect(() => {
-    if (!user) return;
-
-    const userRef = doc(db, "Users", user.uid);
-    const unsubscribe = onSnapshot(
-      userRef,
-      async (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setUserData(data);
-
-          // Fetch trail details for each reference array
-          const fetchTrailDetails = async (references) => {
-            const details = [];
-            for (const ref of references) {
-              if (typeof ref === 'string' && ref.startsWith('/Trails/')) {
-                const trailId = ref.split('/')[2];
-                const trailDoc = await getDoc(doc(db, "Trails", trailId));
-                if (trailDoc.exists()) {
-                  details.push(trailDoc.data());
-                }
-              }
-            }
-            return details;
-          };
-
-          const completedHikes = await fetchTrailDetails(data.completedHikes || []);
-          const favourites = await fetchTrailDetails(data.favourites || []);
-          const wishlist = await fetchTrailDetails(data.wishlist || []);
-          const submittedTrails = await fetchTrailDetails(data.submittedTrails || []);
-
-          setTrailDetails({
-            completedHikes,
-            favourites,
-            wishlist,
-            submittedTrails
-          });
-        } else {
-          console.log("No user document found for", user.uid);
-        }
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Error fetching user data:", error);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [user]);
-
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'home':
-        return <Home userData={userData} trailDetails={trailDetails} />;
-      case 'stats':
-        return <Stats userData={userData} />;
-      case 'challenges':
-        return <Challenges userData={userData} />;
-      case 'account':
-        return <Account user={user} userData={userData} handleLogout={handleLogout} />;
-      default:
-        return <Home userData={userData} trailDetails={trailDetails} />;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
-
+export default function Dashboard() {
   return (
-    <div className="dashboard-main">
-      {/* Keep your header sections */}
-      {/* Mobile Header */}
-      <header className="mobile-header">
-        <div className="mobile-header-content">
-          <div className="welcome-section">
-            <span className="fire-emoji">🔥</span>
+    <div className="container">
+      <section className="fade-in-up" style={{display:'grid', gap:'1rem'}}>
+        <h1 className="gradient-text" style={{margin:'0.5rem 0 0'}}>Welcome to Orion</h1>
+        <p style={{color:'var(--muted)'}}>Plan, discover, and share hiking adventures. This dashboard gives you a snapshot of trails, contributions, and alerts across the community.</p>
+      </section>
+
+      <section className="grid cols-3 fade-in-up" style={{marginTop:'1rem'}}>
+        <div className="scale-in reveal" style={{'--delay':'60ms'}}>
+          <div className="card glass" style={{padding:'1rem', display:'grid', gap:'.5rem', justifyItems:'start'}}>
+            <h3>Browse Trails</h3>
+            <p className="muted">Search by location, difficulty, distance, and terrain.</p>
             <div>
-              <h1 className="welcome-title">Welcome back!</h1>
+              <Link to="/explorer" className="button">Open Explorer</Link>
             </div>
           </div>
-          <div className="header-actions">
+        </div>
+        <div className="scale-in reveal" style={{'--delay':'140ms'}}>
+          <div className="card glass" style={{padding:'1rem', display:'grid', gap:'.5rem', justifyItems:'start'}}>
+            <h3>Contribute</h3>
+            <p className="muted">Submit trails, add photos, and write reviews.</p>
+            <div>
+              <Link to="/submit" className="button">Submit a Trail</Link>
+            </div>
           </div>
         </div>
-      </header>
-
-
-      {/* Desktop Header */}
-      <header className="desktop-header">
-        <div>
-          <h1 className="desktop-title">
-            {userData?.profileInfo?.name || "Explorer"}'s Dashboard
-          </h1>
-          <p className="desktop-subtitle">Track your hiking adventures</p>
+        <div className="scale-in reveal" style={{'--delay':'220ms'}}>
+          <div className="card glass" style={{padding:'1rem', display:'grid', gap:'.5rem', justifyItems:'start'}}>
+            <h3>Stay Safe</h3>
+            <p className="muted">View closures, conditions, and alerts from the community.</p>
+            <div>
+              <Link to="/alerts" className="button">View Alerts</Link>
+            </div>
+          </div>
         </div>
-        <div className="desktop-header-actions">
-        </div>
-      </header>
-      
-      {/* Main Content */}
-      <main className="dashboard-content">
-        {renderActiveTab()}
-      </main>
+      </section>
 
-      {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Image Banner Segment */}
+  <section className="card scale-in hero reveal" style={{marginTop:'1rem', padding:0, overflow:'hidden', position:'relative', '--delay':'280ms'}}>
+        <img
+          src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop"
+          alt="Scenic mountain trail"
+          loading="lazy"
+      className="hero-img"
+      style={{width:'100%', height: '360px', objectFit:'cover', display:'block', filter:'brightness(0.85)'}}
+        />
+        <div style={{position:'absolute', inset:0, display:'grid', placeItems:'center', textAlign:'center', padding:'1rem'}}>
+          <div>
+            <h2 style={{margin:'0 0 .5rem'}}>Find your next trail</h2>
+            <p className="muted" style={{maxWidth:'68ch', margin:'0 auto 1rem'}}>Discover crowdsourced insights on difficulty, terrain, distance, photos, and real-time alerts from the community.</p>
+            <Link to="/explorer" className="button">Browse Trails</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid cols-4 fade-in-up" style={{marginTop:'1rem'}}>
+        <div className="card glass scale-in reveal" style={{padding:'1rem', '--delay':'60ms'}}>
+          <h4>Quick Stats</h4>
+          <ul style={{listStyle:'none', padding:0, margin:0, display:'grid', gap:'6px'}}>
+            <li>
+              <span className="badge success">Live</span> 1,284 Trails
+            </li>
+            <li>
+              <span className="badge">Avg Difficulty</span> Moderate
+            </li>
+            <li>
+              <span className="badge">Active Alerts</span> 12
+            </li>
+          </ul>
+        </div>
+
+  <div className="card glass scale-in reveal" style={{padding:'1rem', '--delay':'120ms'}}>
+          <h4>Favourites & Wishlist</h4>
+          <p className="muted">Keep track of hikes you love and ones you want to try.</p>
+          <Link to="/mytrails" className="button">Open MyTrails</Link>
+        </div>
+
+  <div className="card glass scale-in reveal" style={{padding:'1rem', '--delay':'180ms'}}>
+          <h4>Recent Reviews</h4>
+          <p className="muted">See what hikers are saying.</p>
+          <Link to="/reviews" className="button">Open Reviews</Link>
+        </div>
+
+  <div className="card glass scale-in reveal" style={{padding:'1rem', '--delay':'240ms'}}>
+          <h4>Search & Filter</h4>
+          <p className="muted">Find the perfect trail for your next trip.</p>
+          <Link to="/explorer" className="button">Search Trails</Link>
+        </div>
+      </section>
     </div>
   );
 }
-
-export default Dashboard;

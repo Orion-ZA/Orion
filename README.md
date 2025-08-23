@@ -6,6 +6,8 @@
 - 2678768 aka Terence
 - 2686994 aka Jaairdan
 - 2713248 aka Leethee at work 🫡
+- 2485124 aka Ndums ready for business 🤝
+- 2715815 aka Ash ready for business :/
 
 ## 🛠 Tech Stack
 

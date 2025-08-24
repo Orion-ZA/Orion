@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebaseConfig";
 import GoogleIcon from "../components/GoogleIcon";
 import AuthLayout from "../components/AuthLayout";
-import { useLoader } from "../components/LoaderContext";
+import { useLoader } from "../components/LoaderContext.js";
 
 function Login() {
   const [email, setEmail] = useState("");

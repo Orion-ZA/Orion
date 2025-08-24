@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { LoaderProvider, useLoader } from './components/LoaderContext';
-import FullScreenLoader from './components/FullScreenLoader';
+import { LoaderProvider, useLoader } from './components/LoaderContext.js';
+import FullScreenLoader from './components/FullScreenLoader.js';
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';

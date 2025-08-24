@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
+import LogoutButton from './LogoutButton.js';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -27,6 +28,9 @@ export default function Navbar() {
           <NavLink to="/mytrails">MyTrails</NavLink>
           <NavLink to="/alerts">Alerts & Updates</NavLink>
         </nav>
+        <div className="nav-actions">
+          <LogoutButton />
+        </div>
       </div>
     </header>
   );

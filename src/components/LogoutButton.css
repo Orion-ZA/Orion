@@ -1,4 +1,5 @@
 /* Styles for the expanding Logout button */
+
 .logout-wrapper { display: inline-flex; align-items: center; padding: 10px; }
 
 .Btn {
@@ -39,6 +40,17 @@
   color: white;
   font-size: 1.1em;
   font-weight: 600;
+  transition-duration: .3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gicon svg { width: 18px; height: 18px; }
+
+/* hover effect on button width */
+.Btn:hover {
+  width: 145px;
   transition-duration: .28s;
   display: inline-flex;
   align-items: center;

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -20,8 +21,6 @@ const LogoutButton = () => {
     } catch (err) {
       console.error('Failed to logout:', err);
       alert('Failed to logout. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 

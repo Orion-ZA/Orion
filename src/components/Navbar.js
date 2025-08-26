@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
-import LogoutButton from './LogoutButton';
 import LogoutButton from './LogoutButton.js';
 
 export default function Navbar() {
@@ -28,9 +27,6 @@ export default function Navbar() {
           <NavLink to="/reviews">Reviews & Media</NavLink>
           <NavLink to="/mytrails">MyTrails</NavLink>
           <NavLink to="/alerts">Alerts & Updates</NavLink>
-          <div style={{ marginLeft: '0.5rem' }}>
-            <LogoutButton />
-          </div>
         </nav>
         <div className="nav-actions">
           <LogoutButton />

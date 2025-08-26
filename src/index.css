@@ -38,6 +38,9 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto;
 }
 
+/* Header uses a full-width inner row so the nav stretches edge-to-edge */
+.navbar .nav-inner { max-width: 100%; width: 100%; padding: .75rem 1rem; }
+
 .app-shell {
   display: grid;
   grid-template-rows: auto 1fr auto;

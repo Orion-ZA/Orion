@@ -1,16 +1,22 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import GoogleIcon from './GoogleIcon';
 import './LogoutButton.css';
+import { useLoader } from './LoaderContext';
 
 const LogoutButton = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const { triggerLoader } = useLoader();
 
   const handleLogout = async () => {
+    setLoading(true);
     try {
       await signOut(auth);
+      triggerLoader();
       navigate('/login');
     } catch (err) {
       console.error('Failed to logout:', err);
@@ -20,7 +26,7 @@ const LogoutButton = () => {
 
   return (
     <div className="logout-wrapper">
-      <button className="Btn" onClick={handleLogout} aria-label="Logout">
+      <button className="Btn" onClick={handleLogout} aria-label="Logout" disabled={loading}>
         <div className="sign" aria-hidden>
           {/* Logout arrow icon */}
           <svg viewBox="0 0 512 512" width="17" height="17">

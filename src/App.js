@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { LoaderProvider, useLoader } from './components/LoaderContext.js';
+import FullScreenLoader from './components/FullScreenLoader.js';
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -40,18 +42,17 @@ function AppContent() {
     return () => io.disconnect();
   }, []);
 
+  const { show } = useLoader();
   return (
     <div className="app-shell">
+      {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-      
       <main>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/create-profile" element={<CreateProfile />} />
-
           <Route
             path="/dashboard"
             element={
@@ -60,17 +61,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
           <Route path="/explorer" element={<TrailExplorer />} />
           <Route path="/submit" element={<TrailSubmission />} />
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
-
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </main>
-
       {!hideNavFooter && <Footer />}
     </div>
   );
@@ -78,9 +76,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <LoaderProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </LoaderProvider>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton';
+import LogoutButton from './LogoutButton.js';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -31,6 +32,9 @@ export default function Navbar() {
             <LogoutButton />
           </div>
         </nav>
+        <div className="nav-actions">
+          <LogoutButton />
+        </div>
       </div>
     </header>
   );

@@ -124,6 +124,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             padding: '8px 12px',
             backgroundColor: '#fff',
             border: '1px solid #ccc',
+            color: '#333',
             borderRadius: '4px',
             cursor: 'pointer',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'

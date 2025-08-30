@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import mbxClient from "@mapbox/mapbox-sdk/services/geocoding";
-import { collection, addDoc, GeoPoint, doc } from "firebase/firestore";
+import { collection, addDoc, GeoPoint, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage, auth } from "../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
@@ -10,7 +10,11 @@ import { v4 as uuidv4 } from "uuid";
 const geocodingClient = mbxClient({ accessToken: process.env.REACT_APP_MAPBOX_TOKEN });
 
 export default function TrailSubmission() {
+  const mapRef = useRef(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [viewport, setViewport] = useState({
     latitude: -26.2041,
     longitude: 28.0473,
@@ -46,6 +50,44 @@ export default function TrailSubmission() {
     });
     return () => unsubscribe();
   }, []);
+
+  // --- Location handlers ---
+  const getUserLocation = () => {
+    setIsLoadingLocation(true);
+    setLocationError(null);
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser');
+      setIsLoadingLocation(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { longitude, latitude } = position.coords;
+        setUserLocation({ longitude, latitude });
+        setViewport(prev => ({ ...prev, longitude, latitude, zoom: 13 }));
+        setIsLoadingLocation(false);
+      },
+      (error) => {
+        setLocationError('Unable to retrieve your location: ' + error.message);
+        setIsLoadingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
+  const handleRecenter = () => {
+    if (userLocation) {
+      mapRef.current.flyTo({
+        center: [userLocation.longitude, userLocation.latitude],
+        zoom: 13,
+        speed: 1.5
+      });
+    }
+  };
 
   // --- Handlers ---
   const handlePlaceInputChange = (e) => setPlaceInput(e.target.value);
@@ -117,12 +159,14 @@ export default function TrailSubmission() {
 
   const handleSubmit = async () => {
     if (!currentUserId) {
-      alert("You must be logged in to submit a trail.");
+      // TODO: REMOVE THIS ALERT - Replace with proper error handling for production
+      console.error("User not logged in - cannot submit trail");
       return;
     }
 
     if (!form.name || !selectedLocation) {
-      alert("Please enter a trail name and select a location.");
+      // TODO: REMOVE THIS ALERT - Replace with proper validation UI for production
+      console.error("Missing required fields: name or location");
       return;
     }
 
@@ -132,24 +176,50 @@ export default function TrailSubmission() {
       // Create trail document following the exact schema
       const trailData = {
         name: form.name,
-        location: new GeoPoint(selectedLocation.latitude, selectedLocation.longitude),
+        location: {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude
+        },
         distance: Number(form.distance),
         elevationGain: Number(form.elevationGain),
         difficulty: form.difficulty,
         tags: form.tags,
-        gpsRoute: routePoints.map(([lng, lat]) => new GeoPoint(lat, lng)),
+        gpsRoute: routePoints.map(([lng, lat]) => ({ latitude: lat, longitude: lng })),
         description: form.description,
         photos: photoUrls,
         status: {
           status: form.status,
-          lastUpdated: new Date()
+          lastUpdated: new Date().toISOString()
         },
-        createdBy: doc(db, "users", currentUserId), // Reference to User document
+        createdBy: currentUserId,
+        createdAt: new Date().toISOString(), // TODO: REMOVE - Use serverTimestamp() for production
+        updatedAt: new Date().toISOString() // TODO: REMOVE - Use serverTimestamp() for production
       };
 
-      await addDoc(collection(db, "Trails"), trailData);
+             // TODO: REMOVE THIS LOGGING SECTION - For development/debugging only
+       console.log("=== TRAIL SUBMISSION DEBUG LOG ===");
+       console.log("User ID:", currentUserId);
+       console.log("Trail Data to Submit:");
+       console.log(JSON.stringify(trailData, null, 2));
+       console.log("=== END DEBUG LOG ===");
 
-      alert("Trail submitted successfully!");
+       // TODO: UNCOMMENT FOR PRODUCTION - Submit to Firestore database (PERMISSION ISSUE - DISABLED)
+       // const trailDataWithTimestamps = {
+       //   ...trailData,
+       //   createdAt: serverTimestamp(),
+       //   updatedAt: serverTimestamp()
+       // };
+       // const trailRef = await addDoc(collection(db, "Trails"), trailDataWithTimestamps);
+       // console.log("Trail submitted successfully with ID:", trailRef.id);
+
+       // TODO: UNCOMMENT FOR PRODUCTION - Update user's submittedTrails array (PERMISSION ISSUE - DISABLED)
+       // const userRef = doc(db, "Users", currentUserId);
+       // await updateDoc(userRef, {
+       //   submittedTrails: arrayUnion(trailRef.id)
+       // });
+
+       // TODO: REMOVE THIS ALERT - Replace with success notification for production
+       console.log("Trail data prepared and logged successfully!");
       
       // Reset form
       setForm({ 
@@ -168,8 +238,9 @@ export default function TrailSubmission() {
       setSelectedLocation({ latitude: -26.2041, longitude: 28.0473, name: "Johannesburg" });
       setViewport({ latitude: -26.2041, longitude: 28.0473, zoom: 10 });
     } catch (err) {
-      console.error("Error submitting trail:", err);
-      alert("Failed to submit trail.");
+      // TODO: REMOVE THIS ALERT - Replace with proper error handling for production
+      console.error("Error preparing trail data:", err);
+      console.error("Error details:", err.message);
     }
   };
 
@@ -183,16 +254,46 @@ export default function TrailSubmission() {
       <div className="card" style={{ padding: "1rem", marginTop: "1rem" }}>
         <p className="muted">Create or update a hiking trail.</p>
 
+        {/* Location Controls */}
+        <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
+          <button 
+            className="button secondary"
+            onClick={getUserLocation}
+            disabled={isLoadingLocation}
+          >
+            {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
+          </button>
+          {userLocation && (
+            <span>
+              Your location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+            </span>
+          )}
+        </div>
+
+        {locationError && (
+          <div className="card error">
+            ⚠️ {locationError}
+          </div>
+        )}
+
         <div className="grid cols-2" style={{ marginTop: ".5rem" }}>
           {/* Map */}
-          <div style={{ height: "100vh", width: "100%" }}>
+          <div style={{borderRadius: '8px', overflow: 'hidden', height: '600px', border: '1px solid #ccc', position: 'relative'}}>
             <Map
+              ref={mapRef}
               {...viewport}
               mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
               mapStyle="mapbox://styles/mapbox/standard"
               onMove={(evt) => setViewport(evt.viewState)}
               onClick={handleMapClick}
+              style={{width: '100%', height: '100%'}}
             >
+              {userLocation && (
+                <Marker longitude={userLocation.longitude} latitude={userLocation.latitude} anchor="center">
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#4285F4', border: '3px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
+                </Marker>
+              )}
+
               {selectedLocation && (
                 <Marker
                   latitude={selectedLocation.latitude}
@@ -234,6 +335,26 @@ export default function TrailSubmission() {
                 </Source>
               )}
             </Map>
+            {userLocation && (
+              <button
+                onClick={handleRecenter}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  zIndex: 1,
+                  color: '#333',
+                  padding: '8px 12px',
+                  backgroundColor: '#fff',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                Recenter
+              </button>
+            )}
           </div>
 
           {/* Form */}

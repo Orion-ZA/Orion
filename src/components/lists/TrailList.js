@@ -35,7 +35,7 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
                   }}
                   onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = selectedTrail?.id === trail.id ? '#f0f8ff' : 'transparent';
-                      e.currentTarget.style.color = selectedTrail?.id === trail.id ? '#e6edf3' : '#e6edf3';
+                      e.currentTarget.style.color = selectedTrail?.id === trail.id ? 'grey' : '#e6edf3';
                   }}
                 >
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>

@@ -16,8 +16,7 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
             <p style={{color: '#666'}}>No trails found. Try adjusting your filters or increasing the distance.</p>
           ) : (
             trails.map(trail => {
-              const distance = userLocation ? calculateDistance(userLocation.latitude, userLocation.longitude, trail.latitude, trail.longitude).toFixed(1) : 'N/A';
-              const elevationGainInMeters = (trail.elevationGain * 0.3048).toFixed(0); // Convert feet to meters
+              const distance = userLocation ? calculateDistance(userLocation.latitude, userLocation.longitude, trail.location.latitude, trail.location.longitude).toFixed(1) : 'N/A';
               return (
                 <div 
                   key={trail.id} 
@@ -40,17 +39,22 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
                 >
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <strong>{trail.name}</strong>
-                    <span style={{color: trail.difficulty === 'easy' ? '#4CAF50' : trail.difficulty === 'moderate' ? '#FF9800' : '#F44336', fontWeight: 'bold'}}>
+                    <span style={{color: trail.difficulty === 'Easy' ? '#4CAF50' : trail.difficulty === 'Moderate' ? '#FF9800' : '#F44336', fontWeight: 'bold'}}>
                       {trail.difficulty}
                     </span>
                   </div>
                   <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem', color: '#555', fontSize: '0.9rem'}}>
-                    <span>{trail.length} km • {elevationGainInMeters} m gain</span>
+                    <span>{trail.distance} km • {trail.elevationGain} m gain</span>
                     <span>⭐ {trail.rating}</span>
                   </div>
                   {userLocation && (
                     <div style={{marginTop: '0.25rem', fontSize: '0.8rem', color: '#666'}}>
                       📍 {distance} km away
+                    </div>
+                  )}
+                  {trail.tags && trail.tags.length > 0 && (
+                    <div style={{marginTop: '0.25rem', fontSize: '0.8rem', color: '#666'}}>
+                      🏷️ {trail.tags.join(', ')}
                     </div>
                   )}
                 </div>

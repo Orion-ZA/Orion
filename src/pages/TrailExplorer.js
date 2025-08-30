@@ -77,7 +77,7 @@ export default function TrailExplorerPage() {
           selectedTrail={selectedTrail}
           onSelectTrail={setSelectedTrail}
           calculateDistance={calculateDistance}
-          maxDistance={filters.maxDistance}
+          maxDistance={filters.maxLocationDistance}
         />
       </div>
     </div>

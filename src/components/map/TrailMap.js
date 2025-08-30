@@ -18,7 +18,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
   useEffect(() => {
     if (selectedTrail) {
       mapRef.current.flyTo({
-        center: [selectedTrail.longitude, selectedTrail.latitude],
+        center: [selectedTrail.location.longitude, selectedTrail.location.latitude],
         zoom: 14,
         speed: 1.5
       });
@@ -31,7 +31,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
       type: 'Feature',
       geometry: {
         type: 'LineString',
-        coordinates: trail.coordinates
+        coordinates: trail.gpsRoute.map(point => [point.longitude, point.latitude])
       },
       properties: {
         id: trail.id,
@@ -78,7 +78,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
               id="trail-line"
               type="line"
               paint={{
-                'line-color': ['match', ['get', 'difficulty'], 'easy', '#4CAF50', 'moderate', '#FF9800', 'hard', '#F44336', '#9C27B0'],
+                'line-color': ['match', ['get', 'difficulty'], 'Easy', '#4CAF50', 'Moderate', '#FF9800', 'Hard', '#F44336', '#9C27B0'],
                 'line-width': 3,
                 'line-opacity': 0.8
               }}
@@ -89,8 +89,8 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
         {trails.map(trail => (
           <Marker
             key={trail.id}
-            longitude={trail.longitude}
-            latitude={trail.latitude}
+            longitude={trail.location.longitude}
+            latitude={trail.location.latitude}
             anchor="bottom"
             onClick={e => {
               e.originalEvent.stopPropagation();
@@ -98,7 +98,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             }}
           >
             <div style={{ cursor: 'pointer' }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill={trail.difficulty === 'easy' ? '#4CAF50' : trail.difficulty === 'moderate' ? '#FF9800' : '#F44336'}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill={trail.difficulty === 'Easy' ? '#4CAF50' : trail.difficulty === 'Moderate' ? '#FF9800' : '#F44336'}>
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
               </svg>
             </div>
@@ -107,8 +107,8 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
 
         {selectedTrail && (
           <Popup
-            longitude={selectedTrail.longitude}
-            latitude={selectedTrail.latitude}
+            longitude={selectedTrail.location.longitude}
+            latitude={selectedTrail.location.latitude}
             onClose={() => onSelectTrail(null)}
             closeButton={true}
             closeOnClick={false}
@@ -117,7 +117,11 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             <div style={{ color: '#333' }}>
               <h3>{selectedTrail.name}</h3>
               <p><strong>Difficulty:</strong> {selectedTrail.difficulty}</p>
-              <p><strong>Length:</strong> {selectedTrail.length} km</p>
+              <p><strong>Distance:</strong> {selectedTrail.distance} km</p>
+              <p><strong>Elevation Gain:</strong> {selectedTrail.elevationGain} m</p>
+              {selectedTrail.tags && selectedTrail.tags.length > 0 && (
+                <p><strong>Tags:</strong> {selectedTrail.tags.join(', ')}</p>
+              )}
             </div>
           </Popup>
         )}

@@ -12,29 +12,30 @@ export default function FilterPanel({ filters, onFilterChange }) {
           <label>Difficulty</label>
           <select value={filters.difficulty} onChange={(e) => onFilterChange('difficulty', e.target.value)} style={{width: '100%', padding: '0.5rem', marginTop: '0.25rem', borderRadius: '4px', border: '1px solid #ccc'}}>
             <option value="all">All</option>
-            <option value="easy">Easy</option>
-            <option value="moderate">Moderate</option>
-            <option value="hard">Hard</option>
+            <option value="Easy">Easy</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Hard">Hard</option>
           </select>
         </div>
          <div>
-          <label>Terrain</label>
-          <select value={filters.terrain} onChange={(e) => onFilterChange('terrain', e.target.value)} style={{width: '100%', padding: '0.5rem', marginTop: '0.25rem', borderRadius: '4px', border: '1px solid #ccc'}}>
-            <option value="all">All</option>
-            <option value="forest">Forest</option>
-            <option value="coastal">Coastal</option>
-            <option value="mountain">Mountain</option>
-          </select>
+          <label>Tags</label>
+          <input 
+            type="text" 
+            placeholder="Search tags (e.g., waterfall, forest)"
+            value={filters.tags === 'all' ? '' : filters.tags} 
+            onChange={(e) => onFilterChange('tags', e.target.value || 'all')} 
+            style={{width: '100%', padding: '0.5rem', marginTop: '0.25rem', borderRadius: '4px', border: '1px solid #ccc'}}
+          />
         </div>
 
         {/* Range Sliders */}
         <div>
-          <label>Length: {filters.minLength} - {filters.maxLength} km</label>
-          <input type="range" min="0" max="32" value={filters.maxLength} onChange={(e) => onFilterChange('maxLength', parseFloat(e.target.value))} style={{width: '100%'}}/>
+          <label>Distance: {filters.minDistance} - {filters.maxDistance} km</label>
+          <input type="range" min="0" max="32" value={filters.maxDistance} onChange={(e) => onFilterChange('maxDistance', parseFloat(e.target.value))} style={{width: '100%'}}/>
         </div>
          <div>
-          <label>Max Distance: {filters.maxDistance} km</label>
-          <input type="range" min="0" max="160" step="5" value={filters.maxDistance} onChange={(e) => onFilterChange('maxDistance', parseFloat(e.target.value))} style={{width: '100%'}}/>
+          <label>Max Location Distance: {filters.maxLocationDistance} km</label>
+          <input type="range" min="0" max="160" step="5" value={filters.maxLocationDistance} onChange={(e) => onFilterChange('maxLocationDistance', parseFloat(e.target.value))} style={{width: '100%'}}/>
         </div>
       </div>
     </div>

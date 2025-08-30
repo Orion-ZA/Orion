@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../firebaseConfig";
+import { auth, googleProvider, db } from "../firebaseConfig";
+import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import GoogleIcon from "../components/GoogleIcon";
 import AuthLayout from "../components/AuthLayout";
 import { useLoader } from "../components/LoaderContext.js";
@@ -30,7 +31,29 @@ function Login() {
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user document exists in database
+      const userRef = doc(db, "Users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      // If user doesn't exist in database, create their profile
+      if (!userDoc.exists()) {
+        await setDoc(userRef, {
+          profileInfo: {
+            email: user.email,
+            joinedDate: serverTimestamp(),
+            name: user.displayName || "User",
+            userId: user.uid
+          },
+          completedHikes: [],
+          favourites: [],
+          wishlist: [],
+          submittedTrails: []
+        });
+      }
+
       triggerLoader();
       navigate("/dashboard"); 
     } catch (error) {

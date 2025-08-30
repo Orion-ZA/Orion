@@ -108,7 +108,11 @@ function Signup() {
           joinedDate: serverTimestamp(),
           name: user.displayName || "User",
           userId: user.uid
-        }
+        },
+        completedHikes: [],
+        favourites: [],
+        wishlist: [],
+        submittedTrails: []
       });
 
       navigate("/dashboard");

@@ -1,20 +1,29 @@
 // src/components/map/TrailMap.js
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Map, { Marker, Popup, NavigationControl, FullscreenControl, ScaleControl, Source, Layer } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
-// import mapboxgl from 'mapbox-gl';
-
-// mapboxgl.setTelemetry(false);
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 
 export default function TrailMap({ trails, userLocation, selectedTrail, onSelectTrail }) {
+  const mapRef = useRef(null);
   const [viewState, setViewState] = useState({
     longitude: userLocation?.longitude || 28.0473,
     latitude: userLocation?.latitude || -26.2041,
     zoom: userLocation ? 11 : 9
   });
   const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Effect to recenter map on selected trail
+  useEffect(() => {
+    if (selectedTrail) {
+      mapRef.current.flyTo({
+        center: [selectedTrail.longitude, selectedTrail.latitude],
+        zoom: 14,
+        speed: 1.5
+      });
+    }
+  }, [selectedTrail]);
 
   const trailPaths = useMemo(() => ({
     type: 'FeatureCollection',
@@ -34,11 +43,10 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
 
   const handleRecenter = () => {
     if (userLocation) {
-      setViewState({
-        ...viewState,
-        longitude: userLocation.longitude,
-        latitude: userLocation.latitude,
-        zoom: 11
+      mapRef.current.flyTo({
+        center: [userLocation.longitude, userLocation.latitude],
+        zoom: 13,
+        speed: 1.5
       });
     }
   };
@@ -46,6 +54,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
   return (
     <div style={{borderRadius: '8px', overflow: 'hidden', height: '600px', border: '1px solid #ccc', position: 'relative'}}>
       <Map
+        ref={mapRef}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
         style={{width: '100%', height: '100%'}}
@@ -105,7 +114,7 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             closeOnClick={false}
             anchor="top"
           >
-            <div>
+            <div style={{ color: '#333' }}>
               <h3>{selectedTrail.name}</h3>
               <p><strong>Difficulty:</strong> {selectedTrail.difficulty}</p>
               <p><strong>Length:</strong> {selectedTrail.length} km</p>
@@ -121,10 +130,10 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             top: '10px',
             right: '50px',
             zIndex: 1,
+            color: '#333',
             padding: '8px 12px',
             backgroundColor: '#fff',
             border: '1px solid #ccc',
-            color: '#333',
             borderRadius: '4px',
             cursor: 'pointer',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'

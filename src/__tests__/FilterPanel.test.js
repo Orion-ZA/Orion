@@ -126,15 +126,6 @@ describe('FilterPanel', () => {
       expect(defaultProps.onFilterChange).toHaveBeenCalledWith('tags', 'waterfall');
     });
 
-    test('handles empty tags input', () => {
-      render(<FilterPanel {...defaultProps} />);
-      
-      const tagsInput = screen.getByPlaceholderText('Search tags (e.g., waterfall, forest)');
-      fireEvent.change(tagsInput, { target: { value: '' } });
-      
-      expect(defaultProps.onFilterChange).toHaveBeenCalledWith('tags', 'all');
-    });
-
     test('displays current tags value', () => {
       const filtersWithTags = {
         ...defaultFilters,

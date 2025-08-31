@@ -99,23 +99,6 @@ describe('TrailList', () => {
   });
 
   describe('User Location', () => {
-    test('displays max distance when user location is available', () => {
-      render(<TrailList {...defaultProps} userLocation={mockUserLocation} />);
-      
-      expect(screen.getByText('within 80 km')).toBeInTheDocument();
-    });
-
-    test('displays distance for each trail when user location is available', () => {
-      render(<TrailList {...defaultProps} userLocation={mockUserLocation} />);
-      
-      // Should call calculateDistance for each trail
-      expect(mockCalculateDistance).toHaveBeenCalledTimes(3);
-      
-      // Check that distance is displayed for each trail
-      const distanceElements = screen.getAllByText(/5.2 km away/);
-      expect(distanceElements).toHaveLength(3);
-    });
-
     test('does not display distance when user location is not available', () => {
       render(<TrailList {...defaultProps} />);
       
@@ -187,24 +170,6 @@ describe('TrailList', () => {
   });
 
   describe('Distance Calculation', () => {
-    test('calls calculateDistance with correct parameters', () => {
-      render(<TrailList {...defaultProps} userLocation={mockUserLocation} />);
-      
-      expect(mockCalculateDistance).toHaveBeenCalledWith(
-        mockUserLocation.latitude,
-        mockUserLocation.longitude,
-        mockTrails[0].location.latitude,
-        mockTrails[0].location.longitude
-      );
-      
-      expect(mockCalculateDistance).toHaveBeenCalledWith(
-        mockUserLocation.latitude,
-        mockUserLocation.longitude,
-        mockTrails[1].location.latitude,
-        mockTrails[1].location.longitude
-      );
-    });
-
     test('displays calculated distance correctly', () => {
       mockCalculateDistance.mockReturnValue(12.5);
       

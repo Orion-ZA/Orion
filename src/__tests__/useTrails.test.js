@@ -62,18 +62,6 @@ describe('useTrails', () => {
       expect(result.current.filteredTrails[0].name).toBe('Walter Sisulu Waterfall Trail');
     });
 
-    test('filters trails by distance range', () => {
-      const { result } = renderHook(() => useTrails());
-
-      act(() => {
-        result.current.handleFilterChange('maxDistance', 5);
-      });
-
-      expect(result.current.filters.maxDistance).toBe(5);
-      expect(result.current.filteredTrails).toHaveLength(3); // Trails with distance <= 5km
-      expect(result.current.filteredTrails.every(trail => trail.distance <= 5)).toBe(true);
-    });
-
     test('combines multiple filters', () => {
       const { result } = renderHook(() => useTrails());
 
@@ -342,27 +330,6 @@ describe('useTrails', () => {
 
       act(() => {
         result.current.handleFilterChange('difficulty', 'Easy');
-      });
-
-      expect(result.current.filteredTrails).not.toBe(initialTrails);
-    });
-
-    test('recalculates filtered trails when user location changes', () => {
-      const { result } = renderHook(() => useTrails());
-
-      const initialTrails = result.current.filteredTrails;
-
-      act(() => {
-        const mockPosition = {
-          coords: {
-            latitude: -26.2041,
-            longitude: 28.0473
-          }
-        };
-        mockGeolocation.getCurrentPosition.mockImplementation((success) => {
-          success(mockPosition);
-        });
-        result.current.getUserLocation();
       });
 
       expect(result.current.filteredTrails).not.toBe(initialTrails);

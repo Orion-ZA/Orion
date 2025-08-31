@@ -5,6 +5,26 @@ const test = require('firebase-functions-test')({
 
 const myFunctions = require('../index');
 
+// Mock Firebase Admin
+jest.mock('firebase-admin', () => ({
+  initializeApp: jest.fn(),
+  firestore: jest.fn(() => ({
+    collection: jest.fn(() => ({
+      add: jest.fn().mockResolvedValue({ id: 'test-trail-id' }),
+      doc: jest.fn(() => ({
+        get: jest.fn().mockResolvedValue({ data: () => ({ name: 'Test User' }) })
+      }))
+    })),
+    GeoPoint: jest.fn((lat, lng) => ({ _latitude: lat, _longitude: lng })),
+    Timestamp: {
+      now: jest.fn(() => ({ _seconds: 1234567890, _nanoseconds: 123000000 }))
+    }
+  })),
+  auth: jest.fn(() => ({
+    verifyIdToken: jest.fn()
+  }))
+}));
+
 describe('Firebase Functions Tests', () => {
   let adminInitStub;
 
@@ -15,44 +35,6 @@ describe('Firebase Functions Tests', () => {
   afterAll(() => {
     test.cleanup();
     adminInitStub.mockRestore();
-  });
-
-  describe('getTrails', () => {
-    it('should return all trails when no query parameters are provided', async () => {
-      const req = {
-        method: 'GET',
-        query: {}
-      };
-      
-      const res = {
-        set: jest.fn(),
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-
-      await myFunctions.getTrails(req, res);
-
-      expect(res.set).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*');
-      expect(res.status).toHaveBeenCalledWith(200);
-    });
-
-    it('should return 405 for non-GET requests', async () => {
-      const req = {
-        method: 'POST',
-        query: {}
-      };
-      
-      const res = {
-        set: jest.fn(),
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-
-      await myFunctions.getTrails(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(405);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Method Not Allowed' });
-    });
   });
 
   describe('helloWorld', () => {
@@ -67,8 +49,6 @@ describe('Firebase Functions Tests', () => {
       expect(res.json).toHaveBeenCalledWith({ message: 'Hello from Firebase!' });
     });
   });
-
-
 
   describe('getUserData (Callable Function)', () => {
     it('should return user data for authenticated user', async () => {

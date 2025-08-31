@@ -1,130 +1,8 @@
-// src/components/hooks/useTrails.js
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; // Adjust the path to your Firebase config
 
-const sampleTrails = [
-  {
-    id: 1,
-    name: "Melville Koppies Trail",
-    difficulty: "Moderate",
-    distance: 4.5,
-    elevationGain: 600,
-    rating: 4.8,
-    gpsRoute: [
-      { latitude: -26.1755, longitude: 27.9715 },
-      { latitude: -26.1762, longitude: 27.9708 },
-      { latitude: -26.1770, longitude: 27.9695 },
-      { latitude: -26.1785, longitude: 27.9680 }
-    ],
-    location: { latitude: -26.1755, longitude: 27.9715 },
-    description: "A popular trail on a rocky ridge with panoramic views of the city.",
-    tags: ["rocky", "panoramic", "city-views"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-1"
-  },
-  {
-    id: 2,
-    name: "Klipriviersberg Loop",
-    difficulty: "Hard",
-    distance: 8.9,
-    elevationGain: 1100,
-    rating: 4.6,
-    gpsRoute: [
-      { latitude: -26.2940, longitude: 28.0250 },
-      { latitude: -26.2952, longitude: 28.0261 },
-      { latitude: -26.2965, longitude: 28.0275 },
-      { latitude: -26.2981, longitude: 28.0290 }
-    ],
-    location: { latitude: -26.2940, longitude: 28.0250 },
-    description: "A challenging trail through the largest nature reserve in Johannesburg, home to diverse wildlife.",
-    tags: ["bushveld", "wildlife", "nature-reserve"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-2"
-  },
-  {
-    id: 3,
-    name: "Modderfontein Reserve Path",
-    difficulty: "Easy",
-    distance: 3.1,
-    elevationGain: 200,
-    rating: 4.5,
-    gpsRoute: [
-      { latitude: -26.0690, longitude: 28.1400 },
-      { latitude: -26.0695, longitude: 28.1412 },
-      { latitude: -26.0700, longitude: 28.1425 },
-      { latitude: -26.0705, longitude: 28.1438 }
-    ],
-    location: { latitude: -26.0690, longitude: 28.1400 },
-    description: "A gentle and flat trail through the reserve, perfect for a family walk.",
-    tags: ["grassland", "family-friendly", "flat"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-3"
-  },
-  {
-    id: 4,
-    name: "Walter Sisulu Waterfall Trail",
-    difficulty: "Moderate",
-    distance: 2.1,
-    elevationGain: 450,
-    rating: 4.9,
-    gpsRoute: [
-      { latitude: -26.1010, longitude: 27.8525 },
-      { latitude: -26.1015, longitude: 27.8530 },
-      { latitude: -26.1020, longitude: 27.8535 },
-      { latitude: -26.1025, longitude: 27.8540 }
-    ],
-    location: { latitude: -26.1010, longitude: 27.8525 },
-    description: "A scenic trail leading to the stunning Witpoortjie Waterfall.",
-    tags: ["forest", "waterfall", "scenic"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-4"
-  },
-  {
-    id: 5,
-    name: "The Wilds Nature Reserve",
-    difficulty: "Easy",
-    distance: 1.5,
-    elevationGain: 150,
-    rating: 4.7,
-    gpsRoute: [
-      { latitude: -26.1833, longitude: 28.0667 },
-      { latitude: -26.1835, longitude: 28.0670 },
-      { latitude: -26.1838, longitude: 28.0673 },
-      { latitude: -26.1840, longitude: 28.0676 }
-    ],
-    location: { latitude: -26.1833, longitude: 28.0667 },
-    description: "A serene urban reserve with walking paths and art installations.",
-    tags: ["urban-park", "art", "serene"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-5"
-  },
-  {
-    id: 6,
-    name: "Suikerbosrand Trail",
-    difficulty: "Hard",
-    distance: 10.3,
-    elevationGain: 1500,
-    rating: 4.7,
-    gpsRoute: [
-      { latitude: -26.4950, longitude: 28.1180 },
-      { latitude: -26.4965, longitude: 28.1192 },
-      { latitude: -26.4980, longitude: 28.1205 },
-      { latitude: -26.4995, longitude: 28.1218 }
-    ],
-    location: { latitude: -26.4950, longitude: 28.1180 },
-    description: "A demanding trail through the largest provincial nature reserve in Gauteng.",
-    tags: ["mountain", "challenging", "provincial-reserve"],
-    photos: [],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-6"
-  }
-];
-
-// Re-useable function to calculate distance
+// Reusable function to calculate distance
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // Earth radius in kilometers
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -139,15 +17,63 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 export default function useTrails() {
   const [filters, setFilters] = useState({
     difficulty: 'all',
-    tags: 'all',
+    tags: [],
     minDistance: 0,
     maxDistance: 20,
-    maxLocationDistance: 80 // Updated default distance to kilometers
+    maxLocationDistance: 80,
+    searchQuery: ''
   });
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [trails, setTrails] = useState([]);
+  const [isLoadingTrails, setIsLoadingTrails] = useState(false);
 
+  // Fetch trails from Firestore
+  const fetchTrails = useCallback(async () => {
+    setIsLoadingTrails(true);
+    try {
+      const trailsCollection = collection(db, 'Trails');
+      const trailsSnapshot = await getDocs(trailsCollection);
+      const trailsData = trailsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name,
+          difficulty: data.difficulty,
+          distance: data.distance,
+          elevationGain: data.elevationGain,
+          rating: data.rating || 4.5,
+          gpsRoute: data.gpsRoute.map(point => ({
+            latitude: point.latitude,
+            longitude: point.longitude
+          })),
+          location: {
+            latitude: data.location.latitude,
+            longitude: data.location.longitude
+          },
+          description: data.description,
+          tags: data.tags || [],
+          photos: data.photos || [],
+          status: data.status,
+          createdBy: data.createdBy.path
+        };
+      });
+      setTrails(trailsData);
+    } catch (error) {
+      console.error('Error fetching trails:', error);
+      setLocationError('Failed to load trails. Please try again.');
+    } finally {
+      setIsLoadingTrails(false);
+    }
+  }, []);
+
+  // Fetch trails on mount
+  useEffect(() => {
+    fetchTrails();
+  }, [fetchTrails]);
+
+  // Get user location
   const getUserLocation = useCallback(() => {
     setIsLoadingLocation(true);
     setLocationError(null);
@@ -182,7 +108,7 @@ export default function useTrails() {
   }, []);
 
   const filteredTrails = useMemo(() => {
-    return sampleTrails.filter(trail => {
+    return trails.filter(trail => {
       let withinDistance = true;
       if (userLocation && filters.maxLocationDistance > 0) {
         const distance = calculateDistance(
@@ -193,19 +119,25 @@ export default function useTrails() {
         );
         withinDistance = distance <= filters.maxLocationDistance;
       }
-      
-      const hasMatchingTag = filters.tags === 'all' || 
-        trail.tags.some(tag => tag.toLowerCase().includes(filters.tags.toLowerCase()));
-      
+
+      const hasMatchingTag = filters.tags.length === 0 || 
+        (trail.tags && filters.tags.every(filterTag => 
+          trail.tags.some(trailTag => trailTag.toLowerCase() === filterTag.toLowerCase())
+        ));
+
+      const hasMatchingName = filters.searchQuery === '' ||
+        trail.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
+
       return (
         (filters.difficulty === 'all' || trail.difficulty === filters.difficulty) &&
         hasMatchingTag &&
         trail.distance >= filters.minDistance &&
         trail.distance <= filters.maxDistance &&
-        withinDistance
+        withinDistance &&
+        hasMatchingName
       );
     });
-  }, [filters, userLocation]);
+  }, [filters, userLocation, trails]);
 
   return {
     filteredTrails,
@@ -215,6 +147,7 @@ export default function useTrails() {
     locationError,
     isLoadingLocation,
     getUserLocation,
-    calculateDistance
+    calculateDistance,
+    isLoadingTrails
   };
 }

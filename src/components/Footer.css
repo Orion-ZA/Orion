@@ -1,0 +1,8 @@
+.footer { border-top: 1px solid rgba(255,255,255,0.08); background: rgba(28,37,65,0.7); backdrop-filter: saturate(140%) blur(6px); }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; color: #cbd5e1; font-size: .95rem; }
+.footer a { color: #a5b4fc; margin-left: 1rem; transition: color .2s ease, text-shadow .2s ease; }
+.footer a:hover { color: #c7d2fe; text-shadow: 0 0 10px rgba(167, 139, 250, 0.25); }
+@media (max-width: 640px) {
+  .footer-inner { flex-direction: column; gap: .5rem; align-items: flex-start; }
+  .footer a { margin-left: 0; margin-right: 1rem; }
+}

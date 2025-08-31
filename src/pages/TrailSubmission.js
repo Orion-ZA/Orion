@@ -2,12 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import mbxClient from "@mapbox/mapbox-sdk/services/geocoding";
-import { collection, addDoc, GeoPoint, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage, auth } from "../firebaseConfig";
+import { storage, auth } from "../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 
 const geocodingClient = mbxClient({ accessToken: process.env.REACT_APP_MAPBOX_TOKEN });
+
+// API Configuration
+// Note: Firebase Functions URLs are public by design and safe to expose in frontend code.
+// Security is handled by Firebase Auth tokens, not by hiding URLs.
+const API_BASE_URL = 'https://us-central1-orion-sdp.cloudfunctions.net';
 
 export default function TrailSubmission() {
   const mapRef = useRef(null);
@@ -15,6 +19,8 @@ export default function TrailSubmission() {
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
   const [viewport, setViewport] = useState({
     latitude: -26.2041,
     longitude: 28.0473,
@@ -157,70 +163,88 @@ export default function TrailSubmission() {
     return urls;
   };
 
+  const validateForm = () => {
+    if (!form.name.trim()) {
+      setSubmitStatus({ type: 'error', message: 'Trail name is required' });
+      return false;
+    }
+    if (!selectedLocation) {
+      setSubmitStatus({ type: 'error', message: 'Please select a location on the map' });
+      return false;
+    }
+    if (!form.distance || Number(form.distance) <= 0) {
+      setSubmitStatus({ type: 'error', message: 'Please enter a valid distance' });
+      return false;
+    }
+    if (!form.elevationGain || Number(form.elevationGain) < 0) {
+      setSubmitStatus({ type: 'error', message: 'Please enter a valid elevation gain' });
+      return false;
+    }
+    if (!form.description.trim()) {
+      setSubmitStatus({ type: 'error', message: 'Trail description is required' });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (!currentUserId) {
-      // TODO: REMOVE THIS ALERT - Replace with proper error handling for production
-      console.error("User not logged in - cannot submit trail");
+      setSubmitStatus({ type: 'error', message: 'Please log in to submit a trail' });
       return;
     }
 
-    if (!form.name || !selectedLocation) {
-      // TODO: REMOVE THIS ALERT - Replace with proper validation UI for production
-      console.error("Missing required fields: name or location");
+    if (!validateForm()) {
       return;
     }
+
+    setIsSubmitting(true);
+    setSubmitStatus({ type: '', message: '' });
 
     try {
+      // Upload photos first
       const photoUrls = await uploadPhotos(selectedFiles);
 
-      // Create trail document following the exact schema
+      // Get user's ID token for authentication
+      const idToken = await auth.currentUser.getIdToken();
+
+      // Prepare trail data according to our API schema
       const trailData = {
-        name: form.name,
+        name: form.name.trim(),
         location: {
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude
+          lat: selectedLocation.latitude,
+          lng: selectedLocation.longitude
         },
         distance: Number(form.distance),
         elevationGain: Number(form.elevationGain),
         difficulty: form.difficulty,
         tags: form.tags,
-        gpsRoute: routePoints.map(([lng, lat]) => ({ latitude: lat, longitude: lng })),
-        description: form.description,
+        gpsRoute: routePoints.map(([lng, lat]) => ({ lat, lng })),
+        description: form.description.trim(),
         photos: photoUrls,
-        status: {
-          status: form.status,
-          lastUpdated: new Date().toISOString()
-        },
-        createdBy: currentUserId,
-        createdAt: new Date().toISOString(), // TODO: REMOVE - Use serverTimestamp() for production
-        updatedAt: new Date().toISOString() // TODO: REMOVE - Use serverTimestamp() for production
+        status: form.status
       };
 
-             // TODO: REMOVE THIS LOGGING SECTION - For development/debugging only
-       console.log("=== TRAIL SUBMISSION DEBUG LOG ===");
-       console.log("User ID:", currentUserId);
-       console.log("Trail Data to Submit:");
-       console.log(JSON.stringify(trailData, null, 2));
-       console.log("=== END DEBUG LOG ===");
+      // Submit to our API
+      const response = await fetch(`${API_BASE_URL}/submitTrail`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(trailData)
+      });
 
-       // TODO: UNCOMMENT FOR PRODUCTION - Submit to Firestore database (PERMISSION ISSUE - DISABLED)
-       // const trailDataWithTimestamps = {
-       //   ...trailData,
-       //   createdAt: serverTimestamp(),
-       //   updatedAt: serverTimestamp()
-       // };
-       // const trailRef = await addDoc(collection(db, "Trails"), trailDataWithTimestamps);
-       // console.log("Trail submitted successfully with ID:", trailRef.id);
+      const result = await response.json();
 
-       // TODO: UNCOMMENT FOR PRODUCTION - Update user's submittedTrails array (PERMISSION ISSUE - DISABLED)
-       // const userRef = doc(db, "Users", currentUserId);
-       // await updateDoc(userRef, {
-       //   submittedTrails: arrayUnion(trailRef.id)
-       // });
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit trail');
+      }
 
-       // TODO: REMOVE THIS ALERT - Replace with success notification for production
-       console.log("Trail data prepared and logged successfully!");
-      
+      setSubmitStatus({ 
+        type: 'success', 
+        message: `Trail "${form.name}" submitted successfully! Trail ID: ${result.trailId}` 
+      });
+
       // Reset form
       setForm({ 
         name: "", 
@@ -237,15 +261,27 @@ export default function TrailSubmission() {
       setTagInput("");
       setSelectedLocation({ latitude: -26.2041, longitude: 28.0473, name: "Johannesburg" });
       setViewport({ latitude: -26.2041, longitude: 28.0473, zoom: 10 });
-    } catch (err) {
-      // TODO: REMOVE THIS ALERT - Replace with proper error handling for production
-      console.error("Error preparing trail data:", err);
-      console.error("Error details:", err.message);
+
+    } catch (error) {
+      console.error("Error submitting trail:", error);
+      setSubmitStatus({ 
+        type: 'error', 
+        message: `Failed to submit trail: ${error.message}` 
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (!currentUserId) {
-    return <p>Please log in to submit a trail.</p>;
+    return (
+      <div className="container fade-in-up">
+        <div className="card error">
+          <h2>Authentication Required</h2>
+          <p>Please log in to submit a trail.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -253,6 +289,13 @@ export default function TrailSubmission() {
       <h1>Trail Submission</h1>
       <div className="card" style={{ padding: "1rem", marginTop: "1rem" }}>
         <p className="muted">Create or update a hiking trail.</p>
+
+        {/* Status Messages */}
+        {submitStatus.message && (
+          <div className={`card ${submitStatus.type === 'success' ? 'success' : 'error'}`}>
+            {submitStatus.type === 'success' ? '✅' : '⚠️'} {submitStatus.message}
+          </div>
+        )}
 
         {/* Location Controls */}
         <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
@@ -496,8 +539,13 @@ export default function TrailSubmission() {
               </p>
             )}
 
-            <button className="button" style={{ marginTop: "1rem" }} onClick={handleSubmit}>
-              Submit Trail
+            <button 
+              className="button" 
+              style={{ marginTop: "1rem" }} 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Trail'}
             </button>
           </div>
         </div>

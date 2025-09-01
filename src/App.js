@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { LoaderProvider, useLoader } from './components/LoaderContext.js';
 import FullScreenLoader from './components/FullScreenLoader.js';
+
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';

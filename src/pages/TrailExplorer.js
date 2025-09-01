@@ -1,4 +1,3 @@
-// src/pages/TrailExplorerPage.js
 import React, { useState, useEffect } from 'react';
 import useTrails from '../components/hooks/useTrails';
 import TrailMap from '../components/map/TrailMap';
@@ -16,6 +15,7 @@ export default function TrailExplorerPage() {
     userLocation,
     locationError,
     isLoadingLocation,
+    isLoadingTrails,
     getUserLocation,
     calculateDistance
   } = useTrails();
@@ -55,6 +55,12 @@ export default function TrailExplorerPage() {
       {locationError && (
         <div className="card error">
           ⚠️ {locationError}
+        </div>
+      )}
+
+      {isLoadingTrails && (
+        <div className="card">
+          Loading trails...
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox";
+import Map, { Marker, Popup, Source, Layer } from 'react-map-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import mbxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";

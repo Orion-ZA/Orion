@@ -1,0 +1,353 @@
+/* Root */
+.landing-page {
+  --green: #4CAF50;
+  --deep: #2d5016;
+  --ink: #0b1a2e;
+  --muted: #6b6b6b;
+  background: #fff;
+  color: #111;
+}
+
+/* Reveal on scroll */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* Containers */
+.container { width: min(1100px, 92%); margin: 0 auto; }
+
+/* Hero */
+.hero { min-height: clamp(520px, 72vh, 780px); display: grid; place-items: center; position: relative; }
+.hero .hero-overlay { position: absolute; inset: 0; background: radial-gradient(1200px 500px at 50% 15%, rgba(255,255,255,.12), rgba(0,0,0,.55)); }
+.hero .hero-title { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 900; letter-spacing: -0.02em; }
+.hero .search-bar input::placeholder { color: rgba(255,255,255,.9); }
+.hero .search-bar input { outline: none; }
+.hero .search-bar button { cursor: pointer; font-weight: 800; letter-spacing: .02em; }
+.hero .hero-actions .link { text-underline-offset: 4px; }
+
+/* River */
+@keyframes riverScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.river { overflow-x: hidden; }
+.h-scroll-sm { overflow-x: auto; overscroll-behavior-x: contain; }
+.river-item:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(12,20,10,.12); }
+
+/* Cards */
+.trail-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 18px 38px rgba(12,20,10,.14); }
+
+/* Dots */
+.hero-dot { opacity: .8; }
+.hero-dot.active { opacity: 1; transform: scale(1.05); }
+
+/* Sections */
+.section-title { font-weight: 800; color: var(--deep); }
+
+/* Stats */
+.stats .stat-item p { opacity: .92; }
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .hero .search-bar input { font-size: .95rem; }
+  .hero .hero-actions { gap: 10px; }
+}
+/* Enhanced Landing Page Styles for Orion */
+.landing-root {
+  background: linear-gradient(180deg, var(--bg) 0%, #0f1b3d 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* intentionally left blank; landing page removed */
+
+@media (max-width: 420px) {
+  .hero-content { transform: scale(.88); }
+  .search-bar { transform: scale(.9); }
+}
+
+.river-title { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 100%;
+  margin-bottom: clamp(12px, 2vw, 24px);
+}
+
+.local-favorites .section-title, 
+.activities .section-title, 
+.app-content .section-title { 
+  text-align: center; 
+  justify-content: center; 
+  width: 100%;
+  margin-bottom: clamp(18px, 3vw, 32px);
+}
+
+.stats .container, 
+.activities.container, 
+.app-content, 
+.local-favorites .container { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  width: 100%;
+}
+
+/* Responsive grids and layouts */
+.trails-grid { 
+  width: 100%; 
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(16px, 3vw, 24px);
+  justify-items: center;
+}
+
+.river { 
+  display: flex; 
+  justify-content: flex-start; 
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.river-track { 
+  display: flex;
+  gap: clamp(12px, 2vw, 18px);
+  align-items: center;
+  animation: riverScroll 34s linear infinite;
+  will-change: transform;
+  min-width: max-content;
+}
+.landing-header {
+  background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.85));
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 6px 20px rgba(8,12,8,0.06);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.logo img {
+  height: 32px;
+  margin-right: 8px;
+  filter: drop-shadow(0 2px 8px rgba(76,175,80,0.12));
+  transition: transform 0.3s;
+}
+.logo span {
+  color: #94f477;
+  font-weight: 800;
+  font-size: 1.3em;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(76,175,80,0.08);
+}
+.logo:hover img {
+  transform: scale(1.08) rotate(-3deg);
+}
+nav ul {
+  display: flex;
+  gap: 22px;
+  list-style: none;
+  align-items: center;
+}
+nav a {
+  font-weight: 600;
+  color: #2d5016;
+  transition: color .18s, transform 0.2s;
+  text-decoration: none;
+  font-size: 1.05em;
+}
+nav a:hover {
+  color: var(--primary);
+  transform: translateY(-2px) scale(1.08);
+}
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.login-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.login-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--text);
+  transform: scale(1.05);
+}
+.signup-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #052b2b;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(91,192,190,0.22);
+  transition: all 0.2s;
+}
+.signup-btn:hover {
+  background: #3ba9a8;
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 8px 22px rgba(91,192,190,0.3);
+}
+
+/* Add more styles for hero, cards, etc. as you integrate more content */
+
+/* Responsive hero title to avoid clipping on zoom */
+.hero-title {
+  font-weight: 800;
+  margin-bottom: clamp(12px, 2vw, 20px);
+  width: 100%;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1.1;
+  white-space: normal;
+  border-right: none;
+  text-align: center;
+}
+
+/* Section spacing with flexible padding */
+.local-favorites { 
+  padding: clamp(32px, 6vw, 64px) 0; 
+  background: #fff; 
+  border-top: 1px solid rgba(0,0,0,0.04);
+  width: 100%;
+}
+
+.activities { 
+  padding: clamp(40px, 8vw, 80px) 0 clamp(20px, 4vw, 40px);
+  width: 100%;
+}
+
+.river-section { 
+  overflow: hidden; 
+  padding: clamp(24px, 5vw, 48px) 0 clamp(32px, 6vw, 64px);
+  width: 100%;
+}
+
+.stats {
+  padding: clamp(32px, 6vw, 64px) 0;
+  width: 100%;
+}
+
+.app-section {
+  padding: clamp(40px, 7vw, 72px) 0;
+  width: 100%;
+}
+
+/* Horizontal scroll helpers - improved for mobile */
+.h-scroll-sm { 
+  overflow: visible; 
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .h-scroll-sm { 
+    overflow-x: auto; 
+    overflow-y: visible; 
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 8px;
+  }
+  
+  .h-scroll-sm::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .h-scroll-sm::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+  }
+  
+  .h-scroll-sm::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+  }
+  
+  .trails-grid { 
+    display: flex;
+    gap: clamp(12px, 3vw, 16px);
+    padding: 0 clamp(16px, 4vw, 24px);
+    scroll-snap-type: x mandatory;
+  }
+  
+  .trail-card {
+    flex: 0 0 clamp(260px, 70vw, 300px);
+    scroll-snap-align: start;
+  }
+  
+  .river-track { 
+    animation: none !important;
+    gap: clamp(10px, 3vw, 16px);
+  }
+  
+  .river-item {
+    flex: 0 0 clamp(200px, 60vw, 240px);
+    scroll-snap-align: start;
+  }
+}
+
+/* Carousel responsiveness */
+.carousel-wrapper {
+  width: 100% !important;
+  height: clamp(280px, 50vw, 360px) !important;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto clamp(32px, 6vw, 64px) auto !important;
+}
+
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    height: clamp(240px, 45vw, 280px) !important;
+  transform: scale(0.85);
+    margin: 0 auto clamp(16px, 4vw, 32px) auto !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    height: clamp(200px, 40vw, 240px) !important;
+    transform: scale(0.7);
+  }
+}
+
+/* Keep hero content above transparent nav in landing */
+.navbar.landing + main .hero, .hero { z-index: 1; position: relative; }
+
+/* Ensure cards don't get clipped at any zoom level */
+.trails-grid { 
+  align-items: stretch; 
+  width: 100%;
+  max-width: 100%;
+}
+
+.trail-card, .river-item {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Section spacing */
+.local-favorites { padding: 44px 0; background: #fff; border-top: 1px solid rgba(0,0,0,0.04); }
+.activities { padding: 56px 0 28px; }
+.river-section { overflow: hidden; }
+
+/* Horizontal scroll helpers on small screens */
+.h-scroll-sm { overflow: visible; }
+@media (max-width: 768px) {
+  .h-scroll-sm { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+  .trails-grid { display: grid; grid-auto-flow: column; grid-auto-columns: 78%; gap: 14px; }
+  .river-track { animation: none !important; }
+}
+
+/* Ensure cards don’t get clipped at 110% zoom: allow wrapping and spacing */
+.trails-grid { align-items: stretch; }

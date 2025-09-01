@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { LoaderProvider, useLoader } from './components/LoaderContext.js';
 import FullScreenLoader from './components/FullScreenLoader.js';
+import { ToastProvider } from './components/ToastContext';
 
 
 import Login from './pages/Login';
+import Welcome from './pages/Welcome';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import CreateProfile from './pages/CreateProfile';
@@ -22,6 +24,7 @@ import AlertsUpdates from './pages/AlertsUpdates';
 function AppContent() {
   const location = useLocation();
   const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+  const firstRenderRef = useRef(true);
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
@@ -43,14 +46,25 @@ function AppContent() {
     return () => io.disconnect();
   }, []);
 
-  const { show } = useLoader();
+  const { show, triggerLoader } = useLoader();
+
+  // Trigger loader on route changes (skip first render)
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    const id = setTimeout(() => triggerLoader(700), 0);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
   return (
     <div className="app-shell">
       {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-      <main>
+  <main className="page-fade" key={location.pathname}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/create-profile" element={<CreateProfile />} />
@@ -78,9 +92,11 @@ function AppContent() {
 function App() {
   return (
     <LoaderProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ToastProvider>
     </LoaderProvider>
   );
 }

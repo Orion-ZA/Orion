@@ -1,6 +1,6 @@
 // src/components/map/TrailMap.js
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import Map, { Marker, Popup, NavigationControl, FullscreenControl, ScaleControl, Source, Layer } from 'react-map-gl';
+import Map, { Marker, Popup, NavigationControl, FullscreenControl, ScaleControl, Source, Layer } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton.js';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -10,6 +10,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
   const { show } = useToast();
   // Login via route; Google sign-in available on Login page
 
@@ -19,7 +21,7 @@ export default function Navbar() {
   }, []);
 
   return (
-  <header className="navbar">
+  <header className={`navbar ${isLanding ? 'landing' : ''}`}>
       <div className="nav-inner">
     <Link className="brand" to={user ? '/dashboard' : '/'}>
           <span className="brand-icon" aria-hidden>🌌</span>

@@ -25,6 +25,7 @@ function AppContent() {
   const location = useLocation();
   const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
   const firstRenderRef = useRef(true);
+  const isLanding = location.pathname === '/';
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
@@ -62,7 +63,7 @@ function AppContent() {
     <div className="app-shell">
       {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-  <main className="page-fade" key={location.pathname}>
+  <main className="page-fade" key={location.pathname} style={isLanding ? { paddingTop: 0 } : undefined}>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />

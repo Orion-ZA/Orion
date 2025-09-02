@@ -71,7 +71,7 @@ async function fetchTrailReviews(trailId) {
 async function fetchTrailAlerts(trailId) {
   try {
     const res = await fetch(
-      `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${trailId}`
+      `https://gettrailalerts-fqtduxc7ua-uc.a.run.app/getAlerts?trailId=${trailId}`
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -232,6 +232,106 @@ export default function ReviewsMedia() {
     }
   };
 
+  const handleAddReview = async () => {
+    if (!newReview) return;
+
+    try {
+      const response = await fetch(
+        "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trailId: selectedTrailId,
+            review: {
+              id: uuidv4(),
+              message: newReview,
+              timestamp: new Date().toISOString(),
+              // Add user info if available
+              userId: "anonymous", // You might want to get this from auth
+              userName: "Anonymous User"
+            }
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Server returned ${response.status}`);
+      }
+
+      // Refetch reviews for this trail
+      const updatedReviews = await fetchTrailReviews(selectedTrailId);
+      setReviews((prev) => ({
+        ...prev,
+        [selectedTrailId]: updatedReviews,
+      }));
+
+      closeModal();
+      alert("✅ Review added successfully!");
+    } catch (err) {
+      console.error("Error adding review:", err);
+      alert("❌ Failed to add review: " + err.message);
+    }
+  };
+
+  const handleAddImages = async () => {
+    if (!newImages || newImages.length === 0) return;
+
+    try {
+      // Upload images to Firebase Storage
+      const uploadedUrls = await uploadPhotos(newImages);
+      
+      // Update trail with new images
+      const response = await fetch(
+        "https://us-central1-orion-sdp.cloudfunctions.net/updateTrailImages",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trailId: selectedTrailId,
+            photos: uploadedUrls
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Server returned ${response.status}`);
+      }
+
+      // Refetch trails to update images
+      const updatedTrails = await fetchTrails();
+      const trailsWithUrls = await Promise.all(
+        updatedTrails.map(async (trail) => {
+          if (trail.photos && Array.isArray(trail.photos) && trail.photos.length > 0) {
+            const urls = await Promise.all(
+              trail.photos.map(async (path) => {
+                try {
+                  if (path.startsWith("https://")) return path;
+                  return await getDownloadURL(ref(storage, path));
+                } catch {
+                  return null;
+                }
+              })
+            );
+            return { ...trail, photos: urls.filter(Boolean) };
+          }
+          return { ...trail, photos: [] };
+        })
+      );
+
+      setTrails(trailsWithUrls);
+      closeModal();
+      alert("✅ Images added successfully!");
+    } catch (err) {
+      console.error("Error adding images:", err);
+      alert("❌ Failed to add images: " + err.message);
+    }
+  };
+
   if (loading) return <p>Loading trails...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -354,6 +454,47 @@ export default function ReviewsMedia() {
                   </button>
                   <button style={primaryButtonStyle} onClick={handleAddAlert}>
                     Submit
+                  </button>
+                </div>
+              </>
+            )}
+            
+            {modalType === "review" && (
+              <>
+                <h3>Add Review</h3>
+                <textarea
+                  value={newReview}
+                  onChange={(e) => setNewReview(e.target.value)}
+                  placeholder="Write your review..."
+                  style={textareaStyle}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
+                  <button style={cancelButtonStyle} onClick={closeModal}>
+                    Cancel
+                  </button>
+                  <button style={primaryButtonStyle} onClick={handleAddReview}>
+                    Submit
+                  </button>
+                </div>
+              </>
+            )}
+            
+            {modalType === "images" && (
+              <>
+                <h3>Add Images</h3>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => setNewImages(Array.from(e.target.files))}
+                  style={inputFileStyle}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
+                  <button style={cancelButtonStyle} onClick={closeModal}>
+                    Cancel
+                  </button>
+                  <button style={primaryButtonStyle} onClick={handleAddImages}>
+                    Upload
                   </button>
                 </div>
               </>

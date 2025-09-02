@@ -15,31 +15,39 @@ const getTrailRef = (trailId) => admin.firestore().collection('Trails').doc(trai
  * GET /alerts?trailId=TRAIL_ID
  * Fetch all active alerts for a specific trail
  */
-exports.getAlerts = functions.https.onRequest((req, res) => {
+exports.getTrailAlerts = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
-    if (req.method !== 'GET') {
-      return res.status(405).json({ error: 'Method Not Allowed. Use GET.' });
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Method Not Allowed. Use GET." });
     }
 
     const { trailId } = req.query;
-
     if (!trailId) {
-      return res.status(400).json({ error: 'trailId query parameter is required.' });
+      return res.status(400).json({ error: "trailId query parameter is required." });
     }
 
     try {
+      console.log(`Fetching alerts for trailId: ${trailId}`);
       const snapshot = await admin.firestore().collection('Alerts')
         .where('trailId', '==', trailId)
         .where('isActive', '==', true)
         .orderBy('timestamp', 'desc')
         .get();
 
-      const alerts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.status(200).json({ alerts });
+      console.log(`Found ${snapshot.size} alerts`);
+      const alerts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    } catch (error) {
-      console.error('Error fetching alerts:', error);
-      res.status(500).json({ error: 'Internal server error. Check function logs for details.' });
+      res.status(200).json({ alerts });
+    } catch (err) {
+      console.error("Error fetching trail alerts:", err);
+      console.error("Error details:", err.message, err.stack);
+      res.status(500).json({ 
+        error: "Failed to fetch alerts.",
+        details: err.message // Only include in development
+      });
     }
   });
 });

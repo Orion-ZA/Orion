@@ -1,10 +1,15 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { LoaderProvider, useLoader } from './components/LoaderContext.js';
+import FullScreenLoader from './components/FullScreenLoader.js';
+import { ToastProvider } from './components/ToastContext';
+
 
 import Login from './pages/Login';
+import Welcome from './pages/Welcome';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import CreateProfile from './pages/CreateProfile';
@@ -19,6 +24,8 @@ import AlertsUpdates from './pages/AlertsUpdates';
 function AppContent() {
   const location = useLocation();
   const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+  const firstRenderRef = useRef(true);
+  const isLanding = location.pathname === '/';
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
@@ -40,18 +47,28 @@ function AppContent() {
     return () => io.disconnect();
   }, []);
 
+  const { show, triggerLoader } = useLoader();
+
+  // Trigger loader on route changes (skip first render)
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    const id = setTimeout(() => triggerLoader(700), 0);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
   return (
     <div className="app-shell">
+      {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-      
-      <main>
+  <main className="page-fade" key={location.pathname} style={isLanding ? { paddingTop: 0 } : undefined}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
+          <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/create-profile" element={<CreateProfile />} />
-
           <Route
             path="/dashboard"
             element={
@@ -60,17 +77,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
           <Route path="/explorer" element={<TrailExplorer />} />
           <Route path="/submit" element={<TrailSubmission />} />
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
-
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </main>
-
       {!hideNavFooter && <Footer />}
     </div>
   );
@@ -78,9 +92,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <LoaderProvider>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ToastProvider>
+    </LoaderProvider>
   );
 }
 

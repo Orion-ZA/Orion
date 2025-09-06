@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "orion-sdp",
+    "orion": "orion-sdp"
+  },
+  "targets": {},
+  "etags": {}
+}

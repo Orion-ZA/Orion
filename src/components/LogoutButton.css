@@ -1,67 +1,66 @@
 /* Styles for the expanding Logout button */
-.logout-wrapper { display: inline-block; }
+
+.logout-wrapper { display: inline-flex; align-items: center; padding: 0 8px; }
 
 .Btn {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  width: 45px;
-  height: 45px;
+  justify-content: center;
+  min-width: 120px;
+  height: 44px;
   border: none;
-  border-radius: 50%;
+  border-radius: 10px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition-duration: .3s;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
-  background-color: rgb(255, 65, 65);
+  transition: box-shadow .28s, filter .18s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  background-color: var(--danger, #ef4444);
+  padding: 0 22px;
+  gap: 12px;
 }
 
 /* icon container */
 .sign {
-  width: 100%;
-  transition-duration: .3s;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 8px;
+  transition: none;
+  padding: 0;
 }
 
 .sign svg path { fill: white; }
 
 /* text */
 .text {
-  position: absolute;
-  right: 0%;
-  width: 0%;
-  opacity: 0;
   color: white;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: 600;
-  transition-duration: .3s;
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  position: static;
+  opacity: 1;
+  width: auto;
+  transition: none;
 }
 
 .gicon svg { width: 18px; height: 18px; }
 
 /* hover effect on button width */
 .Btn:hover {
-  width: 145px;
-  border-radius: 40px;
+  filter: brightness(1.08);
+  box-shadow: 0 6px 18px rgba(239,68,68,0.18);
 }
 
-.Btn:hover .sign {
-  width: 30%;
-  padding-left: 16px;
-}
 
-/* hover effect button's text */
-.Btn:hover .text {
-  opacity: 1;
-  width: 70%;
-  padding-right: 95px;
-  padding-left: 12px;
+.gicon svg { width: 20px; height: 20px; }
+
+@media (max-width: 640px) {
+  .Btn { min-width: 90px; height: 38px; padding: 0 12px; gap: 8px; }
+  .sign { margin-right: 6px; }
+  .gicon svg { width: 16px; height: 16px; }
 }
 
 /* button click effect*/

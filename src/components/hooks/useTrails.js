@@ -4,14 +4,32 @@ import { db } from '../../firebaseConfig'; // Adjust the path to your Firebase c
 
 // Reusable function to calculate distance
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Earth radius in kilometers
+  const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
     Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};
+
+// Helper function to extract coordinates from trail location
+const getTrailCoordinates = (location) => {
+  if (!location) return { latitude: null, longitude: null };
+  
+  // Handle both formats: {latitude, longitude} and {_latitude, _longitude}
+  const lat = location.latitude || location._latitude;
+  const lng = location.longitude || location._longitude;
+  
+  // Convert to numbers and validate
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  
+  return {
+    latitude: isNaN(latitude) ? null : latitude,
+    longitude: isNaN(longitude) ? null : longitude
+  };
 };
 
 export default function useTrails() {
@@ -67,7 +85,6 @@ export default function useTrails() {
       setIsLoadingTrails(false);
     }
   }, []);
-
   // Fetch trails on mount
   useEffect(() => {
     fetchTrails();
@@ -78,46 +95,45 @@ export default function useTrails() {
     setIsLoadingLocation(true);
     setLocationError(null);
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser');
+      setLocationError('Geolocation is not supported');
       setIsLoadingLocation(false);
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { longitude, latitude } = position.coords;
-        setUserLocation({ longitude, latitude });
+      (pos) => {
+        setUserLocation({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude
+        });
         setIsLoadingLocation(false);
       },
-      (error) => {
-        setLocationError('Unable to retrieve your location: ' + error.message);
+      (err) => {
+        setLocationError('Unable to get location: ' + err.message);
         setIsLoadingLocation(false);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   }, []);
 
   const handleFilterChange = useCallback((filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+    setFilters(prev => ({ ...prev, [filterType]: value }));
   }, []);
 
   const filteredTrails = useMemo(() => {
     return trails.filter(trail => {
       let withinDistance = true;
-      if (userLocation && filters.maxLocationDistance > 0) {
-        const distance = calculateDistance(
+      
+      // Get coordinates using the helper function
+      const { latitude, longitude } = getTrailCoordinates(trail.location);
+      
+      if (userLocation && filters.maxLocationDistance > 0 && latitude && longitude) {
+        const dist = calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
-          trail.location.latitude,
-          trail.location.longitude
+          latitude,
+          longitude
         );
-        withinDistance = distance <= filters.maxLocationDistance;
+        withinDistance = dist <= filters.maxLocationDistance;
       }
 
       const hasMatchingTag = filters.tags.length === 0 || 

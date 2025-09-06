@@ -172,7 +172,6 @@ export default function MyTrails() {
         console.error('Error fetching saved trails:', err);
       }
     }
-
     if (userId) fetchSavedTrails();
   }, [userId]);
 

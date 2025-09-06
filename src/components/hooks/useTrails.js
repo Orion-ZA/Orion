@@ -1,8 +1,8 @@
-// src/components/hooks/useTrails.js
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; // Adjust the path to your Firebase config
 
-const API_BASE = "https://us-central1-orion-sdp.cloudfunctions.net";
-
+// Reusable function to calculate distance
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -35,47 +35,62 @@ const getTrailCoordinates = (location) => {
 export default function useTrails() {
   const [filters, setFilters] = useState({
     difficulty: 'all',
-    tags: 'all',
+    tags: [],
     minDistance: 0,
     maxDistance: 20,
-    maxLocationDistance: 80
+    maxLocationDistance: 80,
+    searchQuery: ''
   });
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-
   const [trails, setTrails] = useState([]);
-  const [loadingTrails, setLoadingTrails] = useState(false);
-  const [trailError, setTrailError] = useState(null);
+  const [isLoadingTrails, setIsLoadingTrails] = useState(false);
 
-  // Fetch trails from API
+  // Fetch trails from Firestore
+  const fetchTrails = useCallback(async () => {
+    setIsLoadingTrails(true);
+    try {
+      const trailsCollection = collection(db, 'Trails');
+      const trailsSnapshot = await getDocs(trailsCollection);
+      const trailsData = trailsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name,
+          difficulty: data.difficulty,
+          distance: data.distance,
+          elevationGain: data.elevationGain,
+          rating: data.rating || 4.5,
+          gpsRoute: data.gpsRoute.map(point => ({
+            latitude: point.latitude,
+            longitude: point.longitude
+          })),
+          location: {
+            latitude: data.location.latitude,
+            longitude: data.location.longitude
+          },
+          description: data.description,
+          tags: data.tags || [],
+          photos: data.photos || [],
+          status: data.status,
+          createdBy: data.createdBy.path
+        };
+      });
+      setTrails(trailsData);
+    } catch (error) {
+      console.error('Error fetching trails:', error);
+      setLocationError('Failed to load trails. Please try again.');
+    } finally {
+      setIsLoadingTrails(false);
+    }
+  }, []);
+  // Fetch trails on mount
   useEffect(() => {
-    const fetchTrails = async () => {
-      setLoadingTrails(true);
-      setTrailError(null);
-
-      try {
-        // build query params from filters if needed
-        const params = new URLSearchParams();
-        if (filters.difficulty !== 'all') {
-          params.append("difficulty", filters.difficulty);
-        }
-
-        const res = await fetch(`${API_BASE}/getTrails?${params.toString()}`);
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        const data = await res.json();
-        setTrails(data);
-      } catch (err) {
-        console.error("Failed to fetch trails:", err);
-        setTrailError(err.message);
-      } finally {
-        setLoadingTrails(false);
-      }
-    };
-
     fetchTrails();
-  }, [filters.difficulty]); // refetch if difficulty filter changes
+  }, [fetchTrails]);
 
+  // Get user location
   const getUserLocation = useCallback(() => {
     setIsLoadingLocation(true);
     setLocationError(null);
@@ -121,21 +136,24 @@ export default function useTrails() {
         withinDistance = dist <= filters.maxLocationDistance;
       }
 
-      const hasMatchingTag =
-        filters.tags === 'all' ||
-        (trail.tags || []).some(tag =>
-          tag.toLowerCase().includes(filters.tags.toLowerCase())
-        );
+      const hasMatchingTag = filters.tags.length === 0 || 
+        (trail.tags && filters.tags.every(filterTag => 
+          trail.tags.some(trailTag => trailTag.toLowerCase() === filterTag.toLowerCase())
+        ));
+
+      const hasMatchingName = filters.searchQuery === '' ||
+        trail.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
 
       return (
         (filters.difficulty === 'all' || trail.difficulty === filters.difficulty) &&
         hasMatchingTag &&
         trail.distance >= filters.minDistance &&
         trail.distance <= filters.maxDistance &&
-        withinDistance
+        withinDistance &&
+        hasMatchingName
       );
     });
-  }, [trails, filters, userLocation]);
+  }, [filters, userLocation, trails]);
 
   return {
     filteredTrails,
@@ -146,8 +164,6 @@ export default function useTrails() {
     isLoadingLocation,
     getUserLocation,
     calculateDistance,
-    loadingTrails,
-    trailError,
-    getTrailCoordinates // Export this for use in components
+    isLoadingTrails
   };
 }

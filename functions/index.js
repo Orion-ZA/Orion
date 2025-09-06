@@ -93,6 +93,7 @@ exports.addAlert = functions.https.onRequest((req, res) => {
 });
 
 /**
+
  * Existing functions...
  */
 exports.getTrails = functions.https.onRequest((req, res) => {
@@ -278,6 +279,7 @@ exports.addWishlist = functions.https.onRequest((req, res) => {
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Failed to add trail to wishlist.' });
+
     }
   });
 });

@@ -1,4 +1,3 @@
-// src/pages/TrailExplorerPage.js
 import React, { useState, useEffect } from 'react';
 import useTrails from '../components/hooks/useTrails';
 import TrailMap from '../components/map/TrailMap';
@@ -19,6 +18,7 @@ export default function TrailExplorerPage() {
     userLocation,
     locationError,
     isLoadingLocation,
+    isLoadingTrails,
     getUserLocation,
     calculateDistance
   } = useTrails();
@@ -32,7 +32,6 @@ export default function TrailExplorerPage() {
 
   const userId = user ? user.uid : null;
 
-  // Auto-detect location on mount
   useEffect(() => {
     getUserLocation();
   }, [getUserLocation]);
@@ -104,14 +103,22 @@ export default function TrailExplorerPage() {
     <div className="container fade-in-up">
       <h1>Trail Explorer</h1>
       <p>Find trails near your current location</p>
-
+      
       {/* Location, Filters, Save, and Wishlist Buttons */}
-      <div style={{ marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button className="button primary" onClick={() => setShowFilters(!showFilters)}>
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
+      <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center'}}>
+        <button 
+          className="button primary"
+          onClick={handleSaveForLater}
+          disabled={!selectedTrail || userSaved.favourites.some(t => t.id === selectedTrail?.id)}
+        >
+          {selectedTrail && userSaved.favourites.some(t => t.id === selectedTrail?.id) ? 'Saved' : 'Save for later'}
         </button>
-        <button className="button secondary" onClick={getUserLocation} disabled={isLoadingLocation}>
-          {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
+        <button
+          className="button secondary"
+          onClick={handleAddToWishlist}
+          disabled={!selectedTrail || userSaved.wishlist.some(t => t.id === selectedTrail?.id)}
+        >
+          {selectedTrail && userSaved.wishlist.some(t => t.id === selectedTrail?.id) ? 'In Wishlist' : 'Add to wishlist'}
         </button>
         <button
           className="button primary"
@@ -127,10 +134,20 @@ export default function TrailExplorerPage() {
         >
           {selectedTrail && userSaved.wishlist.some(t => t.id === selectedTrail?.id) ? 'In Wishlist' : 'Add to wishlist'}
         </button>
-        {userLocation && <span>Your location: {userLocation.latitude}, {userLocation.longitude}</span>}
+        {userLocation && (
+          <span>
+            Your location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+          </span>
+        )}
       </div>
 
       {locationError && <div className="card error">⚠️ {locationError}</div>}
+
+      {isLoadingTrails && (
+        <div className="card">
+          Loading trails...
+        </div>
+      )}
 
       {/* Filter Panel */}
       {showFilters && <FilterPanel filters={filters} onFilterChange={handleFilterChange} />}

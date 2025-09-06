@@ -7,7 +7,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function TrailExplorerPage() {
   const [selectedTrail, setSelectedTrail] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters] = useState(false);
   const [userSaved, setUserSaved] = useState({ favourites: [], wishlist: [], completed: [] });
   const [user, setUser] = useState(null);
 
@@ -17,7 +17,7 @@ export default function TrailExplorerPage() {
     handleFilterChange,
     userLocation,
     locationError,
-    isLoadingLocation,
+    // isLoadingLocation,
     isLoadingTrails,
     getUserLocation,
     calculateDistance

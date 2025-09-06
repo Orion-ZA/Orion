@@ -216,7 +216,7 @@ const handleRemove = async (trailId, listType) => {
 
   const handleMarkAsCompleted = async (rating, comment) => {
     try {
-      const { trailId, trailName } = modalState;
+      const { trailId } = modalState;
 
       const newReview = {
         userId,

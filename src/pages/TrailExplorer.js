@@ -32,7 +32,6 @@ export default function TrailExplorerPage() {
 
   const userId = user ? user.uid : null;
 
-  // Auto-detect location on component mount
   useEffect(() => {
     getUserLocation();
   }, [getUserLocation]);
@@ -109,16 +108,17 @@ export default function TrailExplorerPage() {
       <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center'}}>
         <button 
           className="button primary"
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={handleSaveForLater}
+          disabled={!selectedTrail || userSaved.favourites.some(t => t.id === selectedTrail?.id)}
         >
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
+          {selectedTrail && userSaved.favourites.some(t => t.id === selectedTrail?.id) ? 'Saved' : 'Save for later'}
         </button>
-        <button 
+        <button
           className="button secondary"
-          onClick={getUserLocation}
-          disabled={isLoadingLocation}
+          onClick={handleAddToWishlist}
+          disabled={!selectedTrail || userSaved.wishlist.some(t => t.id === selectedTrail?.id)}
         >
-          {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
+          {selectedTrail && userSaved.wishlist.some(t => t.id === selectedTrail?.id) ? 'In Wishlist' : 'Add to wishlist'}
         </button>
         <button
           className="button primary"
@@ -141,11 +141,7 @@ export default function TrailExplorerPage() {
         )}
       </div>
 
-      {locationError && (
-        <div className="card error">
-          ⚠️ {locationError}
-        </div>
-      )}
+      {locationError && <div className="card error">⚠️ {locationError}</div>}
 
       {isLoadingTrails && (
         <div className="card">
@@ -154,12 +150,10 @@ export default function TrailExplorerPage() {
       )}
 
       {/* Filter Panel */}
-      {showFilters && (
-        <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
-      )}
+      {showFilters && <FilterPanel filters={filters} onFilterChange={handleFilterChange} />}
 
       {/* Main Content: Map and List */}
-      <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem'}}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
         <TrailMap
           trails={filteredTrails}
           userLocation={userLocation}

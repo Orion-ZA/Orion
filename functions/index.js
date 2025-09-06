@@ -15,31 +15,39 @@ const getTrailRef = (trailId) => admin.firestore().collection('Trails').doc(trai
  * GET /alerts?trailId=TRAIL_ID
  * Fetch all active alerts for a specific trail
  */
-exports.getAlerts = functions.https.onRequest((req, res) => {
+exports.getTrailAlerts = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
-    if (req.method !== 'GET') {
-      return res.status(405).json({ error: 'Method Not Allowed. Use GET.' });
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Method Not Allowed. Use GET." });
     }
 
     const { trailId } = req.query;
-
     if (!trailId) {
-      return res.status(400).json({ error: 'trailId query parameter is required.' });
+      return res.status(400).json({ error: "trailId query parameter is required." });
     }
 
     try {
+      console.log(`Fetching alerts for trailId: ${trailId}`);
       const snapshot = await admin.firestore().collection('Alerts')
-        .where('trailId', '==', getTrailRef(trailId))
+        .where('trailId', '==', trailId)
         .where('isActive', '==', true)
         .orderBy('timestamp', 'desc')
         .get();
 
-      const alerts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.status(200).json({ alerts });
+      console.log(`Found ${snapshot.size} alerts`);
+      const alerts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    } catch (error) {
-      console.error('Error fetching alerts:', error);
-      res.status(500).json({ error: 'Internal server error. Check function logs for details.' });
+      res.status(200).json({ alerts });
+    } catch (err) {
+      console.error("Error fetching trail alerts:", err);
+      console.error("Error details:", err.message, err.stack);
+      res.status(500).json({ 
+        error: "Failed to fetch alerts.",
+        details: err.message // Only include in development
+      });
     }
   });
 });
@@ -49,38 +57,43 @@ exports.getAlerts = functions.https.onRequest((req, res) => {
  * Add a new alert for a trail
  * Body: { trailId, message, type }
  */
+/**
+ * POST /alerts
+ * Add a new alert for a trail
+ * Body: { trailId, message, type }
+ */
 exports.addAlert = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
-    }
-
-    const { trailId, message, type } = req.body;
-
-    if (!trailId || !message || !type) {
-      return res.status(400).json({ error: 'trailId, message, and type are required.' });
-    }
-
     try {
-      const newAlert = {
-        trailId: getTrailRef(trailId),
+      if (req.method !== "POST") {
+        return res.status(405).send({ error: "Only POST requests are allowed." });
+      }
+
+      const { trailId, message, type } = req.body;
+
+      if (!trailId || !message || !type) {
+        return res.status(400).send({ error: "trailId, message, and type are required." });
+      }
+
+      // Create the alert with proper trail reference
+      await db.collection("Alerts").add({
+        trailId, 
         message,
-        type, // "community" or "authority"
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        isActive: true
-      };
+        type,
+        isActive: true, // Make sure to include isActive field
+        timestamp: admin.firestore.FieldValue.serverTimestamp(), // Use timestamp instead of createdAt
+      });
 
-      const docRef = await admin.firestore().collection('Alerts').add(newAlert);
-      res.status(201).json({ id: docRef.id, ...newAlert });
-
-    } catch (error) {
-      console.error('Error adding alert:', error);
-      res.status(500).json({ error: 'Internal server error. Check function logs for details.' });
+      res.status(200).send({ success: true, message: "Alert added successfully" });
+    } catch (err) {
+      console.error("Error adding alert:", err);
+      res.status(500).send({ error: "Internal server error" });
     }
   });
 });
 
 /**
+
  * Existing functions...
  */
 exports.getTrails = functions.https.onRequest((req, res) => {
@@ -266,6 +279,7 @@ exports.addWishlist = functions.https.onRequest((req, res) => {
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Failed to add trail to wishlist.' });
+
     }
   });
 });
@@ -330,6 +344,161 @@ exports.getSavedTrails = functions.https.onRequest(async (req, res) => {
     }
   });
 });
+
+/**
+ * POST /completed/remove
+ * Remove a trail from user's completed list
+ * Body: { uid, trailId }
+ */
+exports.removeCompleted = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+
+    const { uid, trailId } = req.body;
+    if (!uid || !trailId) return res.status(400).json({ error: 'uid and trailId are required.' });
+
+    try {
+      const userRef = getUserRef(uid);
+      await userRef.update({
+        completed: admin.firestore.FieldValue.arrayRemove(getTrailRef(trailId))
+      });
+      res.status(200).json({ message: 'Trail removed from completed.' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to remove trail from completed.' });
+    }
+  });
+});
+
+/**
+ * POST /trails/update
+ * Update trail info
+ * Body: { trailId, updates }
+ * updates = { name, distance, elevationGain, difficulty, status, description, tags, gpsRoute }
+ */
+exports.updateTrailInfo = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+    }
+
+    const { trailId, updates } = req.body;
+    if (!trailId || !updates) {
+      return res.status(400).json({ error: 'trailId and updates are required.' });
+    }
+
+    try {
+      const trailRef = getTrailRef(trailId);
+      const validFields = ['name', 'distance', 'elevationGain', 'difficulty', 'status', 'description', 'tags', 'gpsRoute', 'reviews'];
+      const dataToUpdate = {};
+
+      validFields.forEach(field => {
+        if (updates[field] !== undefined) {
+          if (field === 'gpsRoute' && Array.isArray(updates[field])) {
+            dataToUpdate.gpsRoute = updates[field].map(point => new admin.firestore.GeoPoint(point.lat, point.lng));
+          } else if (field === 'reviews' && Array.isArray(updates[field])) {
+            // Reviews will be added using arrayUnion
+            dataToUpdate.reviews = admin.firestore.FieldValue.arrayUnion(...updates.reviews);
+          } else {
+            dataToUpdate[field] = updates[field];
+          }
+        }
+      });
+
+      // Always update lastUpdated timestamp
+      dataToUpdate.lastUpdated = admin.firestore.Timestamp.now();
+
+      await trailRef.update(dataToUpdate);
+
+      res.status(200).json({ message: 'Trail info updated successfully.' });
+    } catch (err) {
+      console.error('Error updating trail info:', err);
+      res.status(500).json({ error: 'Failed to update trail info.' });
+    }
+  });
+});
+
+/**
+ * POST /trails/updateImages
+ * Update trail images
+ * Body: { trailId, photos }
+ */
+exports.updateTrailImages = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+
+    const { trailId, photos } = req.body;
+    if (!trailId || !Array.isArray(photos) || photos.length === 0) {
+      return res.status(400).json({ error: 'trailId and photos array are required.' });
+    }
+
+    try {
+      const trailRef = getTrailRef(trailId);
+      await trailRef.update({
+        photos: admin.firestore.FieldValue.arrayUnion(...photos),
+        lastUpdated: admin.firestore.Timestamp.now()
+      });
+      res.status(200).json({ message: 'Trail images updated successfully.' });
+    } catch (err) {
+      console.error('Error updating trail images:', err);
+      res.status(500).json({ error: 'Failed to update trail images.' });
+    }
+  });
+});
+
+/**
+ * GET /getTrailReviews?trailId=TRAIL_ID
+ * Fetch all reviews for a specific trail
+ */
+exports.getTrailReviews = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Method Not Allowed. Use GET." });
+    }
+
+    const { trailId } = req.query;
+    if (!trailId) {
+      return res.status(400).json({ error: "trailId query parameter is required." });
+    }
+
+    try {
+      const reviewsSnapshot = await getTrailRef(trailId)
+        .collection("reviews")
+        .orderBy("timestamp", "desc")
+        .get();
+
+      const reviews = reviewsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      res.status(200).json({ reviews });
+    } catch (err) {
+      console.error("Error fetching trail reviews:", err);
+      res.status(500).json({ error: "Failed to fetch reviews." });
+    }
+  });
+});
+
+exports.addTrailReview = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+
+    const { trailId, review } = req.body;
+    if (!trailId || !review) return res.status(400).json({ error: 'trailId and review are required.' });
+
+    try {
+      const trailRef = getTrailRef(trailId);
+      const reviewRef = trailRef.collection('reviews').doc(review.id);
+      await reviewRef.set(review);
+      res.status(200).json({ message: 'Review added successfully.' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to add review.' });
+    }
+  });
+});
+
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
   response.json({ message: 'Hello from Firebase!' });

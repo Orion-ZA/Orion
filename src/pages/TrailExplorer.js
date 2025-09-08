@@ -6,8 +6,8 @@ import TrailList from '../components/lists/TrailList';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function TrailExplorerPage() {
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedTrail, setSelectedTrail] = useState(null);
-  const [showFilters] = useState(false);
   const [userSaved, setUserSaved] = useState({ favourites: [], wishlist: [], completed: [] });
   const [user, setUser] = useState(null);
 
@@ -17,7 +17,7 @@ export default function TrailExplorerPage() {
     handleFilterChange,
     userLocation,
     locationError,
-    // isLoadingLocation,
+    isLoadingLocation,
     isLoadingTrails,
     getUserLocation,
     calculateDistance
@@ -106,12 +106,9 @@ export default function TrailExplorerPage() {
       
       {/* Location, Filters, Save, and Wishlist Buttons */}
       <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center'}}>
-        <button 
-          className="button primary"
-          onClick={handleSaveForLater}
-          disabled={!selectedTrail || userSaved.favourites.some(t => t.id === selectedTrail?.id)}
-        >
-          {selectedTrail && userSaved.favourites.some(t => t.id === selectedTrail?.id) ? 'Saved' : 'Save for later'}
+        
+        <button className="button primary" onClick={() => setShowFilters(!showFilters)}>
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
         <button
           className="button secondary"
@@ -139,6 +136,9 @@ export default function TrailExplorerPage() {
             Your location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
           </span>
         )}
+        <button className="button secondary" onClick={getUserLocation} disabled={isLoadingLocation}>
+          {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
+        </button>
       </div>
 
       {locationError && <div className="card error">⚠️ {locationError}</div>}

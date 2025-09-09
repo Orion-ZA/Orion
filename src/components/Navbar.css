@@ -91,10 +91,18 @@ html[data-theme='light'] .brand:hover .brand-logo { filter: drop-shadow(0 6px 14
   border-radius: 2px; 
   opacity: .8; 
 }
+.desktop-nav .as-link::after { 
+  content: ""; position: absolute; left: .75rem; right: .75rem; bottom: .35rem; height: 2px; 
+  background: linear-gradient(90deg, var(--primary), #9be7e5); transform: scaleX(0); transform-origin: left; 
+  transition: transform .25s ease; border-radius: 2px; opacity: .8; 
+}
 .desktop-nav a:hover::after, .desktop-nav a.active::after { transform: scaleX(1); }
+.desktop-nav .as-link:hover::after, .desktop-nav .as-link.active::after { transform: scaleX(1); }
 .desktop-nav a:hover { background: rgba(255,255,255,.06); color: #ffffff; }
 .desktop-nav a:active { transform: translateY(1px); }
 .desktop-nav a.active { background: rgba(91,192,190,.15); color: #e6fffa; }
+.desktop-nav .as-link.active { background: rgba(91,192,190,.15); color: #e6fffa; }
+html[data-theme='light'] .desktop-nav .as-link.active { background: rgba(0,0,0,0.06); color: var(--text); }
 
 /* Buttons styled as links for guarded nav */
 .desktop-nav .as-link {
@@ -112,6 +120,15 @@ html[data-theme='light'] .brand:hover .brand-logo { filter: drop-shadow(0 6px 14
 }
 .desktop-nav .as-link:hover { background: rgba(255,255,255,.06); color: #ffffff; }
 .desktop-nav .as-link:active { transform: translateY(1px); }
+
+/* Light mode: all navbar options (links and buttons) use white background on hover/active for consistency */
+html[data-theme='light'] .desktop-nav a.active,
+html[data-theme='light'] .desktop-nav a:hover,
+html[data-theme='light'] .desktop-nav .as-link.active,
+html[data-theme='light'] .desktop-nav .as-link:hover {
+  background: #fff;
+  color: var(--text);
+}
 
 .desktop-actions { 
   display: inline-flex; 

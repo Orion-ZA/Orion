@@ -1,3 +1,6 @@
+html[data-theme="light"] .search-input {
+  color: #222;
+}
 /* Basic Reset and Theme Vars */
 /* We scope color tokens per theme using [data-theme="dark"|"light"]. */
 /* Default (no attribute) fallback = dark to avoid flash of white. */

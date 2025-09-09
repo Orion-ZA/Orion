@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton.js';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useToast } from './ToastContext';
 import ProfileIcon from './ProfileIcon';
 import SettingsIcon from './SettingsIcon';
-import FavouritesIcon from './FavouritesIcon';
 import FeedbackIcon from './FeedbackIcon';
 import HelpCenterIcon from './HelpCenterIcon';
 import OrionLogo from '../assets/orion_logo_clear.png';
@@ -16,6 +15,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const closeTimerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isLanding = location.pathname === '/';
@@ -28,6 +29,44 @@ export default function Navbar() {
     return () => unsub();
   }, []);
 
+  // --- Auth (Google only) ---
+  const googleProviderRef = useRef(new GoogleAuthProvider());
+  const handleGoogleLogin = async () => {
+    if (isAuthLoading || user) return;
+    setIsAuthLoading(true);
+    try {
+      await signInWithPopup(auth, googleProviderRef.current);
+      show('Logged in with Google', { type: 'success' });
+    } catch (err) {
+      if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/cancelled-popup-request') {
+        try {
+          await signInWithRedirect(auth, googleProviderRef.current);
+          return; // redirect flow
+        } catch (rErr) {
+          // eslint-disable-next-line no-console
+          console.error('Redirect sign-in failed', rErr);
+          show(rErr.message || 'Google sign-in failed', { type: 'error' });
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Google sign-in error', err);
+        show(err.message || 'Google sign-in failed', { type: 'error' });
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  // --- Profile dropdown hover persistence (delay close) ---
+  const openProfileDropdown = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setProfileOpen(true);
+  };
+  const scheduleProfileClose = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => setProfileOpen(false), 220);
+  };
+
   return (
     <header className={`navbar ${isLanding ? 'landing' : ''}`}>
       <div className="nav-inner">
@@ -38,22 +77,38 @@ export default function Navbar() {
         {/* Desktop nav links */}
         <nav className="nav-links desktop-nav">
           <NavLink to="/explorer">Trail Explorer</NavLink>
-          <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); } }}>Trail Submission</button>
-          <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); } }}>Reviews & Media</button>
-          <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}>MyTrails</button>
-          <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); } }}>Alerts & Updates</button>
+          <button
+            type="button"
+            className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
+            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); } }}
+          >Trail Submission</button>
+          <button
+            type="button"
+            className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
+            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); } }}
+          >Reviews & Media</button>
+          <button
+            type="button"
+            className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
+            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}
+          >MyTrails</button>
+          <button
+            type="button"
+            className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
+            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); } }}
+          >Alerts & Updates</button>
         </nav>
 
         {/* Desktop login/logout */}
         <div className="nav-actions desktop-actions">
           {user ? (
-            <div 
+            <div
               className="profile-container"
-              onMouseEnter={() => setProfileOpen(true)}
-              onMouseLeave={() => setProfileOpen(false)}
+              onMouseEnter={openProfileDropdown}
+              onMouseLeave={scheduleProfileClose}
             >
               <button className="profile-trigger">
-                {user?. photoURL ? (
+                {user?.photoURL ? (
                   <img
                     src={user.photoURL} alt="User Avatar" className="profile-avatar"
                   />
@@ -112,7 +167,9 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <button className="nav-login-btn" onClick={() => navigate('/login')}>Login</button>
+            <button className="nav-login-btn" onClick={handleGoogleLogin} disabled={isAuthLoading}>
+              {isAuthLoading ? 'Connecting…' : 'Login'}
+            </button>
           )}
         </div>
 
@@ -168,7 +225,13 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <button className="nav-login-btn mobile-login" onClick={() => { navigate('/login'); setOpen(false); }}>Login</button>
+              <button 
+                className="nav-login-btn mobile-login" 
+                onClick={() => { handleGoogleLogin(); setOpen(false); }}
+                disabled={isAuthLoading}
+              >
+                {isAuthLoading ? 'Connecting…' : 'Login'}
+              </button>
             )}
           </div>
         </div>

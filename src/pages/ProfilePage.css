@@ -1,17 +1,21 @@
+
 .profile-page {
   max-width: 800px;
   margin: 40px auto;
   padding: 20px;
-  color: #fff;
+  color: var(--text);
 }
 
 .profile-card {
-  background: rgba(28,37,65,0.9);
+  background: var(--bg-elev);
   border-radius: 12px;
   padding: 30px;
   text-align: center;
   margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .profile-card .edit-btn {
@@ -19,41 +23,94 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: var(--primary);
-  color: #052b2b;
+  padding: 11px 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+  color: #041d1d;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: filter .25s ease, transform .08s ease, box-shadow .3s ease;
   margin-top: 1rem;
+  box-shadow: 0 6px 18px -4px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .25px;
 }
+
+.profile-card .edit-btn:hover { 
+  filter: brightness(1.06); 
+  box-shadow: 0 10px 28px -6px rgba(0,0,0,0.45), 0 0 0 1px var(--primary-accent); 
+}
+
+.profile-card .edit-btn:active { 
+  transform: translateY(2px); 
+}
+
+.profile-card .edit-btn::after { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.5), rgba(255,255,255,0) 55%); 
+  mix-blend-mode: overlay; 
+  opacity: .6; 
+  pointer-events: none; 
+}
+
 .profile-avatar-large {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 20px;
-  border: 3px solid #3b82f6;
+  border: 3px solid var(--primary);
+}
+
+.profile-avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-alt);
+  color: var(--text-dim);
+  border: 3px solid var(--border);
 }
 
 .profile-section {
-  background: rgba(28,37,65,0.7);
+  background: var(--bg-elev);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.profile-section h2 {
+  margin-bottom: 15px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .profile-section h3 {
   margin-bottom: 10px;
-  color: #facc15;
+  color: var(--accent);
 }
 
 .profile-section ul {
   list-style-type: disc;
   margin-left: 20px;
   text-align: left;
+  color: var(--text);
 }
 
+.profile-section p {
+  color: var(--text-dim);
+}

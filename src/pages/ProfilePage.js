@@ -7,7 +7,8 @@ import PyramidLoader from "../components/PyramidLoader";
 import WishlistIcon from "../components/WishlistIcon";
 import SubmittedIcon from "../components/SubmittedIcon";
 import CompletedIcon from "../components/CompletedIcon";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Edit } from "lucide-react";
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
@@ -19,7 +20,7 @@ export default function Profile() {
     submittedTrails: []
   });
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (u) => {
       if (!u) {
@@ -92,7 +93,7 @@ export default function Profile() {
     <div className="profile-page">
       <h1>My Profile</h1>
       <div className="profile-card">
-        {user?. photoURL ? (
+        {user?.photoURL ? (
           <img
             src={user.photoURL} alt="User Avatar" className="profile-avatar-large"
           />
@@ -103,8 +104,10 @@ export default function Profile() {
         <h2>{user?.displayName || "No Name"}</h2>
         <p>Email: {user?.email}</p>
         <button
-          className="edit-btn">
-          <Link to='/settings'>Edit Profile</Link>
+          className="edit-btn"
+          onClick={() => navigate('/settings')}
+        >
+          <Edit /> Edit Profile
         </button>
       </div>
 

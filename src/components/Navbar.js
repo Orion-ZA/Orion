@@ -10,6 +10,7 @@ import SettingsIcon from './SettingsIcon';
 import FavouritesIcon from './FavouritesIcon';
 import FeedbackIcon from './FeedbackIcon';
 import HelpCenterIcon from './HelpCenterIcon';
+import OrionLogo from '../assets/orion_logo_clear.png';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -30,9 +31,8 @@ export default function Navbar() {
   return (
     <header className={`navbar ${isLanding ? 'landing' : ''}`}>
       <div className="nav-inner">
-        <Link className="brand" to={user ? '/dashboard' : '/'}>
-          <span className="brand-icon" aria-hidden>🌌</span>
-          <span className="brand-text">Orion</span>
+        <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
+          <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
         </Link>
 
         {/* Desktop nav links */}

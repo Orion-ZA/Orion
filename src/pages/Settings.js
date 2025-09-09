@@ -17,6 +17,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { useToast } from '../components/ToastContext';
 import './Settings.css';
+import { useTheme } from '../components/ThemeProvider';
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -44,6 +45,7 @@ const SettingsPage = () => {
     confirmPassword: ''
   });
 
+  const { mode: themeMode, setMode: setThemeMode, resolved: resolvedTheme } = useTheme();
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
     activityUpdates: true,
@@ -51,7 +53,7 @@ const SettingsPage = () => {
     publicProfile: true,
     showActivityStatus: true,
     mapType: 'standard',
-    theme: 'dark'
+    theme: themeMode || 'auto'
   });
 
   useEffect(() => {
@@ -87,6 +89,9 @@ const SettingsPage = () => {
 
   const handlePreferenceChange = (name, value) => {
     setPreferences(prev => ({ ...prev, [name]: value }));
+    if (name === 'theme') {
+      setThemeMode(value);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -475,7 +480,7 @@ const SettingsPage = () => {
                   <div className="preference-group">
                     <h3>Theme</h3>
                     <div className="preference-options">
-                      <label className="preference-option">
+                      <label className={`preference-option ${preferences.theme === 'light' ? 'selected' : ''}`}>
                         <input
                           type="radio"
                           name="theme"
@@ -485,7 +490,7 @@ const SettingsPage = () => {
                         />
                         <span className="option-label">Light</span>
                       </label>
-                      <label className="preference-option">
+                      <label className={`preference-option ${preferences.theme === 'dark' ? 'selected' : ''}`}>
                         <input
                           type="radio"
                           name="theme"
@@ -495,7 +500,7 @@ const SettingsPage = () => {
                         />
                         <span className="option-label">Dark</span>
                       </label>
-                      <label className="preference-option">
+                      <label className={`preference-option ${preferences.theme === 'auto' ? 'selected' : ''}`}>
                         <input
                           type="radio"
                           name="theme"
@@ -503,8 +508,9 @@ const SettingsPage = () => {
                           checked={preferences.theme === 'auto'}
                           onChange={() => handlePreferenceChange('theme', 'auto')}
                         />
-                        <span className="option-label">Auto</span>
+                        <span className="option-label">Auto <small style={{opacity:.65}}>(System → {resolvedTheme})</small></span>
                       </label>
+                      <div style={{marginTop:'0.75rem', fontSize:'0.8rem', color:'var(--muted)'}}>Active theme: <strong>{resolvedTheme}</strong></div>
                     </div>
                   </div>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useGeocoding } from '../components/hooks/useGeocoding'; // Adjust path to your useGeocoding hook
 import styles from './Welcome.module.css';
 
 const HERO_IMAGES = [
@@ -29,13 +30,19 @@ export default function Welcome() {
   const [idx, setIdx] = useState(0);
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const navigate = useNavigate();
+  const { geocode, geocodingLoading } = useGeocoding(process.env.REACT_APP_MAPBOX_TOKEN);
 
+  // Background image slideshow
   useEffect(() => {
     const id = setInterval(() => setIdx((i) => (i + 1) % HERO_IMAGES.length), 6000);
     return () => clearInterval(id);
   }, []);
 
-  // Observe stats section visibility to trigger animations
+  // Observe stats section visibility
   useEffect(() => {
     if (!statsRef.current) return;
     const el = statsRef.current;
@@ -61,12 +68,30 @@ export default function Welcome() {
       if (i <= fullTitle.length) {
         setTypedTitle(fullTitle.slice(0, i));
         i++;
-        setTimeout(type, i === 1 ? 400 : 60); // Slight pause at start
+        setTimeout(type, i === 1 ? 400 : 60);
       }
     };
     type();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Geocoding for search suggestions
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2) {
+      geocode(searchQuery).then(setSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchQuery, geocode]);
+
+  // Handle search or suggestion selection
+  const handleSearch = (suggestion) => {
+    const queryParams = new URLSearchParams({
+      lat: suggestion.coordinates.lat,
+      lng: suggestion.coordinates.lng,
+      ...(suggestion.type === 'trail' && { trailId: suggestion.id })
+    });
+    navigate(`/explorer?${queryParams.toString()}`);
+  };
 
   return (
     <div className={styles['welcome-page']}>
@@ -88,10 +113,80 @@ export default function Welcome() {
           <p className={styles['welcome-subtitle']}>Find trails, see community reviews, and plan your next outdoor adventure.</p>
 
           <div className={styles['welcome-search']} role="search" aria-label="Search trails">
-            <div className={styles['welcome-search-inner']}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles['welcome-search-icon']}><path fillRule="evenodd" clipRule="evenodd" d="M3.75 10.875a7.125 7.125 0 1 1 14.25 0 7.125 7.125 0 0 1-14.25 0Zm7.125-8.625a8.625 8.625 0 1 0 5.546 15.231l4.049 4.05a.75.75 0 0 0 1.06-1.061l-4.049-4.05a8.625 8.625 0 0 0-6.606-14.17Z"></path></svg>
-              <input type="search" placeholder="Search by city, park, or trail name" aria-label="Search" />
-              <button type="button" className={styles['welcome-search-btn']}>Search</button>
+            <div className={styles['welcome-search-inner']} style={{ position: 'relative' }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+                className={styles['welcome-search-icon']}
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M3.75 10.875a7.125 7.125 0 1 1 14.25 0 7.125 7.125 0 0 1-14.25 0Zm7.125-8.625a8.625 8.625 0 1 0 5.546 15.231l4.049 4.05a.75.75 0 0 0 1.06-1.061l-4.049-4.05a8.625 8.625 0 0 0-6.606-14.17Z"
+                ></path>
+              </svg>
+              <input
+                type="search"
+                placeholder="Search by city, park, or trail name"
+                aria-label="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+              />
+              <button
+                type="button"
+                className={styles['welcome-search-btn']}
+                onClick={() => suggestions.length > 0 && handleSearch(suggestions[0])}
+                disabled={geocodingLoading || !searchQuery.trim()}
+              >
+                {geocodingLoading ? 'Loading...' : 'Search'}
+              </button>
+              {isFocused && suggestions.length > 0 && (
+                <ul
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'rgba(255,255,255,0.95)',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+                    listStyle: 'none',
+                    padding: '8px 0',
+                    margin: '4px 0 0 0',
+                    zIndex: 10,
+                    color: '#333',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {suggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.id}
+                      style={{
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                      onMouseDown={() => handleSearch(suggestion)}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f8ff')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      {suggestion.type === 'trail' && (
+                        <span role="img" aria-label="Trail">🥾</span>
+                      )}
+                      {suggestion.placeName}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
@@ -105,32 +200,10 @@ export default function Welcome() {
       <section ref={statsRef} className={styles['stats-section']} aria-label="Orion hiking stats">
         <div className={styles['stats-inner']}>
           <div className={styles['stats-grid']}>
-            <StatCard
-              label="Trails mapped"
-              end={1248}
-              start={0}
-              visible={statsVisible}
-            />
-            <StatCard
-              label="Total distance"
-              end={8742}
-              start={0}
-              suffix=" km"
-              visible={statsVisible}
-            />
-            <StatCard
-              label="Elevation gain"
-              end={215000}
-              start={0}
-              suffix=" m"
-              visible={statsVisible}
-            />
-            <StatCard
-              label="Active hikers"
-              end={12430}
-              start={0}
-              visible={statsVisible}
-            />
+            <StatCard label="Trails mapped" end={1248} start={0} visible={statsVisible} />
+            <StatCard label="Total distance" end={8742} start={0} suffix=" km" visible={statsVisible} />
+            <StatCard label="Elevation gain" end={215000} start={0} suffix=" m" visible={statsVisible} />
+            <StatCard label="Active hikers" end={12430} start={0} visible={statsVisible} />
           </div>
         </div>
       </section>
@@ -158,7 +231,6 @@ export default function Welcome() {
                 name={act.name}
               />
             ))}
-            {/* Last image card */}
             <TiltCard
               key="Surfing"
               className={styles['activity-card']}

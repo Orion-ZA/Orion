@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import useTrails from '../components/hooks/useTrails';
 import TrailMap from '../components/map/TrailMap';
 import FilterPanel from '../components/filters/FilterPanel';
 import TrailList from '../components/lists/TrailList';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function TrailExplorerPage() {
-  const [showFilters, setShowFilters] = useState(false);
+  const location = useLocation();
   const [selectedTrail, setSelectedTrail] = useState(null);
-  const [userSaved, setUserSaved] = useState({ favourites: [], wishlist: [], completed: [] });
-  const [user, setUser] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Extract lat, lng, and trailId from URL query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const lat = parseFloat(searchParams.get('lat'));
+  const lng = parseFloat(searchParams.get('lng'));
+  const trailId = searchParams.get('trailId');
+  const searchLocation = lat && lng ? { latitude: lat, longitude: lng } : null;
 
   const {
     filteredTrails,
@@ -21,127 +27,57 @@ export default function TrailExplorerPage() {
     isLoadingTrails,
     getUserLocation,
     calculateDistance
-  } = useTrails();
+  } = useTrails(searchLocation);
 
-  // Listen for Firebase auth state
+  // Auto-detect location on component mount if no search location provided
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
-    return unsubscribe;
-  }, []);
+    if (!searchLocation) {
+      getUserLocation();
+    }
+  }, [getUserLocation, searchLocation]);
 
-  const userId = user ? user.uid : null;
-
+  // Set selected trail if trailId is provided
   useEffect(() => {
-    getUserLocation();
-  }, [getUserLocation]);
-
-  // Fetch user's saved trails when userId is available
-  useEffect(() => {
-    if (!userId) return;
-
-    async function fetchSavedTrails() {
-      try {
-        const res = await fetch(`https://getsavedtrails-fqtduxc7ua-uc.a.run.app?uid=${userId}`);
-        const data = await res.json();
-        setUserSaved(data);
-      } catch (err) {
-        console.error('Failed to fetch saved trails:', err);
+    if (trailId && filteredTrails.length > 0) {
+      const trail = filteredTrails.find(t => t.id === trailId);
+      if (trail) {
+        setSelectedTrail(trail);
       }
     }
-
-    fetchSavedTrails();
-  }, [userId]);
-
-  const handleSaveForLater = async () => {
-    if (!userId) {
-      alert('Please log in to save trails.');
-      return;
-    }
-
-    try {
-      await fetch('https://addfavourite-fqtduxc7ua-uc.a.run.app', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: userId, trailId: selectedTrail?.id })
-      });
-      if (selectedTrail) {
-        setUserSaved(prev => ({
-          ...prev,
-          favourites: [...prev.favourites, selectedTrail]
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to save trail for later:', err);
-    }
-  };
-
-  const handleAddToWishlist = async () => {
-    if (!userId) {
-      alert('Please log in to add trails to wishlist.');
-      return;
-    }
-
-    try {
-      await fetch('https://us-central1-orion-sdp.cloudfunctions.net/addWishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: userId, trailId: selectedTrail?.id })
-      });
-      if (selectedTrail) {
-        setUserSaved(prev => ({
-          ...prev,
-          wishlist: [...prev.wishlist, selectedTrail]
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to add trail to wishlist:', err);
-    }
-  };
+  }, [trailId, filteredTrails]);
 
   return (
     <div className="container fade-in-up">
       <h1>Trail Explorer</h1>
-      <p>Find trails near your current location</p>
+      <p>Find trails near {searchLocation ? 'your selected location' : 'your current location'}</p>
       
-      {/* Location, Filters, Save, and Wishlist Buttons */}
-      <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center'}}>
-        
-        <button className="button primary" onClick={() => setShowFilters(!showFilters)}>
+      {/* Location and Filter Controls */}
+      <div style={{marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
+        <button 
+          className="button primary"
+          onClick={() => setShowFilters(!showFilters)}
+        >
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
-        <button
+        <button 
           className="button secondary"
-          onClick={handleAddToWishlist}
-          disabled={!selectedTrail || userSaved.wishlist.some(t => t.id === selectedTrail?.id)}
+          onClick={getUserLocation}
+          disabled={isLoadingLocation || !!searchLocation}
         >
-          {selectedTrail && userSaved.wishlist.some(t => t.id === selectedTrail?.id) ? 'In Wishlist' : 'Add to wishlist'}
-        </button>
-        <button
-          className="button primary"
-          onClick={handleSaveForLater}
-          disabled={!selectedTrail || userSaved.favourites.some(t => t.id === selectedTrail?.id)}
-        >
-          {selectedTrail && userSaved.favourites.some(t => t.id === selectedTrail?.id) ? 'Saved' : 'Save for later'}
-        </button>
-        <button
-          className="button secondary"
-          onClick={handleAddToWishlist}
-          disabled={!selectedTrail || userSaved.wishlist.some(t => t.id === selectedTrail?.id)}
-        >
-          {selectedTrail && userSaved.wishlist.some(t => t.id === selectedTrail?.id) ? 'In Wishlist' : 'Add to wishlist'}
+          {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
         </button>
         {userLocation && (
           <span>
             Your location: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
           </span>
         )}
-        <button className="button secondary" onClick={getUserLocation} disabled={isLoadingLocation}>
-          {isLoadingLocation ? 'Locating...' : '📍 Find My Location'}
-        </button>
       </div>
 
-      {locationError && <div className="card error">⚠️ {locationError}</div>}
+      {locationError && (
+        <div className="card error">
+          ⚠️ {locationError}
+        </div>
+      )}
 
       {isLoadingTrails && (
         <div className="card">
@@ -150,10 +86,12 @@ export default function TrailExplorerPage() {
       )}
 
       {/* Filter Panel */}
-      {showFilters && <FilterPanel filters={filters} onFilterChange={handleFilterChange} />}
+      {showFilters && (
+        <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
+      )}
 
       {/* Main Content: Map and List */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+      <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem'}}>
         <TrailMap
           trails={filteredTrails}
           userLocation={userLocation}

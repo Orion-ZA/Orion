@@ -1,0 +1,96 @@
+/* Trail Map Styles */
+.trails-map-container {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  pointer-events: auto;
+}
+
+.trails-map {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+/* User location marker */
+.user-location-marker {
+  width: 20px;
+  height: 20px;
+  background: #1976d2;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.user-location-pulse {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 36px;
+  height: 36px;
+  background: rgba(25, 118, 210, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Trail markers */
+.trail-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.trail-marker svg {
+  transform: rotate(45deg);
+  color: white;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.trail-marker:hover {
+  transform: rotate(-45deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Trail popup */
+.trail-popup {
+  padding: 0.5rem;
+  min-width: 200px;
+}
+
+.trail-popup h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.trail-popup p {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.trail-popup strong {
+  color: #333;
+}

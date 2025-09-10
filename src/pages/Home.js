@@ -66,7 +66,6 @@ function Dashboard({ user }) {
             submittedTrails
           });
         } else {
-          console.log("No user document found for", user.uid);
         }
         setLoading(false);
       },

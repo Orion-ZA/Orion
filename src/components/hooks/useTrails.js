@@ -32,7 +32,7 @@ const getTrailCoordinates = (location) => {
   };
 };
 
-export default function useTrails() {
+export default function useTrails(externalUserLocation = null) {
   const [filters, setFilters] = useState({
     difficulty: 'all',
     tags: [],
@@ -55,32 +55,81 @@ export default function useTrails() {
       const trailsSnapshot = await getDocs(trailsCollection);
       const trailsData = trailsSnapshot.docs.map(doc => {
         const data = doc.data();
+        
+        // Safely extract coordinates
+        const { latitude, longitude } = getTrailCoordinates(data.location);
+        
         return {
           id: doc.id,
-          name: data.name,
-          difficulty: data.difficulty,
-          distance: data.distance,
-          elevationGain: data.elevationGain,
+          name: data.name || 'Unnamed Trail',
+          difficulty: data.difficulty || 'Unknown',
+          distance: data.distance || 0,
+          elevationGain: data.elevationGain || 0,
           rating: data.rating || 4.5,
-          gpsRoute: data.gpsRoute.map(point => ({
-            latitude: point.latitude,
-            longitude: point.longitude
-          })),
+          route: data.gpsRoute && Array.isArray(data.gpsRoute) 
+            ? data.gpsRoute.map(point => [point.longitude, point.latitude])
+            : latitude && longitude ? [[longitude, latitude]] : [],
+          latitude: latitude,
+          longitude: longitude,
           location: {
-            latitude: data.location.latitude,
-            longitude: data.location.longitude
+            latitude: latitude,
+            longitude: longitude
           },
-          description: data.description,
+          description: data.description || '',
           tags: data.tags || [],
           photos: data.photos || [],
-          status: data.status,
-          createdBy: data.createdBy.path
+          status: data.status || 'active',
+          createdBy: data.createdBy?.path || data.createdBy || 'unknown'
         };
       });
-      setTrails(trailsData);
+      
+      // If no trails found, add some sample data for testing
+      if (trailsData.length === 0) {
+        const sampleTrails = [
+          {
+            id: 'sample-1',
+            name: 'Table Mountain Trail',
+            difficulty: 'Moderate',
+            distance: 5.2,
+            elevationGain: 800,
+            rating: 4.8,
+            latitude: -33.9628,
+            longitude: 18.4096,
+            location: { latitude: -33.9628, longitude: 18.4096 },
+            description: 'A challenging hike up Table Mountain with stunning views of Cape Town',
+            tags: ['mountain', 'views', 'challenging'],
+            photos: [],
+            status: 'active',
+            createdBy: 'sample',
+            route: [[18.4096, -33.9628]]
+          },
+          {
+            id: 'sample-2',
+            name: 'Lion\'s Head Trail',
+            difficulty: 'Easy',
+            distance: 2.1,
+            elevationGain: 200,
+            rating: 4.5,
+            latitude: -33.9356,
+            longitude: 18.3881,
+            location: { latitude: -33.9356, longitude: 18.3881 },
+            description: 'Popular sunset hike with 360-degree views',
+            tags: ['sunset', 'views', 'popular'],
+            photos: [],
+            status: 'active',
+            createdBy: 'sample',
+            route: [[18.3881, -33.9356]]
+          }
+        ];
+        setTrails(sampleTrails);
+      } else {
+        setTrails(trailsData);
+      }
     } catch (error) {
       console.error('Error fetching trails:', error);
+      console.error('Error details:', error.message);
       setLocationError('Failed to load trails. Please try again.');
+      setTrails([]); // Set empty array on error
     } finally {
       setIsLoadingTrails(false);
     }
@@ -126,10 +175,13 @@ export default function useTrails() {
       // Get coordinates using the helper function
       const { latitude, longitude } = getTrailCoordinates(trail.location);
       
-      if (userLocation && filters.maxLocationDistance > 0 && latitude && longitude) {
+      // Use external user location if provided, otherwise use internal userLocation
+      const currentUserLocation = externalUserLocation || userLocation;
+      
+      if (currentUserLocation && filters.maxLocationDistance > 0 && latitude && longitude) {
         const dist = calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
+          currentUserLocation.latitude,
+          currentUserLocation.longitude,
           latitude,
           longitude
         );
@@ -153,7 +205,7 @@ export default function useTrails() {
         hasMatchingName
       );
     });
-  }, [filters, userLocation, trails]);
+  }, [filters, userLocation, externalUserLocation, trails]);
 
   return {
     filteredTrails,

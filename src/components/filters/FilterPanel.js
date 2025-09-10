@@ -102,7 +102,7 @@ export default function FilterPanel({ filters, onFilterChange }) {
         </div>
         <div>
           <label>Max Location Distance: {filters.maxLocationDistance} km</label>
-          <input type="range" min="0" max="160" step="5" value={filters.maxLocationDistance} onChange={(e) => onFilterChange('maxLocationDistance', parseFloat(e.target.value))} style={{width: '100%'}}/>
+          <input type="range" min="0" max="1000" step="5" value={filters.maxLocationDistance} onChange={(e) => onFilterChange('maxLocationDistance', parseFloat(e.target.value))} style={{width: '100%'}}/>
         </div>
       </div>
     </div>

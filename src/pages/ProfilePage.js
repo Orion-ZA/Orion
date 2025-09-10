@@ -7,7 +7,7 @@ import PyramidLoader from "../components/PyramidLoader";
 import WishlistIcon from "../components/WishlistIcon";
 import SubmittedIcon from "../components/SubmittedIcon";
 import CompletedIcon from "../components/CompletedIcon";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Edit } from "lucide-react";
 
 export default function Profile() {
@@ -81,7 +81,7 @@ export default function Profile() {
   }, []);
 
   if (loading){
-    return <div className="profile-page"><PyramidLoader /></div>;
+    return <div className="profile-page"><p>Loading...</p></div>;
   }
   if (!userData) {
     return <div className="profile-page">
@@ -95,7 +95,8 @@ export default function Profile() {
       <div className="profile-card">
         {user?.photoURL ? (
           <img
-            src={user.photoURL} alt="User Avatar" className="profile-avatar-large"
+            src={user.photoURL || "https://www.flaticon.com/free-icons/profile-picture"}
+            alt="User Avatar" className="profile-avatar-large"
           />
         ):(
           <div className="profile-avatar-placeholder">No Image</div>

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { 
-  Star, MessageCircle, Bug, Lightbulb, ThumbsUp, 
-  ThumbsDown, Send, ArrowLeft, X, Upload
+  Star, MessageCircle, Bug, Lightbulb, ThumbsUp, Send, ArrowLeft, X, Upload
 } from "lucide-react";
 import "./Feedback.css";
 import { db, auth } from "../firebaseConfig";

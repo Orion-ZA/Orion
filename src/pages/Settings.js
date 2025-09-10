@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, MapPin, Globe, Lock, Bell, Eye, EyeOff, 
-  Save, X, Upload, Trash2, Shield, Palette 
+  Save, X, Trash2, Shield, Palette 
 } from 'lucide-react';
 import { 
   updateProfile, 

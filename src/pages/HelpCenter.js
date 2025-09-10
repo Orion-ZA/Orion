@@ -1,7 +1,7 @@
 // HelpCenterPage.js
 import React, { useState } from 'react';
 import { Search, Mail, MessageSquare, 
-    BookOpen, Clock, Phone, 
+    BookOpen, Phone, 
     ArrowRight, ChevronDown, 
     ChevronUp, MapPin, User } from 'lucide-react';
 import { useToast } from '../components/ToastContext';

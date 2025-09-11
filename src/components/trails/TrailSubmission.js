@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, Plus, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Upload, Plus, CheckCircle, AlertCircle, Loader2, MapPin, Map, Edit3, Trash2, Play, Square, Ruler } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
@@ -10,7 +10,10 @@ const TrailSubmission = ({
   onClose,
   onSubmit,
   isSubmitting,
-  submitStatus
+  submitStatus,
+  selectedLocation,
+  onLocationSelect,
+  onRouteUpdate
 }) => {
   const [placeInput, setPlaceInput] = useState('');
   const [trailName, setTrailName] = useState('');
@@ -21,11 +24,48 @@ const TrailSubmission = ({
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [images, setImages] = useState([]);
+  
+  // Trail drawing state
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [routePoints, setRoutePoints] = useState([]);
+  const [drawingMode, setDrawingMode] = useState('click'); // 'click' or 'track'
+
+  // Reset form when panel closes
+  useEffect(() => {
+    if (!isOpen) {
+      setPlaceInput('');
+      setTrailName('');
+      setDescription('');
+      setDifficulty('');
+      setDistance('');
+      setElevationGain('');
+      setTags([]);
+      setTagInput('');
+      setImages([]);
+      setIsDrawing(false);
+      setRoutePoints([]);
+      setDrawingMode('click');
+    }
+  }, [isOpen]);
+
+  // Update route in parent component
+  useEffect(() => {
+    if (onRouteUpdate) {
+      onRouteUpdate(routePoints);
+    }
+  }, [routePoints, onRouteUpdate]);
+
+  // Expose addRoutePoint function to parent
+  useEffect(() => {
+    if (onRouteUpdate) {
+      onRouteUpdate(routePoints, { addRoutePoint, isDrawing });
+    }
+  }, [routePoints, onRouteUpdate, isDrawing]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!placeInput.trim() || !trailName.trim() || !difficulty || !distance) {
+    if (!selectedLocation || !trailName.trim() || !difficulty || !distance) {
       return;
     }
 
@@ -47,21 +87,15 @@ const TrailSubmission = ({
         elevationGain: elevationGain ? parseFloat(elevationGain) : 0,
         tags,
         photos: uploadedImages,
-        location: placeInput
+        location: {
+          lat: selectedLocation.latitude,
+          lng: selectedLocation.longitude
+        },
+        placeName: placeInput || selectedLocation.name || 'Selected Location',
+        gpsRoute: routePoints.map(([lng, lat]) => ({ lat, lng }))
       };
 
       await onSubmit(trailData);
-      
-      // Reset form
-      setPlaceInput('');
-      setTrailName('');
-      setDescription('');
-      setDifficulty('');
-      setDistance('');
-      setElevationGain('');
-      setTags([]);
-      setTagInput('');
-      setImages([]);
     } catch (error) {
       console.error('Error submitting trail:', error);
     }
@@ -87,30 +121,151 @@ const TrailSubmission = ({
     setImages(images.filter((_, i) => i !== index));
   };
 
+  // Drawing control functions
+  const startDrawing = () => {
+    setIsDrawing(true);
+    setRoutePoints([]);
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearRoute = () => {
+    setRoutePoints([]);
+    if (onRouteUpdate) {
+      onRouteUpdate([]);
+    }
+  };
+
+  const addRoutePoint = (lng, lat) => {
+    if (isDrawing) {
+      const newPoint = [lng, lat];
+      setRoutePoints(prev => [...prev, newPoint]);
+    }
+  };
+
+  const calculateRouteDistance = () => {
+    if (routePoints.length < 2) return 0;
+    
+    let totalDistance = 0;
+    for (let i = 1; i < routePoints.length; i++) {
+      const [lng1, lat1] = routePoints[i - 1];
+      const [lng2, lat2] = routePoints[i];
+      
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      totalDistance += R * c;
+    }
+    
+    return totalDistance;
+  };
+
+  // Auto-fill distance when route points change
+  useEffect(() => {
+    if (routePoints.length >= 2) {
+      const calculatedDistance = calculateRouteDistance();
+      setDistance(calculatedDistance.toFixed(2));
+    }
+  }, [routePoints]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="submission-overlay">
-      <div className="submission-panel">
-        <div className="submission-header">
-          <h2>Submit New Trail</h2>
-          <button onClick={onClose} className="close-btn">
-            <X size={18} />
-          </button>
-        </div>
+    <div className="submission-panel-side">
+      <div className="submission-header">
+        <h2>Submit New Trail</h2>
+        <button onClick={onClose} className="close-btn">
+          <X size={18} />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="submission-form">
-          <div className="form-group">
-            <label htmlFor="place">Location *</label>
-            <input
-              type="text"
-              id="place"
-              value={placeInput}
-              onChange={(e) => setPlaceInput(e.target.value)}
-              placeholder="Enter trail location (e.g., Table Mountain, Cape Town)"
-              required
-            />
+      {/* Location Selection Status */}
+      <div className="location-status">
+        {selectedLocation ? (
+          <div className="location-selected">
+            <MapPin size={16} />
+            <span>Location selected: {selectedLocation.name || `${selectedLocation.latitude.toFixed(4)}, ${selectedLocation.longitude.toFixed(4)}`}</span>
           </div>
+        ) : (
+          <div className="location-pending">
+            <Map size={16} />
+            <span>Click on the map to select a location</span>
+          </div>
+        )}
+      </div>
+
+      {/* Trail Drawing Controls */}
+      <div className="drawing-controls">
+        <div className="drawing-header">
+          <h4>Trail Route</h4>
+          <div className="route-stats">
+            {routePoints.length > 0 && (
+              <span className="route-points">{routePoints.length} points</span>
+            )}
+            {routePoints.length > 1 && (
+              <span className="route-distance">{calculateRouteDistance().toFixed(2)} km</span>
+            )}
+          </div>
+        </div>
+        
+        <div className="drawing-buttons">
+          {!isDrawing ? (
+            <button
+              type="button"
+              onClick={startDrawing}
+              className="drawing-btn start"
+            >
+              <Edit3 size={16} />
+              Start Drawing
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={stopDrawing}
+              className="drawing-btn stop"
+            >
+              <Square size={16} />
+              Stop Drawing
+            </button>
+          )}
+          
+          {routePoints.length > 0 && (
+            <button
+              type="button"
+              onClick={clearRoute}
+              className="drawing-btn clear"
+            >
+              <Trash2 size={16} />
+              Clear Route
+            </button>
+          )}
+        </div>
+        
+        {isDrawing && (
+          <div className="drawing-instructions">
+            <p>Click on the map to add points to your trail route</p>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className="submission-form">
+        <div className="form-group">
+          <label htmlFor="place">Place Name</label>
+          <input
+            type="text"
+            id="place"
+            value={placeInput}
+            onChange={(e) => setPlaceInput(e.target.value)}
+            placeholder="Enter place name (e.g., Table Mountain, Cape Town)"
+          />
+        </div>
 
           <div className="form-group">
             <label htmlFor="name">Trail Name *</label>
@@ -154,16 +309,25 @@ const TrailSubmission = ({
 
             <div className="form-group">
               <label htmlFor="distance">Distance (km) *</label>
-              <input
-                type="number"
-                id="distance"
-                value={distance}
-                onChange={(e) => setDistance(e.target.value)}
-                placeholder="0.0"
-                step="0.1"
-                min="0"
-                required
-              />
+              <div className="distance-input-container">
+                <input
+                  type="number"
+                  id="distance"
+                  value={distance}
+                  onChange={(e) => setDistance(e.target.value)}
+                  placeholder="0.0"
+                  step="0.1"
+                  min="0"
+                  required
+                  className={routePoints.length >= 2 ? "auto-calculated" : ""}
+                  readOnly={routePoints.length >= 2}
+                />
+                {routePoints.length >= 2 && (
+                  <span className="auto-calculated-indicator" title="Auto-calculated from route">
+                    <Ruler size={16} />
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -237,22 +401,21 @@ const TrailSubmission = ({
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !placeInput.trim() || !trailName.trim() || !difficulty || !distance}
-            className="submit-btn"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              'Submit Trail'
-            )}
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={isSubmitting || !selectedLocation || !trailName.trim() || !difficulty || !distance}
+          className="submit-btn"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            'Submit Trail'
+          )}
+        </button>
+      </form>
     </div>
   );
 };

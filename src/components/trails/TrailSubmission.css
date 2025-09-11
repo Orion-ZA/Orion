@@ -1,48 +1,54 @@
-/* Submission Panel Overlay */
-.submission-overlay {
+/* Submission Panel Side */
+.submission-panel-side {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 5rem;
+  right: 1rem;
+  width: 420px;
+  height: calc(100vh - 6rem);
+  background: linear-gradient(135deg, 
+    rgba(28, 37, 65, 0.75) 0%, 
+    rgba(28, 37, 65, 0.65) 50%, 
+    rgba(28, 37, 65, 0.75) 100%);
+  border-radius: 16px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 1001;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 1rem;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInFromRight 0.3s ease-out;
+  margin-right: 60px; /* Add margin to avoid map controls */
 }
 
-.submission-panel {
-  background: linear-gradient(135deg, 
-    rgba(28, 37, 65, 0.95) 0%, 
-    rgba(28, 37, 65, 0.9) 50%, 
-    rgba(28, 37, 65, 0.95) 100%);
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .submission-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  padding: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .submission-header h2 {
   margin: 0;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -69,17 +75,237 @@
   transform: translateY(-1px);
 }
 
+/* Location Status */
+.location-status {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.location-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4CAF50;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+}
+
+.location-pending {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* Drawing Controls */
+.drawing-controls {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.drawing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.drawing-header h4 {
+  margin: 0;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.route-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.route-points {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.route-distance {
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.drawing-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.drawing-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.drawing-btn.start {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.drawing-btn.start:hover {
+  background: rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.drawing-btn.stop {
+  background: rgba(244, 67, 54, 0.2);
+  color: #F44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.drawing-btn.stop:hover {
+  background: rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px);
+}
+
+.drawing-btn.clear {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.drawing-btn.clear:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.drawing-instructions {
+  padding: 0.75rem;
+  background: rgba(91, 192, 190, 0.1);
+  border: 1px solid rgba(91, 192, 190, 0.3);
+  border-radius: 6px;
+}
+
+.drawing-instructions p {
+  margin: 0;
+  color: #5bc0be;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 /* Form Styles */
 .submission-form {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar for Submission Form */
+.submission-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.submission-form::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.submission-form::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.3) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.submission-form::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.submission-form::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    rgba(255, 255, 255, 0.5) 100%);
+}
+
+/* Firefox scrollbar */
+.submission-form {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.distance-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.distance-input-container input.auto-calculated {
+  background: rgba(91, 192, 190, 0.1);
+  border-color: rgba(91, 192, 190, 0.3);
+  color: #5bc0be;
+  cursor: not-allowed;
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.distance-input-container input.auto-calculated::-webkit-outer-spin-button,
+.distance-input-container input.auto-calculated::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.auto-calculated-indicator {
+  position: absolute;
+  right: 0.75rem;
+  color: #5bc0be;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
 }
 
 .form-row {
@@ -298,13 +524,19 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .submission-overlay {
-    padding: 0.5rem;
-  }
-  
-  .submission-panel {
-    padding: 1.5rem;
-    max-height: 95vh;
+  .submission-panel-side {
+    top: 4rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    height: 50vh;
+    bottom: 0;
+    top: auto;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(135deg, 
+      rgba(28, 37, 65, 0.75) 0%, 
+      rgba(28, 37, 65, 0.65) 50%, 
+      rgba(28, 37, 65, 0.75) 100%);
   }
   
   .form-row {

@@ -2,6 +2,7 @@ import React from 'react';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/mapbox';
 import "mapbox-gl/dist/mapbox-gl.css";
 import { getDifficultyColor, getDifficultyIcon } from './TrailUtils';
+import { Edit3, X, MapPin } from 'lucide-react';
 import './TrailMap.css';
 
 const TrailMap = ({
@@ -14,13 +15,18 @@ const TrailMap = ({
   selectedTrail,
   setSelectedTrail,
   onTrailClick,
+  onMapClick,
   userLocation,
   mapBearing,
   setMapBearing,
   mapPitch,
   setMapPitch,
   mapCenter,
-  setMapCenter
+  setMapCenter,
+  submissionLocation,
+  showSubmissionPanel,
+  submissionRoute,
+  onCloseSubmission
 }) => {
   const handleMapLoad = () => {
     if (mapRef.current) {
@@ -58,11 +64,32 @@ const TrailMap = ({
 
   return (
     <div className="trails-map-container">
+      {/* Submission Mode Alert Popup */}
+      {showSubmissionPanel && (
+        <div className="submission-mode-popup">
+          <div className="popup-content">
+            <div className="popup-icon">
+              <Edit3 size={16} />
+            </div>
+            <div className="popup-text">
+              <h3>Trail Submission Mode - Click on the map to select a location</h3>
+            </div>
+            <button 
+              onClick={onCloseSubmission}
+              className="popup-close-btn"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <Map
         ref={mapRef}
         {...viewport}
         onMove={evt => setViewport(evt.viewState)}
         onLoad={handleMapLoad}
+        onClick={onMapClick}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/standard"
@@ -78,6 +105,59 @@ const TrailMap = ({
               <div className="user-location-pulse"></div>
             </div>
           </Marker>
+        )}
+
+        {/* Submission location marker */}
+        {submissionLocation && showSubmissionPanel && (
+          <Marker
+            longitude={submissionLocation.longitude}
+            latitude={submissionLocation.latitude}
+            anchor="center"
+          >
+            <div className="submission-location-marker">
+              <div className="submission-marker-icon">
+                <MapPin size={20} />
+              </div>
+            </div>
+          </Marker>
+        )}
+
+        {/* Submission route */}
+        {submissionRoute && submissionRoute.length > 1 && showSubmissionPanel && (
+          <Source
+            id="submission-route"
+            type="geojson"
+            data={{
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: submissionRoute },
+            }}
+          >
+            <Layer
+              id="submission-route-layer"
+              type="line"
+              paint={{ 
+                "line-color": "#5bc0be", 
+                "line-width": 4,
+                "line-opacity": 0.8
+              }}
+            />
+          </Source>
+        )}
+
+        {/* Submission route points */}
+        {submissionRoute && submissionRoute.length > 0 && showSubmissionPanel && (
+          submissionRoute.map((point, index) => (
+            <Marker
+              key={`route-point-${index}`}
+              longitude={point[0]}
+              latitude={point[1]}
+              anchor="center"
+            >
+              <div className="route-point-marker">
+                <span className="route-point-number">{index + 1}</span>
+              </div>
+            </Marker>
+          ))
         )}
 
         {/* Trail markers */}

@@ -31,6 +31,9 @@ export default function TrailsPage() {
   // Trail submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+  const [submissionLocation, setSubmissionLocation] = useState(null);
+  const [submissionRoute, setSubmissionRoute] = useState([]);
+  const [submissionDrawingState, setSubmissionDrawingState] = useState({ isDrawing: false, addRoutePoint: null });
 
   // Trail explorer state
   const [trailsUserLocation, setTrailsUserLocation] = useState(null);
@@ -251,36 +254,68 @@ export default function TrailsPage() {
     }
   };
 
+  // Handle map click for trail submission
+  const handleMapClickForSubmission = (evt) => {
+    if (showSubmissionPanel) {
+      const { lngLat } = evt;
+      
+      // If we're in drawing mode, add to route
+      if (submissionDrawingState.isDrawing && submissionDrawingState.addRoutePoint) {
+        submissionDrawingState.addRoutePoint(lngLat.lng, lngLat.lat);
+      } else {
+        // Otherwise, set location
+        setSubmissionLocation({
+          latitude: lngLat.lat,
+          longitude: lngLat.lng,
+          name: ''
+        });
+      }
+    }
+  };
+
+  // Handle route updates from submission panel
+  const handleRouteUpdate = (routePoints, drawingState) => {
+    setSubmissionRoute(routePoints);
+    if (drawingState) {
+      setSubmissionDrawingState(drawingState);
+    }
+  };
+
   // Handle trail submission
   const handleTrailSubmission = async (trailData) => {
     setIsSubmitting(true);
     setSubmitStatus({ type: '', message: '' });
 
     try {
+      // Get user's ID token for authentication
+      const idToken = await auth.currentUser.getIdToken();
+
       const response = await fetch(`${API_BASE_URL}/submitTrail`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify({
-          ...trailData,
-          createdBy: currentUserId
-        }),
+        body: JSON.stringify(trailData),
       });
+
+      const result = await response.json();
 
       if (response.ok) {
         setSubmitStatus({ 
           type: 'success', 
-          message: 'Trail submitted successfully!' 
+          message: `Trail "${trailData.name}" submitted successfully! Trail ID: ${result.trailId}` 
         });
         setShowSubmissionPanel(false);
+        setSubmissionLocation(null);
+        setSubmissionRoute([]);
+        setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
         // Refresh trails data
         window.location.reload();
       } else {
-        const errorData = await response.json();
         setSubmitStatus({ 
           type: 'error', 
-          message: errorData.error || 'Failed to submit trail' 
+          message: result.error || 'Failed to submit trail' 
         });
       }
     } catch (error) {
@@ -307,6 +342,7 @@ export default function TrailsPage() {
           selectedTrail={selectedTrail}
           setSelectedTrail={setSelectedTrail}
           onTrailClick={handleTrailClick}
+          onMapClick={handleMapClickForSubmission}
           userLocation={trailsUserLocation}
           mapBearing={mapBearing}
           setMapBearing={setMapBearing}
@@ -314,6 +350,15 @@ export default function TrailsPage() {
           setMapPitch={setMapPitch}
           mapCenter={mapCenter}
           setMapCenter={setMapCenter}
+          submissionLocation={submissionLocation}
+          showSubmissionPanel={showSubmissionPanel}
+          submissionRoute={submissionRoute}
+          onCloseSubmission={() => {
+            setShowSubmissionPanel(false);
+            setSubmissionLocation(null);
+            setSubmissionRoute([]);
+            setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+          }}
         />
 
         <MapControls
@@ -360,13 +405,23 @@ export default function TrailsPage() {
       )}
 
       {/* Trail Submission Panel */}
-      <TrailSubmission
-        isOpen={showSubmissionPanel}
-        onClose={() => setShowSubmissionPanel(false)}
-        onSubmit={handleTrailSubmission}
-        isSubmitting={isSubmitting}
-        submitStatus={submitStatus}
-      />
+      {showSubmissionPanel && (
+        <TrailSubmission
+          isOpen={showSubmissionPanel}
+          onClose={() => {
+            setShowSubmissionPanel(false);
+            setSubmissionLocation(null);
+            setSubmissionRoute([]);
+            setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+          }}
+          onSubmit={handleTrailSubmission}
+          isSubmitting={isSubmitting}
+          submitStatus={submitStatus}
+          selectedLocation={submissionLocation}
+          onLocationSelect={setSubmissionLocation}
+          onRouteUpdate={handleRouteUpdate}
+        />
+      )}
 
       {/* Location Error */}
       {trailsLocationError && (

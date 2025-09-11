@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Heart, Bookmark, CheckCircle2, Filter, FilterX, X, ChevronUp, ChevronDown } from 'lucide-react';
-import { getDifficultyColor, getDifficultyIcon } from './TrailUtils';
+import { getDifficultyColor, getDifficultyIcon, calculateDistance } from './TrailUtils';
 import './TrailsPanel.css';
 
 const TrailsPanel = ({
@@ -12,10 +12,16 @@ const TrailsPanel = ({
   setShowSubmissionPanel,
   userSaved,
   handleTrailAction,
-  currentUserId
+  currentUserId,
+  onTrailClick,
+  selectedTrail,
+  setSelectedTrail,
+  userLocation
 }) => {
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('distance');
   const [sortOrder, setSortOrder] = useState('asc');
+  const trailsListRef = useRef(null);
+  const selectedTrailRef = useRef(null);
 
   // Sort trails based on selected criteria
   const sortedTrails = useMemo(() => {
@@ -40,6 +46,26 @@ const TrailsPanel = ({
           aValue = parseFloat(a.distance) || 0;
           bValue = parseFloat(b.distance) || 0;
           break;
+        case 'distanceAway':
+          // Calculate distance from user's location to trail
+          if (userLocation) {
+            aValue = calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              a.latitude,
+              a.longitude
+            );
+            bValue = calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              b.latitude,
+              b.longitude
+            );
+          } else {
+            aValue = 0;
+            bValue = 0;
+          }
+          break;
         case 'difficulty':
           const difficultyOrder = { 'easy': 1, 'moderate': 2, 'hard': 3, 'difficult': 3, 'expert': 4 };
           aValue = difficultyOrder[a.difficulty?.toLowerCase()] || 0;
@@ -60,7 +86,51 @@ const TrailsPanel = ({
         return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
       }
     });
-  }, [filteredTrails, sortBy, sortOrder]);
+  }, [filteredTrails, sortBy, sortOrder, userLocation]);
+
+  // Scroll to selected trail when it changes
+  useEffect(() => {
+    if (selectedTrail && selectedTrailRef.current && trailsListRef.current) {
+      // Small delay to ensure the DOM has updated
+      setTimeout(() => {
+        selectedTrailRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [selectedTrail]);
+
+  // Handle scroll events to unselect trail
+  useEffect(() => {
+    const trailsList = trailsListRef.current;
+    if (!trailsList) return;
+
+    let scrollTimeout;
+    const handleScroll = () => {
+      // Clear any existing timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      // Set a new timeout to unselect after scrolling stops
+      scrollTimeout = setTimeout(() => {
+        if (selectedTrail) {
+          setSelectedTrail(null);
+        }
+      }, 150); // 150ms delay to avoid unselecting during programmatic scroll
+    };
+
+    trailsList.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      trailsList.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [selectedTrail, setSelectedTrail]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -103,6 +173,7 @@ const TrailsPanel = ({
                   onChange={(e) => handleSortChange(e.target.value)}
                   className="sort-select"
                 >
+                  <option value="distanceAway">Near Me</option>
                   <option value="name">Name</option>
                   <option value="distance">Distance</option>
                   <option value="difficulty">Difficulty</option>
@@ -133,7 +204,7 @@ const TrailsPanel = ({
             </div>
           </div>
 
-          <div className="trails-list">
+          <div className="trails-list" ref={trailsListRef}>
             {filteredTrails.length === 0 ? (
               <div className="no-trails">
                 <p>No trails found matching your criteria.</p>
@@ -148,10 +219,26 @@ const TrailsPanel = ({
               </div>
             ) : (
               sortedTrails.map(trail => (
-                  <div key={trail.id} className="trail-item">
+                  <div 
+                    key={trail.id} 
+                    ref={selectedTrail && selectedTrail.id === trail.id ? selectedTrailRef : null}
+                    className={`trail-item ${selectedTrail && selectedTrail.id === trail.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      // If clicking on the same trail that's already selected, unselect it
+                      if (selectedTrail && selectedTrail.id === trail.id) {
+                        setSelectedTrail(null);
+                        // Don't call onTrailClick when unselecting
+                      } else {
+                        // Otherwise, select the trail and zoom to it
+                        setSelectedTrail(trail);
+                        onTrailClick && onTrailClick(trail);
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="trail-item-header">
                       <h3>{trail.name}</h3>
-                      <div className="trail-actions">
+                      <div className="trail-actions" onClick={(e) => e.stopPropagation()}>
                         {currentUserId && (
                           <>
                             <button
@@ -188,7 +275,17 @@ const TrailsPanel = ({
                       </div>
                       <div className="trail-item-distance">
                         {trail.distance} km
-                        {trail.elevationGain && ` • ${trail.elevationGain}m elevation`}
+                        {trail.elevationGain && ` • ${trail.elevationGain}m elevation `}
+                        {userLocation && (
+                          <span className="trail-distance-away">
+                            • {calculateDistance(
+                              userLocation.latitude,
+                              userLocation.longitude,
+                              trail.latitude,
+                              trail.longitude
+                            ).toFixed(1)} km away
+                          </span>
+                        )}
                       </div>
                     </div>
                     {trail.description && (

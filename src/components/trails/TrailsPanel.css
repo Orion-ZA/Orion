@@ -374,6 +374,28 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
+.trail-item:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.trail-item.selected {
+  background: rgba(91, 192, 190, 0.15);
+  border-color: rgba(91, 192, 190, 0.4);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(91, 192, 190, 0.3);
+  transform: translateY(-2px);
+}
+
+.trail-item.selected:hover {
+  background: rgba(91, 192, 190, 0.2);
+  border-color: rgba(91, 192, 190, 0.5);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(91, 192, 190, 0.4);
+}
+
 .trail-item-header {
   display: flex;
   justify-content: space-between;
@@ -460,6 +482,11 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-distance-away {
+  color: rgba(91, 192, 190, 0.9);
+  font-weight: 500;
 }
 
 .trail-description {

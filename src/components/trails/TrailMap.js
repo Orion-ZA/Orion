@@ -9,8 +9,11 @@ const TrailMap = ({
   setViewport,
   mapRef,
   trails,
+  hoveredTrail,
+  setHoveredTrail,
   selectedTrail,
   setSelectedTrail,
+  onTrailClick,
   userLocation,
   mapBearing,
   setMapBearing,
@@ -38,9 +41,20 @@ const TrailMap = ({
           lat: center.lat,
           lng: center.lng
         });
+        
+        // Clear hover card when map is moved by user
+        if (hoveredTrail) {
+          setHoveredTrail(null);
+        }
       });
+
+      // Note: Removed map click handler to prevent interference with hover functionality
     }
   };
+
+  // Debug: Log current state
+  console.log('TrailMap render - hoveredTrail:', hoveredTrail);
+  console.log('TrailMap render - trails count:', trails.length);
 
   return (
     <div className="trails-map-container">
@@ -82,16 +96,39 @@ const TrailMap = ({
               longitude={trail.longitude}
               latitude={trail.latitude}
               anchor="bottom"
-              onClick={() => setSelectedTrail(trail)}
+              onClick={() => {
+                // If clicking on the same trail that's already selected, unselect it
+                if (selectedTrail && selectedTrail.id === trail.id) {
+                  setSelectedTrail(null);
+                  setHoveredTrail(null);
+                } else {
+                  // Otherwise, select the trail and zoom to it
+                  if (onTrailClick) {
+                    onTrailClick(trail);
+                  }
+                }
+              }}
             >
               <div 
-                className="trail-marker"
-                style={{
-                  backgroundColor: getDifficultyColor(trail.difficulty),
-                  borderColor: getDifficultyColor(trail.difficulty)
+                className="trail-marker-wrapper"
+                onMouseEnter={() => {
+                  console.log('Mouse enter on trail:', trail.name);
+                  setHoveredTrail(trail);
+                }}
+                onMouseLeave={() => {
+                  console.log('Mouse leave on trail:', trail.name);
+                  setHoveredTrail(null);
                 }}
               >
-                {getDifficultyIcon(trail.difficulty)}
+                <div 
+                  className="trail-marker"
+                  style={{
+                    backgroundColor: getDifficultyColor(trail.difficulty),
+                    borderColor: getDifficultyColor(trail.difficulty)
+                  }}
+                >
+                  {getDifficultyIcon(trail.difficulty)}
+                </div>
               </div>
             </Marker>
           ))}
@@ -128,32 +165,38 @@ const TrailMap = ({
             </Source>
           ))}
 
-        {/* Trail popup */}
-        {selectedTrail && (
-          <Popup
-            longitude={selectedTrail.longitude}
-            latitude={selectedTrail.latitude}
-            anchor="bottom"
-            onClose={() => setSelectedTrail(null)}
-            closeButton={true}
-            closeOnClick={false}
-          >
-            <div className="trail-popup">
-              <h3>{selectedTrail.name}</h3>
-              <p><strong>Difficulty:</strong> {selectedTrail.difficulty}</p>
-              <p><strong>Distance:</strong> {selectedTrail.distance} km</p>
-              {selectedTrail.elevationGain && (
-                <p><strong>Elevation Gain:</strong> {selectedTrail.elevationGain} m</p>
-              )}
-              {selectedTrail.description && (
-                <p><strong>Description:</strong> {selectedTrail.description}</p>
-              )}
-            </div>
-          </Popup>
-        )}
+        {/* Trail hover card */}
+        {hoveredTrail && (() => {
+          console.log('Rendering hover card for:', hoveredTrail.name);
+          return (
+            <Marker
+              longitude={hoveredTrail.longitude}
+              latitude={hoveredTrail.latitude}
+              anchor="bottom"
+              offset={[0, -50]}
+            >
+              <div className="trail-mini-card" onClick={(e) => e.stopPropagation()}>
+                <div className="trail-mini-header">
+                  <h4>{hoveredTrail.name}</h4>
+                  <div className="trail-mini-difficulty" style={{ backgroundColor: getDifficultyColor(hoveredTrail.difficulty) }}>
+                    {getDifficultyIcon(hoveredTrail.difficulty)}
+                  </div>
+                </div>
+                <div className="trail-mini-details">
+                  <span className="trail-mini-distance">{hoveredTrail.distance} km</span>
+                  {hoveredTrail.elevationGain && (
+                    <span className="trail-mini-elevation">• {hoveredTrail.elevationGain}m</span>
+                  )}
+                </div>
+              </div>
+            </Marker>
+          );
+        })()}
       </Map>
     </div>
   );
 };
 
 export default TrailMap;
+
+

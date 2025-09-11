@@ -18,6 +18,7 @@ export default function TrailsPage() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showSubmissionPanel, setShowSubmissionPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [hoveredTrail, setHoveredTrail] = useState(null);
   const [selectedTrail, setSelectedTrail] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [userSaved, setUserSaved] = useState({ favourites: [], wishlist: [], completed: [] });
@@ -165,13 +166,33 @@ export default function TrailsPage() {
   };
 
   const handleRecenter = () => {
-    if (trailsUserLocation) {
-      setViewport(prev => ({
-        ...prev,
-        longitude: trailsUserLocation.longitude,
-        latitude: trailsUserLocation.latitude,
-        zoom: 12
-      }));
+    if (trailsUserLocation && mapRef.current) {
+      const map = mapRef.current.getMap();
+      
+      // Use smooth transition with easeTo
+      map.easeTo({
+        center: [trailsUserLocation.longitude, trailsUserLocation.latitude],
+        zoom: 12,
+        duration: 1500, // 1.5 second smooth transition
+        essential: true // This animation is considered essential with respect to prefers-reduced-motion
+      });
+    }
+  };
+
+  // Handle trail click to center and zoom map
+  const handleTrailClick = (trail) => {
+    if (trail.longitude && trail.latitude && mapRef.current) {
+      const map = mapRef.current.getMap();
+      
+      // Use smooth transition with easeTo
+      map.easeTo({
+        center: [trail.longitude, trail.latitude],
+        zoom: 15, // Zoom in closer for individual trail view
+        duration: 1500, // 1.5 second smooth transition
+        essential: true // This animation is considered essential with respect to prefers-reduced-motion
+      });
+      
+      setSelectedTrail(trail); // Set as selected trail for panel highlighting
     }
   };
 
@@ -281,8 +302,11 @@ export default function TrailsPage() {
           setViewport={setViewport}
           mapRef={mapRef}
           trails={filteredTrails}
+          hoveredTrail={hoveredTrail}
+          setHoveredTrail={setHoveredTrail}
           selectedTrail={selectedTrail}
           setSelectedTrail={setSelectedTrail}
+          onTrailClick={handleTrailClick}
           userLocation={trailsUserLocation}
           mapBearing={mapBearing}
           setMapBearing={setMapBearing}
@@ -317,6 +341,10 @@ export default function TrailsPage() {
           userSaved={userSaved}
           handleTrailAction={handleTrailAction}
           currentUserId={currentUserId}
+          onTrailClick={handleTrailClick}
+          selectedTrail={selectedTrail}
+          setSelectedTrail={setSelectedTrail}
+          userLocation={trailsUserLocation}
         />
       </div>
 

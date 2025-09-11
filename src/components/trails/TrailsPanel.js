@@ -18,7 +18,7 @@ const TrailsPanel = ({
   setSelectedTrail,
   userLocation
 }) => {
-  const [sortBy, setSortBy] = useState('distance');
+  const [sortBy, setSortBy] = useState('distanceAway');
   const [sortOrder, setSortOrder] = useState('asc');
   const trailsListRef = useRef(null);
   const selectedTrailRef = useRef(null);

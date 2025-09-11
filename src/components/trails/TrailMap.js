@@ -58,9 +58,6 @@ const TrailMap = ({
     }
   };
 
-  // Debug: Log current state
-  console.log('TrailMap render - hoveredTrail:', hoveredTrail);
-  console.log('TrailMap render - trails count:', trails.length);
 
   return (
     <div className="trails-map-container">

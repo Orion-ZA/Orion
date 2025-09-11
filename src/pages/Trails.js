@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
@@ -274,12 +274,12 @@ export default function TrailsPage() {
   };
 
   // Handle route updates from submission panel
-  const handleRouteUpdate = (routePoints, drawingState) => {
+  const handleRouteUpdate = useCallback((routePoints, drawingState) => {
     setSubmissionRoute(routePoints);
     if (drawingState) {
       setSubmissionDrawingState(drawingState);
     }
-  };
+  }, []);
 
   // Handle trail submission
   const handleTrailSubmission = async (trailData) => {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Plus, CheckCircle, AlertCircle, Loader2, MapPin, Map, Edit3, Trash2, Play, Square, Ruler } from 'lucide-react';
+import { X, Upload, Plus, CheckCircle, AlertCircle, Loader2, MapPin, Map, Edit3, Trash2, Play, Square, Ruler, Image as ImageIcon } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
+import { calculateRouteDistance, formatFileSize } from './TrailUtils';
 import './TrailSubmission.css';
 
 const TrailSubmission = ({
@@ -51,16 +52,9 @@ const TrailSubmission = ({
   // Update route in parent component
   useEffect(() => {
     if (onRouteUpdate) {
-      onRouteUpdate(routePoints);
-    }
-  }, [routePoints, onRouteUpdate]);
-
-  // Expose addRoutePoint function to parent
-  useEffect(() => {
-    if (onRouteUpdate) {
       onRouteUpdate(routePoints, { addRoutePoint, isDrawing });
     }
-  }, [routePoints, onRouteUpdate, isDrawing]);
+  }, [routePoints, isDrawing]); // Removed onRouteUpdate from dependencies to prevent infinite loop
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +67,7 @@ const TrailSubmission = ({
       // Upload images to Firebase Storage
       const uploadedImages = [];
       for (const image of images) {
-        const imageRef = ref(storage, `trail-images/${uuidv4()}`);
+        const imageRef = ref(storage, `trails/${uuidv4()}-${image.name}`);
         await uploadBytes(imageRef, image);
         const downloadURL = await getDownloadURL(imageRef);
         uploadedImages.push(downloadURL);
@@ -91,8 +85,8 @@ const TrailSubmission = ({
           lat: selectedLocation.latitude,
           lng: selectedLocation.longitude
         },
-        placeName: placeInput || selectedLocation.name || 'Selected Location',
-        gpsRoute: routePoints.map(([lng, lat]) => ({ lat, lng }))
+        gpsRoute: routePoints.map(([lng, lat]) => ({ lat, lng })),
+        status: 'open' // Default status for new trails
       };
 
       await onSubmit(trailData);
@@ -118,8 +112,14 @@ const TrailSubmission = ({
   };
 
   const removeImage = (index) => {
+    // Clean up object URL to prevent memory leaks
+    const imageToRemove = images[index];
+    if (imageToRemove) {
+      URL.revokeObjectURL(URL.createObjectURL(imageToRemove));
+    }
     setImages(images.filter((_, i) => i !== index));
   };
+
 
   // Drawing control functions
   const startDrawing = () => {
@@ -145,35 +145,23 @@ const TrailSubmission = ({
     }
   };
 
-  const calculateRouteDistance = () => {
-    if (routePoints.length < 2) return 0;
-    
-    let totalDistance = 0;
-    for (let i = 1; i < routePoints.length; i++) {
-      const [lng1, lat1] = routePoints[i - 1];
-      const [lng2, lat2] = routePoints[i];
-      
-      const R = 6371; // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      totalDistance += R * c;
-    }
-    
-    return totalDistance;
-  };
 
   // Auto-fill distance when route points change
   useEffect(() => {
     if (routePoints.length >= 2) {
-      const calculatedDistance = calculateRouteDistance();
+      const calculatedDistance = calculateRouteDistance(routePoints);
       setDistance(calculatedDistance.toFixed(2));
     }
   }, [routePoints]);
+
+  // Cleanup object URLs when component unmounts or images change
+  useEffect(() => {
+    return () => {
+      images.forEach(image => {
+        URL.revokeObjectURL(URL.createObjectURL(image));
+      });
+    };
+  }, [images]);
 
   if (!isOpen) return null;
 
@@ -210,7 +198,7 @@ const TrailSubmission = ({
               <span className="route-points">{routePoints.length} points</span>
             )}
             {routePoints.length > 1 && (
-              <span className="route-distance">{calculateRouteDistance().toFixed(2)} km</span>
+              <span className="route-distance">{calculateRouteDistance(routePoints).toFixed(2)} km</span>
             )}
           </div>
         </div>
@@ -300,10 +288,9 @@ const TrailSubmission = ({
                 required
               >
                 <option value="">Select difficulty</option>
-                <option value="easy">Easy</option>
-                <option value="moderate">Moderate</option>
-                <option value="hard">Hard</option>
-                <option value="expert">Expert</option>
+                <option value="Easy">Easy</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Hard">Hard</option>
               </select>
             </div>
 
@@ -377,17 +364,54 @@ const TrailSubmission = ({
 
           <div className="form-group">
             <label htmlFor="images">Photos</label>
-            <input
-              type="file"
-              id="images"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="file-input"
-            />
-            <div className="file-count">
-              {images.length} file{images.length !== 1 ? 's' : ''} selected
+            <div className="image-upload-container">
+              <input
+                type="file"
+                id="images"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="file-input"
+              />
+              <label htmlFor="images" className="file-input-label">
+                <Upload size={20} />
+                <span>Choose Photos</span>
+              </label>
+              <div className="file-count">
+                {images.length} file{images.length !== 1 ? 's' : ''} selected
+              </div>
             </div>
+            
+            {/* Image Previews */}
+            {images.length > 0 && (
+              <div className="image-previews">
+                {images.map((image, index) => (
+                  <div key={index} className="image-preview-item">
+                    <div className="image-preview">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`Preview ${index + 1}`}
+                        className="preview-image"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="remove-image-btn"
+                        title="Remove image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="image-info">
+                      <span className="image-name">{image.name}</span>
+                      <span className="image-size">
+                        {formatFileSize(image.size)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {submitStatus.type && (

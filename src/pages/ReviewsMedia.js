@@ -414,7 +414,7 @@ export default function ReviewsMedia() {
               {reviews[trail.id] && reviews[trail.id].length > 0 ? (
                 <ul style={{ color: "var(--muted)", paddingLeft: "1rem" }}>
                   {reviews[trail.id].map((rev) => (
-                    <li key={rev.id}>{rev.message}</li>
+                    <li key={rev.id}>{rev.comment || rev.message}</li>
                   ))}
                 </ul>
               ) : (

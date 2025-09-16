@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Heart, Bookmark, CheckCircle2, Filter, FilterX, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import { Heart, Bookmark, CheckCircle2, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3 } from 'lucide-react';
+import { useToast } from '../ToastContext';
 import { getDifficultyColor, getDifficultyIcon, calculateDistance } from './TrailUtils';
 import './TrailsPanel.css';
 
@@ -22,6 +25,8 @@ const TrailsPanel = ({
   const [sortOrder, setSortOrder] = useState('asc');
   const trailsListRef = useRef(null);
   const selectedTrailRef = useRef(null);
+  const [authorNames, setAuthorNames] = useState({});
+  const { show: showToast } = useToast();
 
   // Sort trails based on selected criteria
   const sortedTrails = useMemo(() => {
@@ -141,6 +146,48 @@ const TrailsPanel = ({
     }
   };
 
+  // Resolve and cache author display names for visible trails
+  useEffect(() => {
+    const fetchMissingAuthors = async () => {
+      try {
+        const idsToFetch = new Set();
+        for (const trail of filteredTrails) {
+          const createdByRaw = trail.createdBy;
+          if (!createdByRaw) continue;
+          const uid = typeof createdByRaw === 'string'
+            ? (createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw)
+            : createdByRaw;
+          if (!uid || uid === 'sample' || uid === 'unknown') continue;
+          if (!authorNames[uid]) idsToFetch.add(uid);
+        }
+
+        if (idsToFetch.size === 0) return;
+
+        const entries = await Promise.all(Array.from(idsToFetch).map(async (uid) => {
+          try {
+            const snap = await getDoc(doc(db, 'Users', uid));
+            if (snap.exists()) {
+              const data = snap.data();
+              const name = data?.profileInfo?.name || data?.name || 'Unknown';
+              return [uid, name];
+            }
+            return [uid, 'Unknown'];
+          } catch (e) {
+            return [uid, 'Unknown'];
+          }
+        }));
+
+        if (entries.length > 0) {
+          setAuthorNames(prev => ({ ...prev, ...Object.fromEntries(entries) }));
+        }
+      } catch (e) {
+        // swallow errors; UI will just show Unknown
+      }
+    };
+
+    fetchMissingAuthors();
+  }, [filteredTrails, authorNames]);
+
   return (
     <div className={`trails-panel-toggle ${isPanelOpen ? 'open' : ''}`}>
       <button
@@ -194,13 +241,15 @@ const TrailsPanel = ({
               >
                 {showFilters ? <FilterX size={16} /> : <Filter size={16} />}
               </button>
-              <button
-                onClick={() => setShowSubmissionPanel(true)}
-                className="action-button primary"
-                title="Submit New Trail"
-              >
-                Submit Trail
-              </button>
+              {currentUserId && (
+                <button
+                  onClick={() => setShowSubmissionPanel(true)}
+                  className="action-button primary"
+                  title="Submit New Trail"
+                >
+                  Submit Trail
+                </button>
+              )}
             </div>
           </div>
 
@@ -237,7 +286,20 @@ const TrailsPanel = ({
                     style={{ cursor: 'pointer' }}
                   >
                     <div className="trail-item-header">
-                      <h3>{trail.name}</h3>
+                      <div className="trail-title-section">
+                        <h3>{trail.name}</h3>
+                        <div className="trail-author" title="Trail submitted by">
+                          {(() => {
+                            const createdByRaw = trail.createdBy;
+                            if (!createdByRaw) return null;
+                            const uid = typeof createdByRaw === 'string'
+                              ? (createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw)
+                              : createdByRaw;
+                            const display = uid === 'sample' ? 'Sample User' : (uid === 'unknown' ? 'Unknown' : (authorNames[uid] || '...'));
+                            return <span>by {display}</span>;
+                          })()}
+                        </div>
+                      </div>
                       <div className="trail-actions" onClick={(e) => e.stopPropagation()}>
                         {currentUserId && (
                           <>
@@ -300,6 +362,24 @@ const TrailsPanel = ({
                         ))}
                       </div>
                     )}
+                    {(() => {
+                      const createdByRaw = trail.createdBy;
+                      if (!createdByRaw || !currentUserId) return null;
+                      const uid = typeof createdByRaw === 'string'
+                        ? (createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw)
+                        : createdByRaw;
+                      if (uid !== currentUserId) return null;
+                      return (
+                        <button
+                          className="edit-trail-btn"
+                          title={`Edit ${trail.name}`}
+                          aria-label={`Edit ${trail.name}`}
+                          onClick={(e) => { e.stopPropagation(); showToast(`Edit requested: ${trail.name}`, { type: 'info', timeout: 2200 }); }}
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                      );
+                    })()}
                   </div>
                 ))
             )}

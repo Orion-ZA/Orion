@@ -445,6 +445,11 @@
   margin-bottom: 0.5rem;
 }
 
+.trail-title-section {
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
 .trail-item-header h3 {
   margin: 0;
   color: white;
@@ -453,6 +458,12 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   flex: 1;
   margin-right: 0.5rem;
+}
+
+.trail-author {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.25rem;
 }
 
 .trail-actions {
@@ -553,6 +564,38 @@
   border-radius: 4px;
   font-size: 0.7rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Edit button for user's own trails */
+.edit-trail-btn {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  background: rgba(25, 118, 210, 0.95);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.35rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.edit-trail-btn:hover {
+  background: rgba(25, 118, 210, 1);
+  transform: translateY(-1px);
+}
+
+.edit-trail-btn:active {
+  transform: translateY(0);
+}
+
+.trail-item:hover .edit-trail-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* No Trails */

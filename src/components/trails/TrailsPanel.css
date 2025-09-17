@@ -110,7 +110,8 @@
   position: relative;
   color: white;
   background: transparent;
-  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .trails-panel-content::before {
@@ -342,27 +343,29 @@
 }
 
 /* Trail List */
-.trails-list {
+.trails-panel-content .trails-list {
   flex: 1;
   overflow-y: auto;
   padding: 0.75rem;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Custom Scrollbar for Trail List */
-.trails-list::-webkit-scrollbar {
+.trails-panel-content .trails-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.trails-list::-webkit-scrollbar-track {
+.trails-panel-content .trails-list::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   margin: 4px 0;
 }
 
-.trails-list::-webkit-scrollbar-thumb {
+.trails-panel-content .trails-list::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.3) 0%, 
     rgba(255, 255, 255, 0.2) 50%, 
@@ -374,7 +377,7 @@
   transition: all 0.3s ease;
 }
 
-.trails-list::-webkit-scrollbar-thumb:hover {
+.trails-panel-content .trails-list::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.4) 0%, 
     rgba(255, 255, 255, 0.3) 50%, 
@@ -383,7 +386,7 @@
   transform: scale(1.1);
 }
 
-.trails-list::-webkit-scrollbar-thumb:active {
+.trails-panel-content .trails-list::-webkit-scrollbar-thumb:active {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.5) 0%, 
     rgba(255, 255, 255, 0.4) 50%, 
@@ -391,7 +394,7 @@
 }
 
 /* Firefox scrollbar */
-.trails-list {
+.trails-panel-content .trails-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
 }
@@ -410,7 +413,10 @@
   display: flex;
   flex-direction: column;
   min-height: 280px;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .trail-item:hover {

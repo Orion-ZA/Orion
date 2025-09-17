@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+// Use standard react-map-gl entry ("/mapbox" path can cause instability with version mismatch)
+// Import from explicit subpath; root export "." not provided in v8 exports
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/mapbox';
 import "mapbox-gl/dist/mapbox-gl.css";
 import mbxClient from "@mapbox/mapbox-sdk/services/geocoding";
@@ -6,7 +8,21 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, auth } from "../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 
-const geocodingClient = mbxClient({ accessToken: process.env.REACT_APP_MAPBOX_TOKEN });
+// Mapbox Geocoding client
+// Will be null if the env var isn't set so we can degrade gracefully instead of throwing
+const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
+let geocodingClient = null;
+try {
+  if (MAPBOX_TOKEN) {
+    geocodingClient = mbxClient({ accessToken: MAPBOX_TOKEN });
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn("REACT_APP_MAPBOX_TOKEN is not defined. Mapbox geocoding disabled.");
+  }
+} catch (e) {
+  // eslint-disable-next-line no-console
+  console.error("Failed to initialise Mapbox geocoding client:", e);
+}
 
 // API Configuration
 // Note: Firebase Functions URLs are public by design and safe to expose in frontend code.
@@ -86,12 +102,17 @@ export default function TrailSubmission() {
   };
 
   const handleRecenter = () => {
-    if (userLocation) {
-      mapRef.current.flyTo({
-        center: [userLocation.longitude, userLocation.latitude],
-        zoom: 13,
-        speed: 1.5
-      });
+    if (userLocation && mapRef.current) {
+      try {
+        mapRef.current.flyTo?.({
+          center: [userLocation.longitude, userLocation.latitude],
+          zoom: 13,
+          speed: 1.5
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('flyTo failed', e);
+      }
     }
   };
 
@@ -100,6 +121,10 @@ export default function TrailSubmission() {
 
   const handlePlaceInputBlur = async () => {
     if (!placeInput) return;
+    if (!geocodingClient) {
+      setSubmitStatus({ type: 'error', message: 'Geocoding unavailable: missing Mapbox token.' });
+      return;
+    }
     try {
       const response = await geocodingClient
         .forwardGeocode({ query: placeInput, limit: 1 })
@@ -109,17 +134,22 @@ export default function TrailSubmission() {
         const [lng, lat] = match.center;
         setSelectedLocation({ latitude: lat, longitude: lng, name: match.place_name });
         setViewport((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+      } else {
+        setSubmitStatus({ type: 'error', message: 'No location match found.' });
       }
     } catch (err) {
       console.error("Geocoding error:", err);
+      setSubmitStatus({ type: 'error', message: 'Geocoding failed. See console for details.' });
     }
   };
 
   const handleMapClick = (evt) => {
+    if (!evt?.lngLat) return;
     const { lngLat } = evt;
+    if (typeof lngLat.lng !== 'number' || typeof lngLat.lat !== 'number') return;
     setSelectedLocation({ latitude: lngLat.lat, longitude: lngLat.lng, name: "" });
     setPlaceInput("");
-    setRoutePoints([...routePoints, [lngLat.lng, lngLat.lat]]);
+    setRoutePoints(prev => [...prev, [lngLat.lng, lngLat.lat]]);
   };
 
   const handleFileChange = (e) => setSelectedFiles(Array.from(e.target.files));
@@ -321,64 +351,69 @@ export default function TrailSubmission() {
 
         <div className="grid cols-2" style={{ marginTop: ".5rem" }}>
           {/* Map */}
-          <div style={{borderRadius: '8px', overflow: 'hidden', height: '600px', border: '1px solid #ccc', position: 'relative'}}>
-            <Map
-              ref={mapRef}
-              {...viewport}
-              mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-              mapStyle="mapbox://styles/mapbox/standard"
-              onMove={(evt) => setViewport(evt.viewState)}
-              onClick={handleMapClick}
-              style={{width: '100%', height: '100%'}}
-            >
-              {userLocation && (
-                <Marker longitude={userLocation.longitude} latitude={userLocation.latitude} anchor="center">
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#4285F4', border: '3px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
-                </Marker>
-              )}
+          <div style={{borderRadius: '8px', overflow: 'hidden', minHeight: '400px', height: '600px', border: '1px solid #ccc', position: 'relative'}}>
+            {!MAPBOX_TOKEN ? (
+              <div style={{padding: '2rem', textAlign: 'center'}}>
+                <p style={{margin: 0}}>Map disabled (missing Mapbox token).</p>
+              </div>
+            ) : (
+              <Map
+                ref={mapRef}
+                {...viewport}
+                mapboxAccessToken={MAPBOX_TOKEN}
+                mapStyle="mapbox://styles/mapbox/standard"
+                onMove={(evt) => evt?.viewState && setViewport(evt.viewState)}
+                onClick={handleMapClick}
+                onError={(e) => { /* eslint-disable-next-line no-console */ console.error('Map error', e?.error); }}
+                style={{width: '100%', height: '100%'}}
+              >
+                {userLocation && (
+                  <Marker longitude={userLocation.longitude} latitude={userLocation.latitude} anchor="center">
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#4285F4', border: '3px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
+                  </Marker>
+                )}
 
-              {selectedLocation && (
-                <Marker
-                  latitude={selectedLocation.latitude}
-                  longitude={selectedLocation.longitude}
-                  color="red"
-                  draggable
-                  onDragEnd={(evt) =>
-                    setSelectedLocation({ latitude: evt.lngLat.lat, longitude: evt.lngLat.lng, name: "" })
-                  }
-                />
-              )}
-
-              {selectedLocation && (
-                <Popup
-                  latitude={selectedLocation.latitude}
-                  longitude={selectedLocation.longitude}
-                  onClose={() => setSelectedLocation(null)}
-                  closeOnClick={true}
-                  anchor="top"
-                >
-                  <div>{selectedLocation.name || "Selected Location"}</div>
-                </Popup>
-              )}
-
-              {routePoints.length > 1 && (
-                <Source
-                  id="route"
-                  type="geojson"
-                  data={{
-                    type: "Feature",
-                    geometry: { type: "LineString", coordinates: routePoints },
-                  }}
-                >
-                  <Layer
-                    id="route-layer"
-                    type="line"
-                    paint={{ "line-color": "#ff0000", "line-width": 4 }}
+                {selectedLocation && (
+                  <Marker
+                    latitude={selectedLocation.latitude}
+                    longitude={selectedLocation.longitude}
+                    color="red"
+                    draggable
+                    onDragEnd={(evt) => evt?.lngLat && setSelectedLocation({ latitude: evt.lngLat.lat, longitude: evt.lngLat.lng, name: "" })}
                   />
-                </Source>
-              )}
-            </Map>
-            {userLocation && (
+                )}
+
+                {selectedLocation && (
+                  <Popup
+                    latitude={selectedLocation.latitude}
+                    longitude={selectedLocation.longitude}
+                    onClose={() => setSelectedLocation(null)}
+                    closeOnClick={true}
+                    anchor="top"
+                  >
+                    <div>{selectedLocation.name || "Selected Location"}</div>
+                  </Popup>
+                )}
+
+                {routePoints.length > 1 && (
+                  <Source
+                    id="route"
+                    type="geojson"
+                    data={{
+                      type: "Feature",
+                      geometry: { type: "LineString", coordinates: routePoints.filter(pt => Array.isArray(pt) && pt.length === 2) },
+                    }}
+                  >
+                    <Layer
+                      id="route-layer"
+                      type="line"
+                      paint={{ "line-color": "#ff0000", "line-width": 4 }}
+                    />
+                  </Source>
+                )}
+              </Map>
+            )}
+            {userLocation && MAPBOX_TOKEN && (
               <button
                 onClick={handleRecenter}
                 style={{
@@ -402,6 +437,11 @@ export default function TrailSubmission() {
 
           {/* Form */}
           <div>
+            {!MAPBOX_TOKEN && (
+              <div className="card error" style={{ marginBottom: '1rem' }}>
+                ⚠️ Map functionality limited: set REACT_APP_MAPBOX_TOKEN in a .env.local file to enable full geocoding & styled maps.
+              </div>
+            )}
             <label>Name *</label>
             <input
               className="input"

@@ -405,10 +405,10 @@ export default function ReviewsMedia() {
             )}
 
             <div style={{ marginTop: "0.5rem" }}>
-              {reviews[trail.id]?.length > 0 ? (
-                <ul style={{ color: "#ccc", fontSize: "0.9rem" }}>
-                  {reviews[trail.id].slice(0, 3).map((rev) => (
-                    <li key={rev.id}>{rev.message}</li>
+              {reviews[trail.id] && reviews[trail.id].length > 0 ? (
+                <ul style={{ color: "var(--muted)", paddingLeft: "1rem" }}>
+                  {reviews[trail.id].map((rev) => (
+                    <li key={rev.id}>{rev.comment || rev.message}</li>
                   ))}
                   {reviews[trail.id].length > 3 && (
                     <li>...and {reviews[trail.id].length - 3} more</li>

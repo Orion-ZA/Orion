@@ -437,6 +437,7 @@ export default function TrailsPage() {
             setSubmissionRoute([]);
             setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
           }}
+          isLoading={isLoadingTrails || trailsIsLoadingLocation}
         />
 
         <MapControls
@@ -535,13 +536,7 @@ export default function TrailsPage() {
         </div>
       )}
 
-      {/* Loading State */}
-      {isLoadingTrails && (
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-          <p>Loading trails...</p>
-        </div>
-      )}
+      {/* Map-scoped loader handled inside TrailMap via isLoading prop */}
     </div>
   );
 }

@@ -26,7 +26,8 @@ const TrailMap = ({
   submissionLocation,
   showSubmissionPanel,
   submissionRoute,
-  onCloseSubmission
+  onCloseSubmission,
+  isLoading
 }) => {
   const handleMapLoad = () => {
     if (mapRef.current) {
@@ -61,6 +62,16 @@ const TrailMap = ({
 
   return (
     <div className="trails-map-container">
+      {/* Map-scoped Loading Overlay */}
+      {/** Render a compact loader centered over the map without blocking the entire page */}
+      {isLoading && (
+        <div className="map-loader-overlay">
+          <div className="map-loader-stack">
+            <div className="map-spinner"></div>
+            <div className="map-loader-title">Loading trails…</div>
+          </div>
+        </div>
+      )}
       {/* Submission Mode Alert Popup */}
       {showSubmissionPanel && (
         <div className="submission-mode-popup">

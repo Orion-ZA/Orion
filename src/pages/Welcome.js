@@ -96,7 +96,7 @@ export default function Welcome() {
           </div>
 
           <div className={styles['welcome-explore']}>
-            <Link to="/explorer">Explore nearby trails</Link>
+            <Link to="/trails">Explore nearby trails</Link>
           </div>
         </div>
       </section>

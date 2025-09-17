@@ -20,6 +20,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const isLanding = location.pathname === '/';
+  const isTrails = location.pathname === '/trails';
   const { show } = useToast();
   
   // Login via route; Google sign-in available on Login page
@@ -68,7 +69,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`navbar ${isLanding ? 'landing' : ''}`}>
+  <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
       <div className="nav-inner">
         <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
           <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
@@ -76,7 +77,7 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <nav className="nav-links desktop-nav">
-          <NavLink to="/explorer">Trail Explorer</NavLink>
+          <NavLink to="/trails">Trails</NavLink>
           <button
             type="button"
             className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
@@ -190,8 +191,7 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
           <div className="mobile-nav-links">
-            <NavLink to="/explorer" onClick={() => setOpen(false)}>Trail Explorer</NavLink>
-            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); setOpen(false);} }}>Trail Submission</button>
+            <NavLink to="/trails" onClick={() => setOpen(false)}>Trails</NavLink>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false);} }}>Reviews & Media</button>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false);} }}>MyTrails</button>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false);} }}>Alerts & Updates</button>

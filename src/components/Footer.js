@@ -31,8 +31,7 @@ export default function Footer() {
 
         <div className="links-col">
           <p className="col-title">Explore</p>
-          <Link to="/explorer">Trail Explorer</Link>
-          <Link to="/submit">Submit a Trail</Link>
+          <Link to="/trails">Trails</Link>
           <Link to="/reviews">Reviews & Media</Link>
           <Link to="/alerts">Alerts & Updates</Link>
         </div>

@@ -15,8 +15,7 @@ import Dashboard from './pages/Dashboard';
 import CreateProfile from './pages/CreateProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import TrailExplorer from './pages/TrailExplorer';
-import TrailSubmission from './pages/TrailSubmission';
+import Trails from './pages/Trails';
 import ReviewsMedia from './pages/ReviewsMedia';
 import MyTrails from './pages/MyTrails';
 import AlertsUpdates from './pages/AlertsUpdates';
@@ -29,8 +28,10 @@ import HelpCenter from './pages/HelpCenter';
 function AppContent() {
   const location = useLocation();
   const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+  const hideFooter = ['/login', '/signup', '/trails'].includes(location.pathname);
   const firstRenderRef = useRef(true);
   const isLanding = location.pathname === '/';
+  const isTrails = location.pathname === '/trails';
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
@@ -68,7 +69,7 @@ function AppContent() {
     <div className="app-shell">
       {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-  <main className="page-fade" key={location.pathname} style={isLanding ? { paddingTop: 0 } : undefined}>
+  <main className="page-fade" key={location.pathname} style={isLanding || isTrails ? { paddingTop: 0 } : undefined}>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
@@ -82,8 +83,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/explorer" element={<TrailExplorer />} />
-          <Route path="/submit" element={<TrailSubmission />} />
+          <Route path="/trails" element={<Trails />} />
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
@@ -94,7 +94,7 @@ function AppContent() {
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </main>
-      {!hideNavFooter && <Footer />}
+      {!hideFooter && <Footer />}
     </div>
   );
 }

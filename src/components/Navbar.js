@@ -80,11 +80,6 @@ export default function Navbar() {
           <NavLink to="/trails">Trails</NavLink>
           <button
             type="button"
-            className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); } }}
-          >Trail Submission</button>
-          <button
-            type="button"
             className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
             onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); } }}
           >Reviews & Media</button>

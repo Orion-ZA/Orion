@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { calculateRouteDistance, formatFileSize } from './TrailUtils';
 import './TrailSubmission.css';
 
-const TrailSubmission = ({
+const TrailEdit = ({
   isOpen,
   onClose,
   onSubmit,
@@ -14,9 +14,9 @@ const TrailSubmission = ({
   submitStatus,
   selectedLocation,
   onLocationSelect,
-  onRouteUpdate
+  onRouteUpdate,
+  editTrailData
 }) => {
-  const [placeInput, setPlaceInput] = useState('');
   const [trailName, setTrailName] = useState('');
   const [description, setDescription] = useState('');
   const [difficulty, setDifficulty] = useState('');
@@ -25,6 +25,7 @@ const TrailSubmission = ({
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   
   // Trail drawing state
   const [isDrawing, setIsDrawing] = useState(false);
@@ -34,10 +35,37 @@ const TrailSubmission = ({
   const [routeHistory, setRouteHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
+  // Initialize form with existing trail data
+  useEffect(() => {
+    if (isOpen && editTrailData) {
+      // Pre-fill form with existing trail data
+      setTrailName(editTrailData.name || '');
+      setDescription(editTrailData.description || '');
+      setDifficulty(editTrailData.difficulty || '');
+      setDistance(editTrailData.distance?.toString() || '');
+      setElevationGain(editTrailData.elevationGain?.toString() || '');
+      setTags(editTrailData.tags || []);
+      setImages([]); // New images to be uploaded
+      setExistingImages(editTrailData.photos || []); // Existing images from the trail
+      
+      // Set up route points
+      const initialRoute = editTrailData.gpsRoute?.map(point => [point.lng, point.lat]) || [];
+      setRoutePoints(initialRoute);
+      
+      // Set up history for existing route
+      if (editTrailData.gpsRoute && editTrailData.gpsRoute.length > 0) {
+        setRouteHistory([initialRoute]);
+        setHistoryIndex(0);
+      } else {
+        setRouteHistory([]);
+        setHistoryIndex(-1);
+      }
+    }
+  }, [isOpen, editTrailData]);
+
   // Reset form when panel closes
   useEffect(() => {
     if (!isOpen) {
-      setPlaceInput('');
       setTrailName('');
       setDescription('');
       setDifficulty('');
@@ -46,6 +74,7 @@ const TrailSubmission = ({
       setTags([]);
       setTagInput('');
       setImages([]);
+      setExistingImages([]);
       setIsDrawing(false);
       setRoutePoints([]);
       setRouteHistory([]);
@@ -68,7 +97,7 @@ const TrailSubmission = ({
     }
 
     try {
-      // Upload images to Firebase Storage
+      // Upload new images to Firebase Storage
       const uploadedImages = [];
       for (const image of images) {
         const imageRef = ref(storage, `trails/${uuidv4()}-${image.name}`);
@@ -77,25 +106,32 @@ const TrailSubmission = ({
         uploadedImages.push(downloadURL);
       }
 
+      // Prepare update data - only include fields that have changed
       const trailData = {
+        id: editTrailData.id,
         name: trailName,
-        description: description || '',
+        description: description,
         difficulty,
         distance: parseFloat(distance),
         elevationGain: elevationGain ? parseFloat(elevationGain) : 0,
         tags,
-        photos: uploadedImages,
         location: {
           lat: selectedLocation.latitude,
           lng: selectedLocation.longitude
         },
         gpsRoute: routePoints.length > 0 ? routePoints.map(([lng, lat]) => ({ lat, lng })) : [],
-        status: 'open'
+        status: editTrailData.status // Preserve existing status
       };
+
+      // Combine existing images with new uploaded images
+      const allPhotos = [...existingImages, ...uploadedImages];
+      if (allPhotos.length > 0) {
+        trailData.photos = allPhotos;
+      }
 
       await onSubmit(trailData);
     } catch (error) {
-      console.error('Error submitting trail:', error);
+      console.error('Error updating trail:', error);
     }
   };
 
@@ -124,10 +160,13 @@ const TrailSubmission = ({
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const removeExistingImage = (index) => {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
+  };
+
   // Drawing control functions
   const startDrawing = () => {
     setIsDrawing(true);
-    setRoutePoints([]);
   };
 
   const stopDrawing = () => {
@@ -135,11 +174,13 @@ const TrailSubmission = ({
   };
 
   const clearRoute = () => {
-    setRoutePoints([]);
-    setRouteHistory([]);
-    setHistoryIndex(-1);
-    if (onRouteUpdate) {
-      onRouteUpdate([]);
+    if (window.confirm('Are you sure you want to clear the entire route? This will remove all GPS points.')) {
+      setRoutePoints([]);
+      setRouteHistory([]);
+      setHistoryIndex(-1);
+      if (onRouteUpdate) {
+        onRouteUpdate([]);
+      }
     }
   };
 
@@ -158,15 +199,13 @@ const TrailSubmission = ({
   };
 
   const undoRoutePoint = () => {
-    if (historyIndex >= 0) {
+    if (historyIndex > 0) {
+      // If we have multiple history entries, go back one
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      if (newIndex >= 0) {
-        setRoutePoints(routeHistory[newIndex]);
-      } else {
-        setRoutePoints([]);
-      }
+      setRoutePoints(routeHistory[newIndex]);
     }
+    // Don't allow undoing the original route (index 0)
   };
 
   const redoRoutePoint = () => {
@@ -199,7 +238,7 @@ const TrailSubmission = ({
   return (
     <div className="submission-panel-side">
       <div className="submission-header">
-        <h2>Submit New Trail</h2>
+        <h2>Edit Trail</h2>
         <button onClick={onClose} className="close-btn">
           <X size={18} />
         </button>
@@ -210,7 +249,7 @@ const TrailSubmission = ({
         {selectedLocation ? (
           <div className="location-selected">
             <MapPin size={16} />
-            <span>Location selected: {selectedLocation.name || `${selectedLocation.latitude.toFixed(4)}, ${selectedLocation.longitude.toFixed(4)}`}</span>
+            <span>Location: {selectedLocation.name || `${selectedLocation.latitude.toFixed(4)}, ${selectedLocation.longitude.toFixed(4)}`}</span>
           </div>
         ) : (
           <div className="location-pending">
@@ -262,7 +301,7 @@ const TrailSubmission = ({
                 onClick={undoRoutePoint}
                 className="drawing-btn undo"
                 title="Undo last point"
-                disabled={historyIndex < 0}
+                disabled={historyIndex <= 0}
               >
                 <Undo2 size={16} />
               </button>
@@ -295,17 +334,6 @@ const TrailSubmission = ({
       </div>
 
       <form onSubmit={handleSubmit} className="submission-form">
-        <div className="form-group">
-          <label htmlFor="place">Place Name</label>
-          <input
-            type="text"
-            id="place"
-            value={placeInput}
-            onChange={(e) => setPlaceInput(e.target.value)}
-            placeholder="Enter place name (e.g., Table Mountain, Cape Town)"
-          />
-        </div>
-
         <div className="form-group">
           <label htmlFor="name">Trail Name *</label>
           <input
@@ -415,6 +443,44 @@ const TrailSubmission = ({
 
         <div className="form-group">
           <label htmlFor="images">Photos</label>
+          
+          {/* Existing Images */}
+          <div className="existing-images-section">
+            <h5>Current Photos ({existingImages.length})</h5>
+            {existingImages.length > 0 ? (
+              <div className="image-previews">
+                {existingImages.map((imageUrl, index) => (
+                  <div key={`existing-${index}`} className="image-preview-item">
+                    <div className="image-preview">
+                      <img
+                        src={imageUrl}
+                        alt={`Existing photo ${index + 1}`}
+                        className="preview-image"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(index)}
+                        className="remove-image-btn"
+                        title="Remove existing image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="image-info">
+                      <span className="image-name">Existing Photo {index + 1}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-images-notice">
+                <ImageIcon size={24} />
+                <p>No photos currently uploaded for this trail</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Add New Images */}
           <div className="image-upload-container">
             <input
               type="file"
@@ -426,41 +492,44 @@ const TrailSubmission = ({
             />
             <label htmlFor="images" className="file-input-label">
               <Upload size={20} />
-              <span>Choose Photos</span>
+              <span>Add More Photos</span>
             </label>
             <div className="file-count">
-              {images.length} file{images.length !== 1 ? 's' : ''} selected
+              {images.length} new file{images.length !== 1 ? 's' : ''} selected
             </div>
           </div>
           
-          {/* Image Previews */}
+          {/* New Image Previews */}
           {images.length > 0 && (
-            <div className="image-previews">
-              {images.map((image, index) => (
-                <div key={index} className="image-preview-item">
-                  <div className="image-preview">
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt={`Preview ${index + 1}`}
-                      className="preview-image"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="remove-image-btn"
-                      title="Remove image"
-                    >
-                      <X size={16} />
-                    </button>
+            <div className="new-images-section">
+              <h5>New Photos ({images.length})</h5>
+              <div className="image-previews">
+                {images.map((image, index) => (
+                  <div key={`new-${index}`} className="image-preview-item">
+                    <div className="image-preview">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`New photo ${index + 1}`}
+                        className="preview-image"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="remove-image-btn"
+                        title="Remove new image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="image-info">
+                      <span className="image-name">{image.name}</span>
+                      <span className="image-size">
+                        {formatFileSize(image.size)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="image-info">
-                    <span className="image-name">{image.name}</span>
-                    <span className="image-size">
-                      {formatFileSize(image.size)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -484,10 +553,10 @@ const TrailSubmission = ({
           {isSubmitting ? (
             <>
               <Loader2 size={16} className="animate-spin" />
-              Submitting...
+              Updating...
             </>
           ) : (
-            'Submit Trail'
+            'Update Trail'
           )}
         </button>
       </form>
@@ -495,4 +564,4 @@ const TrailSubmission = ({
   );
 };
 
-export default TrailSubmission;
+export default TrailEdit;

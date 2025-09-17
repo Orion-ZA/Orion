@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { doc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
 import FilterPanel from '../components/filters/FilterPanel';
 import TrailMap from '../components/trails/TrailMap';
 import MapControls from '../components/trails/MapControls';
 import TrailsPanel from '../components/trails/TrailsPanel';
 import TrailSubmission from '../components/trails/TrailSubmission';
+import TrailEdit from '../components/trails/TrailEdit';
 import { calculateDistance } from '../components/trails/TrailUtils';
 import './Trails.css';
 
@@ -34,6 +36,10 @@ export default function TrailsPage() {
   const [submissionLocation, setSubmissionLocation] = useState(null);
   const [submissionRoute, setSubmissionRoute] = useState([]);
   const [submissionDrawingState, setSubmissionDrawingState] = useState({ isDrawing: false, addRoutePoint: null });
+  
+  // Edit trail state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [trailToEdit, setTrailToEdit] = useState(null);
 
   // Trail explorer state
   const [trailsUserLocation, setTrailsUserLocation] = useState(null);
@@ -329,6 +335,78 @@ export default function TrailsPage() {
     }
   };
 
+  // Handle trail update
+  const handleTrailUpdate = async (trailData) => {
+    setIsSubmitting(true);
+    setSubmitStatus({ type: '', message: '' });
+
+    try {
+      // Import GeoPoint from Firestore
+      const { GeoPoint } = await import('firebase/firestore');
+      
+      // Update directly to Firestore database
+      const trailRef = doc(db, 'Trails', trailData.id);
+      
+      // Prepare the update data (exclude id from the update)
+      const { id, ...updateData } = trailData;
+      
+      // Convert location to GeoPoint if provided
+      if (updateData.location && updateData.location.lat && updateData.location.lng) {
+        updateData.location = new GeoPoint(updateData.location.lat, updateData.location.lng);
+      }
+      
+      // Convert GPS route to GeoPoint objects if provided
+      if (updateData.gpsRoute && Array.isArray(updateData.gpsRoute) && updateData.gpsRoute.length > 0) {
+        updateData.gpsRoute = updateData.gpsRoute.map(point => new GeoPoint(point.lat, point.lng));
+      }
+      
+      // Add timestamp
+      updateData.updatedAt = new Date().toISOString();
+      
+      await updateDoc(trailRef, updateData);
+
+      setSubmitStatus({ 
+        type: 'success', 
+        message: `Trail "${trailData.name}" updated successfully!` 
+      });
+      setShowSubmissionPanel(false);
+      setIsEditMode(false);
+      setTrailToEdit(null);
+      setSubmissionLocation(null);
+      setSubmissionRoute([]);
+      setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+      // Refresh trails data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating trail:', error);
+      setSubmitStatus({ 
+        type: 'error', 
+        message: 'Failed to update trail. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle edit trail
+  const handleEditTrail = (trail) => {
+    setTrailToEdit(trail);
+    setIsEditMode(true);
+    setShowSubmissionPanel(true);
+    
+    // Set the location for the trail being edited
+    setSubmissionLocation({
+      latitude: trail.latitude,
+      longitude: trail.longitude,
+      name: trail.name
+    });
+    
+    // Set the route if it exists
+    if (trail.gpsRoute && trail.gpsRoute.length > 0) {
+      setSubmissionRoute(trail.gpsRoute.map(point => [point.lng, point.lat]));
+    }
+  };
+
   return (
     <div className="trails-page">
       <div className="trails-main">
@@ -390,6 +468,7 @@ export default function TrailsPage() {
           selectedTrail={selectedTrail}
           setSelectedTrail={setSelectedTrail}
           userLocation={trailsUserLocation}
+          onEditTrail={handleEditTrail}
         />
       </div>
 
@@ -406,21 +485,44 @@ export default function TrailsPage() {
 
       {/* Trail Submission Panel */}
       {showSubmissionPanel && (
-        <TrailSubmission
-          isOpen={showSubmissionPanel}
-          onClose={() => {
-            setShowSubmissionPanel(false);
-            setSubmissionLocation(null);
-            setSubmissionRoute([]);
-            setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
-          }}
-          onSubmit={handleTrailSubmission}
-          isSubmitting={isSubmitting}
-          submitStatus={submitStatus}
-          selectedLocation={submissionLocation}
-          onLocationSelect={setSubmissionLocation}
-          onRouteUpdate={handleRouteUpdate}
-        />
+        <>
+          {isEditMode ? (
+            <TrailEdit
+              isOpen={showSubmissionPanel}
+              onClose={() => {
+                setShowSubmissionPanel(false);
+                setIsEditMode(false);
+                setTrailToEdit(null);
+                setSubmissionLocation(null);
+                setSubmissionRoute([]);
+                setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+              }}
+              onSubmit={handleTrailUpdate}
+              isSubmitting={isSubmitting}
+              submitStatus={submitStatus}
+              selectedLocation={submissionLocation}
+              onLocationSelect={setSubmissionLocation}
+              onRouteUpdate={handleRouteUpdate}
+              editTrailData={trailToEdit}
+            />
+          ) : (
+            <TrailSubmission
+              isOpen={showSubmissionPanel}
+              onClose={() => {
+                setShowSubmissionPanel(false);
+                setSubmissionLocation(null);
+                setSubmissionRoute([]);
+                setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+              }}
+              onSubmit={handleTrailSubmission}
+              isSubmitting={isSubmitting}
+              submitStatus={submitStatus}
+              selectedLocation={submissionLocation}
+              onLocationSelect={setSubmissionLocation}
+              onRouteUpdate={handleRouteUpdate}
+            />
+          )}
+        </>
       )}
 
       {/* Location Error */}

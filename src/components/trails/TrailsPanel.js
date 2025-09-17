@@ -19,7 +19,8 @@ const TrailsPanel = ({
   onTrailClick,
   selectedTrail,
   setSelectedTrail,
-  userLocation
+  userLocation,
+  onEditTrail
 }) => {
   const [sortBy, setSortBy] = useState('distanceAway');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -374,7 +375,7 @@ const TrailsPanel = ({
                           className="edit-trail-btn"
                           title={`Edit ${trail.name}`}
                           aria-label={`Edit ${trail.name}`}
-                          onClick={(e) => { e.stopPropagation(); showToast(`Edit requested: ${trail.name}`, { type: 'info', timeout: 2200 }); }}
+                          onClick={(e) => { e.stopPropagation(); onEditTrail(trail); }}
                         >
                           <Edit3 size={14} />
                         </button>

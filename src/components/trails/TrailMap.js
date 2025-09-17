@@ -143,18 +143,27 @@ const TrailMap = ({
 
         {/* Submission route points */}
         {submissionRoute && submissionRoute.length > 0 && showSubmissionPanel && (
-          submissionRoute.map((point, index) => (
-            <Marker
-              key={`route-point-${index}`}
-              longitude={point[0]}
-              latitude={point[1]}
-              anchor="center"
-            >
-              <div className="route-point-marker">
-                <span className="route-point-number">{index + 1}</span>
-              </div>
-            </Marker>
-          ))
+          submissionRoute
+            .filter(point => 
+              Array.isArray(point) && 
+              point.length === 2 && 
+              !isNaN(point[0]) && 
+              !isNaN(point[1]) &&
+              point[0] >= -180 && point[0] <= 180 &&
+              point[1] >= -90 && point[1] <= 90
+            )
+            .map((point, index) => (
+              <Marker
+                key={`route-point-${index}`}
+                longitude={point[0]}
+                latitude={point[1]}
+                anchor="center"
+              >
+                <div className="route-point-marker">
+                  <span className="route-point-number">{index + 1}</span>
+                </div>
+              </Marker>
+            ))
         )}
 
         {/* Trail markers */}
@@ -165,7 +174,9 @@ const TrailMap = ({
             !isNaN(trail.longitude) && 
             !isNaN(trail.latitude) &&
             typeof trail.longitude === 'number' &&
-            typeof trail.latitude === 'number'
+            typeof trail.latitude === 'number' &&
+            trail.longitude >= -180 && trail.longitude <= 180 &&
+            trail.latitude >= -90 && trail.latitude <= 90
           )
           .map(trail => (
             <Marker
@@ -212,15 +223,27 @@ const TrailMap = ({
 
         {/* Trail routes */}
         {trails
-          .filter(trail => 
-            trail.route && 
-            Array.isArray(trail.route) && 
-            trail.route.length > 0 &&
-            trail.longitude && 
-            trail.latitude && 
-            !isNaN(trail.longitude) && 
-            !isNaN(trail.latitude)
-          )
+          .filter(trail => {
+            const hasValidRoute = trail.route && 
+              Array.isArray(trail.route) && 
+              trail.route.length > 0 &&
+              trail.longitude && 
+              trail.latitude && 
+              !isNaN(trail.longitude) && 
+              !isNaN(trail.latitude) &&
+              // Validate that all route coordinates are valid
+              trail.route.every(point => 
+                Array.isArray(point) && 
+                point.length === 2 && 
+                !isNaN(point[0]) && 
+                !isNaN(point[1]) &&
+                point[0] >= -180 && point[0] <= 180 &&
+                point[1] >= -90 && point[1] <= 90
+              );
+            
+            
+            return hasValidRoute;
+          })
           .map(trail => (
             <Source key={`route-${trail.id}`} id={`route-${trail.id}`} type="geojson" data={{
               type: 'Feature',

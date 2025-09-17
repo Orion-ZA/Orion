@@ -9,6 +9,7 @@ export default function FilterPanel({ filters, onFilterChange, onClose }) {
     onFilterChange('maxDistance', 20);
     onFilterChange('maxLocationDistance', 80);
     onFilterChange('searchQuery', '');
+    onFilterChange('showAll', false);
   };
   const [tagInput, setTagInput] = useState('');
 
@@ -84,6 +85,47 @@ export default function FilterPanel({ filters, onFilterChange, onClose }) {
           )}
         </div>
       </div>
+      
+      {/* Show All Trails Option */}
+      <div style={{
+        marginBottom: '1.5rem',
+        padding: '1rem',
+        borderRadius: '8px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          cursor: 'pointer',
+          color: 'var(--text)',
+          fontWeight: '500',
+          fontSize: '1rem'
+        }}>
+          <input
+            type="checkbox"
+            checked={filters.showAll || false}
+            onChange={(e) => onFilterChange('showAll', e.target.checked)}
+            style={{
+              width: '18px',
+              height: '18px',
+              accentColor: 'var(--primary)',
+              cursor: 'pointer'
+            }}
+          />
+          <span>Show All Trails (bypass all filters)</span>
+        </label>
+        <p style={{
+          margin: '0.5rem 0 0 0',
+          fontSize: '0.875rem',
+          color: 'rgba(255, 255, 255, 0.7)',
+          lineHeight: '1.4'
+        }}>
+          When enabled, this will display every trail in the database regardless of difficulty, distance, location, or other filters.
+        </p>
+      </div>
+
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem'}}>
         
         {/* Search by Name */}

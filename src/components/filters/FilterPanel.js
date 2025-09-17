@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-export default function FilterPanel({ filters, onFilterChange, onClose }) {
+export default function FilterPanel({ filters, onFilterChange, onClose, currentUserId }) {
   const clearAllFilters = () => {
     onFilterChange('difficulty', 'all');
     onFilterChange('tags', []);
@@ -10,6 +10,7 @@ export default function FilterPanel({ filters, onFilterChange, onClose }) {
     onFilterChange('maxLocationDistance', 80);
     onFilterChange('searchQuery', '');
     onFilterChange('showAll', false);
+    onFilterChange('myTrails', false);
   };
   const [tagInput, setTagInput] = useState('');
 
@@ -125,6 +126,48 @@ export default function FilterPanel({ filters, onFilterChange, onClose }) {
           When enabled, this will display every trail in the database regardless of difficulty, distance, location, or other filters.
         </p>
       </div>
+
+      {/* My Trails Option */}
+      {currentUserId && (
+        <div style={{
+          marginBottom: '1.5rem',
+          padding: '1rem',
+          borderRadius: '8px',
+          background: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            cursor: 'pointer',
+            color: 'var(--text)',
+            fontWeight: '500',
+            fontSize: '1rem'
+          }}>
+            <input
+              type="checkbox"
+              checked={filters.myTrails || false}
+              onChange={(e) => onFilterChange('myTrails', e.target.checked)}
+              style={{
+                width: '18px',
+                height: '18px',
+                accentColor: 'var(--primary)',
+                cursor: 'pointer'
+              }}
+            />
+            <span>Show Only My Trails</span>
+          </label>
+          <p style={{
+            margin: '0.5rem 0 0 0',
+            fontSize: '0.875rem',
+            color: 'rgba(255, 255, 255, 0.7)',
+            lineHeight: '1.4'
+          }}>
+            When enabled, this will only show trails that you have created.
+          </p>
+        </div>
+      )}
 
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem'}}>
         

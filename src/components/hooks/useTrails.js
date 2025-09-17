@@ -36,7 +36,7 @@ const getTrailCoordinates = (location) => {
   };
 };
 
-export default function useTrails(externalUserLocation = null) {
+export default function useTrails(externalUserLocation = null, currentUserId = null) {
   const [filters, setFilters] = useState({
     difficulty: 'all',
     tags: [],
@@ -44,7 +44,8 @@ export default function useTrails(externalUserLocation = null) {
     maxDistance: 20,
     maxLocationDistance: 80,
     searchQuery: '',
-    showAll: false
+    showAll: false,
+    myTrails: false
   });
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
@@ -251,16 +252,27 @@ export default function useTrails(externalUserLocation = null) {
       const hasMatchingName = filters.searchQuery === '' ||
         trail.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
 
+      // Check if trail belongs to current user
+      const isMyTrail = !filters.myTrails || !currentUserId || (() => {
+        const createdByRaw = trail.createdBy;
+        if (!createdByRaw) return false;
+        const uid = typeof createdByRaw === 'string'
+          ? (createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw)
+          : createdByRaw;
+        return uid === currentUserId;
+      })();
+
       return (
         (filters.difficulty === 'all' || trail.difficulty === filters.difficulty) &&
         hasMatchingTag &&
         trail.distance >= filters.minDistance &&
         trail.distance <= filters.maxDistance &&
         withinDistance &&
-        hasMatchingName
+        hasMatchingName &&
+        isMyTrail
       );
     });
-  }, [filters, userLocation, externalUserLocation, trails]);
+  }, [filters, userLocation, externalUserLocation, trails, currentUserId]);
 
   return {
     filteredTrails,

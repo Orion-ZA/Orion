@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { Heart, Bookmark, CheckCircle2, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3 } from 'lucide-react';
+import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3 } from 'lucide-react';
 import { useToast } from '../ToastContext';
 import { getDifficultyColor, getDifficultyIcon, calculateDistance } from './TrailUtils';
 import './TrailsPanel.css';
@@ -274,20 +274,58 @@ const TrailsPanel = ({
                     ref={selectedTrail && selectedTrail.id === trail.id ? selectedTrailRef : null}
                     className={`trail-item ${selectedTrail && selectedTrail.id === trail.id ? 'selected' : ''}`}
                     onClick={() => {
-                      // If clicking on the same trail that's already selected, unselect it
                       if (selectedTrail && selectedTrail.id === trail.id) {
                         setSelectedTrail(null);
-                        // Don't call onTrailClick when unselecting
                       } else {
-                        // Otherwise, select the trail and zoom to it
                         setSelectedTrail(trail);
                         onTrailClick && onTrailClick(trail);
                       }
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className="trail-item-header">
-                      <div className="trail-title-section">
+                    <div className="trail-image-container">
+                      {trail.photos && trail.photos.length > 0 ? (
+                        <img
+                          className="trail-thumb"
+                          src={trail.photos[0]}
+                          alt={`Photo of ${trail.name}`}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="trail-thumb placeholder" aria-label="No photo available" />
+                      )}
+                      
+                      <div className="trail-actions-overlay" onClick={(e) => e.stopPropagation()}>
+                        {currentUserId && (
+                          <>
+                            <button
+                              onClick={() => handleTrailAction(trail.id, 'favourites')}
+                              className={`action-btn favourites ${userSaved.favourites.includes(trail.id) ? 'active' : ''}`}
+                              title={userSaved.favourites.includes(trail.id) ? "Remove from Favourites" : "Add to Favourites"}
+                            >
+                              <Heart size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleTrailAction(trail.id, 'wishlist')}
+                              className={`action-btn wishlist ${userSaved.wishlist.includes(trail.id) ? 'active' : ''}`}
+                              title={userSaved.wishlist.includes(trail.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                            >
+                              <Bookmark size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleTrailAction(trail.id, 'completed')}
+                              className={`action-btn completed ${userSaved.completed.includes(trail.id) ? 'active' : ''}`}
+                              title={userSaved.completed.includes(trail.id) ? "Remove from Completed" : "Mark as Completed"}
+                            >
+                              <Check size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="trail-item-content">
+                      <div className="trail-item-header">
                         <h3>{trail.name}</h3>
                         <div className="trail-author" title="Trail submitted by">
                           {(() => {
@@ -301,68 +339,39 @@ const TrailsPanel = ({
                           })()}
                         </div>
                       </div>
-                      <div className="trail-actions" onClick={(e) => e.stopPropagation()}>
-                        {currentUserId && (
-                          <>
-                            <button
-                              onClick={() => handleTrailAction(trail.id, 'favourites')}
-                              className={`action-btn ${userSaved.favourites.includes(trail.id) ? 'active' : ''}`}
-                              title={userSaved.favourites.includes(trail.id) ? "Remove from Favourites" : "Add to Favourites"}
-                            >
-                              <Heart size={16} fill={userSaved.favourites.includes(trail.id) ? "currentColor" : "none"} />
-                            </button>
-                            <button
-                              onClick={() => handleTrailAction(trail.id, 'wishlist')}
-                              className={`action-btn ${userSaved.wishlist.includes(trail.id) ? 'active' : ''}`}
-                              title={userSaved.wishlist.includes(trail.id) ? "Remove from Wishlist" : "Add to Wishlist"}
-                            >
-                              <Bookmark size={16} fill={userSaved.wishlist.includes(trail.id) ? "currentColor" : "none"} />
-                            </button>
-                            <button
-                              onClick={() => handleTrailAction(trail.id, 'completed')}
-                              className={`action-btn ${userSaved.completed.includes(trail.id) ? 'active' : ''}`}
-                              title={userSaved.completed.includes(trail.id) ? "Remove from Completed" : "Mark as Completed"}
-                            >
-                              <CheckCircle2 size={16} fill={userSaved.completed.includes(trail.id) ? "currentColor" : "none"} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="trail-item-details">
-                      <div className="trail-difficulty" style={{ backgroundColor: getDifficultyColor(trail.difficulty) }}>
-                        <span className="trail-difficulty-icon">
-                          {getDifficultyIcon(trail.difficulty)}
-                        </span>
-                        {trail.difficulty}
-                      </div>
-                      <div className="trail-item-distance">
-                        {trail.distance} km
-                        {trail.elevationGain && ` • ${trail.elevationGain}m elevation `}
-                        {userLocation && (
-                          <span className="trail-distance-away">
-                            • {calculateDistance(
-                              userLocation.latitude,
-                              userLocation.longitude,
-                              trail.latitude,
-                              trail.longitude
-                            ).toFixed(1)} km away
+                      <div className="trail-item-details">
+                        <div className="trail-difficulty" style={{ backgroundColor: getDifficultyColor(trail.difficulty) }}>
+                          <span className="trail-difficulty-icon">
+                            {getDifficultyIcon(trail.difficulty)}
                           </span>
-                        )}
+                          {trail.difficulty}
+                        </div>
+                        <div className="trail-item-distance">
+                          {trail.distance} km
+                          {trail.elevationGain && ` • ${trail.elevationGain}m elevation `}
+                          {userLocation && (
+                            <span className="trail-distance-away">
+                              • {calculateDistance(
+                                userLocation.latitude,
+                                userLocation.longitude,
+                                trail.latitude,
+                                trail.longitude
+                              ).toFixed(1)} km away
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {trail.tags && trail.tags.length > 0 && (
+                        <div className="trail-item-tags">
+                          {trail.tags.map((tag, index) => (
+                            <span key={index} className="trail-tag">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {trail.description && (
-                      <p className="trail-description">{trail.description}</p>
-                    )}
-                    {trail.tags && trail.tags.length > 0 && (
-                      <div className="trail-item-tags">
-                        {trail.tags.map((tag, index) => (
-                          <span key={index} className="trail-tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+
                     {(() => {
                       const createdByRaw = trail.createdBy;
                       if (!createdByRaw || !currentUserId) return null;

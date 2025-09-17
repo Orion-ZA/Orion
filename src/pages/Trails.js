@@ -52,7 +52,7 @@ export default function TrailsPage() {
   });
 
   // Use trails hook
-  const { trails, isLoadingTrails, filters, handleFilterChange, filteredTrails } = useTrails(trailsUserLocation);
+  const { trails, isLoadingTrails, filters, handleFilterChange, filteredTrails } = useTrails(trailsUserLocation, currentUserId);
 
   // Auto-detect user location on component mount
   useEffect(() => {
@@ -480,6 +480,7 @@ export default function TrailsPage() {
             filters={filters} 
             onFilterChange={handleFilterChange} 
             onClose={() => setShowFilters(false)}
+            currentUserId={currentUserId}
           />
         </div>
       )}

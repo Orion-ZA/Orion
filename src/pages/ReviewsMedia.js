@@ -3,55 +3,149 @@ import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebaseConfig";
 
-const modalOverlayStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.19)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 9999,
+// =========================
+// 🎨 Modern Styles
+// =========================
+const responsiveStyles = {
+  container: {
+    padding: "1.5rem",
+    maxWidth: "1200px",
+    margin: "0 auto",
+    fontFamily: "'Inter', sans-serif",
+    color: "#f5f5f5",
+  },
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gap: "1.5rem",
+    marginTop: "2rem",
+  },
+  card: {
+    padding: "1rem",
+    borderRadius: "12px",
+    background: "linear-gradient(145deg, #1c2540, #2a355d)",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  },
+  imageContainer: {
+    display: "flex",
+    overflowX: "auto",
+    gap: "0.5rem",
+    marginBottom: "0.5rem",
+    scrollbarWidth: "thin",
+    msOverflowStyle: "none",
+  },
+  imageWrapper: {
+    position: "relative",
+    width: "100%",
+    height: "220px",
+    flexShrink: 0,
+    borderRadius: "10px",
+    overflow: "hidden",
+    backgroundColor: "#111",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+  },
+  imageStyle: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  trailHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "1rem",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    paddingBottom: "0.5rem",
+  },
+  buttonContainer: {
+    display: "flex",
+    gap: "0.5rem",
+    flexWrap: "wrap",
+  },
+  button: {
+    padding: "0.6rem 1.2rem",
+    borderRadius: "20px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    backgroundColor: "#2d79f3",
+    color: "#fff",
+    fontSize: "0.9rem",
+    transition: "background 0.2s ease",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    backdropFilter: "blur(6px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+    padding: "1rem",
+  },
+  modalContent: {
+    background: "#1c2540",
+    padding: "2rem",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "500px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    boxShadow: "0 12px 32px rgba(0,0,0,0.4)",
+    transform: "scale(0.95)",
+    animation: "fadeIn 0.25s ease forwards",
+  },
+  textarea: {
+    width: "100%",
+    minHeight: "100px",
+    marginTop: "0.5rem",
+    padding: "0.75rem",
+    borderRadius: "8px",
+    border: "1px solid #444",
+    background: "#0b132b",
+    color: "#f5f5f5",
+    fontSize: "1rem",
+    resize: "vertical",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "1rem",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  primaryButton: {
+    padding: "0.6rem 1.2rem",
+    borderRadius: "20px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    backgroundColor: "#00b894",
+    color: "#fff",
+    transition: "background 0.2s ease",
+  },
+  cancelButton: {
+    padding: "0.6rem 1.2rem",
+    borderRadius: "20px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    backgroundColor: "#636e72",
+    color: "#fff",
+  },
 };
 
-const modalContentStyle = {
-  background: "#0b132b",
-  padding: "2rem",
-  borderRadius: "12px",
-  width: 400,
-  maxWidth: "90%",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-};
+// Helper for inline style
+const getResponsiveStyle = (styleKey) => responsiveStyles[styleKey] || {};
 
-const textareaStyle = {
-  width: "100%",
-  minHeight: 100,
-  marginTop: "0.5rem",
-  padding: "0.5rem",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  fontSize: "1rem",
-  resize: "vertical",
-};
-
-const inputFileStyle = { marginTop: "0.5rem" };
-
-const buttonStyle = {
-  padding: "0.5rem 1rem",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: 500,
-  backgroundColor: "#007bff",
-  color: "#fff",
-};
-
-const primaryButtonStyle = { ...buttonStyle, backgroundColor: "#007bff", color: "#fff" };
-const cancelButtonStyle = { ...buttonStyle, backgroundColor: "#f0f0f0", color: "#333" };
-
-// Fetch trails API
+// =========================
+// 📡 API Helpers
+// =========================
 async function fetchTrails() {
   const res = await fetch("https://us-central1-orion-sdp.cloudfunctions.net/getTrails");
   if (!res.ok) throw new Error("Failed to fetch trails");
@@ -67,7 +161,6 @@ async function fetchTrailReviews(trailId) {
   return data.reviews || [];
 }
 
-// Add this helper function outside the component
 async function fetchTrailAlerts(trailId) {
   try {
     const res = await fetch(
@@ -81,6 +174,9 @@ async function fetchTrailAlerts(trailId) {
   }
 }
 
+// =========================
+// 🌲 Main Component
+// =========================
 export default function ReviewsMedia() {
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
@@ -88,6 +184,7 @@ export default function ReviewsMedia() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredTrailId, setHoveredTrailId] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
@@ -99,13 +196,18 @@ export default function ReviewsMedia() {
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
     (async () => {
       try {
         const data = await fetchTrails();
-
         const trailsWithUrls = await Promise.all(
           data.map(async (trail) => {
-            if (trail.photos && Array.isArray(trail.photos) && trail.photos.length > 0) {
+            if (trail.photos?.length > 0) {
               const urls = await Promise.all(
                 trail.photos.map(async (path) => {
                   try {
@@ -126,15 +228,12 @@ export default function ReviewsMedia() {
 
         const reviewsData = {};
         const alertsData = {};
-
-        // Use the external helper function
         await Promise.all(
           trailsWithUrls.map(async (trail) => {
             reviewsData[trail.id] = await fetchTrailReviews(trail.id);
             alertsData[trail.id] = await fetchTrailAlerts(trail.id);
           })
         );
-
         setReviews(reviewsData);
         setAlerts(alertsData);
       } catch (err) {
@@ -165,169 +264,69 @@ export default function ReviewsMedia() {
     setAlertMessage("");
     setModalOpen(true);
   };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setSelectedTrailId(null);
-    setModalType(null);
-  };
-
-  const handleAddAlert = async () => {
-    if (!alertMessage) return;
-
-    try {
-      const response = await fetch(
-        "https://us-central1-orion-sdp.cloudfunctions.net/addAlert",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trailId: selectedTrailId,
-            message: alertMessage,
-            type: alertType
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Instead of trying to construct the alert locally, refetch the alerts for this trail
-      try {
-        const alertsResponse = await fetch(
-          `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${selectedTrailId}`
-        );
-        const alertsData = await alertsResponse.json();
-        
-        if (alertsResponse.ok) {
-          setAlerts((prev) => ({
-            ...prev,
-            [selectedTrailId]: alertsData.alerts || []
-          }));
-        }
-      } catch (fetchError) {
-        console.error("Error refetching alerts:", fetchError);
-        // Fallback: add a temporary alert to local state
-        const newAlert = {
-          id: `temp-${Date.now()}`,
-          message: alertMessage,
-          type: alertType,
-          timestamp: new Date().toISOString()
-        };
-        
-        setAlerts((prev) => ({
-          ...prev,
-          [selectedTrailId]: [...(prev[selectedTrailId] || []), newAlert]
-        }));
-      }
-
-      closeModal();
-      alert("✅ Alert added successfully!");
-    } catch (err) {
-      console.error("Error adding alert:", err);
-      alert("❌ Failed to add alert: " + err.message);
-    }
-  };
+  const closeModal = () => setModalOpen(false);
 
   const handleAddReview = async () => {
     if (!newReview) return;
-
     try {
-      const response = await fetch(
-        "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trailId: selectedTrailId,
-            review: {
-              id: uuidv4(),
-              message: newReview,
-              timestamp: new Date().toISOString(),
-              // Add user info if available
-              userId: "anonymous", // You might want to get this from auth
-              userName: "Anonymous User"
-            }
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch reviews for this trail
+      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trailId: selectedTrailId,
+          review: {
+            id: uuidv4(),
+            message: newReview,
+            timestamp: new Date().toISOString(),
+            userId: "anonymous",
+            userName: "Anonymous User",
+          },
+        }),
+      });
       const updatedReviews = await fetchTrailReviews(selectedTrailId);
-      setReviews((prev) => ({
-        ...prev,
-        [selectedTrailId]: updatedReviews,
-      }));
-
+      setReviews((prev) => ({ ...prev, [selectedTrailId]: updatedReviews }));
       closeModal();
       alert("✅ Review added successfully!");
     } catch (err) {
-      console.error("Error adding review:", err);
       alert("❌ Failed to add review: " + err.message);
     }
   };
 
-  const handleAddImages = async () => {
-    if (!newImages || newImages.length === 0) return;
-
+  const handleAddAlert = async () => {
+    if (!alertMessage) return;
     try {
-      // Upload images to Firebase Storage
+      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/addAlert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trailId: selectedTrailId,
+          message: alertMessage,
+          type: alertType,
+        }),
+      });
+      const alertsData = await fetchTrailAlerts(selectedTrailId);
+      setAlerts((prev) => ({ ...prev, [selectedTrailId]: alertsData }));
+      closeModal();
+      alert("✅ Alert added successfully!");
+    } catch (err) {
+      alert("❌ Failed to add alert: " + err.message);
+    }
+  };
+
+  const handleAddImages = async () => {
+    if (!newImages.length) return;
+    try {
       const uploadedUrls = await uploadPhotos(newImages);
-      
-      // Update trail with new images
-      const response = await fetch(
-        "https://us-central1-orion-sdp.cloudfunctions.net/updateTrailImages",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trailId: selectedTrailId,
-            photos: uploadedUrls
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch trails to update images
+      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/updateTrailImages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trailId: selectedTrailId, photos: uploadedUrls }),
+      });
       const updatedTrails = await fetchTrails();
-      const trailsWithUrls = await Promise.all(
-        updatedTrails.map(async (trail) => {
-          if (trail.photos && Array.isArray(trail.photos) && trail.photos.length > 0) {
-            const urls = await Promise.all(
-              trail.photos.map(async (path) => {
-                try {
-                  if (path.startsWith("https://")) return path;
-                  return await getDownloadURL(ref(storage, path));
-                } catch {
-                  return null;
-                }
-              })
-            );
-            return { ...trail, photos: urls.filter(Boolean) };
-          }
-          return { ...trail, photos: [] };
-        })
-      );
-
-      setTrails(trailsWithUrls);
+      setTrails(updatedTrails);
       closeModal();
       alert("✅ Images added successfully!");
     } catch (err) {
-      console.error("Error adding images:", err);
       alert("❌ Failed to add images: " + err.message);
     }
   };
@@ -336,72 +335,67 @@ export default function ReviewsMedia() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div className="container fade-in-up">
-      <h1>Trails</h1>
-      <div className="grid cols-3" style={{ marginTop: "1rem" }}>
+    <div style={getResponsiveStyle("container")}>
+      <h1>🌲 Hiking Trails</h1>
+      <div style={getResponsiveStyle("gridContainer")}>
         {trails.map((trail) => (
           <div
-            className="card"
             key={trail.id}
-            style={{ padding: "1rem", position: "relative" }}
-            onMouseEnter={() => setHoveredTrailId(trail.id)}
-            onMouseLeave={() => setHoveredTrailId(null)}
+            style={getResponsiveStyle("card")}
+            onMouseEnter={() => !isMobile && setHoveredTrailId(trail.id)}
+            onMouseLeave={() => !isMobile && setHoveredTrailId(null)}
+            className="card"
           >
-            <div
-              style={{
-                display: "flex",
-                overflowX: "auto",
-                gap: "0.5rem",
-                marginBottom: "0.5rem",
-              }}
-            >
+            <div style={getResponsiveStyle("imageContainer")}>
               {trail.photos.length > 0 ? (
                 trail.photos.map((photoUrl, index) => (
-                  <img
-                    key={index}
-                    src={photoUrl}
-                    alt={`Trail ${trail.name} ${index + 1}`}
-                    style={{
-                      height: 100,
-                      borderRadius: 6,
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
+                  <div key={index} style={getResponsiveStyle("imageWrapper")}>
+                    <img
+                      src={photoUrl}
+                      alt={`Trail ${trail.name} ${index + 1}`}
+                      style={getResponsiveStyle("imageStyle")}
+                      onError={(e) => (e.target.style.display = "none")}
+                    />
+                  </div>
                 ))
               ) : (
-                <div
-                  style={{
-                    height: 100,
-                    width: "100%",
-                    backgroundColor: "#eee",
-                    borderRadius: 6,
-                  }}
-                >
-                  No images
+                <div style={getResponsiveStyle("imageWrapper")}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "100%",
+                      height: "100%",
+                      color: "#999",
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    No images
+                  </div>
                 </div>
               )}
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={getResponsiveStyle("trailHeader")}>
               <h4 style={{ margin: 0 }}>{trail.name}</h4>
-              {hoveredTrailId === trail.id && (
-                <div style={{ display: "flex", gap: "0.25rem" }}>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "review")}>
-                    Add Review
+              {(hoveredTrailId === trail.id || isMobile) && (
+                <div style={getResponsiveStyle("buttonContainer")}>
+                  <button style={getResponsiveStyle("button")} onClick={() => openModal(trail.id, "review")}>
+                    Review
                   </button>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "images")}>
-                    Add Images
+                  <button style={getResponsiveStyle("button")} onClick={() => openModal(trail.id, "images")}>
+                    Images
                   </button>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "alert")}>
-                    Add Alert
+                  <button style={getResponsiveStyle("button")} onClick={() => openModal(trail.id, "alert")}>
+                    Alert
                   </button>
                 </div>
               )}
             </div>
 
-            {alerts[trail.id] && alerts[trail.id].length > 0 && (
-              <ul style={{ color: "red", marginTop: "0.25rem" }}>
+            {alerts[trail.id]?.length > 0 && (
+              <ul style={{ color: "red", marginTop: "0.5rem", fontSize: "0.9rem" }}>
                 {alerts[trail.id].map((a) => (
                   <li key={a.id}>
                     [{a.type}] {a.message}
@@ -416,9 +410,12 @@ export default function ReviewsMedia() {
                   {reviews[trail.id].map((rev) => (
                     <li key={rev.id}>{rev.comment || rev.message}</li>
                   ))}
+                  {reviews[trail.id].length > 3 && (
+                    <li>...and {reviews[trail.id].length - 3} more</li>
+                  )}
                 </ul>
               ) : (
-                <p className="muted">No reviews yet.</p>
+                <p style={{ color: "#777", margin: 0 }}>No reviews yet.</p>
               )}
             </div>
           </div>
@@ -426,16 +423,15 @@ export default function ReviewsMedia() {
       </div>
 
       {modalOpen && (
-        <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
+        <div style={getResponsiveStyle("modalOverlay")} onClick={closeModal}>
+          <div style={getResponsiveStyle("modalContent")} onClick={(e) => e.stopPropagation()}>
             {modalType === "alert" && (
               <>
                 <h3>Add Alert</h3>
-                <label>Type:</label>
                 <select
                   value={alertType}
                   onChange={(e) => setAlertType(e.target.value)}
-                  style={{ width: "100%", marginBottom: "0.5rem" }}
+                  style={{ width: "100%", marginBottom: "0.5rem", padding: "0.5rem", borderRadius: "6px" }}
                 >
                   <option value="general">General</option>
                   <option value="closure">Closure</option>
@@ -446,19 +442,15 @@ export default function ReviewsMedia() {
                   value={alertMessage}
                   onChange={(e) => setAlertMessage(e.target.value)}
                   placeholder="Enter alert message..."
-                  style={textareaStyle}
+                  style={getResponsiveStyle("textarea")}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddAlert}>
-                    Submit
-                  </button>
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddAlert}>Submit</button>
                 </div>
               </>
             )}
-            
+
             {modalType === "review" && (
               <>
                 <h3>Add Review</h3>
@@ -466,19 +458,15 @@ export default function ReviewsMedia() {
                   value={newReview}
                   onChange={(e) => setNewReview(e.target.value)}
                   placeholder="Write your review..."
-                  style={textareaStyle}
+                  style={getResponsiveStyle("textarea")}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddReview}>
-                    Submit
-                  </button>
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddReview}>Submit</button>
                 </div>
               </>
             )}
-            
+
             {modalType === "images" && (
               <>
                 <h3>Add Images</h3>
@@ -487,21 +475,38 @@ export default function ReviewsMedia() {
                   multiple
                   accept="image/*"
                   onChange={(e) => setNewImages(Array.from(e.target.files))}
-                  style={inputFileStyle}
+                  style={{ marginTop: "0.5rem", width: "100%" }}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddImages}>
-                    Upload
-                  </button>
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddImages}>Upload</button>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
+      {/* Hover + animation styles */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+          }
+          button:hover {
+            background-color: #019874 ;
+          }
+          @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            h4 { font-size: 1rem; }
+          }
+        `}
+      </style>
     </div>
   );
 }

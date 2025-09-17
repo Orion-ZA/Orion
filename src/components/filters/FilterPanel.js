@@ -176,6 +176,7 @@ export default function FilterPanel({ filters, onFilterChange, onClose, currentU
           <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Search Trails</label>
           <input 
             type="text" 
+            className="search-input"
             placeholder="Search by trail name"
             value={filters.searchQuery || ''} 
             onChange={(e) => onFilterChange('searchQuery', e.target.value)} 

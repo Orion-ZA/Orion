@@ -20,6 +20,11 @@ import ReviewsMedia from './pages/ReviewsMedia';
 import MyTrails from './pages/MyTrails';
 import AlertsUpdates from './pages/AlertsUpdates';
 
+import Feedback from './pages/Feedback';
+import ProfilePage from './pages/ProfilePage';
+import Settings from './pages/Settings';
+import HelpCenter from './pages/HelpCenter';
+
 function AppContent() {
   const location = useLocation();
   const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
@@ -82,6 +87,10 @@ function AppContent() {
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </main>

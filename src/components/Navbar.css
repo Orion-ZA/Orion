@@ -26,6 +26,23 @@
   flex-shrink: 0;
   transition: transform 0.18s cubic-bezier(.4,1.4,.6,1);
 }
+.brand-logo { 
+  /* Bigger visual footprint while keeping navbar height: use negative margins to let it overflow */
+  height: clamp(78px,10vw,96px); 
+  width: auto; 
+  display: block; 
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); 
+  transition: transform .35s cubic-bezier(.25,1.25,.35,1), filter .4s ease; 
+  margin-top: -18px; 
+  margin-bottom: -18px; 
+  pointer-events: auto;
+}
+@media (max-width: 640px) {
+  .brand-logo { height: 64px; margin-top: -10px; margin-bottom: -10px; }
+}
+.brand:hover .brand-logo { transform: scale(1.12) rotate(-1.5deg); filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)); }
+html[data-theme='light'] .brand-logo { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.20)); }
+html[data-theme='light'] .brand:hover .brand-logo { filter: drop-shadow(0 6px 14px rgba(0,0,0,0.30)); }
 .brand:hover, .brand:focus-visible {
   transform: scale(1.11);
   z-index: 2;
@@ -74,10 +91,18 @@
   border-radius: 2px; 
   opacity: .8; 
 }
+.desktop-nav .as-link::after { 
+  content: ""; position: absolute; left: .75rem; right: .75rem; bottom: .35rem; height: 2px; 
+  background: linear-gradient(90deg, var(--primary), #9be7e5); transform: scaleX(0); transform-origin: left; 
+  transition: transform .25s ease; border-radius: 2px; opacity: .8; 
+}
 .desktop-nav a:hover::after, .desktop-nav a.active::after { transform: scaleX(1); }
+.desktop-nav .as-link:hover::after, .desktop-nav .as-link.active::after { transform: scaleX(1); }
 .desktop-nav a:hover { background: rgba(255,255,255,.06); color: #ffffff; }
 .desktop-nav a:active { transform: translateY(1px); }
 .desktop-nav a.active { background: rgba(91,192,190,.15); color: #e6fffa; }
+.desktop-nav .as-link.active { background: rgba(91,192,190,.15); color: #e6fffa; }
+html[data-theme='light'] .desktop-nav .as-link.active { background: rgba(0,0,0,0.06); color: var(--text); }
 
 /* Buttons styled as links for guarded nav */
 .desktop-nav .as-link {
@@ -95,6 +120,15 @@
 }
 .desktop-nav .as-link:hover { background: rgba(255,255,255,.06); color: #ffffff; }
 .desktop-nav .as-link:active { transform: translateY(1px); }
+
+/* Light mode: all navbar options (links and buttons) use white background on hover/active for consistency */
+html[data-theme='light'] .desktop-nav a.active,
+html[data-theme='light'] .desktop-nav a:hover,
+html[data-theme='light'] .desktop-nav .as-link.active,
+html[data-theme='light'] .desktop-nav .as-link:hover {
+  background: #fff;
+  color: var(--text);
+}
 
 .desktop-actions { 
   display: inline-flex; 
@@ -226,3 +260,101 @@
 }
 .navbar.landing .desktop-nav a:hover { background: rgba(255,255,255,.08); }
 .navbar.landing .desktop-nav .as-link:hover { background: rgba(255,255,255,.08); }
+
+
+/* Profile dropdown styles (theme-aware) */
+.profile-container { position: relative; display: inline-block; }
+.profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-strong); }
+.profile-trigger {
+  display: flex; align-items: center; gap: 6px; background: var(--glass);
+  border: 1px solid var(--border); border-radius: 20px; padding: 8px 12px;
+  color: var(--text); cursor: pointer; font-weight: 500; letter-spacing: .25px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: background-color .25s ease, border-color .35s ease, color .35s ease, box-shadow .35s ease;
+}
+.profile-trigger:hover { background: rgba(255,255,255,0.10); }
+html[data-theme="light"] .profile-trigger:hover { background: rgba(0,0,0,0.04); }
+
+.profile-dropdown {
+  position: absolute; top: 100%; right: 0; margin-top: 8px; width: 240px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 1000; overflow: hidden;
+  animation: scale-in .25s ease both; color: var(--text);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: background-color .45s ease, border-color .45s ease, color .45s ease;
+}
+html[data-theme="dark"] .profile-dropdown { background: linear-gradient(145deg, rgba(28,37,65,0.90), rgba(28,37,65,0.78)); }
+html[data-theme="light"] .profile-dropdown { background: #ffffffcc; }
+
+.profile-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+.profile-name { font-weight: 600; margin: 0 0 4px 0; font-size: 14px; color: var(--text); }
+.profile-email { margin: 0; font-size: 12px; color: var(--text-dim); word-break: break-all; }
+
+.profile-menu { padding: 6px 0 8px; display: flex; flex-direction: column; gap: 2px; }
+.profile-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 16px; background: none; border: none; text-align: left; cursor: pointer;
+  font-size: 14px; color: var(--text); line-height: 1.2; position: relative;
+  transition: background-color .25s ease, color .35s ease, padding-left .25s ease;
+}
+.profile-menu-item .menu-icon { width: 18px; height: 18px; opacity: .9; }
+.profile-menu-item:hover { background: rgba(255,255,255,0.09); padding-left: 18px; }
+html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06); }
+.profile-menu-item:active { transform: translateY(1px); }
+
+.profile-divider { margin: 6px 0 4px; border: none; border-top: 1px solid var(--border); }
+.logout-item { padding: 2px 4px 0; }
+
+/* Smooth theme transition for dropdown parts */
+.profile-dropdown, .profile-trigger, .profile-menu-item, .profile-avatar { transition: background-color .45s ease, color .45s ease, border-color .45s ease; }
+
+/* Mobile profile styles */
+.mobile-profile {
+  padding: 16px;
+}
+
+.mobile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.mobile-profile-info {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mobile-profile-name {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  color: white;
+}
+
+.mobile-profile-email {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-profile-item {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  text-align: left;
+  color: white;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-logout {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}

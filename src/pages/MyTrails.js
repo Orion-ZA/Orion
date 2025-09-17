@@ -1,74 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
+import './MyTrails.css';
 
 // Modal Component
 const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
 
-  const modalOverlayStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    display: isOpen ? "flex" : "none",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 9999,
-    animation: "fadeIn 0.3s ease-in",
-  };
-
-  const modalContentStyle = {
-    background: "#0b132b",
-    padding: "2rem",
-    borderRadius: "12px",
-    width: 400,
-    maxWidth: "90%",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-    animation: "slideUp 0.3s ease-out",
-    border: "1px solid #1e2a47",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    border: "1px solid #2d3a5a",
-    backgroundColor: "#0f1729",
-    color: "#fff",
-    fontSize: "1rem",
-    marginBottom: "1rem",
-  };
-
-  const textareaStyle = {
-    ...inputStyle,
-    minHeight: "100px",
-    resize: "vertical",
-  };
-
-  const buttonStyle = {
-    padding: "0.75rem 1.5rem",
-    borderRadius: "8px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: 600,
-    fontSize: "1rem",
-    transition: "all 0.2s ease",
-  };
-
-  const primaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#007bff",
-    color: "#fff",
-  };
-
-  const cancelButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#2d3a5a",
-    color: "#ccc",
-  };
+  useEffect(() => {
+    // Prevent body scrolling when modal is open
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+    }
+    
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+    };
+  }, [isOpen]);
 
   const handleSubmit = () => {
     if (rating < 1 || rating > 5) {
@@ -86,42 +41,60 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
     setComment('');
   };
 
+  // Handle overlay click (close modal when clicking outside content)
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   return (
-    <div style={modalOverlayStyle}>
-      <div style={modalContentStyle}>
-        <h3 style={{ marginBottom: "1.5rem", color: "#fff" }}>Review: {trailName}</h3>
+    <div 
+      className={`modal-overlay ${isOpen ? 'open' : ''}`} 
+      onClick={handleOverlayClick}
+    >
+      <div className="modal-content">
+        <button className="modal-close-btn" onClick={handleClose} aria-label="Close modal">
+          ×
+        </button>
+        <h3>Review: {trailName}</h3>
         
-        <div style={{ marginBottom: "1rem" }}>
-          <label style={{ display: "block", marginBottom: "0.5rem", color: "#ccc" }}>
+        <div className="input-group">
+          <label>
             Rating (1-5)
           </label>
-          <input
-            type="number"
-            min="1"
-            max="5"
-            value={rating}
-            onChange={(e) => setRating(parseInt(e.target.value) || 5)}
-            style={inputStyle}
-          />
+          <div className="rating-input">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                className={`star ${rating >= star ? 'active' : ''}`}
+                onClick={() => setRating(star)}
+                aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label style={{ display: "block", marginBottom: "0.5rem", color: "#ccc" }}>
+        <div className="input-group">
+          <label>
             Comment
           </label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share your experience..."
-            style={textareaStyle}
+            rows="4"
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
-          <button style={cancelButtonStyle} onClick={handleClose}>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={handleClose}>
             Cancel
           </button>
-          <button style={primaryButtonStyle} onClick={handleSubmit}>
+          <button className="btn-primary" onClick={handleSubmit}>
             Submit Review
           </button>
         </div>
@@ -138,13 +111,18 @@ export default function MyTrails() {
     trailId: null,
     trailName: '',
   });
+  const [activeTab, setActiveTab] = useState('favourites');
+  const [loading, setLoading] = useState(true);
   const auth = getAuth();
   const user = auth.currentUser;
   const userId = user ? user.uid : null;
 
   useEffect(() => {
     async function fetchSavedTrails() {
+      if (!userId) return;
+      
       try {
+        setLoading(true);
         const res = await fetch(`https://getsavedtrails-fqtduxc7ua-uc.a.run.app?uid=${userId}`);
         const data = await res.json();
         setTrails(data);
@@ -170,33 +148,38 @@ export default function MyTrails() {
         setAlerts(alertsData);
       } catch (err) {
         console.error('Error fetching saved trails:', err);
+      } finally {
+        setLoading(false);
       }
     }
-    if (userId) fetchSavedTrails();
+    
+    fetchSavedTrails();
   }, [userId]);
 
-const handleRemove = async (trailId, listType) => {
-  try {
-    let url = "";
-    if (listType === "favourites") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeFavourite";
-    if (listType === "wishlist") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeWishlist";
-    if (listType === "completed") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeCompleted"; // ✅ added
+  const handleRemove = async (trailId, listType) => {
+    if (window.confirm("Are you sure you want to remove this trail?")) {
+      try {
+        let url = "";
+        if (listType === "favourites") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeFavourite";
+        if (listType === "wishlist") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeWishlist";
+        if (listType === "completed") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeCompleted";
 
-    await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid: userId, trailId }),
-    });
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid: userId, trailId }),
+        });
 
-    setTrails((prev) => ({
-      ...prev,
-      [listType]: prev[listType].filter((t) => t.id !== trailId),
-    }));
-  } catch (err) {
-    console.error("Failed to remove trail:", err);
-    alert("Failed to remove trail. Please try again.");
-  }
-};
+        setTrails((prev) => ({
+          ...prev,
+          [listType]: prev[listType].filter((t) => t.id !== trailId),
+        }));
+      } catch (err) {
+        console.error("Failed to remove trail:", err);
+        alert("Failed to remove trail. Please try again.");
+      }
+    }
+  };
 
   const openReviewModal = (trailId, trailName) => {
     setModalState({
@@ -218,11 +201,9 @@ const handleRemove = async (trailId, listType) => {
     try {
       const { trailId } = modalState;
 
-      const newReview = {
-        userId,
-        rating,
-        comment,
-        timestamp: new Date().toISOString()
+      // Generate a unique ID for the review
+      const generateId = () => {
+        return Math.random().toString(36).substring(2) + Date.now().toString(36);
       };
 
       // Mark trail as completed
@@ -232,15 +213,31 @@ const handleRemove = async (trailId, listType) => {
         body: JSON.stringify({ uid: userId, trailId }),
       });
 
-      // Update trail with new review
-      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/updateTrailInfo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          trailId,
-          updateData: { reviews: [newReview] }
-        }),
-      });
+      // Add review to the trail
+      const reviewResponse = await fetch(
+        "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trailId: trailId,
+            review: {
+              id: generateId(),
+              rating: rating,
+              comment: comment,
+              timestamp: new Date().toISOString(),
+              userId: userId,
+              userName: user?.displayName || "Anonymous User"
+            }
+          }),
+        }
+      );
+
+      const result = await reviewResponse.json();
+
+      if (!reviewResponse.ok) {
+        throw new Error(result.error || `Server returned ${reviewResponse.status}`);
+      }
 
       // Update local state
       setTrails((prev) => {
@@ -267,50 +264,49 @@ const handleRemove = async (trailId, listType) => {
     }
   };
 
-  // === UI ===
-  const renderTrailList = (trailArray, listType) =>
-    trailArray.map((trail) => (
-      <li key={trail.id} style={{ marginBottom: "1rem", padding: "1rem", backgroundColor: "#0f1729", borderRadius: "8px" }}>
-        <strong style={{ color: "#fff" }}>{trail.name}</strong>
+  // Render trail list for the current active tab
+  const renderTrailList = () => {
+    const trailArray = trails[activeTab] || [];
+    
+    if (trailArray.length === 0) {
+      return (
+        <div className="empty-state">
+          <div className="empty-icon">🏔️</div>
+          <p>No trails in your {activeTab} yet.</p>
+          <p className="empty-subtext">Start exploring to add trails to your collection!</p>
+        </div>
+      );
+    }
+    
+    return trailArray.map((trail) => (
+      <li key={trail.id} className="trail-card">
+        <div className="trail-header">
+          <h4>{trail.name}</h4>
+          <button
+            className="remove-btn"
+            onClick={() => handleRemove(trail.id, activeTab)}
+            aria-label={`Remove ${trail.name}`}
+          >
+            ×
+          </button>
+        </div>
 
         {/* Alerts */}
         {alerts[trail.id] && alerts[trail.id].length > 0 && (
-          <ul style={{ color: "#ff6b6b", marginTop: "0.5rem", paddingLeft: "1rem" }}>
+          <div className="alerts-container">
             {alerts[trail.id].map((alert) => (
-              <li key={alert.id} style={{ fontSize: "0.9rem" }}>
-                <strong>[{alert.type}]</strong> {alert.message}
-              </li>
+              <div key={alert.id} className="alert-item">
+                <span className="alert-type">[{alert.type}]</span> {alert.message}
+              </div>
             ))}
-          </ul>
+          </div>
         )}
 
         {/* Buttons */}
-        <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          <button
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: "#dc3545",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: "0.9rem",
-            }}
-            onClick={() => handleRemove(trail.id, listType)}
-          >
-            Remove
-          </button>
-          {listType !== "completed" && (
+        <div className="trail-actions">
+          {activeTab !== "completed" && (
             <button
-              style={{
-                padding: "0.5rem 1rem",
-                borderRadius: "6px",
-                border: "none",
-                backgroundColor: "#28a745",
-                color: "#fff",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-              }}
+              className="complete-btn"
               onClick={() => openReviewModal(trail.id, trail.name)}
             >
               Mark as Completed
@@ -319,30 +315,66 @@ const handleRemove = async (trailId, listType) => {
         </div>
       </li>
     ));
+  };
 
   return (
-    <div className="container fade-in-up">
-      <h1 style={{ color: "#fff", marginBottom: "2rem" }}>My Trails</h1>
-      <div className="grid cols-3" style={{ gap: "1.5rem", marginTop: "1rem" }}>
-        <div className="card" style={{ padding: "1.5rem", backgroundColor: "#1a243b", border: "1px solid #2d3a5a" }}>
-          <h3 style={{ color: "#fff", marginBottom: "1rem" }}>Favourites</h3>
-          <ul style={{ color: "#ccc", listStyle: "none", padding: 0 }}>
-            {renderTrailList(trails.favourites, "favourites")}
-          </ul>
+    <div className="my-trails-container">
+      <header className="page-header">
+        <h1>My Trails</h1>
+      </header>
+
+      {loading ? (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading your trails...</p>
         </div>
-        <div className="card" style={{ padding: "1.5rem", backgroundColor: "#1a243b", border: "1px solid #2d3a5a" }}>
-          <h3 style={{ color: "#fff", marginBottom: "1rem" }}>Completed</h3>
-          <ul style={{ color: "#ccc", listStyle: "none", padding: 0 }}>
-            {renderTrailList(trails.completed, "completed")}
-          </ul>
-        </div>
-        <div className="card" style={{ padding: "1.5rem", backgroundColor: "#1a243b", border: "1px solid #2d3a5a" }}>
-          <h3 style={{ color: "#fff", marginBottom: "1rem" }}>Wishlist</h3>
-          <ul style={{ color: "#ccc", listStyle: "none", padding: 0 }}>
-            {renderTrailList(trails.wishlist, "wishlist")}
-          </ul>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="tabs-scroll-container">
+            <div className="tabs-container">
+              <button 
+                className={`tab ${activeTab === 'favourites' ? 'active' : ''}`}
+                onClick={() => setActiveTab('favourites')}
+              >
+                <span className="tab-icon"></span>
+                <span className="tab-text">Favourites</span>
+                <span className="tab-count">{trails.favourites.length}</span>
+              </button>
+              <button 
+                className={`tab ${activeTab === 'completed' ? 'active' : ''}`}
+                onClick={() => setActiveTab('completed')}
+              >
+                <span className="tab-icon"></span>
+                <span className="tab-text">Completed</span>
+                <span className="tab-count">{trails.completed.length}</span>
+              </button>
+              <button 
+                className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`}
+                onClick={() => setActiveTab('wishlist')}
+              >
+                <span className="tab-icon"></span>
+                <span className="tab-text">Wishlist</span>
+                <span className="tab-count">{trails.wishlist.length}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="trails-content">
+            <div className="active-tab-header">
+              <h2>
+                {activeTab === 'favourites' && ' Favourite Trails'}
+                {activeTab === 'completed' && ' Completed Trails'}
+                {activeTab === 'wishlist' && ' Wishlist Trails'}
+              </h2>
+              <span className="trail-count">{trails[activeTab].length} trails</span>
+            </div>
+            
+            <ul className="trails-list">
+              {renderTrailList()}
+            </ul>
+          </div>
+        </>
+      )}
 
       <ReviewModal
         trailName={modalState.trailName}

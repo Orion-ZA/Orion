@@ -1,5 +1,6 @@
 // src/components/map/TrailMap.js
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+// Use explicit subpath export (root path is not exported in react-map-gl v8)
 import Map, { Marker, Popup, NavigationControl, FullscreenControl, ScaleControl, Source, Layer } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -16,12 +17,17 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
 
   // Effect to recenter map on selected trail
   useEffect(() => {
-    if (selectedTrail) {
-      mapRef.current.flyTo({
-        center: [selectedTrail.location.longitude, selectedTrail.location.latitude],
-        zoom: 14,
-        speed: 1.5
-      });
+    if (selectedTrail && mapRef.current) {
+      try {
+        mapRef.current.flyTo?.({
+          center: [selectedTrail.location.longitude, selectedTrail.location.latitude],
+          zoom: 14,
+          speed: 1.5
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('TrailMap flyTo failed', e);
+      }
     }
   }, [selectedTrail]);
 
@@ -42,26 +48,33 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
   }), [trails]);
 
   const handleRecenter = () => {
-    if (userLocation) {
-      mapRef.current.flyTo({
-        center: [userLocation.longitude, userLocation.latitude],
-        zoom: 13,
-        speed: 1.5
-      });
+    if (userLocation && mapRef.current) {
+      try {
+        mapRef.current.flyTo?.({
+          center: [userLocation.longitude, userLocation.latitude],
+          zoom: 13,
+          speed: 1.5
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Recenter flyTo failed', e);
+      }
     }
   };
 
   return (
     <div style={{borderRadius: '8px', overflow: 'hidden', height: '600px', border: '1px solid #ccc', position: 'relative'}}>
-      <Map
-        ref={mapRef}
-        {...viewState}
-        onMove={evt => setViewState(evt.viewState)}
-        style={{width: '100%', height: '100%'}}
-        mapStyle="mapbox://styles/mapbox/standard"
-        mapboxAccessToken={MAPBOX_TOKEN}
-        onLoad={() => setMapLoaded(true)}
-      >
+      {MAPBOX_TOKEN ? (
+        <Map
+          ref={mapRef}
+          {...viewState}
+          onMove={evt => evt?.viewState && setViewState(evt.viewState)}
+          style={{width: '100%', height: '100%'}}
+          mapStyle="mapbox://styles/mapbox/standard"
+          mapboxAccessToken={MAPBOX_TOKEN}
+          onLoad={() => setMapLoaded(true)}
+          onError={(e) => { /* eslint-disable-next-line no-console */ console.error('TrailMap error', e?.error); }}
+        >
         <NavigationControl position="top-right" />
         <FullscreenControl position="top-right" />
         <ScaleControl position="bottom-right" />
@@ -125,7 +138,12 @@ export default function TrailMap({ trails, userLocation, selectedTrail, onSelect
             </div>
           </Popup>
         )}
-      </Map>
+        </Map>
+      ) : (
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',padding:'2rem',textAlign:'center'}}>
+          <p style={{margin:0}}>Map disabled (missing Mapbox token)</p>
+        </div>
+      )}
       {userLocation && (
         <button
           onClick={handleRecenter}

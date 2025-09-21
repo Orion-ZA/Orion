@@ -17,4 +17,5 @@ jobs:
         continue-on-error: ${{ github.event_name == 'push' }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        # still runs even if tests failed on push
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

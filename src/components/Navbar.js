@@ -77,7 +77,11 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <nav className="nav-links desktop-nav">
-          <NavLink to="/trails">Trails</NavLink>
+          <button
+            type="button"
+            className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
+            onClick={()=>{ navigate('/trails'); }}
+          >Trails</button>
           <button
             type="button"
             className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
@@ -87,7 +91,7 @@ export default function Navbar() {
             type="button"
             className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
             onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}
-          >MyTrails</button>
+          >My Trails</button>
           <button
             type="button"
             className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}

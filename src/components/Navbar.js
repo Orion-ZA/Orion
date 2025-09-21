@@ -80,7 +80,7 @@ export default function Navbar() {
           <button
             type="button"
             className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/trails'); } }}
+            onClick={()=>{ navigate('/trails'); }}
           >Trails</button>
           <button
             type="button"

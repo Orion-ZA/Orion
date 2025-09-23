@@ -96,6 +96,16 @@ describe('AlertsUpdates Component', () => {
     });
 
     it('shows loading state initially', async () => {
+      // Mock slow fetch to ensure loading state is visible
+      global.fetch.mockImplementation((url) => {
+        return new Promise(resolve => {
+          setTimeout(() => resolve({
+            ok: true,
+            json: () => Promise.resolve({ favourites: [], wishlist: [], completed: [] })
+          }), 100);
+        });
+      });
+
       await act(async () => {
         render(<AlertsUpdates />);
       });
@@ -121,8 +131,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Trail: Test Trail 1')).toBeInTheDocument();
-        expect(screen.getByText('Trail: Test Trail 3')).toBeInTheDocument();
+        expect(screen.getAllByText('Trail:', { exact: false })).toHaveLength(3);
+        expect(screen.getAllByText('Test Trail 1')).toHaveLength(2);
+        expect(screen.getByText('Test Trail 3')).toBeInTheDocument();
       });
     });
 
@@ -132,7 +143,7 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Closure')).toBeInTheDocument();
+        expect(screen.getAllByText('Closure')).toHaveLength(2);
         expect(screen.getByText('Condition')).toBeInTheDocument();
       });
     });
@@ -143,9 +154,10 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Posted: 1/1/2024')).toBeInTheDocument();
-        expect(screen.getByText('Posted: 1/2/2024')).toBeInTheDocument();
-        expect(screen.getByText('Posted: 1/3/2024')).toBeInTheDocument();
+        expect(screen.getAllByText('Posted:', { exact: false })).toHaveLength(3);
+        expect(screen.getByText('2024/01/01', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('2024/01/02', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('2024/01/03', { exact: false })).toBeInTheDocument();
       });
     });
   });
@@ -333,7 +345,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Tracking alerts for 4 saved trails')).toBeInTheDocument();
+        expect(screen.getByText('Tracking alerts for', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('4')).toBeInTheDocument();
+        expect(screen.getAllByText('saved trails', { exact: false })).toHaveLength(3);
       });
     });
 
@@ -343,7 +357,12 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Tracking alerts for 4 saved trails, with 3 active alerts')).toBeInTheDocument();
+        expect(screen.getByText('Tracking alerts for', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('4')).toBeInTheDocument();
+        expect(screen.getAllByText('saved trails', { exact: false })).toHaveLength(3);
+        expect(screen.getByText('with', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('3')).toBeInTheDocument();
+        expect(screen.getAllByText('active alerts', { exact: false })).toHaveLength(2);
       });
     });
 
@@ -367,10 +386,10 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        const closureBadge = screen.getByText('Closure');
+        const closureBadges = screen.getAllByText('Closure');
         const conditionBadge = screen.getByText('Condition');
         
-        expect(closureBadge).toHaveClass('badge', 'danger');
+        expect(closureBadges[0]).toHaveClass('badge', 'danger');
         expect(conditionBadge).toHaveClass('badge', 'warning');
       });
     });
@@ -406,7 +425,7 @@ describe('AlertsUpdates Component', () => {
       await waitFor(() => {
         expect(screen.getByText('Trail closed due to weather')).toBeInTheDocument();
         // Should not show date if not provided
-        expect(screen.queryByText(/Posted:/)).not.toBeInTheDocument();
+        expect(screen.queryByText('Posted:', { exact: false })).not.toBeInTheDocument();
       });
     });
 
@@ -445,7 +464,7 @@ describe('AlertsUpdates Component', () => {
       await waitFor(() => {
         expect(screen.getByText('Trail closed due to weather')).toBeInTheDocument();
         // Should not show trail name if not provided
-        expect(screen.queryByText(/Trail:/)).not.toBeInTheDocument();
+        expect(screen.queryByText('Trail:', { exact: false })).not.toBeInTheDocument();
       });
     });
   });

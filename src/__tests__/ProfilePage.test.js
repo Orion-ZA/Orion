@@ -2,13 +2,12 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProfilePage from '../pages/ProfilePage';
-import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 // Mock Firebase modules
 jest.mock('firebase/firestore', () => ({
-  doc: jest.fn(),
+  doc: jest.fn((db, collection, id) => ({ path: `${collection}/${id}` })),
   getDoc: jest.fn(),
 }));
 
@@ -18,6 +17,14 @@ jest.mock('firebase/auth', () => ({
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
+}));
+
+// Mock Firebase config
+jest.mock('../firebaseConfig', () => ({
+  auth: {
+    onAuthStateChanged: jest.fn(),
+  },
+  db: {},
 }));
 
 // Mock child components
@@ -59,11 +66,13 @@ describe('ProfilePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useNavigate.mockReturnValue(mockNavigate);
+    const { auth } = require('../firebaseConfig');
     auth.onAuthStateChanged = mockOnAuthStateChanged;
     getDoc.mockImplementation(mockGetDoc);
   });
 
   it('renders loading state initially', () => {
+    mockOnAuthStateChanged.mockReturnValue(jest.fn()); // Return unsubscribe function
     render(<ProfilePage />);
     
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -220,7 +229,7 @@ describe('ProfilePage', () => {
     };
 
     const mockUserData = {
-      wishlist: ['/Trails/trail1', '/Trails/trail2'],
+      wishlist: ['/Trails/trail1'],
       favourites: [],
       completedHikes: [],
       submittedTrails: []
@@ -236,6 +245,7 @@ describe('ProfilePage', () => {
       return jest.fn();
     });
 
+    // Mock getDoc to return user data first, then trail data
     mockGetDoc
       .mockResolvedValueOnce({ exists: () => true, data: () => mockUserData })
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });

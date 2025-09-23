@@ -208,6 +208,7 @@ export default function Feedback() {
                       type="button" 
                       onClick={removeScreenshot}
                       className="remove-screenshot"
+                      aria-label="Remove screenshot"
                     >
                       <X size={14} />
                     </button>

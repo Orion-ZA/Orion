@@ -20,6 +20,8 @@ const LogoutButton = () => {
     } catch (err) {
       console.error('Failed to logout:', err);
       alert('Failed to logout. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

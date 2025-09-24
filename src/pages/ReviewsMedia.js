@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebaseConfig";
+import { storage, auth } from "../firebaseConfig"; // Import auth from firebaseConfig
+import { onAuthStateChanged, signOut } from "firebase/auth"; // Import auth functions
 
 const modalOverlayStyle = {
   position: "fixed",
@@ -81,6 +82,14 @@ async function fetchTrailAlerts(trailId) {
   }
 }
 
+// Add this function to calculate average rating
+function calculateAverageRating(reviews) {
+  if (!reviews || reviews.length === 0) return 0;
+  
+  const sum = reviews.reduce((total, review) => total + (review.rating || 0), 0);
+  return sum / reviews.length;
+}
+
 export default function ReviewsMedia() {
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
@@ -94,11 +103,36 @@ export default function ReviewsMedia() {
   const [selectedTrailId, setSelectedTrailId] = useState(null);
 
   const [newReview, setNewReview] = useState("");
+  const [newRating, setNewRating] = useState(0);
   const [newImages, setNewImages] = useState([]);
   const [alertType, setAlertType] = useState("general");
   const [alertMessage, setAlertMessage] = useState("");
 
+  // Add user authentication state
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Set up auth state listener
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to load before fetching trails
+
     (async () => {
       try {
         const data = await fetchTrails();
@@ -122,14 +156,28 @@ export default function ReviewsMedia() {
           })
         );
 
-        setTrails(trailsWithUrls);
+        // Fetch reviews for each trail and calculate average ratings
+        const trailsWithRatings = await Promise.all(
+          trailsWithUrls.map(async (trail) => {
+            const trailReviews = await fetchTrailReviews(trail.id);
+            const averageRating = calculateAverageRating(trailReviews);
+            const reviewCount = trailReviews.length;
+            
+            return {
+              ...trail,
+              averageRating,
+              reviewCount
+            };
+          })
+        );
+
+        setTrails(trailsWithRatings);
 
         const reviewsData = {};
         const alertsData = {};
 
-        // Use the external helper function
         await Promise.all(
-          trailsWithUrls.map(async (trail) => {
+          trailsWithRatings.map(async (trail) => {
             reviewsData[trail.id] = await fetchTrailReviews(trail.id);
             alertsData[trail.id] = await fetchTrailAlerts(trail.id);
           })
@@ -143,7 +191,7 @@ export default function ReviewsMedia() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [authLoading]);
 
   const uploadPhotos = async (files) => {
     const urls = [];
@@ -157,9 +205,16 @@ export default function ReviewsMedia() {
   };
 
   const openModal = (trailId, type) => {
+    // Check if user is logged in for review submission
+    if (type === "review" && !user) {
+      alert("Please log in to submit a review");
+      return;
+    }
+    
     setSelectedTrailId(trailId);
     setModalType(type);
     setNewReview("");
+    setNewRating(0);
     setNewImages([]);
     setAlertType("general");
     setAlertMessage("");
@@ -190,37 +245,17 @@ export default function ReviewsMedia() {
       );
 
       const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Server returned ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
+      const alertsResponse = await fetch(
+        `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${selectedTrailId}`
+      );
+      const alertsData = await alertsResponse.json();
 
-      // Instead of trying to construct the alert locally, refetch the alerts for this trail
-      try {
-        const alertsResponse = await fetch(
-          `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${selectedTrailId}`
-        );
-        const alertsData = await alertsResponse.json();
-        
-        if (alertsResponse.ok) {
-          setAlerts((prev) => ({
-            ...prev,
-            [selectedTrailId]: alertsData.alerts || []
-          }));
-        }
-      } catch (fetchError) {
-        console.error("Error refetching alerts:", fetchError);
-        // Fallback: add a temporary alert to local state
-        const newAlert = {
-          id: `temp-${Date.now()}`,
-          message: alertMessage,
-          type: alertType,
-          timestamp: new Date().toISOString()
-        };
-        
+      if (alertsResponse.ok) {
         setAlerts((prev) => ({
           ...prev,
-          [selectedTrailId]: [...(prev[selectedTrailId] || []), newAlert]
+          [selectedTrailId]: alertsData.alerts || []
         }));
       }
 
@@ -236,6 +271,9 @@ export default function ReviewsMedia() {
     if (!newReview) return;
 
     try {
+      // Use actual user data instead of "anonymous"
+      const userDisplayName = user.displayName || user.email || "User";
+      
       const response = await fetch(
         "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
         {
@@ -246,27 +284,33 @@ export default function ReviewsMedia() {
             review: {
               id: uuidv4(),
               message: newReview,
+              rating: newRating,
               timestamp: new Date().toISOString(),
-              // Add user info if available
-              userId: "anonymous", // You might want to get this from auth
-              userName: "Anonymous User"
+              userId: user.uid, // Use actual user ID
+              userName: userDisplayName, // Use actual user name
+              userEmail: user.email // Optional: store email for reference
             }
           }),
         }
       );
 
       const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Server returned ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch reviews for this trail
+      // Refetch reviews to update the average rating
       const updatedReviews = await fetchTrailReviews(selectedTrailId);
       setReviews((prev) => ({
         ...prev,
         [selectedTrailId]: updatedReviews,
       }));
+
+      // Update the trail's average rating
+      const averageRating = calculateAverageRating(updatedReviews);
+      setTrails(prev => prev.map(trail => 
+        trail.id === selectedTrailId 
+          ? {...trail, averageRating, reviewCount: updatedReviews.length}
+          : trail
+      ));
 
       closeModal();
       alert("✅ Review added successfully!");
@@ -280,10 +324,8 @@ export default function ReviewsMedia() {
     if (!newImages || newImages.length === 0) return;
 
     try {
-      // Upload images to Firebase Storage
       const uploadedUrls = await uploadPhotos(newImages);
-      
-      // Update trail with new images
+
       const response = await fetch(
         "https://us-central1-orion-sdp.cloudfunctions.net/updateTrailImages",
         {
@@ -297,12 +339,8 @@ export default function ReviewsMedia() {
       );
 
       const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Server returned ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch trails to update images
       const updatedTrails = await fetchTrails();
       const trailsWithUrls = await Promise.all(
         updatedTrails.map(async (trail) => {
@@ -332,12 +370,28 @@ export default function ReviewsMedia() {
     }
   };
 
-  if (loading) return <p>Loading trails...</p>;
+  if (authLoading || loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className="container fade-in-up">
-      <h1>Trails</h1>
+      {/* Add user info and logout button */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h1>Trails</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {user ? (
+            <>
+              <span>Welcome, {user.displayName || user.email}!</span>
+              <button style={cancelButtonStyle} onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <span>Please log in to submit reviews</span>
+          )}
+        </div>
+      </div>
+      
       <div className="grid cols-3" style={{ marginTop: "1rem" }}>
         {trails.map((trail) => (
           <div
@@ -385,9 +439,17 @@ export default function ReviewsMedia() {
 
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <h4 style={{ margin: 0 }}>{trail.name}</h4>
+              <span style={{ fontSize: "0.9rem", color: "#666" }}>
+                ⭐ {trail.averageRating ? trail.averageRating.toFixed(1) : "N/A"} 
+                {trail.reviewCount > 0 && ` (${trail.reviewCount})`}
+              </span>
               {hoveredTrailId === trail.id && (
                 <div style={{ display: "flex", gap: "0.25rem" }}>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "review")}>
+                  <button 
+                    style={{...buttonStyle, opacity: user ? 1 : 0.6}} 
+                    onClick={() => openModal(trail.id, "review")}
+                    title={user ? "Add Review" : "Please log in to review"}
+                  >
                     Add Review
                   </button>
                   <button style={buttonStyle} onClick={() => openModal(trail.id, "images")}>
@@ -410,11 +472,39 @@ export default function ReviewsMedia() {
               </ul>
             )}
 
-            <div style={{ marginTop: "0.5rem" }}>
+            <div
+              style={{
+                marginTop: "0.5rem",
+                maxHeight: "150px",
+                overflowY: "auto",
+                paddingRight: "0.5rem",
+              }}
+            >
               {reviews[trail.id] && reviews[trail.id].length > 0 ? (
-                <ul style={{ color: "var(--muted)", paddingLeft: "1rem" }}>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {reviews[trail.id].map((rev) => (
-                    <li key={rev.id}>{rev.message}</li>
+                    <li
+                      key={rev.id}
+                      style={{
+                        marginBottom: "1rem",
+                        paddingBottom: "0.5rem",
+                        borderBottom: "1px solid #eee",
+                      }}
+                    >
+                      {rev.rating && (
+                        <div style={{ marginBottom: "0.25rem" }}>
+                          {"★".repeat(rev.rating)}
+                          {"☆".repeat(5 - rev.rating)}
+                        </div>
+                      )}
+
+                      <div>
+                        <strong style={{ marginRight: "0.5rem" }}>
+                          {rev.userName || "Anonymous"}
+                        </strong>
+                        <span style={{ color: "var(--muted)" }}>{rev.message}</span>
+                      </div>
+                    </li>
                   ))}
                 </ul>
               ) : (
@@ -461,7 +551,23 @@ export default function ReviewsMedia() {
             
             {modalType === "review" && (
               <>
-                <h3>Add Review</h3>
+                <h3>Add Review {user && `(as ${user.displayName || user.email})`}</h3>
+                <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.5rem" }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      style={{
+                        cursor: "pointer",
+                        color: newRating >= star ? "gold" : "#ccc",
+                        fontSize: "1.5rem",
+                      }}
+                      onClick={() => setNewRating(star)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+
                 <textarea
                   value={newReview}
                   onChange={(e) => setNewReview(e.target.value)}

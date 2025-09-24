@@ -153,6 +153,7 @@ const SearchBar = ({
       {/* Suggestions Dropdown */}
       {showSuggestions && 
        showSuggestionsLocal && 
+       searchSuggestions && 
        searchSuggestions.length > 0 && 
        isFocused && (
         <div ref={suggestionsRef} className="search-suggestions">

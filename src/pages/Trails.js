@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
 import FilterPanel from '../components/filters/FilterPanel';
@@ -308,9 +308,21 @@ export default function TrailsPage() {
       const result = await response.json();
 
       if (response.ok) {
+        //get the trail id
+        const trailId = result.trailId;
+
+        //create a doc reference to new the new trail
+        const trailRef = doc(db, "Trails", trailId);
+        //update the doc with the id
+        const userRef = doc(db, "Users", currentUserId);
+
+        await updateDoc(userRef, 
+          { submittedTrails: arrayUnion(trailRef)
+        });
+
         setSubmitStatus({ 
           type: 'success', 
-          message: `Trail "${trailData.name}" submitted successfully! Trail ID: ${result.trailId}` 
+          message: `Trail "${trailData.name}" submitted successfully! Trail ID: ${trailId}`
         });
         setShowSubmissionPanel(false);
         setSubmissionLocation(null);

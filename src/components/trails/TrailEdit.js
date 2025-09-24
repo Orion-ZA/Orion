@@ -4,12 +4,14 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { calculateRouteDistance, formatFileSize } from './TrailUtils';
+import ConfirmDialog from '../ConfirmDialog';
 import './TrailSubmission.css';
 
 const TrailEdit = ({
   isOpen,
   onClose,
   onSubmit,
+  onDelete,
   isSubmitting,
   submitStatus,
   selectedLocation,
@@ -34,6 +36,10 @@ const TrailEdit = ({
   // Undo/Redo history state
   const [routeHistory, setRouteHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  
+  // Confirm dialog state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showClearRouteConfirm, setShowClearRouteConfirm] = useState(false);
 
   // Initialize form with existing trail data
   useEffect(() => {
@@ -135,6 +141,27 @@ const TrailEdit = ({
     }
   };
 
+  const handleDelete = () => {
+    if (!editTrailData?.id) {
+      console.error('No trail ID available for deletion');
+      return;
+    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await onDelete(editTrailData.id);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error('Error deleting trail:', error);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);
@@ -174,14 +201,21 @@ const TrailEdit = ({
   };
 
   const clearRoute = () => {
-    if (window.confirm('Are you sure you want to clear the entire route? This will remove all GPS points.')) {
-      setRoutePoints([]);
-      setRouteHistory([]);
-      setHistoryIndex(-1);
-      if (onRouteUpdate) {
-        onRouteUpdate([]);
-      }
+    setShowClearRouteConfirm(true);
+  };
+
+  const confirmClearRoute = () => {
+    setRoutePoints([]);
+    setRouteHistory([]);
+    setHistoryIndex(-1);
+    if (onRouteUpdate) {
+      onRouteUpdate([]);
     }
+    setShowClearRouteConfirm(false);
+  };
+
+  const cancelClearRoute = () => {
+    setShowClearRouteConfirm(false);
   };
 
   const addRoutePoint = (lng, lat) => {
@@ -545,21 +579,58 @@ const TrailEdit = ({
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting || !selectedLocation || !trailName.trim() || !difficulty || !distance}
-          className="submit-btn"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Updating...
-            </>
-          ) : (
-            'Update Trail'
-          )}
-        </button>
+        <div className="form-actions">
+          <button
+            type="submit"
+            disabled={isSubmitting || !selectedLocation || !trailName.trim() || !difficulty || !distance}
+            className="submit-btn"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Updating...
+              </>
+            ) : (
+              'Update Trail'
+            )}
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isSubmitting}
+            className="delete-btn"
+            title="Delete this trail"
+          >
+            <Trash2 size={16} />
+            Delete Trail
+          </button>
+        </div>
       </form>
+
+      {/* Custom Confirm Dialogs */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="Delete Trail"
+        message={`Are you sure you want to delete "${editTrailData?.name}"? This action cannot be undone.`}
+        confirmText="Delete Trail"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isSubmitting}
+      />
+      
+      <ConfirmDialog
+        isOpen={showClearRouteConfirm}
+        onClose={cancelClearRoute}
+        onConfirm={confirmClearRoute}
+        title="Clear Route"
+        message="Are you sure you want to clear the entire route? This will remove all GPS points."
+        confirmText="Clear Route"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   );
 };

@@ -388,6 +388,45 @@ export default function TrailsPage() {
     }
   };
 
+  // Handle trail deletion (set status to closed)
+  const handleTrailDelete = async (trailId) => {
+    setIsSubmitting(true);
+    setSubmitStatus({ type: '', message: '' });
+
+    try {
+      // Update the trail status to closed
+      const trailRef = doc(db, 'Trails', trailId);
+      await updateDoc(trailRef, {
+        status: 'closed',
+        updatedAt: new Date().toISOString()
+      });
+
+      setSubmitStatus({ 
+        type: 'success', 
+        message: 'Trail deleted successfully!' 
+      });
+      
+      // Close the edit panel
+      setShowSubmissionPanel(false);
+      setIsEditMode(false);
+      setTrailToEdit(null);
+      setSubmissionLocation(null);
+      setSubmissionRoute([]);
+      setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
+      
+      // Refresh trails data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting trail:', error);
+      setSubmitStatus({ 
+        type: 'error', 
+        message: 'Failed to delete trail. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Handle edit trail
   const handleEditTrail = (trail) => {
     setTrailToEdit(trail);
@@ -500,6 +539,7 @@ export default function TrailsPage() {
                 setSubmissionDrawingState({ isDrawing: false, addRoutePoint: null });
               }}
               onSubmit={handleTrailUpdate}
+              onDelete={handleTrailDelete}
               isSubmitting={isSubmitting}
               submitStatus={submitStatus}
               selectedLocation={submissionLocation}

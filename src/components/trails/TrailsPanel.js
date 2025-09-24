@@ -169,7 +169,7 @@ const TrailsPanel = ({
             const snap = await getDoc(doc(db, 'Users', uid));
             if (snap.exists()) {
               const data = snap.data();
-              const name = data?.profileInfo?.name || data?.name || 'Unknown';
+              const name = data?.profileInfo?.displayName || data?.profileInfo?.name || data?.name || 'Unknown';
               return [uid, name];
             }
             return [uid, 'Unknown'];
@@ -330,7 +330,9 @@ const TrailsPanel = ({
                         <div className="trail-author" title="Trail submitted by">
                           {(() => {
                             const createdByRaw = trail.createdBy;
-                            if (!createdByRaw) return null;
+                            if (!createdByRaw) {
+                              return null;
+                            }
                             const uid = typeof createdByRaw === 'string'
                               ? (createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw)
                               : createdByRaw;

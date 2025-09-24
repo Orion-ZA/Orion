@@ -105,7 +105,7 @@ export default function useTrails(externalUserLocation = null, currentUserId = n
           description: data.description || '',
           tags: data.tags || [],
           photos: data.photos || [],
-          status: data.status || 'active',
+          status: data.status || 'open',
           createdBy: data.createdBy?.path || data.createdBy || 'unknown',
           gpsRoute: data.gpsRoute && Array.isArray(data.gpsRoute) 
             ? data.gpsRoute
@@ -124,12 +124,13 @@ export default function useTrails(externalUserLocation = null, currentUserId = n
         };
       });
       
-      // Filter out trails with invalid coordinates
+      // Filter out trails with invalid coordinates and closed trails
       const validTrails = trailsData.filter(trail => 
         trail.latitude !== null && 
         trail.longitude !== null && 
         !isNaN(trail.latitude) && 
-        !isNaN(trail.longitude)
+        !isNaN(trail.longitude) &&
+        trail.status !== 'closed' // Filter out closed trails
       );
       
       // If no trails found, add some sample data for testing

@@ -91,7 +91,7 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/help" element={<HelpCenter />} />
-          <Route path="*" element={<Dashboard />} />
+          <Route path="*" element={<Welcome />} />
         </Routes>
       </main>
       {!hideFooter && <Footer />}

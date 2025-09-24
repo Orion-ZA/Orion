@@ -173,8 +173,11 @@ export default function FilterPanel({ filters, onFilterChange, onClose, currentU
         
         {/* Search by Name */}
         <div>
-          <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Search Trails</label>
+          <label htmlFor="search-trails-input" style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>
+            Search Trails
+          </label>
           <input 
+            id="search-trails-input"
             type="text" 
             className="search-input"
             placeholder="Search by trail name"
@@ -186,8 +189,15 @@ export default function FilterPanel({ filters, onFilterChange, onClose, currentU
 
         {/* Standard Filters */}
         <div>
-          <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Difficulty</label>
-          <select value={filters.difficulty} onChange={(e) => onFilterChange('difficulty', e.target.value)} style={{width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'var(--text)'}}>
+          <label htmlFor="difficulty-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+            Difficulty
+          </label>
+          <select
+            id="difficulty-select"
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255, 255, 255, 0.05)' }}
+            value={filters.difficulty}
+            onChange={e => onFilterChange('difficulty', e.target.value)}
+          >
             <option value="all">All</option>
             <option value="Easy">Easy</option>
             <option value="Moderate">Moderate</option>
@@ -195,9 +205,12 @@ export default function FilterPanel({ filters, onFilterChange, onClose, currentU
           </select>
         </div>
         <div>
-          <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Tags</label>
+          <label htmlFor="tags-input" style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>
+            Tags
+          </label>
           <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
             <input 
+              id="tags-input"
               type="text" 
               placeholder="Search tags (e.g., waterfall, forest)"
               value={tagInput} 
@@ -266,40 +279,32 @@ export default function FilterPanel({ filters, onFilterChange, onClose, currentU
 
         {/* Range Sliders */}
         <div>
-          <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Distance: {filters.minDistance} - {filters.maxDistance} km</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="32" 
-            value={filters.maxDistance} 
-            onChange={(e) => onFilterChange('maxDistance', parseFloat(e.target.value))} 
-            style={{
-              width: '100%',
-              height: '6px',
-              borderRadius: '3px',
-              background: 'rgba(255,255,255,0.2)',
-              outline: 'none',
-              appearance: 'none'
-            }}
+          <label htmlFor="distance-range" style={{display: 'block', marginBottom: '0.5rem', fontWeight: 500}}>
+            Distance: {filters.minDistance} - {filters.maxDistance} km
+          </label>
+          <input
+            id="distance-range"
+            type="range"
+            min={0}
+            max={32}
+            value={filters.maxDistance}
+            onChange={e => onFilterChange('maxDistance', Number(e.target.value))}
+            style={{width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.2)', outline: 'none', appearance: 'none'}}
           />
         </div>
         <div>
-          <label style={{display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontWeight: '500'}}>Max Location Distance: {filters.maxLocationDistance} km</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="1000" 
-            step="5" 
-            value={filters.maxLocationDistance} 
-            onChange={(e) => onFilterChange('maxLocationDistance', parseFloat(e.target.value))} 
-            style={{
-              width: '100%',
-              height: '6px',
-              borderRadius: '3px',
-              background: 'rgba(255,255,255,0.2)',
-              outline: 'none',
-              appearance: 'none'
-            }}
+          <label htmlFor="location-distance-range" style={{display: 'block', marginBottom: '0.5rem', fontWeight: 500}}>
+            Max Location Distance: {filters.maxLocationDistance} km
+          </label>
+          <input
+            id="location-distance-range"
+            type="range"
+            min={0}
+            max={1000}
+            step={5}
+            value={filters.maxLocationDistance}
+            onChange={e => onFilterChange('maxLocationDistance', Number(e.target.value))}
+            style={{width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.2)', outline: 'none', appearance: 'none'}}
           />
         </div>
       </div>

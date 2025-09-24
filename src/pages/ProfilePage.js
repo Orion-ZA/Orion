@@ -16,7 +16,7 @@ export default function Profile() {
   const [trailsData, setTrailsData] = useState({
     wishlist: [],
     favourites: [],
-    completedHikes: [],
+    completed: [], // hikes marked as completed are pushed to this array in firestore instead of "completedHikes"
     submittedTrails: []
   });
   const [loading, setLoading] = useState(true);
@@ -60,15 +60,15 @@ export default function Profile() {
             ).then((list) => list.filter(Boolean)); // filter out nulls
           };
 
-          const [wishlist, favourites, completedHikes, submittedTrails] =
+          const [wishlist, favourites, completed, submittedTrails] =
             await Promise.all([
               fetchTrails(data.wishlist || []),
               fetchTrails(data.favourites || []),
-              fetchTrails(data.completedHikes || []),
+              fetchTrails(data.completed || []),
               fetchTrails(data.submittedTrails || [])
             ]);
 
-          setTrailsData({ wishlist, favourites, completedHikes, submittedTrails });
+          setTrailsData({ wishlist, favourites, completed, submittedTrails });
         }
       } catch (err) {
         console.error("Error fetching user/trails:", err);
@@ -162,9 +162,9 @@ export default function Profile() {
 
       <section className="profile-section">
         <h2><CompletedIcon /> Completed Hikes</h2>
-        {trailsData.completedHikes.length ? (
+        {trailsData.completed.length ? (
           <ul className="trail-list">
-            {trailsData.completedHikes.map((trail) => {
+            {trailsData.completed.map((trail) => {
               const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
               return (
                 <li 

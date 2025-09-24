@@ -13,6 +13,18 @@
   left: 0;
 }
 
+/* Search Container */
+.trails-search-container {
+  position: absolute;
+  top: 5rem; /* Account for navbar height */
+  left: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  max-width: 600px;
+  margin: 0 auto;
+  pointer-events: auto;
+}
+
 
 .trails-main {
   flex: 1;
@@ -158,6 +170,12 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
+  .trails-search-container {
+    top: 4.5rem; /* Slightly less on mobile due to smaller navbar */
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+  
   .filter-overlay {
     top: 4rem;
     right: 0.5rem;

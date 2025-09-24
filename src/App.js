@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import { LoaderProvider, useLoader } from './components/LoaderContext.js';
 import FullScreenLoader from './components/FullScreenLoader.js';
 import { ToastProvider } from './components/ToastContext';
+import { SearchProvider } from './components/SearchContext';
 
 
 import Login from './pages/Login';
@@ -104,7 +105,9 @@ function App() {
     <LoaderProvider>
       <ToastProvider>
         <Router>
-          <AppContent />
+          <SearchProvider>
+            <AppContent />
+          </SearchProvider>
         </Router>
       </ToastProvider>
     </LoaderProvider>

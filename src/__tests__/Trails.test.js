@@ -1,10 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import TrailsPage from '../pages/Trails';
 import useTrails from '../components/hooks/useTrails';
+import { SearchProvider } from '../components/SearchContext';
 import { 
   mockTrails, 
   mockUserLocation, 
@@ -180,6 +182,17 @@ window.location = { reload: jest.fn() };
 // Mock fetch globally
 global.fetch = jest.fn();
 
+// Helper function to render with all necessary providers
+const renderWithProviders = (component) => {
+  return render(
+    <BrowserRouter>
+      <SearchProvider>
+        {component}
+      </SearchProvider>
+    </BrowserRouter>
+  );
+};
+
 describe('TrailsPage', () => {
   const mockUnsubscribe = jest.fn();
   const mockHandleFilterChange = jest.fn();
@@ -204,11 +217,16 @@ describe('TrailsPage', () => {
     });
 
     mockUseTrails.mockReturnValue({
+      filteredTrails: mockTrails,
       trails: mockTrails,
       isLoadingTrails: false,
       filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
       handleFilterChange: mockHandleFilterChange,
-      filteredTrails: mockTrails
+      userLocation: null,
+      locationError: null,
+      isLoadingLocation: false,
+      getUserLocation: jest.fn(),
+      calculateDistance: jest.fn()
     });
 
     // Mock successful fetch responses
@@ -248,7 +266,7 @@ describe('TrailsPage', () => {
   describe('Component Rendering', () => {
     it('renders the trails page with all main components', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -258,15 +276,20 @@ describe('TrailsPage', () => {
 
     it('renders loading state when trails are loading', async () => {
       mockUseTrails.mockReturnValue({
+        filteredTrails: [],
         trails: [],
         isLoadingTrails: true,
         filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
         handleFilterChange: mockHandleFilterChange,
-        filteredTrails: []
+        userLocation: null,
+        locationError: null,
+        isLoadingLocation: false,
+        getUserLocation: jest.fn(),
+        calculateDistance: jest.fn()
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByText('Loading trails…')).toBeInTheDocument();
@@ -276,7 +299,7 @@ describe('TrailsPage', () => {
       simulateGeolocationError('Location access denied');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -288,7 +311,7 @@ describe('TrailsPage', () => {
   describe('Authentication State Management', () => {
     it('handles authenticated user state', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(onAuthStateChanged).toHaveBeenCalled();
@@ -308,7 +331,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(onAuthStateChanged).toHaveBeenCalled();
@@ -316,7 +339,7 @@ describe('TrailsPage', () => {
 
     it('loads user saved trails on authentication', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -336,7 +359,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Should not throw error and should set empty userSaved state
@@ -347,7 +370,7 @@ describe('TrailsPage', () => {
   describe('Geolocation Functionality', () => {
     it('gets user location on component mount', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalled();
@@ -364,7 +387,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledWith(
@@ -381,7 +404,7 @@ describe('TrailsPage', () => {
       simulateGeolocationError('User denied geolocation');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -397,7 +420,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -413,7 +436,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -430,7 +453,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -448,7 +471,7 @@ describe('TrailsPage', () => {
   describe('Map Controls', () => {
     it('handles zoom in action', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const zoomInButton = screen.getByText('Zoom In');
@@ -460,7 +483,7 @@ describe('TrailsPage', () => {
 
     it('handles zoom out action', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const zoomOutButton = screen.getByText('Zoom Out');
@@ -471,7 +494,7 @@ describe('TrailsPage', () => {
 
     it('handles reset north action', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const resetNorthButton = screen.getByText('Reset North');
@@ -484,7 +507,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const recenterButton = screen.getByText('Recenter');
@@ -495,7 +518,7 @@ describe('TrailsPage', () => {
 
     it('handles find location action', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const findLocationButton = screen.getByText('Find Location');
@@ -508,7 +531,7 @@ describe('TrailsPage', () => {
   describe('Trail Interactions', () => {
     it('handles trail click and centers map', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const clickTrailButtons = screen.getAllByText('Click Trail');
@@ -519,7 +542,7 @@ describe('TrailsPage', () => {
 
     it('handles map click for trail submission', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // First open submission panel
@@ -535,7 +558,7 @@ describe('TrailsPage', () => {
 
     it('handles map click in drawing mode', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -575,7 +598,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -615,7 +638,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -633,7 +656,7 @@ describe('TrailsPage', () => {
 
     it('handles wishlist actions', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock the handleTrailAction to test wishlist
@@ -644,7 +667,7 @@ describe('TrailsPage', () => {
 
     it('handles completed trail actions', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Similar to wishlist, this would require testing the actual component behavior
@@ -654,7 +677,7 @@ describe('TrailsPage', () => {
       global.fetch.mockImplementation(() => Promise.resolve({ ok: false }));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const toggleFavouriteButton = screen.getByText('Toggle Favourite');
@@ -668,7 +691,7 @@ describe('TrailsPage', () => {
   describe('Trail Submission', () => {
     it('opens trail submission panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const submitTrailButton = screen.getByText('Submit Trail');
@@ -700,7 +723,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -736,7 +759,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -756,7 +779,7 @@ describe('TrailsPage', () => {
       global.fetch.mockImplementation(() => Promise.reject(new Error('Network error')));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -774,7 +797,7 @@ describe('TrailsPage', () => {
 
     it('closes trail submission panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -794,7 +817,7 @@ describe('TrailsPage', () => {
   describe('Trail Editing', () => {
     it('opens trail edit panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const editTrailButton = screen.getByText('Edit Trail');
@@ -807,7 +830,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -827,7 +850,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Update failed'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -845,7 +868,7 @@ describe('TrailsPage', () => {
 
     it('closes trail edit panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -863,7 +886,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with existing GPS route data', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock trail with existing GPS route
@@ -882,7 +905,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail without GPS route data', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock trail without GPS route
@@ -903,7 +926,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -929,7 +952,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Delete failed'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -949,7 +972,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -976,7 +999,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1001,7 +1024,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1022,7 +1045,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1048,7 +1071,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1068,7 +1091,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Delete failed'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1088,7 +1111,7 @@ describe('TrailsPage', () => {
       updateDoc.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1109,7 +1132,7 @@ describe('TrailsPage', () => {
   describe('Panel Management', () => {
     it('opens and closes filter panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open filter panel
@@ -1127,7 +1150,7 @@ describe('TrailsPage', () => {
 
     it('opens trails panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const openPanelButton = screen.getByText('Open Panel');
@@ -1141,7 +1164,7 @@ describe('TrailsPage', () => {
   describe('Route Updates', () => {
     it('handles route updates from submission panel', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -1157,7 +1180,7 @@ describe('TrailsPage', () => {
 
     it('handles location selection', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -1177,7 +1200,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // The component should calculate distance between user location and map center
@@ -1191,7 +1214,7 @@ describe('TrailsPage', () => {
       global.fetch.mockImplementation(() => Promise.reject(new Error('Network error')));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Component should still render despite fetch errors
@@ -1205,7 +1228,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       const toggleFavouriteButton = screen.getByText('Toggle Favourite');
@@ -1222,7 +1245,7 @@ describe('TrailsPage', () => {
   describe('Component Cleanup', () => {
     it('unsubscribes from auth state changes on unmount', async () => {
       const { unmount } = await act(async () => {
-        return render(<TrailsPage />);
+        return renderWithProviders(<TrailsPage />);
       });
 
       unmount();
@@ -1234,15 +1257,20 @@ describe('TrailsPage', () => {
   describe('Edge Cases', () => {
     it('handles empty trails array', async () => {
       mockUseTrails.mockReturnValue({
+        filteredTrails: [],
         trails: [],
         isLoadingTrails: false,
         filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
         handleFilterChange: mockHandleFilterChange,
-        filteredTrails: []
+        userLocation: null,
+        locationError: null,
+        isLoadingLocation: false,
+        getUserLocation: jest.fn(),
+        calculateDistance: jest.fn()
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -1255,7 +1283,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -1268,15 +1296,20 @@ describe('TrailsPage', () => {
       ];
 
       mockUseTrails.mockReturnValue({
+        filteredTrails: trailsWithInvalidCoords,
         trails: trailsWithInvalidCoords,
         isLoadingTrails: false,
         filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
         handleFilterChange: mockHandleFilterChange,
-        filteredTrails: trailsWithInvalidCoords
+        userLocation: null,
+        locationError: null,
+        isLoadingLocation: false,
+        getUserLocation: jest.fn(),
+        calculateDistance: jest.fn()
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -1284,7 +1317,7 @@ describe('TrailsPage', () => {
 
     it('handles trail click with missing coordinates', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock a trail without coordinates
@@ -1297,7 +1330,7 @@ describe('TrailsPage', () => {
 
     it('handles map click without submission panel open', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Click map when submission panel is not open
@@ -1310,7 +1343,7 @@ describe('TrailsPage', () => {
 
     it('handles route update callback', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -1328,7 +1361,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1348,7 +1381,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1366,7 +1399,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with existing route data', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock trail with existing route
@@ -1387,7 +1420,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test the needsRecenter calculation
@@ -1400,7 +1433,7 @@ describe('TrailsPage', () => {
       simulateGeolocationError('Location error');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -1415,7 +1448,7 @@ describe('TrailsPage', () => {
       });
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -1423,7 +1456,7 @@ describe('TrailsPage', () => {
 
     it('handles trail click with missing longitude/latitude', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test handleTrailClick with trail missing coordinates
@@ -1433,7 +1466,7 @@ describe('TrailsPage', () => {
 
     it('handles map click in drawing mode with addRoutePoint', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -1455,7 +1488,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1475,7 +1508,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1499,7 +1532,7 @@ describe('TrailsPage', () => {
       updateDoc.mockResolvedValue();
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1521,7 +1554,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with existing GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock trail with existing GPS route
@@ -1540,7 +1573,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail without GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Mock trail without GPS route
@@ -1557,7 +1590,7 @@ describe('TrailsPage', () => {
 
     it('sets submission location when editing trail', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1569,7 +1602,7 @@ describe('TrailsPage', () => {
 
     it('sets submission route when editing trail with GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1581,7 +1614,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with empty GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1593,7 +1626,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with null GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1607,7 +1640,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test the needsRecenter calculation with valid coordinates
@@ -1617,12 +1650,10 @@ describe('TrailsPage', () => {
 
     it('handles needsRecenter calculation with missing coordinates', async () => {
       // Don't simulate geolocation success
-      navigator.geolocation.getCurrentPosition.mockImplementation((success, error) => {
-        error(new Error('No location'));
-      });
+      simulateGeolocationError('No location');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test the needsRecenter calculation with missing coordinates
@@ -1633,7 +1664,7 @@ describe('TrailsPage', () => {
       simulateGeolocationError('Location error');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       await waitFor(() => {
@@ -1645,7 +1676,7 @@ describe('TrailsPage', () => {
       simulateGeolocationSuccess(-26.2041, 28.0473);
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test showFindLocation when no error and location exists
@@ -1654,12 +1685,10 @@ describe('TrailsPage', () => {
 
     it('handles showFindLocation without user location', async () => {
       // Don't simulate geolocation success
-      navigator.geolocation.getCurrentPosition.mockImplementation((success, error) => {
-        error(new Error('No location'));
-      });
+      simulateGeolocationError('No location');
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Test showFindLocation when no user location
@@ -1670,7 +1699,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Network error'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1690,7 +1719,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Invalid trail ID'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1710,7 +1739,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Permission denied'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1728,7 +1757,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with malformed GPS route data', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1740,7 +1769,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with undefined GPS route', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1752,7 +1781,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with GPS route containing invalid coordinates', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1766,7 +1795,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Concurrent modification'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1786,7 +1815,7 @@ describe('TrailsPage', () => {
       updateDoc.mockRejectedValue(new Error('Request timeout'));
 
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1804,7 +1833,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with missing trail name', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1816,7 +1845,7 @@ describe('TrailsPage', () => {
 
     it('handles edit trail with missing trail coordinates', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1830,7 +1859,7 @@ describe('TrailsPage', () => {
   describe('Uncovered Code Paths', () => {
     it('executes onCloseSubmission callback to reset submission state', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel first
@@ -1850,7 +1879,7 @@ describe('TrailsPage', () => {
 
     it('executes GPS route mapping logic in handleEditTrail with complex route data', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel
@@ -1863,7 +1892,7 @@ describe('TrailsPage', () => {
 
     it('tests the specific onCloseSubmission callback execution', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open submission panel
@@ -1883,7 +1912,7 @@ describe('TrailsPage', () => {
 
     it('tests the specific GPS route mapping in handleEditTrail', async () => {
       await act(async () => {
-        render(<TrailsPage />);
+        renderWithProviders(<TrailsPage />);
       });
 
       // Open edit panel - this should trigger the handleEditTrail function

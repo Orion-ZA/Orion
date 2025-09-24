@@ -2,14 +2,14 @@
 .profile-page {
   max-width: 800px;
   margin: 40px auto;
-  padding: 20px;
-  color: var(--text);
+  padding: 1rem;
+
 }
 
 .profile-card {
   background: var(--bg-elev);
   border-radius: 12px;
-  padding: 30px;
+  padding: 20px;
   text-align: center;
   margin-bottom: 30px;
   box-shadow: var(--shadow);
@@ -105,7 +105,7 @@
 }
 
 .profile-section ul {
-  list-style-type: disc;
+  list-style-type:none;
   margin-left: 20px;
   text-align: left;
   color: var(--text);
@@ -113,4 +113,49 @@
 
 .profile-section p {
   color: var(--text-dim);
+}
+ /* new add ons */
+.trail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.trail-card {
+  background: var(--bg-alt);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+ 
+}
+
+.trail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px -4px rgba(0,0,0,0.3);
+}
+
+.trail-card h4 {
+  margin: 0 0 8px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.trail-card .meta {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+/* trail names based on difficulty */
+.trail-card.easy h4 {
+  color: #2ecc71; /* green */
+}
+
+.trail-card.moderate h4 {
+  color: #f1c40f; /* yellow */
+}
+
+.trail-card.hard h4 {
+  color: #e74c3c; /* red */
 }

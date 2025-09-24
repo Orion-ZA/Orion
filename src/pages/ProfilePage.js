@@ -115,10 +115,21 @@ export default function Profile() {
       <section className="profile-section">
         <h2><WishlistIcon /> Wishlist</h2>
         {trailsData.wishlist.length ? (
-          <ul>
-            {trailsData.wishlist.map((trail) => (
-              <li key={trail.id}>{trail.name}</li>
-            ))}
+          <ul className="trail-list">
+            {trailsData.wishlist.map((trail) => {
+              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
+              return (
+                <li 
+                  key={trail.id}
+                  className={`trail-card ${difficultyClass}`}
+                >
+                  <h4>{trail.name}</h4>
+                  <p className="meta">
+                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p>No items in wishlist.</p>
@@ -128,10 +139,21 @@ export default function Profile() {
       <section className="profile-section">
         <h2><FavouritesIcon /> Favourites</h2>
         {trailsData.favourites.length ? (
-          <ul>
-            {trailsData.favourites.map((trail) => (
-              <li key={trail.id}>{trail.name}</li>
-            ))}
+          <ul className="trail-list">
+            {trailsData.favourites.map((trail) => {
+              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
+              return (
+                <li 
+                  key={trail.id}
+                  className={`trail-card ${difficultyClass}`}
+                >
+                  <h4>{trail.name}</h4>
+                  <p className="meta">
+                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p>No favourites yet.</p>
@@ -141,10 +163,21 @@ export default function Profile() {
       <section className="profile-section">
         <h2><CompletedIcon /> Completed Hikes</h2>
         {trailsData.completedHikes.length ? (
-          <ul>
-            {trailsData.completedHikes.map((trail) => (
-              <li key={trail.id}>{trail.name}</li>
-            ))}
+          <ul className="trail-list">
+            {trailsData.completedHikes.map((trail) => {
+              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
+              return (
+                <li 
+                  key={trail.id}
+                  className={`trail-card ${difficultyClass}`}
+                >
+                  <h4>{trail.name}</h4>
+                  <p className="meta">
+                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p>No completed hikes yet.</p>
@@ -154,10 +187,22 @@ export default function Profile() {
       <section className="profile-section">
         <h2><SubmittedIcon /> Submitted Trails</h2>
         {trailsData.submittedTrails.length ? (
-          <ul>
-            {trailsData.submittedTrails.map((trail) => (
-              <li key={trail.id}>{trail.name}</li>
-            ))}
+          
+          <ul className="trail-list">
+            {trailsData.submittedTrails.map((trail) => {
+              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
+              return (
+                <li 
+                  key={trail.id}
+                  className={`trail-card ${difficultyClass}`}
+                >
+                  <h4>{trail.name}</h4>
+                  <p className="meta">
+                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p>No submitted trails yet.</p>

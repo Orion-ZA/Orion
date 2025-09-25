@@ -1,5 +1,5 @@
 // HelpCenterPage.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Mail, MessageSquare, 
     BookOpen, Phone, 
     ArrowRight, ChevronDown, 
@@ -20,6 +20,40 @@ const HelpCenterPage = () => {
     message: ''
   });
   const { show } = useToast();
+
+  // keywords for searching
+  const keywordMap = {
+    "password": "account",
+    "username": "account",
+    "login": "account",
+    "account": "account",
+    "wishlist": "trails",
+    "save": "trails",
+    "offline": "trails",
+    "map": "trails",
+    "difficulty": "trails",
+    "crash": "technical",
+    "notifications": "technical",
+    "location": "technical",
+    "support": "general",
+    "report": "general"
+  };
+
+  const [autoCategory, setAutoCategory] = useState(null);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const lower = searchQuery.toLowerCase();
+      for (let [keyword, category] of Object.entries(keywordMap)) {
+        if (lower.includes(keyword)) {
+          setAutoCategory(category);
+          return;
+        }
+      }
+    }
+    setAutoCategory(null);
+  }, [searchQuery]);
+
 
   const faqCategories = {
     general: {
@@ -125,20 +159,22 @@ const HelpCenterPage = () => {
 
   // Filter FAQs based on search query
   const filteredCategories = Object.entries(faqCategories).reduce((acc, [key, category]) => {
+    let questions = category.questions;
+
     if (searchQuery) {
-      const filteredQuestions = category.questions.filter(q => 
-        q.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      questions = questions.filter(q => 
+        q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         q.answer.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      
-      if (filteredQuestions.length > 0) {
-        acc[key] = {
-          ...category,
-          questions: filteredQuestions
-        };
-      }
-    } else {
-      acc[key] = category;
+    }
+
+    // If autoCategory is detected, only return that category
+    if (autoCategory && key !== autoCategory) {
+      return acc;
+    }
+
+    if (questions.length > 0) {
+      acc[key] = { ...category, questions };
     }
     return acc;
   }, {});

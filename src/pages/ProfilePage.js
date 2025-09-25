@@ -91,123 +91,80 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
-      <h1>My Profile</h1>
+      <h1>My Dashboard</h1>
+
+      {/* Profile Header */}
       <div className="profile-card">
         {user?.photoURL ? (
           <img
-            src={user.photoURL || "https://www.flaticon.com/free-icons/profile-picture"}
-            alt="User Avatar" className="profile-avatar-large"
+            src={user.photoURL}
+            alt="User Avatar"
+            className="profile-avatar-large"
           />
-        ):(
+        ) : (
           <div className="profile-avatar-placeholder">No Image</div>
         )}
-      
-        <h2>{user?.displayName || "No Name"}</h2>
-        <p>Email: {user?.email}</p>
-        <button
-          className="edit-btn"
-          onClick={() => navigate('/settings')}
-        >
-          <Edit /> Edit Profile
-        </button>
+        <div className="profile-info">
+          <h2>{user?.displayName || "No Name"}</h2>
+          <p>{user?.email}</p>
+          <button className="edit-btn" onClick={() => navigate('/settings')}>
+            <Edit /> Edit Profile
+          </button>
+        </div>
       </div>
 
-      <section className="profile-section">
-        <h2><WishlistIcon /> Wishlist</h2>
-        {trailsData.wishlist.length ? (
-          <ul className="trail-list">
-            {trailsData.wishlist.map((trail) => {
-              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
-              return (
-                <li 
-                  key={trail.id}
-                  className={`trail-card ${difficultyClass}`}
-                >
-                  <h4>{trail.name}</h4>
-                  <p className="meta">
-                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>No items in wishlist.</p>
-        )}
-      </section>
+      {/* Stats Overview */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <SubmittedIcon /><h3>{trailsData.submittedTrails.length}</h3>
+          <p>Submitted</p>
+        </div>
+        <div className="stat-card">
+          <CompletedIcon /><h3>{trailsData.completed.length}</h3>
+          <p>Completed</p>
+        </div>
+        <div className="stat-card">
+          <FavouritesIcon /><h3>{trailsData.favourites.length}</h3>
+          <p>Favourites</p>
+        </div>
+        <div className="stat-card">
+          <WishlistIcon /><h3>{trailsData.wishlist.length}</h3>
+          <p>Wishlist</p>
+        </div>
+      </div>
 
-      <section className="profile-section">
-        <h2><FavouritesIcon /> Favourites</h2>
-        {trailsData.favourites.length ? (
-          <ul className="trail-list">
-            {trailsData.favourites.map((trail) => {
-              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
-              return (
-                <li 
-                  key={trail.id}
-                  className={`trail-card ${difficultyClass}`}
-                >
-                  <h4>{trail.name}</h4>
-                  <p className="meta">
-                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>No favourites yet.</p>
-        )}
-      </section>
-
-      <section className="profile-section">
-        <h2><CompletedIcon /> Completed Hikes</h2>
-        {trailsData.completed.length ? (
-          <ul className="trail-list">
-            {trailsData.completed.map((trail) => {
-              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
-              return (
-                <li 
-                  key={trail.id}
-                  className={`trail-card ${difficultyClass}`}
-                >
-                  <h4>{trail.name}</h4>
-                  <p className="meta">
-                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>No completed hikes yet.</p>
-        )}
-      </section>
-
-      <section className="profile-section">
-        <h2><SubmittedIcon /> Submitted Trails</h2>
-        {trailsData.submittedTrails.length ? (
-          
-          <ul className="trail-list">
-            {trailsData.submittedTrails.map((trail) => {
-              const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
-              return (
-                <li 
-                  key={trail.id}
-                  className={`trail-card ${difficultyClass}`}
-                >
-                  <h4>{trail.name}</h4>
-                  <p className="meta">
-                    {trail.difficulty ? `Difficulty: ${trail.difficulty}` : "No difficulty info"}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>No submitted trails yet.</p>
-        )}
-      </section>
+      {/* Trails Sections */}
+      <div className="trail-sections">
+        {[
+          { title: "Wishlist", icon: <WishlistIcon />, data: trailsData.wishlist },
+          { title: "Favourites", icon: <FavouritesIcon />, data: trailsData.favourites },
+          { title: "Completed Hikes", icon: <CompletedIcon />, data: trailsData.completed },
+          { title: "Submitted Trails", icon: <SubmittedIcon />, data: trailsData.submittedTrails },
+        ].map((section, idx) => (
+          <section key={idx} className="profile-section">
+            <h2>{section.icon} {section.title}</h2>
+            {section.data.length ? (
+              <ul className="trail-list">
+                {section.data.map((trail) => {
+                  const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
+                  return (
+                    <li key={trail.id} className={`trail-card ${difficultyClass}`}>
+                      <h4>{trail.name}</h4>
+                      <p className="meta">
+                        {trail.difficulty
+                          ? `Difficulty: ${trail.difficulty}`
+                          : "No difficulty info"}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>No {section.title.toLowerCase()} yet.</p>
+            )}
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

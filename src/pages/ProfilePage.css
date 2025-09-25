@@ -159,3 +159,62 @@
 .trail-card.hard h4 {
   color: #e74c3c; /* red */
 }
+
+/* Profile header layout */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: left;
+  flex-wrap: wrap;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+/* Stats overview */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 20px 0 30px;
+}
+
+.stat-card {
+  background: var(--bg-alt);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px -4px rgba(0,0,0,0.3);
+}
+
+.stat-card h3 {
+  font-size: 1.6rem;
+  margin: 10px 0;
+  color: var(--primary);
+}
+
+/* Trail sections in a responsive grid */
+.trail-sections {
+  display: grid;
+  gap: 20px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .profile-info {
+    text-align: center;
+  }
+}

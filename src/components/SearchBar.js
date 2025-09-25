@@ -197,9 +197,6 @@ const SearchBar = ({
                       {suggestionData.status && suggestionData.status === 'closed' && (
                         <span className="suggestion-status closed">🔒 Closed</span>
                       )}
-                      {suggestionData.type && suggestionData.type !== 'legacy' && (
-                        <span className="suggestion-type">{suggestionData.type}</span>
-                      )}
                     </div>
                   </div>
                   

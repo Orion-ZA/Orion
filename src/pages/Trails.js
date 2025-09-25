@@ -56,6 +56,10 @@ export default function TrailsPage() {
     zoom: 10
   });
 
+  // Search location state for trail sorting
+  const [searchLocation, setSearchLocation] = useState(null);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+
   // Use trails hook
   const { trails, isLoadingTrails, filters, handleFilterChange, filteredTrails } = useTrails(trailsUserLocation, currentUserId);
 
@@ -229,6 +233,13 @@ export default function TrailsPage() {
     }
   };
 
+  // Handle recenter from search mode back to user location
+  const handleRecenterFromSearch = () => {
+    setIsSearchMode(false);
+    setSearchLocation(null);
+    handleRecenter();
+  };
+
   // Handle trail click to center and zoom map
   const handleTrailClick = (trail) => {
     if (trail.longitude && trail.latitude && mapRef.current) {
@@ -250,13 +261,21 @@ export default function TrailsPage() {
   const handleSearchZoom = useCallback(async (query) => {
     if (!query || !mapRef.current) return;
 
+    // Open the trails panel when searching
+    setIsPanelOpen(true);
+
     // First, try to find a matching trail (only if trails data is available)
     const matchingTrail = trails && trails.length > 0 ? trails.find(trail => 
       trail.name && trail.name.toLowerCase().includes(query.toLowerCase())
     ) : null;
 
     if (matchingTrail && matchingTrail.longitude && matchingTrail.latitude) {
-      // Found a matching trail - zoom to it
+      // Found a matching trail - zoom to it and set search location
+      setSearchLocation({
+        latitude: matchingTrail.latitude,
+        longitude: matchingTrail.longitude
+      });
+      setIsSearchMode(true);
       handleTrailClick(matchingTrail);
       return;
     }
@@ -267,6 +286,13 @@ export default function TrailsPage() {
       
       if (coordinates && coordinates.latitude && coordinates.longitude) {
         const map = mapRef.current.getMap();
+        
+        // Set search location and enable search mode
+        setSearchLocation({
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude
+        });
+        setIsSearchMode(true);
         
         // Zoom to the geocoded location
         map.easeTo({
@@ -641,6 +667,9 @@ export default function TrailsPage() {
           setSelectedTrail={setSelectedTrail}
           userLocation={trailsUserLocation}
           onEditTrail={handleEditTrail}
+          searchLocation={searchLocation}
+          isSearchMode={isSearchMode}
+          onRecenterFromSearch={handleRecenterFromSearch}
         />
       </div>
 

@@ -21,6 +21,17 @@ jest.mock('../hooks/useReverseGeocoding', () => ({
   })
 }));
 
+// Mock SearchContext
+jest.mock('../components/SearchContext', () => ({
+  useSearch: () => ({
+    searchSuggestions: [],
+    setSearchSuggestions: jest.fn(),
+    getSuggestions: jest.fn(),
+    handleSearch: jest.fn()
+  }),
+  SearchProvider: ({ children }) => children
+}));
+
 const renderWithProviders = (component) => {
   return render(
     <BrowserRouter>
@@ -179,6 +190,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).toBeInTheDocument();
       });
 
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -216,6 +228,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).toBeInTheDocument();
       });
 
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -265,6 +278,7 @@ describe('SearchBar', () => {
       });
       
       // Restore original mock
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -285,13 +299,15 @@ describe('SearchBar', () => {
       renderWithProviders(<SearchBar />);
       
       // Mock the search context
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -308,21 +324,24 @@ describe('SearchBar', () => {
         }
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
     it('handles suggestion click with legacy string format', async () => {
       const mockSuggestions = ['Legacy Trail Name'];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -339,6 +358,7 @@ describe('SearchBar', () => {
         }
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -349,15 +369,17 @@ describe('SearchBar', () => {
         displayName: 'Test Trail'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -376,6 +398,7 @@ describe('SearchBar', () => {
         }
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });
@@ -395,15 +418,17 @@ describe('SearchBar', () => {
         status: 'open'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -416,9 +441,11 @@ describe('SearchBar', () => {
         expect(screen.getByText('🏔️ Moderate • 📏 5.2 km • ⛰️ 800 m')).toBeInTheDocument();
         expect(screen.getByText('mountain')).toBeInTheDocument();
         expect(screen.getByText('views')).toBeInTheDocument();
-        expect(screen.getByText('trail')).toBeInTheDocument();
+        // Type badge was removed, so we don't expect to find "trail" text anymore
       });
       
+      // Restore the original mock
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -432,15 +459,17 @@ describe('SearchBar', () => {
         tags: ['Location']
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -448,9 +477,11 @@ describe('SearchBar', () => {
       
       await waitFor(() => {
         expect(screen.getByText('Cape Town, Western Cape')).toBeInTheDocument();
-        expect(screen.getByText('geocoded')).toBeInTheDocument();
+        // Type badge was removed, so we don't expect to find "geocoded" text anymore
       });
       
+      // Restore the original mock
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -462,15 +493,17 @@ describe('SearchBar', () => {
         status: 'closed'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -480,6 +513,8 @@ describe('SearchBar', () => {
         expect(screen.getByText('🔒 Closed')).toBeInTheDocument();
       });
       
+      // Restore the original mock
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -493,15 +528,17 @@ describe('SearchBar', () => {
         location: 'Test Location'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -512,6 +549,7 @@ describe('SearchBar', () => {
         expect(screen.getByText('📍 Test Location')).toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -525,15 +563,17 @@ describe('SearchBar', () => {
         // No difficulty
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -543,6 +583,7 @@ describe('SearchBar', () => {
         expect(screen.getByText('📏 3.5 km • ⛰️ 500 m')).toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -554,15 +595,17 @@ describe('SearchBar', () => {
         tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -576,6 +619,7 @@ describe('SearchBar', () => {
         expect(screen.queryByText('tag5')).not.toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });
@@ -584,15 +628,17 @@ describe('SearchBar', () => {
     it('submits form on button click with context handler', () => {
       const mockHandleSearch = jest.fn();
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: mockHandleSearch
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       const button = screen.getByRole('button', { name: /search/i });
@@ -602,21 +648,24 @@ describe('SearchBar', () => {
       
       expect(mockHandleSearch).toHaveBeenCalledWith('Cape Town');
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
     it('submits form on Enter key with context handler', () => {
       const mockHandleSearch = jest.fn();
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: mockHandleSearch
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       
@@ -625,6 +674,7 @@ describe('SearchBar', () => {
       
       expect(mockHandleSearch).toHaveBeenCalledWith('Cape Town');
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -632,15 +682,17 @@ describe('SearchBar', () => {
       const mockOnSearch = jest.fn();
       const mockHandleSearch = jest.fn();
       
-      renderWithProviders(<SearchBar onSearch={mockOnSearch} />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: mockHandleSearch
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       const button = screen.getByRole('button', { name: /search/i });
@@ -651,21 +703,24 @@ describe('SearchBar', () => {
       expect(mockOnSearch).toHaveBeenCalledWith('Test search');
       expect(mockHandleSearch).not.toHaveBeenCalled();
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
     it('does not submit empty search', () => {
       const mockHandleSearch = jest.fn();
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: mockHandleSearch
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       const button = screen.getByRole('button', { name: /search/i });
@@ -675,21 +730,24 @@ describe('SearchBar', () => {
       
       expect(mockHandleSearch).not.toHaveBeenCalled();
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
     it('trims whitespace from search input', () => {
       const mockHandleSearch = jest.fn();
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: mockHandleSearch
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       const button = screen.getByRole('button', { name: /search/i });
@@ -699,6 +757,7 @@ describe('SearchBar', () => {
       
       expect(mockHandleSearch).toHaveBeenCalledWith('Cape Town');
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });
@@ -711,15 +770,17 @@ describe('SearchBar', () => {
         displayName: 'Test Trail'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -738,6 +799,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).not.toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -748,15 +810,17 @@ describe('SearchBar', () => {
         displayName: 'Test Trail'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -775,6 +839,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -785,15 +850,17 @@ describe('SearchBar', () => {
         displayName: 'Test Trail'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -810,6 +877,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });
@@ -822,15 +890,17 @@ describe('SearchBar', () => {
         { type: 'trail', name: 'Trail 3', displayName: 'Trail 3' }
       ];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -847,21 +917,24 @@ describe('SearchBar', () => {
         expect(suggestionItems[2]).toHaveStyle('animation-delay: 0.1s');
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });
 
   describe('Edge Cases', () => {
     it('handles empty suggestions array', () => {
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: [],
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       fireEvent.focus(input);
@@ -870,19 +943,22 @@ describe('SearchBar', () => {
       const suggestionsContainer = document.querySelector('.search-suggestions');
       expect(suggestionsContainer).not.toBeInTheDocument();
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
     it('handles null/undefined suggestions', () => {
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: null,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       act(() => {
@@ -893,6 +969,7 @@ describe('SearchBar', () => {
       const suggestionsContainer = document.querySelector('.search-suggestions');
       expect(suggestionsContainer).not.toBeInTheDocument();
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
 
@@ -903,15 +980,17 @@ describe('SearchBar', () => {
         description: 'A trail'
       }];
       
-      renderWithProviders(<SearchBar />);
-      
+      // Mock the SearchContext module
       const searchContext = require('../components/SearchContext');
-      jest.spyOn(searchContext, 'useSearch').mockReturnValue({
+      const mockUseSearch = jest.fn().mockReturnValue({
         searchSuggestions: mockSuggestions,
         setSearchSuggestions: jest.fn(),
         getSuggestions: jest.fn(),
         handleSearch: jest.fn()
       });
+      searchContext.useSearch = mockUseSearch;
+      
+      renderWithProviders(<SearchBar />);
       
       const input = screen.getByPlaceholderText(/search by city, park, or trail name/i);
       act(() => {
@@ -925,6 +1004,7 @@ describe('SearchBar', () => {
         expect(suggestionsContainer).toBeInTheDocument();
       });
       
+      // Restore the original mock
       searchContext.useSearch.mockRestore();
     });
   });

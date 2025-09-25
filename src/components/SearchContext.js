@@ -50,9 +50,25 @@ export const SearchProvider = ({ children }) => {
     const realTrailNames = trailsData.map(trail => trail.name).filter(Boolean);
 
     // Filter real trail suggestions first (highest priority)
+    // Enhanced matching: prioritize exact matches, then starts-with, then contains
     const realTrailMatches = trailsData.filter(trail =>
       trail.name && trail.name.toLowerCase().includes(query.toLowerCase())
-    ).map(trail => {
+    ).sort((a, b) => {
+      const queryLower = query.toLowerCase();
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      
+      // Exact match gets highest priority
+      if (aName === queryLower && bName !== queryLower) return -1;
+      if (bName === queryLower && aName !== queryLower) return 1;
+      
+      // Starts with query gets second priority
+      if (aName.startsWith(queryLower) && !bName.startsWith(queryLower)) return -1;
+      if (bName.startsWith(queryLower) && !aName.startsWith(queryLower)) return 1;
+      
+      // Then sort by length (shorter names first for better UX)
+      return aName.length - bName.length;
+    }).map(trail => {
       // Handle GeoPoint location field
       let coordinates = null;
       if (trail.location) {
@@ -84,8 +100,9 @@ export const SearchProvider = ({ children }) => {
     const localFiltered = [...realTrailMatches];
     
     // Set local suggestions immediately if we have any
+    // Show more trail suggestions immediately for better UX
     if (localFiltered.length > 0) {
-      setSearchSuggestions(localFiltered.slice(0, 8));
+      setSearchSuggestions(localFiltered.slice(0, 6)); // Show up to 6 trail suggestions immediately
     }
 
     // Debounce geocoding API call
@@ -148,7 +165,11 @@ export const SearchProvider = ({ children }) => {
         }
 
         // Prioritize: Real trails first, then accurate Mapbox geocoding
-        const allSuggestions = [...realTrailMatches, ...geocodingSuggestions];
+        // If we have many trail matches, limit geocoded suggestions to make room for trails
+        const maxGeocodedSuggestions = realTrailMatches.length >= 5 ? 3 : 5;
+        const limitedGeocodedSuggestions = geocodingSuggestions.slice(0, maxGeocodedSuggestions);
+        
+        const allSuggestions = [...realTrailMatches, ...limitedGeocodedSuggestions];
         
         // Remove duplicates based on displayName
         const uniqueSuggestions = allSuggestions.filter((suggestion, index, self) => 

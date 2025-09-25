@@ -97,21 +97,85 @@
   top: 100% !important;
   left: 0 !important;
   right: 0 !important;
-  background: var(--bg-elev) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
+  background: linear-gradient(135deg, 
+    rgba(28, 37, 65, 0.85) 0%, 
+    rgba(28, 37, 65, 0.75) 50%, 
+    rgba(28, 37, 65, 0.85) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
   margin-top: 8px !important;
-  backdrop-filter: blur(20px) !important;
-  box-shadow: var(--shadow) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   z-index: 1000 !important;
-  max-height: 300px !important;
+  max-height: 240px !important;
   overflow-y: auto !important;
+  padding: 8px !important;
   animation: slideDownSmooth 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   transform-origin: top !important;
   opacity: 0 !important;
   transform: translateY(-10px) scaleY(0.8) !important;
   animation-fill-mode: forwards !important;
   will-change: transform, opacity !important;
+  
+  /* Custom scrollbar styling */
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;
+  scroll-behavior: smooth !important;
+}
+
+/* Webkit scrollbar styling for better cross-browser support */
+.search-bar-container .search-suggestions::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.search-bar-container .search-suggestions::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  margin: 4px 0 !important;
+}
+
+.search-bar-container .search-suggestions::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.3) 100%) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.search-bar-container .search-suggestions::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.4) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.1) !important;
+}
+
+.search-bar-container .search-suggestions::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    rgba(255, 255, 255, 0.5) 100%) !important;
+}
+
+/* Additional scrollbar enhancements */
+
+/* Smooth scrollbar transitions */
+.search-bar-container .search-suggestions::-webkit-scrollbar-thumb {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Add subtle shadow to scrollbar thumb on hover */
+.search-bar-container .search-suggestions::-webkit-scrollbar-thumb:hover {
+  box-shadow: 0 2px 4px rgba(91, 192, 190, 0.2) !important;
 }
 
 @keyframes slideDownSmooth {
@@ -154,66 +218,76 @@
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
-  padding: 12px 16px !important;
+  padding: 10px 12px !important;
   border: none !important;
-  background: transparent !important;
-  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  margin: 0 0 6px 0 !important;
+  color: white !important;
   text-align: left !important;
   cursor: pointer !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  border-bottom: 1px solid var(--border) !important;
+  transition: all 0.3s ease !important;
   position: relative !important;
   overflow: hidden !important;
-  animation: fadeInUpSmooth 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
   opacity: 1 !important;
   transform: none !important;
-  will-change: transform, opacity, background-color !important;
+  min-height: 50px !important;
 }
 
 .search-bar-container .suggestion-item:last-child {
   border-bottom: none !important;
+  margin-bottom: 0 !important;
 }
 
 .search-bar-container .suggestion-item:hover {
-  background: var(--glass) !important;
-  transform: translateX(6px) scale(1.02) !important;
-  color: var(--primary) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  border-left: 3px solid var(--primary) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+  color: white !important;
 }
 
 .search-bar-container .suggestion-item:focus {
-  background: var(--focus-ring) !important;
+  background: rgba(91, 192, 190, 0.15) !important;
+  border-color: rgba(91, 192, 190, 0.4) !important;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(91, 192, 190, 0.3) !important;
+  transform: translateY(-2px) !important;
+  color: white !important;
   outline: none !important;
-  transform: translateX(6px) scale(1.02) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  border-left: 3px solid var(--primary) !important;
 }
 
 .search-bar-container .suggestion-item:active {
-  transform: translateX(4px) scale(0.98) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+  color: white !important;
   transition: all 0.1s ease !important;
 }
 
 .search-bar-container .suggestion-icon {
-  width: 16px !important;
-  height: 16px !important;
-  fill: var(--text-dim) !important;
-  margin-right: 12px !important;
+  width: 18px !important;
+  height: 18px !important;
+  fill: rgba(255, 255, 255, 0.7) !important;
   flex-shrink: 0 !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  transition: fill 0.2s ease !important;
+  display: block !important;
+  margin: 0 !important;
 }
 
 .search-bar-container .suggestion-item:hover .suggestion-icon {
-  fill: var(--primary) !important;
-  transform: scale(1.15) rotate(5deg) !important;
+  fill: rgba(255, 255, 255, 0.9) !important;
 }
 
 .search-bar-container .suggestion-text {
   font-size: 14px !important;
   font-weight: 500 !important;
-  color: var(--text) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  color: white !important;
+  transition: color 0.2s ease !important;
 }
 
 /* Enhanced suggestion layout */
@@ -224,15 +298,15 @@
   width: 32px !important;
   height: 32px !important;
   border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   margin-right: 12px !important;
   flex-shrink: 0 !important;
-  transition: all 0.3s ease !important;
+  transition: background-color 0.2s ease !important;
+  position: relative !important;
 }
 
 .search-bar-container .suggestion-item:hover .suggestion-icon-container {
-  background: rgba(91, 192, 190, 0.1) !important;
-  transform: scale(1.1) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .search-bar-container .suggestion-content {
@@ -274,7 +348,7 @@
 .search-bar-container .suggestion-title {
   font-size: 14px !important;
   font-weight: 600 !important;
-  color: var(--text) !important;
+  color: white !important;
   line-height: 1.2 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -302,7 +376,7 @@
 
 .search-bar-container .suggestion-description {
   font-size: 12px !important;
-  color: var(--text-dim) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
   line-height: 1.3 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -311,7 +385,7 @@
 
 .search-bar-container .suggestion-location {
   font-size: 11px !important;
-  color: var(--text-dim) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
@@ -319,7 +393,7 @@
 
 .search-bar-container .suggestion-meta {
   font-size: 11px !important;
-  color: var(--text-dim) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
@@ -440,6 +514,11 @@
   display: block !important;
   visibility: visible !important;
   padding: 8px !important;
+  
+  /* Custom scrollbar styling */
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;
+  scroll-behavior: smooth !important;
 }
 
 /* Performance optimizations */

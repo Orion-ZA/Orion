@@ -71,7 +71,7 @@ html[data-theme='light'] .brand:hover .brand-logo { filter: drop-shadow(0 6px 14
   position: relative; 
   padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 18px); 
   border-radius: 8px; 
-  color: #cbd5e1; 
+  color: var(--text-dim); 
   transition: background .22s ease, color .22s ease, transform .1s ease; 
   font-size: clamp(1rem, 2.2vw, 1.15rem); 
   white-space: nowrap;
@@ -98,18 +98,17 @@ html[data-theme='light'] .brand:hover .brand-logo { filter: drop-shadow(0 6px 14
 }
 .desktop-nav a:hover::after, .desktop-nav a.active::after { transform: scaleX(1); }
 .desktop-nav .as-link:hover::after, .desktop-nav .as-link.active::after { transform: scaleX(1); }
-.desktop-nav a:hover { background: rgba(255,255,255,.06); color: #ffffff; }
+.desktop-nav a:hover { background: var(--glass); color: var(--text); }
 .desktop-nav a:active { transform: translateY(1px); }
-.desktop-nav a.active { background: rgba(91,192,190,.15); color: #e6fffa; }
-.desktop-nav .as-link.active { background: rgba(91,192,190,.15); color: #e6fffa; }
-html[data-theme='light'] .desktop-nav .as-link.active { background: rgba(0,0,0,0.06); color: var(--text); }
+.desktop-nav a.active { background: rgba(91,192,190,.18); color: var(--text); }
+.desktop-nav .as-link.active { background: rgba(91,192,190,.18); color: var(--text); }
 
 /* Buttons styled as links for guarded nav */
 .desktop-nav .as-link {
   position: relative;
   padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 18px);
   border-radius: 8px;
-  color: #cbd5e1;
+  color: var(--text-dim);
   transition: background .2s ease, color .2s ease, transform .1s ease;
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   white-space: nowrap;
@@ -118,7 +117,7 @@ html[data-theme='light'] .desktop-nav .as-link.active { background: rgba(0,0,0,0
   border: none;
   cursor: pointer;
 }
-.desktop-nav .as-link:hover { background: rgba(255,255,255,.06); color: #ffffff; }
+.desktop-nav .as-link:hover { background: var(--glass); color: var(--text); }
 .desktop-nav .as-link:active { transform: translateY(1px); }
 
 /* Light mode: all navbar options (links and buttons) use white background on hover/active for consistency */
@@ -128,6 +127,37 @@ html[data-theme='light'] .desktop-nav .as-link.active,
 html[data-theme='light'] .desktop-nav .as-link:hover {
   background: #fff;
   color: var(--text);
+}
+
+html[data-theme='light'] .nav-login-btn {
+  background: rgba(13,110,109,0.12);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+html[data-theme='light'] .nav-login-btn:hover {
+  background: rgba(13,110,109,0.18);
+}
+html[data-theme='light'] .mobile-menu {
+  background: rgba(255,255,255,0.96);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+html[data-theme='light'] .mobile-actions {
+  border-top: 1px solid var(--border);
+}
+html[data-theme='light'] .mobile-profile-name,
+html[data-theme='light'] .mobile-nav-links a,
+html[data-theme='light'] .mobile-nav-links .as-link,
+html[data-theme='light'] .mobile-profile-item {
+  color: var(--text);
+}
+html[data-theme='light'] .mobile-profile-item,
+html[data-theme='light'] .mobile-profile-info {
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme='light'] .mobile-nav-links a:hover,
+html[data-theme='light'] .mobile-nav-links .as-link:hover {
+  background: rgba(13,110,109,0.12);
 }
 
 .desktop-actions { 
@@ -174,7 +204,7 @@ html[data-theme='light'] .desktop-nav .as-link:hover {
   left: 0;
   right: 0;
   background: rgba(10,15,30,0.98);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border);
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
@@ -198,19 +228,19 @@ html[data-theme='light'] .desktop-nav .as-link:hover {
 }
 .mobile-nav-links a {
   padding: 1rem 1.5rem;
-  color: #cbd5e1;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
   transition: all .2s ease;
   font-size: 1.1rem;
 }
 .mobile-nav-links a:hover, .mobile-nav-links a.active {
-  background: rgba(255,255,255,.06);
-  color: #ffffff;
+  background: var(--glass);
+  color: var(--text);
 }
 .mobile-nav-links .as-link {
   padding: 1rem 1.5rem;
-  color: #cbd5e1;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
   background: none;
   border: none;
   width: 100%;
@@ -218,7 +248,7 @@ html[data-theme='light'] .desktop-nav .as-link:hover {
   font-size: 1.1rem;
   cursor: pointer;
 }
-.mobile-nav-links .as-link:hover { background: rgba(255,255,255,.06); color: #ffffff; }
+.mobile-nav-links .as-link:hover { background: var(--glass); color: var(--text); }
 .mobile-actions {
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -234,9 +264,9 @@ html[data-theme='light'] .desktop-nav .as-link:hover {
 .nav-login-btn {
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.08);
-  color: #e6edf3;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--text);
   font-weight: 700;
   cursor: pointer;
 }

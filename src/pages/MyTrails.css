@@ -22,13 +22,13 @@
 }
 
 .modal-content {
-  background: #0b132b;
+  background: var(--bg-elev);
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   width: 100%;
   max-width: 500px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  border: 1px solid #1e2a47;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
@@ -40,7 +40,7 @@
   right: 0.75rem;
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-dim);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
@@ -54,7 +54,7 @@
 
 .modal-content h3 {
   margin-bottom: 1.5rem;
-  color: #fff;
+  color: var(--text);
   font-size: 1.25rem;
   padding-right: 1.5rem;
 }
@@ -66,7 +66,7 @@
 .input-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #ccc;
+  color: var(--text-dim);
   font-weight: 500;
 }
 
@@ -79,7 +79,7 @@
 .star {
   background: none;
   border: none;
-  color: #555;
+  color: var(--muted);
   font-size: 1.8rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -89,16 +89,16 @@
 }
 
 .star.active {
-  color: #ffc107;
+  color: var(--text);
 }
 
 .modal-content textarea {
   width: 100%;
   padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid #2d3a5a;
-  background-color: #0f1729;
-  color: #fff;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
   font-size: 1rem;
   resize: vertical;
   min-height: 120px;
@@ -125,21 +125,25 @@
 }
 
 .btn-primary {
-  background-color: #007bff;
-  color: #fff;
+  background-color: var(--bg-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-primary:hover, .btn-primary:focus {
-  background-color: #0069d9;
+  background-color: var(--bg-elev);
+  border-color: var(--border-strong);
 }
 
 .btn-secondary {
-  background-color: #2d3a5a;
-  color: #ccc;
+  background-color: var(--bg);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover, .btn-secondary:focus {
-  background-color: #3a496b;
+  background-color: var(--bg-alt);
+  color: var(--text);
 }
 
 /* Main Component Styles */
@@ -147,8 +151,9 @@
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  color: #fff;
+  color: var(--text);
   min-height: 100vh;
+  background: var(--bg);
 }
 
 .page-header {
@@ -157,10 +162,11 @@
 }
 
 .page-header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin: 0;
-  color: #fff;
+  color: var(--text);
   text-align: center;
+  font-weight: 600;
 }
 
 .tabs-scroll-container {
@@ -178,10 +184,11 @@
   display: flex;
   min-width: max-content;
   padding: 0.25rem;
-  background-color: #0f1729;
-  border-radius: 12px;
+  background: var(--bg-alt);
+  border-radius: 8px;
   margin: 0 auto;
-  max-width: 500px;
+  max-width: 600px;
+  border: 1px solid var(--border);
 }
 
 .tab {
@@ -191,28 +198,51 @@
   padding: 0.75rem 0.5rem;
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-dim);
   font-weight: 600;
   cursor: pointer;
   flex: 1;
   min-width: 0;
-  border-radius: 8px;
-  transition: all 0.2s;
+  border-radius: 12px;
+  transition: all 0.3s ease;
   min-height: 70px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--glass);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .tab:hover {
-  background-color: #1a243b;
+  background-color: var(--glass);
+  color: var(--text);
+}
+
+.tab:hover::before {
+  opacity: 1;
 }
 
 .tab.active {
-  color: #fff;
-  background-color: #007bff;
+  color: var(--text);
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
 }
 
 .tab-icon {
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 0.25rem;
+  color: inherit;
 }
 
 .tab-text {
@@ -222,10 +252,12 @@
 
 .tab-count {
   font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 0.1rem 0.4rem;
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
   margin-top: 0.25rem;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .active-tab-header {
@@ -238,13 +270,21 @@
 
 .active-tab-header h2 {
   margin: 0;
-  font-size: 1.25rem;
-  color: #fff;
+  font-size: 1.5rem;
+  color: var(--text);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .trail-count {
-  color: #6c757d;
+  color: var(--muted);
   font-size: 0.9rem;
+  background: var(--glass);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-weight: 500;
 }
 
 .trails-list {
@@ -256,60 +296,50 @@
 }
 
 .trail-card {
-  background-color: #1a243b;
-  border: 1px solid #2d3a5a;
-  border-radius: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 1.25rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+
+.trail-card:hover {
+  border-color: var(--border-strong);
+}
+
+.trail-card:hover::before {
+  opacity: 1;
 }
 
 .trail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 0.75rem;
 }
 
 .trail-header h4 {
   margin: 0;
-  color: #fff;
+  color: var(--text);
   font-size: 1.1rem;
   line-height: 1.4;
-  padding-right: 1rem;
+  font-weight: 500;
 }
 
-.remove-btn {
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 1.8rem;
-  cursor: pointer;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.remove-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
 
 .alerts-container {
   margin: 0.75rem 0;
   padding: 0.75rem;
-  background-color: rgba(255, 107, 107, 0.1);
-  border-left: 3px solid #ff6b6b;
+  background-color: var(--bg-alt);
+  border-left: 3px solid var(--danger);
   border-radius: 4px;
 }
 
 .alert-item {
-  font-size: 0.9rem;
-  color: #ff6b6b;
+  font-size: 0.85rem;
+  color: var(--text-dim);
   margin-bottom: 0.25rem;
   line-height: 1.4;
 }
@@ -323,25 +353,27 @@
 }
 
 .trail-actions {
-  margin-top: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .complete-btn {
-  padding: 0.875rem 1rem;
-  border-radius: 8px;
-  border: none;
-  background-color: #28a745;
-  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
   width: 100%;
-  min-height: 44px;
-  font-weight: 600;
+  min-height: 40px;
+  font-weight: 500;
 }
 
 .complete-btn:hover, .complete-btn:focus {
-  background-color: #218838;
+  background: var(--bg-elev);
+  border-color: var(--border-strong);
 }
 
 .empty-state {
@@ -461,6 +493,347 @@ html[data-theme='light'] .spinner {
   border-top: 4px solid var(--primary);
 }
 
+/* Status Confirmation Modal */
+.status-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 1rem;
+}
+
+.status-confirm-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.status-confirm-content {
+  background: var(--bg-elev);
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-hover);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.status-confirm-content h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.status-confirm-content p {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.status-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.status-confirm-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.status-confirm-btn.confirm {
+  background: var(--danger);
+  color: #fff;
+}
+
+.status-confirm-btn.confirm:hover {
+  background: #dc2626;
+}
+
+.status-confirm-btn.cancel {
+  background: var(--bg-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.status-confirm-btn.cancel:hover {
+  background: var(--bg-elev);
+  border-color: var(--border-strong);
+}
+
+/* Icon-specific styles */
+.tab-icon svg {
+  transition: all 0.3s ease;
+}
+
+.tab:hover .tab-icon svg {
+  transform: scale(1.1);
+}
+
+.tab.active .tab-icon svg {
+  transform: scale(1.05);
+}
+
+.empty-icon svg {
+  transition: all 0.3s ease;
+}
+
+.status-badge svg {
+  flex-shrink: 0;
+}
+
+.active-tab-header h2 svg {
+  flex-shrink: 0;
+}
+
+/* Light theme support for new elements */
+html[data-theme='light'] .my-trails-container .trail-info {
+  background: rgba(13,110,109,0.08);
+  border: 1px solid rgba(13,110,109,0.16);
+}
+
+html[data-theme='light'] .my-trails-container .trail-difficulty {
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='light'] .my-trails-container .trail-distance {
+  background: rgba(15, 95, 95, 0.8);
+  color: #fff;
+  border-color: rgba(15, 95, 95, 0.8);
+}
+
+html[data-theme='light'] .my-trails-container .trail-elevation {
+  background: rgba(247, 140, 28, 0.8);
+  color: #fff;
+  border-color: rgba(247, 140, 28, 0.8);
+}
+
+html[data-theme='light'] .my-trails-container .status-open {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+html[data-theme='light'] .my-trails-container .status-closed {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--danger);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+html[data-theme='light'] .my-trails-container .submitted-actions {
+  background: rgba(13,110,109,0.1);
+  border: 1px solid rgba(13,110,109,0.2);
+}
+
+html[data-theme='light'] .my-trails-container .submitted-date {
+  color: var(--primary);
+}
+
+html[data-theme='light'] .empty-state {
+  background: linear-gradient(135deg, rgba(13,110,109,0.05) 0%, rgba(13,110,109,0.02) 100%);
+  border: 1px solid rgba(13,110,109,0.1);
+  color: var(--muted);
+}
+
+html[data-theme='light'] .loading-state {
+  background: linear-gradient(135deg, rgba(13,110,109,0.05) 0%, rgba(13,110,109,0.02) 100%);
+  border: 1px solid rgba(13,110,109,0.1);
+}
+
+/* New Trail Info Styles */
+.my-trails-container .trail-info {
+  margin: 0 0 1rem 0;
+  padding: 0.75rem;
+  background: var(--bg-alt);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  flex: 1;
+}
+
+.my-trails-container .trail-details {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.my-trails-container .trail-difficulty, 
+.my-trails-container .trail-distance, 
+.my-trails-container .trail-elevation {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.my-trails-container .trail-difficulty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: none;
+  opacity: 0.9;
+}
+
+.my-trails-container .trail-difficulty-icon {
+  display: flex;
+  align-items: center;
+}
+
+.my-trails-container .trail-difficulty-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+.my-trails-container .trail-distance {
+  background: rgba(91, 192, 190, 0.8);
+  color: #fff;
+  border-color: rgba(91, 192, 190, 0.8);
+}
+
+.my-trails-container .trail-elevation {
+  background: rgba(247, 183, 51, 0.8);
+  color: #fff;
+  border-color: rgba(247, 183, 51, 0.8);
+}
+
+
+
+
+.my-trails-container .trail-status {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+}
+
+.my-trails-container .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.my-trails-container .status-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.my-trails-container .status-open {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.my-trails-container .status-closed {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.my-trails-container .submitted-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--bg-alt);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.my-trails-container .submitted-date {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-align: left;
+}
+
+/* Enhanced Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  background: var(--bg-alt);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+  color: var(--muted);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.empty-subtext {
+  font-size: 1rem;
+  margin-top: 0.75rem;
+  opacity: 0.8;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Enhanced Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  background: var(--bg-alt);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-radius: 50%;
+  border-top: 3px solid var(--text-dim);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
 /* Responsive styles */
 @media (max-width: 576px) {
   .modal-content {
@@ -485,6 +858,7 @@ html[data-theme='light'] .spinner {
 @media (min-width: 640px) {
   .tabs-container {
     padding: 0.5rem;
+    max-width: 700px;
   }
   
   .tab {
@@ -496,11 +870,21 @@ html[data-theme='light'] .spinner {
   
   .tab-icon {
     margin-bottom: 0;
-    font-size: 1.1rem;
   }
   
   .tab-text {
     font-size: 0.9rem;
+  }
+  
+  .my-trails-container .trail-details {
+    gap: 1rem;
+  }
+  
+  .my-trails-container .trail-difficulty, 
+  .my-trails-container .trail-distance, 
+  .my-trails-container .trail-elevation {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
   }
 }
 
@@ -553,9 +937,38 @@ html[data-theme='light'] .spinner {
 @media (max-width: 400px) {
   .tab {
     min-height: 65px;
+    padding: 0.5rem 0.25rem;
   }
   
   .tab-text {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+  }
+  
+  .tab-icon {
+    /* Icon size handled by component props */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .tab-count {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+  }
+  
+  .my-trails-container .trail-details {
+    gap: 0.5rem;
+  }
+  
+  .my-trails-container .trail-difficulty, 
+  .my-trails-container .trail-distance, 
+  .my-trails-container .trail-elevation {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .my-trails-container .status-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
   }
 }

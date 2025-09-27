@@ -1,6 +1,70 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { Heart, CheckCircle, Bookmark, Upload, Mountain, Lock, Unlock } from 'lucide-react';
+import { getDifficultyColor, getDifficultyIcon } from '../components/trails/TrailUtils';
 import './MyTrails.css';
+
+// Status Confirmation Modal Component
+const StatusConfirmModal = ({ isOpen, onClose, onConfirm, trailName, currentStatus }) => {
+  const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+  const actionText = newStatus === 'closed' ? 'close' : 'reopen';
+  
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+    };
+  }, [isOpen]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div 
+      className={`status-confirm-overlay ${isOpen ? 'open' : ''}`} 
+      onClick={handleOverlayClick}
+    >
+      <div className="status-confirm-content">
+        <h3>Confirm Status Change</h3>
+        <p>
+          Are you sure you want to {actionText} the trail "{trailName}"? 
+          {newStatus === 'closed' 
+            ? ' This will make it unavailable to other users.' 
+            : ' This will make it available to other users again.'
+          }
+        </p>
+        <div className="status-confirm-actions">
+          <button 
+            className="status-confirm-btn cancel" 
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button 
+            className="status-confirm-btn confirm" 
+            onClick={onConfirm}
+          >
+            {newStatus === 'closed' ? 'Close Trail' : 'Reopen Trail'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Modal Component
 const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
@@ -104,12 +168,18 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
 };
 
 export default function MyTrails() {
-  const [trails, setTrails] = useState({ favourites: [], completed: [], wishlist: [] });
+  const [trails, setTrails] = useState({ favourites: [], completed: [], wishlist: [], submitted: [] });
   const [alerts, setAlerts] = useState({});
   const [modalState, setModalState] = useState({
     isOpen: false,
     trailId: null,
     trailName: '',
+  });
+  const [statusConfirmState, setStatusConfirmState] = useState({
+    isOpen: false,
+    trailId: null,
+    trailName: '',
+    currentStatus: 'open',
   });
   const [activeTab, setActiveTab] = useState('favourites');
   const [loading, setLoading] = useState(true);
@@ -123,11 +193,78 @@ export default function MyTrails() {
       
       try {
         setLoading(true);
+        
+        // Fetch saved trails from the API
         const res = await fetch(`https://getsavedtrails-fqtduxc7ua-uc.a.run.app?uid=${userId}`);
         const data = await res.json();
-        setTrails(data);
+        
+        // Fetch submitted trails from Firestore
+        const userRef = doc(db, 'Users', userId);
+        const userSnap = await getDoc(userRef);
+        let submittedTrails = [];
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          console.log('User data:', userData);
+          console.log('Submitted trails array:', userData.submittedTrails);
+          
+          if (userData.submittedTrails && userData.submittedTrails.length > 0) {
+            const fetchTrailDetails = async (references) => {
+              const details = [];
+              console.log('Processing submitted trail references:', references);
+              
+              for (const ref of references) {
+                try {
+                  console.log('Processing reference:', ref, 'Type:', typeof ref);
+                  let trailDoc;
+                  
+                  if (typeof ref === 'string') {
+                    // Handle string path like "/Trails/trailId"
+                    if (ref.startsWith('/Trails/')) {
+                      const trailId = ref.split('/')[2];
+                      trailDoc = await getDoc(doc(db, 'Trails', trailId));
+                    }
+                  } else if (ref && ref.path) {
+                    // Handle Firestore DocumentReference
+                    trailDoc = await getDoc(ref);
+                  } else if (ref && ref._path) {
+                    // Handle Firestore DocumentReference with _path
+                    const pathParts = ref._path.segments;
+                    if (pathParts[0] === 'Trails') {
+                      trailDoc = await getDoc(doc(db, 'Trails', pathParts[1]));
+                    }
+                  }
+                  
+                  if (trailDoc && trailDoc.exists()) {
+                    const trailData = trailDoc.data();
+                    details.push({ 
+                      id: trailDoc.id, 
+                      ...trailData,
+                      // Ensure we have the required fields for display
+                      name: trailData.name || 'Unnamed Trail',
+                      difficulty: trailData.difficulty || 'Unknown',
+                      distance: trailData.distance || 0,
+                      elevationGain: trailData.elevationGain || 0,
+                      status: trailData.status || 'open',
+                      createdAt: trailData.createdAt || trailData.lastUpdated
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error fetching trail details:', error);
+                }
+              }
+              return details;
+            };
+            
+            submittedTrails = await fetchTrailDetails(userData.submittedTrails);
+            console.log('Fetched submitted trails:', submittedTrails);
+          }
+        }
+        
+        console.log('Final trails state:', { ...data, submitted: submittedTrails });
+        setTrails({ ...data, submitted: submittedTrails });
 
-        const allTrails = [...data.favourites, ...data.completed, ...data.wishlist];
+        const allTrails = [...data.favourites, ...data.completed, ...data.wishlist, ...submittedTrails];
         const alertsData = {};
 
         await Promise.all(
@@ -156,30 +293,6 @@ export default function MyTrails() {
     fetchSavedTrails();
   }, [userId]);
 
-  const handleRemove = async (trailId, listType) => {
-    if (window.confirm("Are you sure you want to remove this trail?")) {
-      try {
-        let url = "";
-        if (listType === "favourites") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeFavourite";
-        if (listType === "wishlist") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeWishlist";
-        if (listType === "completed") url = "https://us-central1-orion-sdp.cloudfunctions.net/removeCompleted";
-
-        await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uid: userId, trailId }),
-        });
-
-        setTrails((prev) => ({
-          ...prev,
-          [listType]: prev[listType].filter((t) => t.id !== trailId),
-        }));
-      } catch (err) {
-        console.error("Failed to remove trail:", err);
-        alert("Failed to remove trail. Please try again.");
-      }
-    }
-  };
 
   const openReviewModal = (trailId, trailName) => {
     setModalState({
@@ -195,6 +308,52 @@ export default function MyTrails() {
       trailId: null,
       trailName: '',
     });
+  };
+
+  const openStatusConfirmModal = (trailId, trailName, currentStatus) => {
+    setStatusConfirmState({
+      isOpen: true,
+      trailId,
+      trailName,
+      currentStatus,
+    });
+  };
+
+  const closeStatusConfirmModal = () => {
+    setStatusConfirmState({
+      isOpen: false,
+      trailId: null,
+      trailName: '',
+      currentStatus: 'open',
+    });
+  };
+
+  const handleStatusChange = async () => {
+    try {
+      const { trailId, currentStatus } = statusConfirmState;
+      const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+
+      // Update the trail status in Firestore
+      const trailRef = doc(db, 'Trails', trailId);
+      await updateDoc(trailRef, {
+        status: newStatus,
+        lastUpdated: new Date().toISOString()
+      });
+
+      // Update local state
+      setTrails((prev) => ({
+        ...prev,
+        submitted: prev.submitted.map((trail) =>
+          trail.id === trailId ? { ...trail, status: newStatus } : trail
+        ),
+      }));
+
+      closeStatusConfirmModal();
+      alert(`Trail ${newStatus === 'closed' ? 'closed' : 'reopened'} successfully!`);
+    } catch (err) {
+      console.error('Failed to update trail status:', err);
+      alert('Failed to update trail status. Please try again.');
+    }
   };
 
   const handleMarkAsCompleted = async (rating, comment) => {
@@ -271,9 +430,20 @@ export default function MyTrails() {
     if (trailArray.length === 0) {
       return (
         <div className="empty-state">
-          <div className="empty-icon">🏔️</div>
+          <div className="empty-icon">
+            {activeTab === 'favourites' && <Heart size={48} />}
+            {activeTab === 'completed' && <CheckCircle size={48} />}
+            {activeTab === 'wishlist' && <Bookmark size={48} />}
+            {activeTab === 'submitted' && <Upload size={48} />}
+            {!['favourites', 'completed', 'wishlist', 'submitted'].includes(activeTab) && <Mountain size={48} />}
+          </div>
           <p>No trails in your {activeTab} yet.</p>
-          <p className="empty-subtext">Start exploring to add trails to your collection!</p>
+          <p className="empty-subtext">
+            {activeTab === 'submitted' 
+              ? 'Submit your first trail to see it here!' 
+              : 'Start exploring to add trails to your collection!'
+            }
+          </p>
         </div>
       );
     }
@@ -282,13 +452,6 @@ export default function MyTrails() {
       <li key={trail.id} className="trail-card">
         <div className="trail-header">
           <h4>{trail.name}</h4>
-          <button
-            className="remove-btn"
-            onClick={() => handleRemove(trail.id, activeTab)}
-            aria-label={`Remove ${trail.name}`}
-          >
-            ×
-          </button>
         </div>
 
         {/* Alerts */}
@@ -302,15 +465,64 @@ export default function MyTrails() {
           </div>
         )}
 
+        {/* Status Badge - Only for submitted trails */}
+        {activeTab === 'submitted' && (
+          <div className="trail-status">
+            <span 
+              className={`status-badge ${trail.status === 'open' ? 'status-open' : 'status-closed'}`}
+              onClick={() => openStatusConfirmModal(trail.id, trail.name, trail.status)}
+              title={`Click to ${trail.status === 'open' ? 'close' : 'reopen'} trail`}
+            >
+              {trail.status === 'open' ? (
+                <>
+                  <Unlock size={14} style={{ marginRight: '4px', display: 'inline-block' }} />
+                  Open
+                </>
+              ) : (
+                <>
+                  <Lock size={14} style={{ marginRight: '4px', display: 'inline-block' }} />
+                  Closed
+                </>
+              )}
+            </span>
+          </div>
+        )}
+
+        {/* Trail Info */}
+        <div className="trail-info">
+          <div className="trail-details">
+            <span 
+              className="trail-difficulty"
+              style={{ backgroundColor: getDifficultyColor(trail.difficulty) }}
+            >
+              <span className="trail-difficulty-icon">
+                {getDifficultyIcon(trail.difficulty)}
+              </span>
+              {trail.difficulty}
+            </span>
+            <span className="trail-distance">{trail.distance} km</span>
+            {trail.elevationGain && (
+              <span className="trail-elevation">+{trail.elevationGain}m</span>
+            )}
+          </div>
+        </div>
+
         {/* Buttons */}
         <div className="trail-actions">
-          {activeTab !== "completed" && (
+          {activeTab !== "completed" && activeTab !== "submitted" && (
             <button
               className="complete-btn"
               onClick={() => openReviewModal(trail.id, trail.name)}
             >
               Mark as Completed
             </button>
+          )}
+          {activeTab === "submitted" && (
+            <div className="submitted-actions">
+              <span className="submitted-date">
+                Submitted: {new Date(trail.createdAt?.toDate?.() || trail.createdAt).toLocaleDateString()}
+              </span>
+            </div>
           )}
         </div>
       </li>
@@ -336,7 +548,7 @@ export default function MyTrails() {
                 className={`tab ${activeTab === 'favourites' ? 'active' : ''}`}
                 onClick={() => setActiveTab('favourites')}
               >
-                <span className="tab-icon"></span>
+                <span className="tab-icon"><Heart size={18} /></span>
                 <span className="tab-text">Favourites</span>
                 <span className="tab-count">{trails.favourites.length}</span>
               </button>
@@ -344,7 +556,7 @@ export default function MyTrails() {
                 className={`tab ${activeTab === 'completed' ? 'active' : ''}`}
                 onClick={() => setActiveTab('completed')}
               >
-                <span className="tab-icon"></span>
+                <span className="tab-icon"><CheckCircle size={18} /></span>
                 <span className="tab-text">Completed</span>
                 <span className="tab-count">{trails.completed.length}</span>
               </button>
@@ -352,9 +564,17 @@ export default function MyTrails() {
                 className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`}
                 onClick={() => setActiveTab('wishlist')}
               >
-                <span className="tab-icon"></span>
+                <span className="tab-icon"><Bookmark size={18} /></span>
                 <span className="tab-text">Wishlist</span>
                 <span className="tab-count">{trails.wishlist.length}</span>
+              </button>
+              <button 
+                className={`tab ${activeTab === 'submitted' ? 'active' : ''}`}
+                onClick={() => setActiveTab('submitted')}
+              >
+                <span className="tab-icon"><Upload size={18} /></span>
+                <span className="tab-text">Submitted</span>
+                <span className="tab-count">{trails.submitted.length}</span>
               </button>
             </div>
           </div>
@@ -362,9 +582,30 @@ export default function MyTrails() {
           <div className="trails-content">
             <div className="active-tab-header">
               <h2>
-                {activeTab === 'favourites' && ' Favourite Trails'}
-                {activeTab === 'completed' && ' Completed Trails'}
-                {activeTab === 'wishlist' && ' Wishlist Trails'}
+                {activeTab === 'favourites' && (
+                  <>
+                    <Heart size={20} style={{ marginRight: '8px', display: 'inline-block' }} />
+                    Favourite Trails
+                  </>
+                )}
+                {activeTab === 'completed' && (
+                  <>
+                    <CheckCircle size={20} style={{ marginRight: '8px', display: 'inline-block' }} />
+                    Completed Trails
+                  </>
+                )}
+                {activeTab === 'wishlist' && (
+                  <>
+                    <Bookmark size={20} style={{ marginRight: '8px', display: 'inline-block' }} />
+                    Wishlist Trails
+                  </>
+                )}
+                {activeTab === 'submitted' && (
+                  <>
+                    <Upload size={20} style={{ marginRight: '8px', display: 'inline-block' }} />
+                    Submitted Trails
+                  </>
+                )}
               </h2>
               <span className="trail-count">{trails[activeTab].length} trails</span>
             </div>
@@ -381,6 +622,14 @@ export default function MyTrails() {
         isOpen={modalState.isOpen}
         onClose={closeReviewModal}
         onSubmit={handleMarkAsCompleted}
+      />
+
+      <StatusConfirmModal
+        isOpen={statusConfirmState.isOpen}
+        onClose={closeStatusConfirmModal}
+        onConfirm={handleStatusChange}
+        trailName={statusConfirmState.trailName}
+        currentStatus={statusConfirmState.currentStatus}
       />
     </div>
   );

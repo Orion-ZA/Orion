@@ -14,7 +14,12 @@ html[data-theme='dark'] .settings-nav button:hover { background: rgba(255,255,25
 html[data-theme='light'] .settings-nav button { background: #f1f5f9; }
 html[data-theme='light'] .settings-nav button:hover { background: #ffffff; color: var(--text); box-shadow: 0 4px 14px -4px rgba(0,0,0,0.15); }
 .settings-nav button.active { background: var(--primary); color: #fff; border-color: var(--primary-accent); box-shadow: 0 6px 18px -4px rgba(0,0,0,0.35); }
-html[data-theme='light'] .settings-nav button.active { box-shadow: 0 8px 20px -6px rgba(0,0,0,0.18); }
+html[data-theme='light'] .settings-nav button.active {
+	background: linear-gradient(135deg, rgba(17,130,127,0.16), rgba(17,130,127,0.32));
+	color: var(--text);
+	border-color: rgba(17,130,127,0.35);
+	box-shadow: 0 8px 20px -10px rgba(15,23,42,0.18);
+}
 
 .settings-main { flex: 1; background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); backdrop-filter: blur(14px); border-radius: 18px; padding: 2rem 2.25rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: background .45s ease, border-color .45s ease, box-shadow .45s ease; }
 html[data-theme='light'] .settings-main { background: #ffffff; backdrop-filter: none; }
@@ -62,11 +67,20 @@ html[data-theme='light'] .preference-group h3 { color: var(--text); }
 html[data-theme='light'] .preference-option { background: #f1f5f9; }
 .preference-option:hover { border-color: var(--primary-accent); color: var(--text); }
 .preference-option.selected { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%); color: #fff; border-color: var(--primary-accent); box-shadow: 0 6px 18px -6px rgba(0,0,0,.45); }
-html[data-theme='light'] .preference-option.selected { box-shadow: 0 6px 18px -6px rgba(0,0,0,.30); }
+html[data-theme='light'] .preference-option.selected {
+	background: linear-gradient(135deg, rgba(17,130,127,0.14), rgba(17,130,127,0.26));
+	color: var(--text);
+	border-color: rgba(17,130,127,0.35);
+	box-shadow: 0 6px 16px -8px rgba(15,23,42,0.20);
+}
 .preference-option:active { transform: translateY(2px); }
 .preference-option input[type='radio'] { margin: 0; position: absolute; opacity: 0; pointer-events: none; }
 .option-label { color: inherit; font-weight: 500; }
 .preference-option.selected .option-label small { color: rgba(255,255,255,0.9); }
+html[data-theme='light'] .preference-option.selected .option-label,
+html[data-theme='light'] .preference-option.selected .option-label small {
+	color: var(--text-dim);
+}
 .option-label small { font-weight: 500; }
 
 .toggle-switch { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; cursor: pointer; }

@@ -7,6 +7,7 @@ import { LoaderProvider, useLoader } from './components/LoaderContext.js';
 import FullScreenLoader from './components/FullScreenLoader.js';
 import { ToastProvider } from './components/ToastContext';
 import { SearchProvider } from './components/SearchContext';
+import faviconAsset from './assets/orion_logo_clear.png';
 
 
 import Login from './pages/Login';
@@ -101,6 +102,18 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    const existing = document.querySelector("link[rel='icon']");
+    const link = existing || document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.sizes = '192x192';
+    link.href = faviconAsset;
+    if (!existing) {
+      document.head.appendChild(link);
+    }
+  }, []);
+
   return (
     <LoaderProvider>
       <ToastProvider>

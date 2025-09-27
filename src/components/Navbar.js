@@ -69,19 +69,19 @@ export default function Navbar() {
   };
 
   return (
-  <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
-      <div className="nav-inner">
-        <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
-          <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
-        </Link>
+    <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
+    <div className="nav-inner">
+      <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
+        <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
+      </Link>
 
-        {/* Desktop nav links */}
-        <nav className="nav-links desktop-nav">
-          <button
-            type="button"
-            className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-            onClick={()=>{ navigate('/trails'); }}
-          >Trails</button>
+      {/* Desktop nav links */}
+      <nav className="nav-links desktop-nav">
+        <button
+          type="button"
+          className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
+          onClick={()=>{ navigate('/trails'); }}
+        >Trails</button>
           <button
             type="button"
             className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
@@ -91,7 +91,7 @@ export default function Navbar() {
             type="button"
             className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
             onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}
-          >My Trails</button>
+          >MyTrails</button>
           <button
             type="button"
             className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
@@ -190,7 +190,8 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
           <div className="mobile-nav-links">
-            <NavLink to="/trails" onClick={() => setOpen(false)}>Trails</NavLink>
+            <NavLink to="/explorer" onClick={() => setOpen(false)}>Trail Explorer</NavLink>
+            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); setOpen(false);} }}>Trail Submission</button>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false);} }}>Reviews & Media</button>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false);} }}>MyTrails</button>
             <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false);} }}>Alerts & Updates</button>

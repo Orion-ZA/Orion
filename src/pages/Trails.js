@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { useLocation } from 'react-router-dom';
 import { auth, db } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
+import { useSearch } from '../components/SearchContext';
 import FilterPanel from '../components/filters/FilterPanel';
 import TrailMap from '../components/trails/TrailMap';
 import MapControls from '../components/trails/MapControls';
 import TrailsPanel from '../components/trails/TrailsPanel';
 import TrailSubmission from '../components/trails/TrailSubmission';
 import TrailEdit from '../components/trails/TrailEdit';
+import SearchBar from '../components/SearchBar';
 import { calculateDistance } from '../components/trails/TrailUtils';
 import './Trails.css';
 
@@ -16,6 +19,8 @@ const API_BASE_URL = 'https://us-central1-orion-sdp.cloudfunctions.net';
 
 export default function TrailsPage() {
   const mapRef = useRef(null);
+  const location = useLocation();
+  const { searchQuery, setSearchQuery, updateTrailsData, getLocationCoordinates, getLocationNameFromCoordinates } = useSearch();
   const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showSubmissionPanel, setShowSubmissionPanel] = useState(false);
@@ -51,8 +56,37 @@ export default function TrailsPage() {
     zoom: 10
   });
 
+  // Search location state for trail sorting
+  const [searchLocation, setSearchLocation] = useState(null);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+
   // Use trails hook
   const { trails, isLoadingTrails, filters, handleFilterChange, filteredTrails } = useTrails(trailsUserLocation, currentUserId);
+
+  // Update search context with trails data
+  useEffect(() => {
+    if (trails && trails.length > 0) {
+      updateTrailsData(trails);
+    }
+  }, [trails, updateTrailsData]);
+
+  // Handle search query from Welcome page or search bar
+  useEffect(() => {
+    if (location.state?.searchQuery) {
+      setSearchQuery(location.state.searchQuery);
+      
+      if (location.state.action === 'zoom') {
+        // Handle zoom action - find and zoom to the trail or location
+        handleSearchZoom(location.state.searchQuery);
+      } else {
+        // Legacy behavior - filter trails (keeping for backward compatibility)
+        handleFilterChange('searchQuery', location.state.searchQuery);
+      }
+      
+      // Clear the state to prevent re-applying on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, setSearchQuery, handleFilterChange]);
 
   // Auto-detect user location on component mount
   useEffect(() => {
@@ -123,13 +157,24 @@ export default function TrailsPage() {
         setTrailsUserLocation(location);
         setTrailsIsLoadingLocation(false);
         
-        // Center map on user location
-        setViewport(prev => ({
-          ...prev,
-          longitude: location.longitude,
-          latitude: location.latitude,
-          zoom: 12
-        }));
+        // Smooth transition to user location using map.easeTo
+        if (mapRef.current) {
+          const map = mapRef.current.getMap();
+          map.easeTo({
+            center: [location.longitude, location.latitude],
+            zoom: 14,
+            duration: 2000, // 2 second smooth transition
+            essential: true
+          });
+        } else {
+          // Fallback to viewport update if map not ready
+          setViewport(prev => ({
+            ...prev,
+            longitude: location.longitude,
+            latitude: location.latitude,
+            zoom: 14
+          }));
+        }
       },
       (error) => {
         console.error('Error getting location:', error);
@@ -181,11 +226,18 @@ export default function TrailsPage() {
       // Use smooth transition with easeTo
       map.easeTo({
         center: [trailsUserLocation.longitude, trailsUserLocation.latitude],
-        zoom: 12,
-        duration: 1500, // 1.5 second smooth transition
+        zoom: 14,
+        duration: 2000, // 2 second smooth transition
         essential: true // This animation is considered essential with respect to prefers-reduced-motion
       });
     }
+  };
+
+  // Handle recenter from search mode back to user location
+  const handleRecenterFromSearch = () => {
+    setIsSearchMode(false);
+    setSearchLocation(null);
+    handleRecenter();
   };
 
   // Handle trail click to center and zoom map
@@ -204,6 +256,59 @@ export default function TrailsPage() {
       setSelectedTrail(trail); // Set as selected trail for panel highlighting
     }
   };
+
+  // Handle search zoom - find trail or location and zoom to it
+  const handleSearchZoom = useCallback(async (query) => {
+    if (!query || !mapRef.current) return;
+
+    // Open the trails panel when searching
+    setIsPanelOpen(true);
+
+    // First, try to find a matching trail (only if trails data is available)
+    const matchingTrail = trails && trails.length > 0 ? trails.find(trail => 
+      trail.name && trail.name.toLowerCase().includes(query.toLowerCase())
+    ) : null;
+
+    if (matchingTrail && matchingTrail.longitude && matchingTrail.latitude) {
+      // Found a matching trail - zoom to it and set search location
+      setSearchLocation({
+        latitude: matchingTrail.latitude,
+        longitude: matchingTrail.longitude
+      });
+      setIsSearchMode(true);
+      handleTrailClick(matchingTrail);
+      return;
+    }
+
+    // If no trail found, try to get coordinates from geocoding
+    try {
+      const coordinates = await getLocationCoordinates(query);
+      
+      if (coordinates && coordinates.latitude && coordinates.longitude) {
+        const map = mapRef.current.getMap();
+        
+        // Set search location and enable search mode
+        setSearchLocation({
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude
+        });
+        setIsSearchMode(true);
+        
+        // Zoom to the geocoded location
+        map.easeTo({
+          center: [coordinates.longitude, coordinates.latitude],
+          zoom: 15, // Increased zoom level for more detailed view
+          duration: 1500,
+          essential: true
+        });
+        
+        // Clear any selected trail since we're zooming to a location
+        setSelectedTrail(null);
+      }
+    } catch (error) {
+      console.warn('Failed to geocode search query:', error);
+    }
+  }, [trails, getLocationCoordinates, handleTrailClick]);
 
   // Check if map needs recentering
   const needsRecenter = trailsUserLocation && mapCenter && 
@@ -261,7 +366,7 @@ export default function TrailsPage() {
   };
 
   // Handle map click for trail submission
-  const handleMapClickForSubmission = (evt) => {
+  const handleMapClickForSubmission = useCallback(async (evt) => {
     if (showSubmissionPanel) {
       const { lngLat } = evt;
       
@@ -269,15 +374,43 @@ export default function TrailsPage() {
       if (submissionDrawingState.isDrawing && submissionDrawingState.addRoutePoint) {
         submissionDrawingState.addRoutePoint(lngLat.lng, lngLat.lat);
       } else {
-        // Otherwise, set location
+        // Get location name using reverse geocoding
+        let locationName = '';
+        try {
+          const locationInfo = await getLocationNameFromCoordinates([lngLat.lng, lngLat.lat]);
+          if (locationInfo) {
+            locationName = locationInfo.name || locationInfo.fullAddress || '';
+          }
+        } catch (error) {
+          console.warn('Failed to get location name:', error);
+        }
+        
+        // Set the submission location with name
         setSubmissionLocation({
           latitude: lngLat.lat,
           longitude: lngLat.lng,
-          name: ''
+          name: locationName
         });
       }
     }
-  };
+  }, [showSubmissionPanel, submissionDrawingState, getLocationNameFromCoordinates]);
+
+  // Handle general map clicks to get location information using reverse geocoding
+  const handleMapClick = useCallback(async (evt) => {
+    const { lngLat } = evt;
+    const coordinates = [lngLat.lng, lngLat.lat];
+    
+    try {
+      const locationInfo = await getLocationNameFromCoordinates(coordinates);
+      if (locationInfo) {
+        console.log('Clicked location:', locationInfo);
+        // You can use this information to show a tooltip, update UI, etc.
+        // For now, we'll just log it, but you could show it in a toast or modal
+      }
+    } catch (error) {
+      console.warn('Failed to get location info for clicked coordinates:', error);
+    }
+  }, [getLocationNameFromCoordinates]);
 
   // Handle route updates from submission panel
   const handleRouteUpdate = useCallback((routePoints, drawingState) => {
@@ -460,6 +593,18 @@ export default function TrailsPage() {
 
   return (
     <div className="trails-page">
+      {/* Search Bar */}
+      <div className="trails-search-container">
+        <SearchBar 
+          placeholder="Search trails, locations, or activities..."
+          initialValue={searchQuery}
+          onSearch={(query) => {
+            setSearchQuery(query);
+            handleSearchZoom(query);
+          }}
+        />
+      </div>
+      
       <div className="trails-main">
         <TrailMap
           viewport={viewport}
@@ -472,6 +617,7 @@ export default function TrailsPage() {
           setSelectedTrail={setSelectedTrail}
           onTrailClick={handleTrailClick}
           onMapClick={handleMapClickForSubmission}
+          onGeneralMapClick={handleMapClick}
           userLocation={trailsUserLocation}
           mapBearing={mapBearing}
           setMapBearing={setMapBearing}
@@ -521,6 +667,9 @@ export default function TrailsPage() {
           setSelectedTrail={setSelectedTrail}
           userLocation={trailsUserLocation}
           onEditTrail={handleEditTrail}
+          searchLocation={searchLocation}
+          isSearchMode={isSearchMode}
+          onRecenterFromSearch={handleRecenterFromSearch}
         />
       </div>
 

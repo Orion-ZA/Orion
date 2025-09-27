@@ -68,29 +68,19 @@
 }
 
 .distance-slider-wrapper {
-  padding: 0.75rem 0; /* Increased padding for better thumb accessibility */
+  padding: 1rem 16px; /* Add horizontal padding for thumb space */
 }
 
 .distance-slider-container {
   position: relative;
-  height: 20px;
-  margin: 0 12px; /* Half of thumb width to center it (24px/2) */
-}
-
-.distance-slider-min {
-  left: -12px; /* Offset to allow min thumb to reach left edge */
-  width: calc(100% + 24px); /* Extend width to compensate for offset */
-}
-
-.distance-slider-max {
-  left: -12px; /* Offset to allow max thumb to reach right edge */
-  width: calc(100% + 24px); /* Extend width to compensate for offset */
+  height: 32px;
+  margin: 0;
 }
 
 .distance-slider {
   position: absolute;
   width: 100%;
-  height: 6px;
+  height: 32px;
   background: transparent;
   outline: none;
   -webkit-appearance: none;
@@ -100,17 +90,17 @@
   padding: 0;
 }
 
-/* Track styling */
+/* Track styling - make it invisible since we'll use our own track */
 .distance-slider::-webkit-slider-track {
-  height: 6px;
+  height: 4px;
   background: transparent;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .distance-slider::-moz-range-track {
-  height: 6px;
+  height: 4px;
   background: transparent;
-  border-radius: 3px;
+  border-radius: 2px;
   border: none;
 }
 
@@ -118,16 +108,15 @@
 .distance-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   background: var(--primary);
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid var(--bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
-  position: relative;
-  z-index: 2;
+  margin-top: -14px; /* Center on 4px track: (32px - 4px) / 2 */
 }
 
 .distance-slider::-webkit-slider-thumb:hover {
@@ -136,16 +125,15 @@
 }
 
 .distance-slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   background: var(--primary);
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid var(--bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
-  position: relative;
-  z-index: 2;
+  margin-top: -14px; /* Center on 4px track: (32px - 4px) / 2 */
 }
 
 .distance-slider::-moz-range-thumb:hover {
@@ -160,9 +148,9 @@
   top: 50%;
   left: 0;
   right: 0;
-  height: 6px;
+  height: 4px;
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 2px;
   transform: translateY(-50%);
   z-index: 0;
 }
@@ -171,15 +159,35 @@
 .distance-slider-progress {
   position: absolute;
   top: 50%;
-  height: 6px;
+  height: 4px;
   background: var(--primary);
-  border-radius: 3px;
+  border-radius: 2px;
   transform: translateY(-50%);
   z-index: 1;
   pointer-events: none;
 }
 
-/* Ensure max slider thumb is above min slider thumb */
+/* Ensure proper z-index layering */
+.distance-slider-min::-webkit-slider-thumb {
+  z-index: 4; /* Higher z-index for min thumb */
+}
+
+.distance-slider-min::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 5; /* Even higher on hover */
+}
+
+.distance-slider-min::-moz-range-thumb {
+  z-index: 4; /* Higher z-index for min thumb */
+}
+
+.distance-slider-min::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 5; /* Even higher on hover */
+}
+
 .distance-slider-max::-webkit-slider-thumb {
   z-index: 3;
 }

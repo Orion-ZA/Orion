@@ -3,12 +3,17 @@ import React, { useEffect, useState } from 'react';
 
 // Add these helper functions
 async function fetchTrailReviews(trailId) {
-  const res = await fetch(
-    `https://us-central1-orion-sdp.cloudfunctions.net/getTrailReviews?trailId=${trailId}`
-  );
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.reviews || [];
+  try {
+    const res = await fetch(
+      `https://us-central1-orion-sdp.cloudfunctions.net/getTrailReviews?trailId=${trailId}`
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.reviews || [];
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
 }
 
 function calculateAverageRating(reviews) {
@@ -23,6 +28,12 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
 
   useEffect(() => {
     const calculateRatings = async () => {
+      if (!trails || !Array.isArray(trails)) {
+        setTrailsWithRatings([]);
+        setLoading(false);
+        return;
+      }
+
       const trailsWithCalculatedRatings = await Promise.all(
         trails.map(async (trail) => {
           // If averageRating is already calculated, use it
@@ -66,7 +77,8 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
             <p style={{color: '#666'}}>No trails found. Try adjusting your filters or increasing the distance.</p>
           ) : (
             trailsWithRatings.map(trail => {
-              const distance = userLocation ? calculateDistance(userLocation.latitude, userLocation.longitude, trail.location.latitude, trail.location.longitude).toFixed(1) : 'N/A';
+              const distance = userLocation && calculateDistance && trail.location ? 
+                (calculateDistance(userLocation.latitude, userLocation.longitude, trail.location.latitude, trail.location.longitude) || 0).toFixed(1) : 'N/A';
               
               return (
                 <div 
@@ -90,7 +102,7 @@ export default function TrailList({ trails, userLocation, selectedTrail, onSelec
                     <span>{trail.distance} km • {trail.elevationGain} m gain</span>
                     <span>
                       ⭐ {trail.averageRating ? trail.averageRating.toFixed(1) : 'N/A'} 
-                      {trail.reviewCount > 0}
+                      {trail.reviewCount > 0 && ` (${trail.reviewCount})`}
                     </span>
                   </div>
                   {userLocation && (

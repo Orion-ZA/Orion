@@ -31,24 +31,24 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
   /* Make it truly bright */
-  --bg: #ffffff; /* base */
-  --bg-alt: #f2f6fb; /* subtle tinted panel */
+  --bg: #f5f7fb; /* soft dove */
+  --bg-alt: #e8edf6; /* gentle panel */
   --bg-elev: #ffffff;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --primary: #0d6e6d;
-  --primary-accent: #13908e;
-  --accent: #ff9f1c;
-  --accent-alt: #ffa93e;
-  --text: #1a202c;
-  --text-dim: #475569;
-  --muted: #64748b;
-  --focus-ring: rgba(13,110,109,0.45);
-  --glass: rgba(255,255,255,0.9);
-  --shadow: 0 4px 12px -2px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.08);
-  --shadow-hover: 0 8px 20px -4px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-  --success: #15803d;
-  --danger: #dc2626;
+  --border: #d9e1ed;
+  --border-strong: #c0ccdd;
+  --primary: #0f5f5f;
+  --primary-accent: #11827f;
+  --accent: #f78c1c;
+  --accent-alt: #ff9e32;
+  --text: #1e2635;
+  --text-dim: #4a566b;
+  --muted: #5c6b82;
+  --focus-ring: rgba(17,130,127,0.35);
+  --glass: rgba(255,255,255,0.82);
+  --shadow: 0 3px 10px -4px rgba(15,23,42,0.18), 0 1px 3px rgba(15,23,42,0.08);
+  --shadow-hover: 0 8px 18px -6px rgba(15,23,42,0.22), 0 2px 6px rgba(15,23,42,0.12);
+  --success: #1a7a41;
+  --danger: #c53030;
   color-scheme: light;
 }
 /* Light theme surface overrides for SOLID look */

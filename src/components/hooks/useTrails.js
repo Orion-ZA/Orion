@@ -251,7 +251,9 @@ export default function useTrails(externalUserLocation = null, currentUserId = n
         ));
 
       const hasMatchingName = filters.searchQuery === '' ||
-        trail.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
+        trail.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        (trail.description && trail.description.toLowerCase().includes(filters.searchQuery.toLowerCase())) ||
+        (trail.tags && trail.tags.some(tag => tag.toLowerCase().includes(filters.searchQuery.toLowerCase())));
 
       // Check if trail belongs to current user
       const isMyTrail = !filters.myTrails || !currentUserId || (() => {

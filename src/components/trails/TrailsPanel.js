@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3 } from 'lucide-react';
+import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3, MapPin } from 'lucide-react';
 import { useToast } from '../ToastContext';
 import { getDifficultyColor, getDifficultyIcon, calculateDistance } from './TrailUtils';
 import './TrailsPanel.css';
@@ -20,7 +20,10 @@ const TrailsPanel = ({
   selectedTrail,
   setSelectedTrail,
   userLocation,
-  onEditTrail
+  onEditTrail,
+  searchLocation,
+  isSearchMode,
+  onRecenterFromSearch
 }) => {
   const [sortBy, setSortBy] = useState('distanceAway');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -53,17 +56,18 @@ const TrailsPanel = ({
           bValue = parseFloat(b.distance) || 0;
           break;
         case 'distanceAway':
-          // Calculate distance from user's location to trail
-          if (userLocation) {
+          // Calculate distance from user's location or search location to trail
+          const referenceLocation = isSearchMode && searchLocation ? searchLocation : userLocation;
+          if (referenceLocation) {
             aValue = calculateDistance(
-              userLocation.latitude,
-              userLocation.longitude,
+              referenceLocation.latitude,
+              referenceLocation.longitude,
               a.latitude,
               a.longitude
             );
             bValue = calculateDistance(
-              userLocation.latitude,
-              userLocation.longitude,
+              referenceLocation.latitude,
+              referenceLocation.longitude,
               b.latitude,
               b.longitude
             );
@@ -92,7 +96,7 @@ const TrailsPanel = ({
         return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
       }
     });
-  }, [filteredTrails, sortBy, sortOrder, userLocation]);
+  }, [filteredTrails, sortBy, sortOrder, userLocation, searchLocation, isSearchMode]);
 
   // Scroll to selected trail when it changes
   useEffect(() => {
@@ -221,7 +225,7 @@ const TrailsPanel = ({
                   onChange={(e) => handleSortChange(e.target.value)}
                   className="sort-select"
                 >
-                  <option value="distanceAway">Near Me</option>
+                  <option value="distanceAway">{isSearchMode ? "Near Search" : "Near Me"}</option>
                   <option value="name">Name</option>
                   <option value="distance">Distance</option>
                   <option value="difficulty">Difficulty</option>
@@ -235,6 +239,15 @@ const TrailsPanel = ({
                   {sortOrder === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
               </div>
+              {isSearchMode && (
+                <button
+                  onClick={onRecenterFromSearch}
+                  className="action-button secondary"
+                  title="Recenter to My Location"
+                >
+                  <MapPin size={16} />
+                </button>
+              )}
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="action-button secondary"
@@ -351,16 +364,22 @@ const TrailsPanel = ({
                         <div className="trail-item-distance">
                           {trail.distance} km
                           {trail.elevationGain && ` • ${trail.elevationGain}m elevation `}
-                          {userLocation && (
-                            <span className="trail-distance-away">
-                              • {calculateDistance(
-                                userLocation.latitude,
-                                userLocation.longitude,
-                                trail.latitude,
-                                trail.longitude
-                              ).toFixed(1)} km away
-                            </span>
-                          )}
+                          {(() => {
+                            const referenceLocation = isSearchMode && searchLocation ? searchLocation : userLocation;
+                            if (referenceLocation) {
+                              return (
+                                <span className="trail-distance-away">
+                                  • {calculateDistance(
+                                    referenceLocation.latitude,
+                                    referenceLocation.longitude,
+                                    trail.latitude,
+                                    trail.longitude
+                                  ).toFixed(1)} km away
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                       </div>
                       {trail.tags && trail.tags.length > 0 && (

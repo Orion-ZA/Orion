@@ -32,3 +32,13 @@
   .welcome-search-inner { gap: 8px; padding: 8px; }
   .welcome-search-inner input { padding: 8px 6px; }
 }
+
+html[data-theme='light'] .welcome-page { background: linear-gradient(180deg, #f8fafc 0%, #e3f2f2 60%, #d8f5f1 100%); color: var(--text); }
+html[data-theme='light'] .welcome-hero-gradient { background: linear-gradient(180deg, rgba(248,250,252,0.65), rgba(15,27,61,0.35)); }
+html[data-theme='light'] .welcome-title,
+html[data-theme='light'] .welcome-subtitle { text-shadow: none; }
+html[data-theme='light'] .welcome-search-inner { background: rgba(255,255,255,0.92); border: 1px solid var(--border); box-shadow: 0 8px 22px rgba(15,23,42,0.12); }
+html[data-theme='light'] .welcome-search-inner input { background: rgba(241,245,249,0.95); color: var(--text); }
+html[data-theme='light'] .welcome-search-inner input::placeholder { color: var(--text-dim); }
+html[data-theme='light'] .welcome-search-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%); color: #f8fafc; }
+html[data-theme='light'] .welcome-explore a { color: var(--primary); text-shadow: none; }

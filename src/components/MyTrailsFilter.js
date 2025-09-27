@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import './MyTrailsFilter.css';
 
 const MyTrailsFilter = ({ 
@@ -8,8 +8,12 @@ const MyTrailsFilter = ({
   filters, 
   onFilterChange, 
   onClearFilters,
+  sorting,
+  onSortChange,
   activeTab 
 }) => {
+  const [showAllChecked, setShowAllChecked] = useState(true);
+
   const handleSearchChange = (e) => {
     onSearchChange(e.target.value);
   };
@@ -18,16 +22,34 @@ const MyTrailsFilter = ({
     onFilterChange(filterType, value);
   };
 
+  const handleSortOrderToggle = () => {
+    const newOrder = sorting.sortOrder === 'asc' ? 'desc' : 'asc';
+    onSortChange(sorting.sortBy, newOrder);
+  };
+
   const clearAllFilters = () => {
     onSearchChange('');
     onClearFilters();
+    setShowAllChecked(true);
+  };
+
+  const handleShowAllChange = (e) => {
+    setShowAllChecked(e.target.checked);
+    if (e.target.checked) {
+      clearAllFilters();
+    }
   };
 
   const hasActiveFilters = searchQuery || 
     filters.difficulty !== 'all' || 
     filters.minDistance > 0 || 
-    filters.maxDistance !== 20 ||
+    filters.maxDistance < 50 || // Any range less than max is considered a filter
     filters.status !== 'all';
+
+  // Update checkbox state when filters change
+  useEffect(() => {
+    setShowAllChecked(!hasActiveFilters);
+  }, [hasActiveFilters]);
 
   return (
     <div className="mytrails-filter-container">
@@ -127,6 +149,41 @@ const MyTrailsFilter = ({
             </select>
           )}
 
+          {/* Sort By Dropdown */}
+          <select
+            value={sorting.sortBy}
+            onChange={(e) => onSortChange(e.target.value, sorting.sortOrder)}
+            className="mytrails-inline-select"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="distance">Sort by Distance</option>
+            <option value="difficulty">Sort by Difficulty</option>
+            {activeTab === 'submitted' && <option value="date">Sort by Date</option>}
+          </select>
+
+          {/* Sort Order Toggle Button */}
+          <button
+            onClick={handleSortOrderToggle}
+            className="mytrails-sort-order-button"
+            title={`Sort ${sorting.sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+            aria-label={`Sort ${sorting.sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+          >
+            {sorting.sortOrder === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+          </button>
+
+          {/* Show All Checkbox */}
+          <div className="mytrails-show-all-container">
+            <label className="mytrails-show-all-label">
+              <input
+                type="checkbox"
+                checked={showAllChecked}
+                onChange={handleShowAllChange}
+                className="mytrails-show-all-checkbox"
+              />
+              <span className="mytrails-show-all-text">Show All</span>
+            </label>
+          </div>
+
           {/* Clear All Button */}
           <button
             onClick={clearAllFilters}
@@ -134,46 +191,11 @@ const MyTrailsFilter = ({
             aria-label="Clear all filters"
             disabled={!hasActiveFilters}
           >
-            Clear All
+            Clear Filters
           </button>
         </div>
       </div>
 
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <div className="mytrails-active-filters">
-          <span className="active-filters-label">Active filters:</span>
-          <div className="active-filters-list">
-            {searchQuery && (
-              <span className="active-filter-tag">
-                Search: "{searchQuery}"
-                <button onClick={() => onSearchChange('')}>×</button>
-              </span>
-            )}
-            {filters.difficulty !== 'all' && (
-              <span className="active-filter-tag">
-                Difficulty: {filters.difficulty}
-                <button onClick={() => handleFilterChange('difficulty', 'all')}>×</button>
-              </span>
-            )}
-            {(filters.minDistance > 0 || filters.maxDistance !== 20) && (
-              <span className="active-filter-tag">
-                Distance: {filters.minDistance}-{filters.maxDistance}km
-                <button onClick={() => {
-                  handleFilterChange('minDistance', 0);
-                  handleFilterChange('maxDistance', 20);
-                }}>×</button>
-              </span>
-            )}
-            {activeTab === 'submitted' && filters.status !== 'all' && (
-              <span className="active-filter-tag">
-                Status: {filters.status}
-                <button onClick={() => handleFilterChange('status', 'all')}>×</button>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

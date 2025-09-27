@@ -42,8 +42,12 @@ export default function MyTrails() {
   const [filters, setFilters] = useState({
     difficulty: 'all',
     minDistance: 0,
-    maxDistance: 20,
+    maxDistance: 50, // Set to max range to show all trails by default
     status: 'all'
+  });
+  const [sorting, setSorting] = useState({
+    sortBy: 'name', // name, distance, difficulty, date
+    sortOrder: 'asc' // asc, desc
   });
   const auth = getAuth();
   const user = auth.currentUser;
@@ -300,14 +304,18 @@ export default function MyTrails() {
     setFilters({
       difficulty: 'all',
       minDistance: 0,
-      maxDistance: 20,
+      maxDistance: 50, // Set to max range to show all trails
       status: 'all'
     });
   };
 
-  // Filter trails based on search query and filters
+  const handleSortChange = (sortBy, sortOrder) => {
+    setSorting({ sortBy, sortOrder });
+  };
+
+  // Filter and sort trails based on search query, filters, and sorting options
   const filterTrails = (trailArray) => {
-    return trailArray.filter(trail => {
+    const filtered = trailArray.filter(trail => {
       // Search filter
       if (searchQuery) {
         const searchLower = searchQuery.toLowerCase();
@@ -332,6 +340,44 @@ export default function MyTrails() {
       }
 
       return true;
+    });
+
+    // Sort the filtered trails
+    return filtered.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sorting.sortBy) {
+        case 'name':
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
+          break;
+        case 'distance':
+          aValue = parseFloat(a.distance) || 0;
+          bValue = parseFloat(b.distance) || 0;
+          break;
+        case 'difficulty':
+          const difficultyOrder = { 'Easy': 1, 'Moderate': 2, 'Hard': 3 };
+          aValue = difficultyOrder[a.difficulty] || 0;
+          bValue = difficultyOrder[b.difficulty] || 0;
+          break;
+        case 'date':
+          // For submitted trails, use createdAt; for others, use a default date
+          aValue = new Date(a.createdAt || a.lastUpdated || '1970-01-01');
+          bValue = new Date(b.createdAt || b.lastUpdated || '1970-01-01');
+          break;
+        default:
+          return 0;
+      }
+
+      if (sorting.sortBy === 'date') {
+        // For dates, newer dates should come first in desc order
+        return sorting.sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+      } else {
+        // For other fields, use string/number comparison
+        if (aValue < bValue) return sorting.sortOrder === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sorting.sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      }
     });
   };
 
@@ -548,6 +594,8 @@ export default function MyTrails() {
             filters={filters}
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
+            sorting={sorting}
+            onSortChange={handleSortChange}
             activeTab={activeTab}
           />
 

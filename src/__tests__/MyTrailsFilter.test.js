@@ -6,6 +6,8 @@ import MyTrailsFilter from '../components/MyTrailsFilter';
 jest.mock('lucide-react', () => ({
   Search: (props) => <svg data-testid="search-icon" {...props} />,
   X: (props) => <svg data-testid="x-icon" {...props} />,
+  ArrowUp: (props) => <svg data-testid="arrow-up-icon" {...props} />,
+  ArrowDown: (props) => <svg data-testid="arrow-down-icon" {...props} />,
 }));
 
 describe('MyTrailsFilter', () => {
@@ -15,11 +17,16 @@ describe('MyTrailsFilter', () => {
     filters: {
       difficulty: 'all',
       minDistance: 0,
-      maxDistance: 20,
+      maxDistance: 50,
       status: 'all'
     },
     onFilterChange: jest.fn(),
     onClearFilters: jest.fn(),
+    sorting: {
+      sortBy: 'name',
+      sortOrder: 'asc'
+    },
+    onSortChange: jest.fn(),
     activeTab: 'favorites'
   };
 
@@ -34,8 +41,8 @@ describe('MyTrailsFilter', () => {
       expect(screen.getByPlaceholderText('Search favorites...')).toBeInTheDocument();
       expect(screen.getByTestId('search-icon')).toBeInTheDocument();
       expect(screen.getByDisplayValue('All Difficulties')).toBeInTheDocument();
-      expect(screen.getByText('Distance: 0 - 20 km')).toBeInTheDocument();
-      expect(screen.getByText('Clear All')).toBeInTheDocument();
+      expect(screen.getByText('Distance: 0 - 50 km')).toBeInTheDocument();
+      expect(screen.getByText('Clear Filters')).toBeInTheDocument();
     });
 
     it('renders with correct CSS classes', () => {
@@ -231,30 +238,163 @@ describe('MyTrailsFilter', () => {
     });
   });
 
-  describe('Clear All Functionality', () => {
-    it('shows clear all button when filters are active', () => {
-      render(<MyTrailsFilter {...defaultProps} searchQuery="test" />);
-      
-      const clearAllButton = screen.getByText('Clear All');
-      expect(clearAllButton).toHaveClass('visible');
-      expect(clearAllButton).not.toBeDisabled();
-    });
-
-    it('hides clear all button when no filters are active', () => {
+  describe('Sorting Functionality', () => {
+    it('renders sort by dropdown with correct options', () => {
       render(<MyTrailsFilter {...defaultProps} />);
       
-      const clearAllButton = screen.getByText('Clear All');
-      expect(clearAllButton).toHaveClass('hidden');
-      expect(clearAllButton).toBeDisabled();
+      const sortBySelect = screen.getByDisplayValue('Sort by Name');
+      expect(sortBySelect).toBeInTheDocument();
+      
+      const options = Array.from(sortBySelect.options).map(option => option.value);
+      expect(options).toEqual(['name', 'distance', 'difficulty']);
     });
 
-    it('calls onSearchChange and onClearFilters when clear all is clicked', () => {
+    it('renders date option for submitted tab', () => {
+      render(<MyTrailsFilter {...defaultProps} activeTab="submitted" />);
+      
+      const sortBySelect = screen.getByDisplayValue('Sort by Name');
+      const options = Array.from(sortBySelect.options).map(option => option.value);
+      expect(options).toEqual(['name', 'distance', 'difficulty', 'date']);
+    });
+
+    it('calls onSortChange when sort by is changed', () => {
+      const onSortChange = jest.fn();
+      render(<MyTrailsFilter {...defaultProps} onSortChange={onSortChange} />);
+      
+      const sortBySelect = screen.getByDisplayValue('Sort by Name');
+      fireEvent.change(sortBySelect, { target: { value: 'distance' } });
+      
+      expect(onSortChange).toHaveBeenCalledWith('distance', 'asc');
+    });
+
+    it('renders sort order toggle button', () => {
+      render(<MyTrailsFilter {...defaultProps} />);
+      
+      const sortOrderButton = screen.getByRole('button', { name: /Sort (Ascending|Descending)/ });
+      expect(sortOrderButton).toBeInTheDocument();
+      expect(sortOrderButton).toHaveClass('mytrails-sort-order-button');
+    });
+
+    it('shows up arrow for ascending sort', () => {
+      render(<MyTrailsFilter {...defaultProps} sorting={{ sortBy: 'name', sortOrder: 'asc' }} />);
+      
+      expect(screen.getByTestId('arrow-up-icon')).toBeInTheDocument();
+      expect(screen.queryByTestId('arrow-down-icon')).not.toBeInTheDocument();
+    });
+
+    it('shows down arrow for descending sort', () => {
+      render(<MyTrailsFilter {...defaultProps} sorting={{ sortBy: 'name', sortOrder: 'desc' }} />);
+      
+      expect(screen.getByTestId('arrow-down-icon')).toBeInTheDocument();
+      expect(screen.queryByTestId('arrow-up-icon')).not.toBeInTheDocument();
+    });
+
+    it('calls onSortChange when sort order button is clicked', () => {
+      const onSortChange = jest.fn();
+      render(<MyTrailsFilter {...defaultProps} onSortChange={onSortChange} />);
+      
+      const sortOrderButton = screen.getByRole('button', { name: /Sort (Ascending|Descending)/ });
+      fireEvent.click(sortOrderButton);
+      
+      expect(onSortChange).toHaveBeenCalledWith('name', 'desc');
+    });
+
+    it('toggles sort order correctly', () => {
+      const onSortChange = jest.fn();
+      const { rerender } = render(<MyTrailsFilter {...defaultProps} onSortChange={onSortChange} />);
+      
+      // Start with ascending
+      const sortOrderButton = screen.getByRole('button', { name: /Sort (Ascending|Descending)/ });
+      fireEvent.click(sortOrderButton);
+      expect(onSortChange).toHaveBeenCalledWith('name', 'desc');
+      
+      // Change to descending
+      rerender(<MyTrailsFilter {...defaultProps} sorting={{ sortBy: 'name', sortOrder: 'desc' }} onSortChange={onSortChange} />);
+      fireEvent.click(sortOrderButton);
+      expect(onSortChange).toHaveBeenCalledWith('name', 'asc');
+    });
+  });
+
+  describe('Show All Checkbox Functionality', () => {
+    it('renders show all checkbox', () => {
+      render(<MyTrailsFilter {...defaultProps} />);
+      
+      const showAllCheckbox = screen.getByRole('checkbox');
+      expect(showAllCheckbox).toBeInTheDocument();
+      expect(showAllCheckbox).toBeChecked();
+    });
+
+    it('calls clearAllFilters when show all checkbox is checked', () => {
       const onSearchChange = jest.fn();
       const onClearFilters = jest.fn();
       render(<MyTrailsFilter {...defaultProps} searchQuery="test" onSearchChange={onSearchChange} onClearFilters={onClearFilters} />);
       
-      const clearAllButton = screen.getByText('Clear All');
-      fireEvent.click(clearAllButton);
+      const showAllCheckbox = screen.getByRole('checkbox');
+      
+      // Uncheck first, then check to trigger the clearAllFilters call
+      fireEvent.click(showAllCheckbox);
+      fireEvent.click(showAllCheckbox);
+      
+      expect(onSearchChange).toHaveBeenCalledWith('');
+      expect(onClearFilters).toHaveBeenCalledTimes(1); // Called once when checking the box
+    });
+
+    it('does not call clearAllFilters when show all checkbox is unchecked', () => {
+      const onSearchChange = jest.fn();
+      const onClearFilters = jest.fn();
+      render(<MyTrailsFilter {...defaultProps} onSearchChange={onSearchChange} onClearFilters={onClearFilters} />);
+      
+      const showAllCheckbox = screen.getByRole('checkbox');
+      
+      // Uncheck the checkbox
+      fireEvent.click(showAllCheckbox);
+      
+      // Should not call clearAllFilters when unchecking
+      expect(onClearFilters).not.toHaveBeenCalled();
+    });
+
+    it('updates checkbox state when filters change', () => {
+      const { rerender } = render(<MyTrailsFilter {...defaultProps} />);
+      
+      let showAllCheckbox = screen.getByRole('checkbox');
+      expect(showAllCheckbox).toBeChecked();
+      
+      // Add a filter
+      rerender(<MyTrailsFilter {...defaultProps} searchQuery="test" />);
+      showAllCheckbox = screen.getByRole('checkbox');
+      expect(showAllCheckbox).not.toBeChecked();
+      
+      // Remove the filter
+      rerender(<MyTrailsFilter {...defaultProps} searchQuery="" />);
+      showAllCheckbox = screen.getByRole('checkbox');
+      expect(showAllCheckbox).toBeChecked();
+    });
+  });
+
+  describe('Clear Filters Functionality', () => {
+    it('shows clear filters button when filters are active', () => {
+      render(<MyTrailsFilter {...defaultProps} searchQuery="test" />);
+      
+      const clearFiltersButton = screen.getByText('Clear Filters');
+      expect(clearFiltersButton).toHaveClass('visible');
+      expect(clearFiltersButton).not.toBeDisabled();
+    });
+
+    it('hides clear filters button when no filters are active', () => {
+      render(<MyTrailsFilter {...defaultProps} />);
+      
+      const clearFiltersButton = screen.getByText('Clear Filters');
+      expect(clearFiltersButton).toHaveClass('hidden');
+      expect(clearFiltersButton).toBeDisabled();
+    });
+
+    it('calls onSearchChange and onClearFilters when clear filters is clicked', () => {
+      const onSearchChange = jest.fn();
+      const onClearFilters = jest.fn();
+      render(<MyTrailsFilter {...defaultProps} searchQuery="test" onSearchChange={onSearchChange} onClearFilters={onClearFilters} />);
+      
+      const clearFiltersButton = screen.getByText('Clear Filters');
+      fireEvent.click(clearFiltersButton);
       
       expect(onSearchChange).toHaveBeenCalledWith('');
       expect(onClearFilters).toHaveBeenCalledTimes(1);
@@ -262,122 +402,30 @@ describe('MyTrailsFilter', () => {
 
     it('detects active filters correctly', () => {
       const { rerender } = render(<MyTrailsFilter {...defaultProps} />);
-      expect(screen.getByText('Clear All')).toHaveClass('hidden');
+      expect(screen.getByText('Clear Filters')).toHaveClass('hidden');
       
       // Test search query
       rerender(<MyTrailsFilter {...defaultProps} searchQuery="test" />);
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
       
       // Test difficulty filter
       rerender(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, difficulty: 'Easy' }} />);
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
       
       // Test distance filter
       rerender(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, minDistance: 5 }} />);
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
       
       // Test max distance filter
       rerender(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, maxDistance: 30 }} />);
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
       
       // Test status filter (for submitted tab)
       rerender(<MyTrailsFilter {...defaultProps} activeTab="submitted" filters={{ ...defaultProps.filters, status: 'open' }} />);
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
     });
   });
 
-  describe('Active Filters Display', () => {
-    it('shows active filters section when filters are active', () => {
-      render(<MyTrailsFilter {...defaultProps} searchQuery="test" />);
-      
-      expect(screen.getByText('Active filters:')).toBeInTheDocument();
-      expect(document.querySelector('.mytrails-active-filters')).toBeInTheDocument();
-    });
-
-    it('hides active filters section when no filters are active', () => {
-      render(<MyTrailsFilter {...defaultProps} />);
-      
-      expect(screen.queryByText('Active filters:')).not.toBeInTheDocument();
-      expect(document.querySelector('.mytrails-active-filters')).not.toBeInTheDocument();
-    });
-
-    it('displays search filter tag', () => {
-      render(<MyTrailsFilter {...defaultProps} searchQuery="hiking trail" />);
-      
-      expect(screen.getByText('Search: "hiking trail"')).toBeInTheDocument();
-    });
-
-    it('displays difficulty filter tag', () => {
-      render(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, difficulty: 'Hard' }} />);
-      
-      expect(screen.getByText('Difficulty: Hard')).toBeInTheDocument();
-    });
-
-    it('displays distance filter tag', () => {
-      render(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, minDistance: 5, maxDistance: 15 }} />);
-      
-      expect(screen.getByText('Distance: 5-15km')).toBeInTheDocument();
-    });
-
-    it('displays status filter tag for submitted tab', () => {
-      render(<MyTrailsFilter {...defaultProps} activeTab="submitted" filters={{ ...defaultProps.filters, status: 'closed' }} />);
-      
-      expect(screen.getByText('Status: closed')).toBeInTheDocument();
-    });
-
-    it('calls onSearchChange when search filter tag is removed', () => {
-      const onSearchChange = jest.fn();
-      render(<MyTrailsFilter {...defaultProps} searchQuery="test" onSearchChange={onSearchChange} />);
-      
-      const searchTag = screen.getByText('Search: "test"');
-      const removeButton = searchTag.querySelector('button');
-      fireEvent.click(removeButton);
-      
-      expect(onSearchChange).toHaveBeenCalledWith('');
-    });
-
-    it('calls onFilterChange when difficulty filter tag is removed', () => {
-      const onFilterChange = jest.fn();
-      render(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, difficulty: 'Easy' }} onFilterChange={onFilterChange} />);
-      
-      const difficultyTag = screen.getByText('Difficulty: Easy');
-      const removeButton = difficultyTag.querySelector('button');
-      fireEvent.click(removeButton);
-      
-      expect(onFilterChange).toHaveBeenCalledWith('difficulty', 'all');
-    });
-
-    it('calls onFilterChange when distance filter tag is removed', () => {
-      const onFilterChange = jest.fn();
-      render(<MyTrailsFilter {...defaultProps} filters={{ ...defaultProps.filters, minDistance: 5, maxDistance: 15 }} onFilterChange={onFilterChange} />);
-      
-      const distanceTag = screen.getByText('Distance: 5-15km');
-      const removeButton = distanceTag.querySelector('button');
-      fireEvent.click(removeButton);
-      
-      expect(onFilterChange).toHaveBeenCalledWith('minDistance', 0);
-      expect(onFilterChange).toHaveBeenCalledWith('maxDistance', 20);
-    });
-
-    it('calls onFilterChange when status filter tag is removed', () => {
-      const onFilterChange = jest.fn();
-      render(<MyTrailsFilter {...defaultProps} activeTab="submitted" filters={{ ...defaultProps.filters, status: 'open' }} onFilterChange={onFilterChange} />);
-      
-      const statusTag = screen.getByText('Status: open');
-      const removeButton = statusTag.querySelector('button');
-      fireEvent.click(removeButton);
-      
-      expect(onFilterChange).toHaveBeenCalledWith('status', 'all');
-    });
-
-    it('displays multiple active filter tags', () => {
-      render(<MyTrailsFilter {...defaultProps} searchQuery="test" filters={{ ...defaultProps.filters, difficulty: 'Moderate', minDistance: 5 }} />);
-      
-      expect(screen.getByText('Search: "test"')).toBeInTheDocument();
-      expect(screen.getByText('Difficulty: Moderate')).toBeInTheDocument();
-      expect(screen.getByText('Distance: 5-20km')).toBeInTheDocument();
-    });
-  });
 
   describe('Edge Cases', () => {
     it('handles missing callback functions gracefully', () => {
@@ -386,6 +434,7 @@ describe('MyTrailsFilter', () => {
           <MyTrailsFilter
             searchQuery=""
             filters={defaultProps.filters}
+            sorting={defaultProps.sorting}
             activeTab="favorites"
           />
         );
@@ -440,6 +489,7 @@ describe('MyTrailsFilter', () => {
       
       expect(screen.getByRole('button', { name: 'Clear search' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Sort (Ascending|Descending)/ })).toBeInTheDocument();
     });
 
     it('has proper slider elements with correct attributes', () => {
@@ -491,14 +541,8 @@ describe('MyTrailsFilter', () => {
       expect(screen.getByDisplayValue('Open')).toBeInTheDocument();
       expect(screen.getByText('Distance: 10 - 30 km')).toBeInTheDocument();
       
-      // Active filters should be displayed
-      expect(screen.getByText('Search: "mountain"')).toBeInTheDocument();
-      expect(screen.getByText('Difficulty: Hard')).toBeInTheDocument();
-      expect(screen.getByText('Distance: 10-30km')).toBeInTheDocument();
-      expect(screen.getByText('Status: open')).toBeInTheDocument();
-      
-      // Clear all should be enabled
-      expect(screen.getByText('Clear All')).toHaveClass('visible');
+      // Clear filters should be enabled
+      expect(screen.getByText('Clear Filters')).toHaveClass('visible');
     });
 
     it('handles rapid filter changes', () => {

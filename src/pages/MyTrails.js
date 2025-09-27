@@ -2,170 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { Heart, CheckCircle, Bookmark, Upload, Mountain, Lock, Unlock } from 'lucide-react';
-import { getDifficultyColor, getDifficultyIcon } from '../components/trails/TrailUtils';
+import { Heart, CheckCircle, Bookmark, Upload, Mountain } from 'lucide-react';
+import ReviewModal from '../components/modals/ReviewModal';
+import StatusConfirmModal from '../components/modals/StatusConfirmModal';
+import AlertsPopup from '../components/AlertsPopup';
+import TrailCard from '../components/trails/TrailCard';
+import MyTrailsFilter from '../components/MyTrailsFilter';
 import './MyTrails.css';
 
-// Status Confirmation Modal Component
-const StatusConfirmModal = ({ isOpen, onClose, onConfirm, trailName, currentStatus }) => {
-  const newStatus = currentStatus === 'open' ? 'closed' : 'open';
-  const actionText = newStatus === 'closed' ? 'close' : 'reopen';
-  
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.position = 'static';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.position = 'static';
-    };
-  }, [isOpen]);
-
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  return (
-    <div 
-      className={`status-confirm-overlay ${isOpen ? 'open' : ''}`} 
-      onClick={handleOverlayClick}
-    >
-      <div className="status-confirm-content">
-        <h3>Confirm Status Change</h3>
-        <p>
-          Are you sure you want to {actionText} the trail "{trailName}"? 
-          {newStatus === 'closed' 
-            ? ' This will make it unavailable to other users.' 
-            : ' This will make it available to other users again.'
-          }
-        </p>
-        <div className="status-confirm-actions">
-          <button 
-            className="status-confirm-btn cancel" 
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button 
-            className="status-confirm-btn confirm" 
-            onClick={onConfirm}
-          >
-            {newStatus === 'closed' ? 'Close Trail' : 'Reopen Trail'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Modal Component
-const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState('');
-
-  useEffect(() => {
-    // Prevent body scrolling when modal is open
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.position = 'static';
-    }
-    
-    // Cleanup function
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.position = 'static';
-    };
-  }, [isOpen]);
-
-  const handleSubmit = () => {
-    if (rating < 1 || rating > 5) {
-      alert("Please enter a rating between 1 and 5");
-      return;
-    }
-    onSubmit(rating, comment);
-    setRating(5);
-    setComment('');
-  };
-
-  const handleClose = () => {
-    onClose();
-    setRating(5);
-    setComment('');
-  };
-
-  // Handle overlay click (close modal when clicking outside content)
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
-
-  return (
-    <div 
-      className={`modal-overlay ${isOpen ? 'open' : ''}`} 
-      onClick={handleOverlayClick}
-    >
-      <div className="modal-content">
-        <button className="modal-close-btn" onClick={handleClose} aria-label="Close modal">
-          ×
-        </button>
-        <h3>Review: {trailName}</h3>
-        
-        <div className="input-group">
-          <label>
-            Rating (1-5)
-          </label>
-          <div className="rating-input">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                className={`star ${rating >= star ? 'active' : ''}`}
-                onClick={() => setRating(star)}
-                aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="input-group">
-          <label>
-            Comment
-          </label>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Share your experience..."
-            rows="4"
-          />
-        </div>
-
-        <div className="modal-actions">
-          <button className="btn-secondary" onClick={handleClose}>
-            Cancel
-          </button>
-          <button className="btn-primary" onClick={handleSubmit}>
-            Submit Review
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function MyTrails() {
   const [trails, setTrails] = useState({ favourites: [], completed: [], wishlist: [], submitted: [] });
@@ -183,6 +27,24 @@ export default function MyTrails() {
   });
   const [activeTab, setActiveTab] = useState('favourites');
   const [loading, setLoading] = useState(true);
+  const [loadingStates, setLoadingStates] = useState({
+    savedTrails: true,
+    submittedTrails: true,
+    alerts: true
+  });
+  const [cache, setCache] = useState({});
+  const [alertsPopup, setAlertsPopup] = useState({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    alerts: []
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    difficulty: 'all',
+    minDistance: 0,
+    maxDistance: 20,
+    status: 'all'
+  });
   const auth = getAuth();
   const user = auth.currentUser;
   const userId = user ? user.uid : null;
@@ -191,12 +53,26 @@ export default function MyTrails() {
     async function fetchSavedTrails() {
       if (!userId) return;
       
+      // Check cache first (5 minute cache)
+      const cacheKey = `trails_${userId}`;
+      const cachedData = cache[cacheKey];
+      if (cachedData && Date.now() - cachedData.timestamp < 300000) {
+        setTrails(cachedData.data);
+        setAlerts(cachedData.alerts || {});
+        setLoading(false);
+        setLoadingStates({ savedTrails: false, submittedTrails: false, alerts: false });
+        return;
+      }
+      
       try {
         setLoading(true);
+        setLoadingStates({ savedTrails: true, submittedTrails: true, alerts: true });
         
         // Fetch saved trails from the API
         const res = await fetch(`https://getsavedtrails-fqtduxc7ua-uc.a.run.app?uid=${userId}`);
         const data = await res.json();
+        
+        setLoadingStates(prev => ({ ...prev, savedTrails: false }));
         
         // Fetch submitted trails from Firestore
         const userRef = doc(db, 'Users', userId);
@@ -205,84 +81,75 @@ export default function MyTrails() {
         
         if (userSnap.exists()) {
           const userData = userSnap.data();
-          console.log('User data:', userData);
-          console.log('Submitted trails array:', userData.submittedTrails);
           
           if (userData.submittedTrails && userData.submittedTrails.length > 0) {
             const fetchTrailDetails = async (references) => {
               const details = [];
-              console.log('Processing submitted trail references:', references);
+              const trailIds = [];
               
+              // Extract trail IDs from references
               for (const ref of references) {
-                try {
-                  console.log('Processing reference:', ref, 'Type:', typeof ref);
-                  let trailDoc;
-                  
-                  if (typeof ref === 'string') {
-                    // Handle string path like "/Trails/trailId"
-                    if (ref.startsWith('/Trails/')) {
-                      const trailId = ref.split('/')[2];
-                      trailDoc = await getDoc(doc(db, 'Trails', trailId));
-                    }
-                  } else if (ref && ref.path) {
-                    // Handle Firestore DocumentReference
-                    trailDoc = await getDoc(ref);
-                  } else if (ref && ref._path) {
-                    // Handle Firestore DocumentReference with _path
-                    const pathParts = ref._path.segments;
-                    if (pathParts[0] === 'Trails') {
-                      trailDoc = await getDoc(doc(db, 'Trails', pathParts[1]));
-                    }
+                if (typeof ref === 'string' && ref.startsWith('/Trails/')) {
+                  trailIds.push(ref.split('/')[2]);
+                } else if (ref && ref.path) {
+                  trailIds.push(ref.path.split('/')[1]);
+                } else if (ref && ref._path) {
+                  const pathParts = ref._path.segments;
+                  if (pathParts[0] === 'Trails') {
+                    trailIds.push(pathParts[1]);
                   }
-                  
-                  if (trailDoc && trailDoc.exists()) {
-                    const trailData = trailDoc.data();
-                    details.push({ 
-                      id: trailDoc.id, 
-                      ...trailData,
-                      // Ensure we have the required fields for display
-                      name: trailData.name || 'Unnamed Trail',
-                      difficulty: trailData.difficulty || 'Unknown',
-                      distance: trailData.distance || 0,
-                      elevationGain: trailData.elevationGain || 0,
-                      status: trailData.status || 'open',
-                      createdAt: trailData.createdAt || trailData.lastUpdated
-                    });
-                  }
-                } catch (error) {
-                  console.error('Error fetching trail details:', error);
                 }
               }
+              
+              // Batch fetch trails
+              const trailPromises = trailIds.map(trailId => 
+                getDoc(doc(db, 'Trails', trailId))
+              );
+              
+              const trailDocs = await Promise.all(trailPromises);
+              
+              trailDocs.forEach((trailDoc, index) => {
+                if (trailDoc.exists()) {
+                  const trailData = trailDoc.data();
+                  details.push({ 
+                    id: trailDoc.id, 
+                    ...trailData,
+                    name: trailData.name || 'Unnamed Trail',
+                    difficulty: trailData.difficulty || 'Unknown',
+                    distance: trailData.distance || 0,
+                    elevationGain: trailData.elevationGain || 0,
+                    status: trailData.status || 'open',
+                    createdAt: trailData.createdAt || trailData.lastUpdated
+                  });
+                }
+              });
+              
               return details;
             };
             
             submittedTrails = await fetchTrailDetails(userData.submittedTrails);
-            console.log('Fetched submitted trails:', submittedTrails);
           }
         }
         
-        console.log('Final trails state:', { ...data, submitted: submittedTrails });
-        setTrails({ ...data, submitted: submittedTrails });
+        setLoadingStates(prev => ({ ...prev, submittedTrails: false }));
+        
+        const trailsData = { ...data, submitted: submittedTrails };
+        setTrails(trailsData);
 
-        const allTrails = [...data.favourites, ...data.completed, ...data.wishlist, ...submittedTrails];
-        const alertsData = {};
-
-        await Promise.all(
-          allTrails.map(async (trail) => {
-            try {
-              const res = await fetch(
-                `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${trail.id}`
-              );
-              const alertData = await res.json();
-              alertsData[trail.id] = alertData.alerts || [];
-            } catch (err) {
-              console.error(`Error fetching alerts for ${trail.name}:`, err);
-              alertsData[trail.id] = [];
-            }
-          })
-        );
-
-        setAlerts(alertsData);
+        // Load alerts in background after main content is shown
+        const allTrailsForAlerts = [...data.favourites, ...data.completed, ...data.wishlist, ...submittedTrails];
+        console.log('Loading alerts for trails:', allTrailsForAlerts.length, 'trails');
+        loadAlertsInBackground(allTrailsForAlerts);
+        
+        // Cache the results
+        setCache(prev => ({
+          ...prev,
+          [cacheKey]: {
+            data: trailsData,
+            timestamp: Date.now()
+          }
+        }));
+        
       } catch (err) {
         console.error('Error fetching saved trails:', err);
       } finally {
@@ -292,6 +159,75 @@ export default function MyTrails() {
     
     fetchSavedTrails();
   }, [userId]);
+
+  // Separate function to load alerts in background
+  const loadAlertsInBackground = async (allTrails) => {
+    if (allTrails.length === 0) {
+      console.log('No trails to load alerts for');
+      setLoadingStates(prev => ({ ...prev, alerts: false }));
+      return;
+    }
+    
+    try {
+      // Batch alerts API call - try to get all alerts in one request
+      const trailIds = allTrails.map(trail => trail.id).join(',');
+      console.log('Attempting batch alerts API call for trail IDs:', trailIds);
+      
+      try {
+        // Try batch endpoint first
+        const res = await fetch(
+          `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailIds=${trailIds}`
+        );
+        
+        console.log('Batch alerts API response status:', res.status);
+        
+        if (res.ok) {
+          const batchAlertData = await res.json();
+          console.log('Batch alerts data received:', batchAlertData);
+          setAlerts(batchAlertData.alerts || {});
+          setLoadingStates(prev => ({ ...prev, alerts: false }));
+          return;
+        }
+      } catch (batchError) {
+        console.log('Batch alerts not available, falling back to individual calls:', batchError);
+      }
+      
+      // Fallback to individual calls if batch endpoint doesn't exist
+      console.log('Using individual alerts API calls');
+      const alertsData = {};
+      const batchSize = 5; // Process in smaller batches to avoid overwhelming the server
+      
+      for (let i = 0; i < allTrails.length; i += batchSize) {
+        const batch = allTrails.slice(i, i + batchSize);
+        console.log(`Processing batch ${i/batchSize + 1} with ${batch.length} trails`);
+        
+        await Promise.all(
+          batch.map(async (trail) => {
+            try {
+              const res = await fetch(
+                `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${trail.id}`
+              );
+              const alertData = await res.json();
+              console.log(`Alerts for trail ${trail.name} (${trail.id}):`, alertData);
+              alertsData[trail.id] = alertData.alerts || [];
+            } catch (err) {
+              console.error(`Error fetching alerts for ${trail.name}:`, err);
+              alertsData[trail.id] = [];
+            }
+          })
+        );
+        
+        // Update alerts progressively
+        console.log('Updating alerts state with:', alertsData);
+        setAlerts(prev => ({ ...prev, ...alertsData }));
+      }
+      
+    } catch (err) {
+      console.error('Error loading alerts:', err);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, alerts: false }));
+    }
+  };
 
 
   const openReviewModal = (trailId, trailName) => {
@@ -325,6 +261,77 @@ export default function MyTrails() {
       trailId: null,
       trailName: '',
       currentStatus: 'open',
+    });
+  };
+
+  const showAlertsPopup = (event, alerts) => {
+    const rect = event.target.getBoundingClientRect();
+    setAlertsPopup({
+      isVisible: true,
+      position: {
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 8
+      },
+      alerts: alerts
+    });
+  };
+
+  const hideAlertsPopup = () => {
+    setAlertsPopup({
+      isVisible: false,
+      position: { x: 0, y: 0 },
+      alerts: []
+    });
+  };
+
+  // Filter management functions
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      difficulty: 'all',
+      minDistance: 0,
+      maxDistance: 20,
+      status: 'all'
+    });
+  };
+
+  // Filter trails based on search query and filters
+  const filterTrails = (trailArray) => {
+    return trailArray.filter(trail => {
+      // Search filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        const nameMatch = trail.name?.toLowerCase().includes(searchLower);
+        if (!nameMatch) return false;
+      }
+
+      // Difficulty filter
+      if (filters.difficulty !== 'all' && trail.difficulty !== filters.difficulty) {
+        return false;
+      }
+
+      // Distance filter
+      const trailDistance = parseFloat(trail.distance) || 0;
+      if (trailDistance < filters.minDistance || trailDistance > filters.maxDistance) {
+        return false;
+      }
+
+      // Status filter (only for submitted trails)
+      if (activeTab === 'submitted' && filters.status !== 'all' && trail.status !== filters.status) {
+        return false;
+      }
+
+      return true;
     });
   };
 
@@ -426,6 +433,7 @@ export default function MyTrails() {
   // Render trail list for the current active tab
   const renderTrailList = () => {
     const trailArray = trails[activeTab] || [];
+    const filteredTrails = filterTrails(trailArray);
     
     if (trailArray.length === 0) {
       return (
@@ -447,85 +455,34 @@ export default function MyTrails() {
         </div>
       );
     }
+
+    if (filteredTrails.length === 0) {
+      return (
+        <div className="empty-state">
+          <div className="empty-icon">
+            <Mountain size={48} />
+          </div>
+          <p>No trails match your current filters.</p>
+          <p className="empty-subtext">
+            Try adjusting your search or filter criteria.
+          </p>
+        </div>
+      );
+    }
     
-    return trailArray.map((trail) => (
-      <li key={trail.id} className="trail-card">
-        <div className="trail-header">
-          <h4>{trail.name}</h4>
-        </div>
-
-        {/* Alerts */}
-        {alerts[trail.id] && alerts[trail.id].length > 0 && (
-          <div className="alerts-container">
-            {alerts[trail.id].map((alert) => (
-              <div key={alert.id} className="alert-item">
-                <span className="alert-type">[{alert.type}]</span> {alert.message}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Status Badge - Only for submitted trails */}
-        {activeTab === 'submitted' && (
-          <div className="trail-status">
-            <span 
-              className={`status-badge ${trail.status === 'open' ? 'status-open' : 'status-closed'}`}
-              onClick={() => openStatusConfirmModal(trail.id, trail.name, trail.status)}
-              title={`Click to ${trail.status === 'open' ? 'close' : 'reopen'} trail`}
-            >
-              {trail.status === 'open' ? (
-                <>
-                  <Unlock size={14} style={{ marginRight: '4px', display: 'inline-block' }} />
-                  Open
-                </>
-              ) : (
-                <>
-                  <Lock size={14} style={{ marginRight: '4px', display: 'inline-block' }} />
-                  Closed
-                </>
-              )}
-            </span>
-          </div>
-        )}
-
-        {/* Trail Info */}
-        <div className="trail-info">
-          <div className="trail-details">
-            <span 
-              className="trail-difficulty"
-              style={{ backgroundColor: getDifficultyColor(trail.difficulty) }}
-            >
-              <span className="trail-difficulty-icon">
-                {getDifficultyIcon(trail.difficulty)}
-              </span>
-              {trail.difficulty}
-            </span>
-            <span className="trail-distance">{trail.distance} km</span>
-            {trail.elevationGain && (
-              <span className="trail-elevation">+{trail.elevationGain}m</span>
-            )}
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="trail-actions">
-          {activeTab !== "completed" && activeTab !== "submitted" && (
-            <button
-              className="complete-btn"
-              onClick={() => openReviewModal(trail.id, trail.name)}
-            >
-              Mark as Completed
-            </button>
-          )}
-          {activeTab === "submitted" && (
-            <div className="submitted-actions">
-              <span className="submitted-date">
-                Submitted: {new Date(trail.createdAt?.toDate?.() || trail.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-        </div>
-      </li>
+    return filteredTrails.map((trail) => (
+      <TrailCard
+        key={trail.id}
+        trail={trail}
+        activeTab={activeTab}
+        alerts={alerts}
+        loadingStates={loadingStates}
+        trails={trails}
+        onShowAlertsPopup={showAlertsPopup}
+        onHideAlertsPopup={hideAlertsPopup}
+        onOpenStatusConfirmModal={openStatusConfirmModal}
+        onOpenReviewModal={openReviewModal}
+      />
     ));
   };
 
@@ -539,6 +496,11 @@ export default function MyTrails() {
         <div className="loading-state">
           <div className="spinner"></div>
           <p>Loading your trails...</p>
+          <div className="loading-progress">
+            {loadingStates.savedTrails && <span>Loading saved trails...</span>}
+            {loadingStates.submittedTrails && <span>Loading submitted trails...</span>}
+            {loadingStates.alerts && <span>Loading alerts...</span>}
+          </div>
         </div>
       ) : (
         <>
@@ -550,7 +512,7 @@ export default function MyTrails() {
               >
                 <span className="tab-icon"><Heart size={18} /></span>
                 <span className="tab-text">Favourites</span>
-                <span className="tab-count">{trails.favourites.length}</span>
+                <span className="tab-count">{trails.favourites?.length || 0}</span>
               </button>
               <button 
                 className={`tab ${activeTab === 'completed' ? 'active' : ''}`}
@@ -558,7 +520,7 @@ export default function MyTrails() {
               >
                 <span className="tab-icon"><CheckCircle size={18} /></span>
                 <span className="tab-text">Completed</span>
-                <span className="tab-count">{trails.completed.length}</span>
+                <span className="tab-count">{trails.completed?.length || 0}</span>
               </button>
               <button 
                 className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`}
@@ -566,7 +528,7 @@ export default function MyTrails() {
               >
                 <span className="tab-icon"><Bookmark size={18} /></span>
                 <span className="tab-text">Wishlist</span>
-                <span className="tab-count">{trails.wishlist.length}</span>
+                <span className="tab-count">{trails.wishlist?.length || 0}</span>
               </button>
               <button 
                 className={`tab ${activeTab === 'submitted' ? 'active' : ''}`}
@@ -574,10 +536,20 @@ export default function MyTrails() {
               >
                 <span className="tab-icon"><Upload size={18} /></span>
                 <span className="tab-text">Submitted</span>
-                <span className="tab-count">{trails.submitted.length}</span>
+                <span className="tab-count">{trails.submitted?.length || 0}</span>
               </button>
             </div>
           </div>
+
+          {/* Filter and Search */}
+          <MyTrailsFilter
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+            activeTab={activeTab}
+          />
 
           <div className="trails-content">
             <div className="active-tab-header">
@@ -607,7 +579,13 @@ export default function MyTrails() {
                   </>
                 )}
               </h2>
-              <span className="trail-count">{trails[activeTab].length} trails</span>
+              <span className="trail-count">
+                {(() => {
+                  const trailArray = trails[activeTab] || [];
+                  const filteredTrails = filterTrails(trailArray);
+                  return filteredTrails.length;
+                })()} trails
+              </span>
             </div>
             
             <ul className="trails-list">
@@ -630,6 +608,13 @@ export default function MyTrails() {
         onConfirm={handleStatusChange}
         trailName={statusConfirmState.trailName}
         currentStatus={statusConfirmState.currentStatus}
+      />
+
+      <AlertsPopup
+        isVisible={alertsPopup.isVisible}
+        position={alertsPopup.position}
+        alerts={alertsPopup.alerts}
+        onMouseLeave={hideAlertsPopup}
       />
     </div>
   );

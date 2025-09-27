@@ -318,6 +318,10 @@
 
 .trail-header {
   margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
 .trail-header h4 {
@@ -326,30 +330,144 @@
   font-size: 1.1rem;
   line-height: 1.4;
   font-weight: 500;
+  flex: 1;
+  min-width: 0;
 }
 
 
-.alerts-container {
-  margin: 0.75rem 0;
-  padding: 0.75rem;
-  background-color: var(--bg-alt);
-  border-left: 3px solid var(--danger);
+/* Alerts Count Styles - Header Positioned */
+.alerts-count-header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  color: var(--danger);
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
-.alert-item {
+.alerts-count-header:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.alerts-count-header .alert-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.alerts-count-header .alert-count {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.alerts-loading-small {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-alt);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Alerts Popup Styles */
+.alerts-popup {
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.alerts-popup-content {
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-width: 280px;
+  max-width: 400px;
+  overflow: hidden;
+  position: relative;
+}
+
+.alerts-popup::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--border-strong);
+}
+
+.alerts-popup::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid var(--bg-elev);
+}
+
+.alerts-popup-header {
+  padding: 0.75rem 1rem;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+}
+
+.alerts-popup-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.alerts-popup-body {
+  padding: 0.75rem 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.alerts-popup-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.alerts-popup-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.alerts-popup-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.alerts-popup-message {
   font-size: 0.85rem;
   color: var(--text-dim);
-  margin-bottom: 0.25rem;
   line-height: 1.4;
-}
-
-.alert-item:last-child {
-  margin-bottom: 0;
-}
-
-.alert-type {
-  font-weight: 600;
 }
 
 .trail-actions {
@@ -374,6 +492,32 @@
 .complete-btn:hover, .complete-btn:focus {
   background: var(--bg-elev);
   border-color: var(--border-strong);
+}
+
+.completed-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 6px;
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.9rem;
+  width: 100%;
+  min-height: 40px;
+}
+
+.completed-icon {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--success);
+}
+
+.completed-text {
+  font-weight: 600;
 }
 
 .empty-state {
@@ -465,16 +609,45 @@ html[data-theme='light'] .trail-card {
 html[data-theme='light'] .trail-header h4 {
   color: var(--text);
 }
-html[data-theme='light'] .alerts-container {
+html[data-theme='light'] .alerts-count-header {
   background-color: rgba(220,38,38,0.08);
-  border-left-color: #dc2626;
+  border-color: rgba(220,38,38,0.3);
+  color: #dc2626;
 }
-html[data-theme='light'] .alert-item {
+html[data-theme='light'] .alerts-count-header:hover {
+  background-color: rgba(220,38,38,0.12);
+  border-color: rgba(220,38,38,0.5);
+  box-shadow: 0 2px 8px rgba(220,38,38,0.2);
+}
+html[data-theme='light'] .alerts-count-header .alert-icon {
+  color: #dc2626;
+}
+html[data-theme='light'] .alerts-popup-content {
+  background: #ffffff;
+  border-color: rgba(220,38,38,0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+html[data-theme='light'] .alerts-popup::after {
+  border-bottom-color: #ffffff;
+}
+html[data-theme='light'] .alerts-popup-header {
+  background: rgba(220,38,38,0.05);
+  border-bottom-color: rgba(220,38,38,0.2);
+}
+html[data-theme='light'] .alerts-popup-type {
   color: #dc2626;
 }
 html[data-theme='light'] .complete-btn {
   background-color: var(--primary);
   color: #ffffff;
+}
+html[data-theme='light'] .completed-status {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #059669;
+}
+html[data-theme='light'] .completed-icon {
+  color: #059669;
 }
 html[data-theme='light'] .btn-secondary {
   background-color: rgba(148,163,184,0.2);
@@ -604,8 +777,8 @@ html[data-theme='light'] .spinner {
 
 /* Light theme support for new elements */
 html[data-theme='light'] .my-trails-container .trail-info {
-  background: rgba(13,110,109,0.08);
-  border: 1px solid rgba(13,110,109,0.16);
+  background: rgba(13,110,109,0.05);
+  border: 1px solid rgba(13,110,109,0.15);
 }
 
 html[data-theme='light'] .my-trails-container .trail-difficulty {
@@ -613,16 +786,24 @@ html[data-theme='light'] .my-trails-container .trail-difficulty {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-html[data-theme='light'] .my-trails-container .trail-distance {
-  background: rgba(15, 95, 95, 0.8);
-  color: #fff;
-  border-color: rgba(15, 95, 95, 0.8);
+html[data-theme='light'] .my-trails-container .trail-distance,
+html[data-theme='light'] .my-trails-container .trail-elevation {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(13,110,109,0.2);
 }
 
-html[data-theme='light'] .my-trails-container .trail-elevation {
-  background: rgba(247, 140, 28, 0.8);
-  color: #fff;
-  border-color: rgba(247, 140, 28, 0.8);
+html[data-theme='light'] .my-trails-container .trail-distance:hover,
+html[data-theme='light'] .my-trails-container .trail-elevation:hover {
+  border-color: rgba(13,110,109,0.4);
+  box-shadow: 0 2px 8px rgba(13,110,109,0.15);
+}
+
+html[data-theme='light'] .my-trails-container .trail-detail-label {
+  color: rgba(13,110,109,0.7);
+}
+
+html[data-theme='light'] .my-trails-container .trail-detail-value {
+  color: var(--text);
 }
 
 html[data-theme='light'] .my-trails-container .status-open {
@@ -637,7 +818,7 @@ html[data-theme='light'] .my-trails-container .status-closed {
   border-color: rgba(220, 38, 38, 0.3);
 }
 
-html[data-theme='light'] .my-trails-container .submitted-actions {
+html[data-theme='light'] .my-trails-container .submitted-info {
   background: rgba(13,110,109,0.1);
   border: 1px solid rgba(13,110,109,0.2);
 }
@@ -657,46 +838,49 @@ html[data-theme='light'] .loading-state {
   border: 1px solid rgba(13,110,109,0.1);
 }
 
-/* New Trail Info Styles */
+/* Enhanced Trail Info Styles */
 .my-trails-container .trail-info {
   margin: 0 0 1rem 0;
-  padding: 0.75rem;
+  padding: 1rem;
   background: var(--bg-alt);
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   flex: 1;
 }
 
-.my-trails-container .trail-details {
-  display: flex;
+.my-trails-container .trail-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  align-items: start;
 }
 
-.my-trails-container .trail-difficulty, 
-.my-trails-container .trail-distance, 
-.my-trails-container .trail-elevation {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid;
+.my-trails-container .trail-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Difficulty Badge - Full Width */
+.my-trails-container .trail-detail-item:first-child {
+  grid-column: 1 / -1;
+  margin-bottom: 0.25rem;
 }
 
 .my-trails-container .trail-difficulty {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: capitalize;
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: none;
   opacity: 0.9;
+  width: fit-content;
 }
 
 .my-trails-container .trail-difficulty-icon {
@@ -705,32 +889,55 @@ html[data-theme='light'] .loading-state {
 }
 
 .my-trails-container .trail-difficulty-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2.5;
 }
 
-.my-trails-container .trail-distance {
-  background: rgba(91, 192, 190, 0.8);
-  color: #fff;
-  border-color: rgba(91, 192, 190, 0.8);
+.my-trails-container .trail-difficulty-text {
+  font-weight: 600;
 }
 
+/* Distance and Elevation Items */
+.my-trails-container .trail-distance,
 .my-trails-container .trail-elevation {
-  background: rgba(247, 183, 51, 0.8);
-  color: #fff;
-  border-color: rgba(247, 183, 51, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.my-trails-container .trail-distance:hover,
+.my-trails-container .trail-elevation:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.my-trails-container .trail-detail-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.my-trails-container .trail-detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
 }
 
 
 
 
-.my-trails-container .trail-status {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  z-index: 2;
-}
+
 
 .my-trails-container .status-badge {
   display: inline-flex;
@@ -764,21 +971,30 @@ html[data-theme='light'] .loading-state {
 }
 
 .my-trails-container .submitted-actions {
+  margin-top: auto;
+}
+
+.my-trails-container .submitted-info {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
   background: var(--bg-alt);
   border-radius: 6px;
   border: 1px solid var(--border);
-  margin-top: auto;
+  gap: 0.75rem;
 }
 
 .my-trails-container .submitted-date {
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 400;
-  text-align: left;
+  flex: 1;
+}
+
+.my-trails-container .submitted-info .status-badge {
+  flex-shrink: 0;
+  margin: 0;
 }
 
 /* Enhanced Empty State */
@@ -834,6 +1050,40 @@ html[data-theme='light'] .loading-state {
   margin-bottom: 1rem;
 }
 
+.loading-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.loading-progress span {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  padding: 0.25rem 0.5rem;
+  background: var(--bg);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.alert-loading {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 0.5rem;
+  background: var(--bg);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 /* Responsive styles */
 @media (max-width: 576px) {
   .modal-content {
@@ -876,15 +1126,27 @@ html[data-theme='light'] .loading-state {
     font-size: 0.9rem;
   }
   
-  .my-trails-container .trail-details {
-    gap: 1rem;
+  .my-trails-container .trail-details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
   
-  .my-trails-container .trail-difficulty, 
-  .my-trails-container .trail-distance, 
+  .my-trails-container .trail-detail-item:first-child {
+    grid-column: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .my-trails-container .trail-distance,
   .my-trails-container .trail-elevation {
+    padding: 0.5rem;
+  }
+  
+  .my-trails-container .trail-detail-label {
+    font-size: 0.65rem;
+  }
+  
+  .my-trails-container .trail-detail-value {
     font-size: 0.85rem;
-    padding: 0.3rem 0.8rem;
   }
 }
 
@@ -956,19 +1218,45 @@ html[data-theme='light'] .loading-state {
     padding: 0.15rem 0.4rem;
   }
   
-  .my-trails-container .trail-details {
+  .my-trails-container .trail-info {
+    padding: 0.75rem;
+  }
+  
+  .my-trails-container .trail-details-grid {
     gap: 0.5rem;
   }
   
-  .my-trails-container .trail-difficulty, 
-  .my-trails-container .trail-distance, 
+  .my-trails-container .trail-difficulty {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .my-trails-container .trail-distance,
   .my-trails-container .trail-elevation {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .my-trails-container .trail-detail-label {
+    font-size: 0.6rem;
+  }
+  
+  .my-trails-container .trail-detail-value {
+    font-size: 0.8rem;
   }
   
   .my-trails-container .status-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.5rem;
+  }
+  
+  .my-trails-container .submitted-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .my-trails-container .submitted-info .status-badge {
+    align-self: flex-end;
   }
 }

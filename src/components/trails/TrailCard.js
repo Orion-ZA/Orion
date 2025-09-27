@@ -25,12 +25,12 @@ const TrailCard = ({
         ) : (
           trailAlerts && trailAlerts.length > 0 && (
             <div 
-              className="alerts-count-header"
+              className="trail-alerts-count-header"
               onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
               onMouseLeave={onHideAlertsPopup}
             >
-              <AlertTriangle size={16} className="alert-icon" />
-              <span className="alert-count">{trailAlerts.length}</span>
+              <AlertTriangle size={16} className="trail-alert-icon" />
+              <span className="trail-alert-count">{trailAlerts.length}</span>
             </div>
           )
         )}

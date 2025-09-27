@@ -92,7 +92,7 @@ html[data-theme] body, html[data-theme] .card, html[data-theme] .navbar, html[da
   transition: background-color .45s ease, color .45s ease, border-color .45s ease, box-shadow .45s ease, filter .45s ease;
 }
 
-* { box-sizing: border-box; }
+*:not(svg) { box-sizing: border-box; }
 html, body, #root { height: 100%; }
 html {
   background: var(--bg);

@@ -194,7 +194,7 @@ describe('TrailCard', () => {
     it('should call onShowAlertsPopup on mouse enter', () => {
       render(<TrailCard {...defaultProps} />);
       
-      const alertsCount = screen.getByText('2').closest('.alerts-count-header');
+      const alertsCount = screen.getByText('2').closest('.trail-alerts-count-header');
       fireEvent.mouseEnter(alertsCount);
       
       expect(defaultProps.onShowAlertsPopup).toHaveBeenCalledWith(
@@ -206,7 +206,7 @@ describe('TrailCard', () => {
     it('should call onHideAlertsPopup on mouse leave', () => {
       render(<TrailCard {...defaultProps} />);
       
-      const alertsCount = screen.getByText('2').closest('.alerts-count-header');
+      const alertsCount = screen.getByText('2').closest('.trail-alerts-count-header');
       fireEvent.mouseLeave(alertsCount);
       
       expect(defaultProps.onHideAlertsPopup).toHaveBeenCalled();
@@ -485,7 +485,7 @@ describe('TrailCard', () => {
       const propsWithoutHandler = { ...defaultProps, onHideAlertsPopup: undefined };
       render(<TrailCard {...propsWithoutHandler} />);
       
-      const alertsCount = screen.getByText('2').closest('.alerts-count-header');
+      const alertsCount = screen.getByText('2').closest('.trail-alerts-count-header');
       expect(() => fireEvent.mouseLeave(alertsCount)).not.toThrow();
     });
   });

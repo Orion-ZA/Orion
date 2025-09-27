@@ -92,11 +92,11 @@ jest.mock('../components/trails/TrailCard', () => {
           <h3>{trail.name}</h3>
           {trailAlerts.length > 0 && (
             <div 
-              className="alerts-count-header"
+              className="trail-alerts-count-header"
               onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
               onMouseLeave={onHideAlertsPopup}
             >
-              <span className="alert-count">{trailAlerts.length}</span>
+              <span className="trail-alert-count">{trailAlerts.length}</span>
             </div>
           )}
         </div>
@@ -1514,7 +1514,7 @@ describe('MyTrails Component', () => {
 
       // Find the alerts count within the trail card (not the tab counts)
       const trailCard = screen.getByTestId('trail-card-trail-1');
-      const alertsCount = trailCard.querySelector('.alert-count');
+      const alertsCount = trailCard.querySelector('.trail-alert-count');
       expect(alertsCount).toBeInTheDocument();
 
       // Mock getBoundingClientRect
@@ -1551,7 +1551,7 @@ describe('MyTrails Component', () => {
 
       // Find the alerts count within the trail card
       const trailCard = screen.getByTestId('trail-card-trail-1');
-      const alertsCount = trailCard.querySelector('.alert-count');
+      const alertsCount = trailCard.querySelector('.trail-alert-count');
       
       // Mock getBoundingClientRect
       const mockRect = {

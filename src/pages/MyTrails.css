@@ -300,16 +300,35 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem;
-  transition: border-color 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 200px;
+  overflow: hidden;
 }
 
+.trail-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--success), var(--warning)) border-box;
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
 
 .trail-card:hover {
-  border-color: var(--border-strong);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: transparent;
 }
 
 .trail-card:hover::before {
@@ -335,8 +354,8 @@
 }
 
 
-/* Alerts Count Styles - Header Positioned */
-.alerts-count-header {
+/* Trail Alerts Count Styles - Header Positioned */
+.trail-alerts-count-header {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -352,19 +371,19 @@
   flex-shrink: 0;
 }
 
-.alerts-count-header:hover {
+.trail-alerts-count-header:hover {
   background-color: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.5);
   transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
-.alerts-count-header .alert-icon {
+.trail-alerts-count-header .trail-alert-icon {
   color: var(--danger);
   flex-shrink: 0;
 }
 
-.alerts-count-header .alert-count {
+.trail-alerts-count-header .trail-alert-count {
   font-weight: 700;
   font-size: 0.8rem;
 }

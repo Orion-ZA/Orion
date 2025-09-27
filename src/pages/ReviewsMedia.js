@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage, auth } from "../firebaseConfig"; // Import auth from firebaseConfig
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Import auth functions
+import { storage, auth } from "../firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { Shield, AlertCircle, Star, MessageSquare } from "lucide-react";
+
+// Import components
+import AlertsPopup from "../components/AlertsPopup";
+import ReviewsTrailCard from "../components/ReviewsTrailCard";
+import ReviewsTrailSkeleton from "../components/ReviewsTrailSkeleton";
+import SuccessPopup from "../components/SuccessPopup";
+import "./ReviewsMedia.css";
 
 // =========================
-// 🎨 Modern Styles
+// 🎨 Responsive Styles
 // =========================
 const responsiveStyles = {
   container: {
@@ -20,63 +28,6 @@ const responsiveStyles = {
     gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
     gap: "1.5rem",
     marginTop: "2rem",
-  },
-  card: {
-    padding: "1rem",
-    borderRadius: "12px",
-    background: "linear-gradient(145deg, #1c2540, #2a355d)",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  },
-  imageContainer: {
-    display: "flex",
-    overflowX: "auto",
-    gap: "0.5rem",
-    marginBottom: "0.5rem",
-    scrollbarWidth: "thin",
-    msOverflowStyle: "none",
-  },
-  imageWrapper: {
-    position: "relative",
-    width: "100%",
-    height: "220px",
-    flexShrink: 0,
-    borderRadius: "10px",
-    overflow: "hidden",
-    backgroundColor: "#111",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  },
-  imageStyle: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  trailHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: "1rem",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
-    paddingBottom: "0.5rem",
-  },
-  buttonContainer: {
-    display: "flex",
-    gap: "0.5rem",
-    flexWrap: "wrap",
-  },
-  button: {
-    padding: "0.6rem 1.2rem",
-    borderRadius: "20px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: 600,
-    backgroundColor: "#2d79f3",
-    color: "#fff",
-    fontSize: "0.9rem",
-    transition: "background 0.2s ease",
   },
   modalOverlay: {
     position: "fixed",
@@ -194,6 +145,12 @@ export default function ReviewsMedia() {
   const [error, setError] = useState(null);
   const [hoveredTrailId, setHoveredTrailId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [alertsPopup, setAlertsPopup] = useState({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    alerts: []
+  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
@@ -204,6 +161,13 @@ export default function ReviewsMedia() {
   const [newImages, setNewImages] = useState([]);
   const [alertType, setAlertType] = useState("general");
   const [alertMessage, setAlertMessage] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Success popup state
+  const [successPopup, setSuccessPopup] = useState({
+    isVisible: false,
+    message: ""
+  });
 
   // Add user authentication state
   const [user, setUser] = useState(null);
@@ -227,6 +191,28 @@ export default function ReviewsMedia() {
     }
   };
 
+  const handleShowAlertsPopup = (event, trailAlerts) => {
+    if (!trailAlerts || trailAlerts.length === 0) return;
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    setAlertsPopup({
+      isVisible: true,
+      position: {
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 8
+      },
+      alerts: trailAlerts
+    });
+  };
+
+  const handleHideAlertsPopup = () => {
+    setAlertsPopup({
+      isVisible: false,
+      position: { x: 0, y: 0 },
+      alerts: []
+    });
+  };
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
@@ -238,55 +224,139 @@ export default function ReviewsMedia() {
     (async () => {
       try {
         const data = await fetchTrails();
-        const trailsWithUrls = await Promise.all(
-          data.map(async (trail) => {
-            if (trail.photos?.length > 0) {
-              const urls = await Promise.all(
-                trail.photos.map(async (path) => {
-                  try {
-                    if (path.startsWith("https://")) return path;
-                    return await getDownloadURL(ref(storage, path));
-                  } catch {
-                    return null;
-                  }
-                })
-              );
-              return { ...trail, photos: urls.filter(Boolean) };
-            }
-            return { ...trail, photos: [] };
-          })
-        );
+        
+        // Process trails progressively - show them as they load
+        setTrails(data.map(trail => ({ 
+          ...trail, 
+          photos: [], 
+          averageRating: 0, 
+          reviewCount: 0,
+          processedPhotos: false,
+          hasReviews: false,
+          hasAlerts: false
+        })));
+        setLoading(false);
 
-        // Fetch reviews for each trail and calculate average ratings
-        const trailsWithRatings = await Promise.all(
-          trailsWithUrls.map(async (trail) => {
-            const trailReviews = await fetchTrailReviews(trail.id);
-            const averageRating = calculateAverageRating(trailReviews);
-            const reviewCount = trailReviews.length;
-            
-            return {
-              ...trail,
-              averageRating,
-              reviewCount
-            };
-          })
-        );
-
-        setTrails(trailsWithRatings);
-
+        // Process photos, reviews, and alerts in parallel for each trail
         const reviewsData = {};
         const alertsData = {};
-        await Promise.all(
-          trailsWithRatings.map(async (trail) => {
-            reviewsData[trail.id] = await fetchTrailReviews(trail.id);
-            alertsData[trail.id] = await fetchTrailAlerts(trail.id);
-          })
-        );
+        
+        // Process trails in batches to avoid overwhelming the browser
+        const batchSize = 5;
+        for (let i = 0; i < data.length; i += batchSize) {
+          const batch = data.slice(i, i + batchSize);
+          
+          const batchResults = await Promise.all(
+            batch.map(async (trail) => {
+              try {
+                // Process photos with timeout
+                let photos = [];
+                let processedPhotos = true;
+                if (trail.photos?.length > 0) {
+                  try {
+                    const photoPromises = trail.photos.map(async (path) => {
+                      try {
+                        if (path.startsWith("https://")) return path;
+                        return await getDownloadURL(ref(storage, path));
+                      } catch {
+                        return null;
+                      }
+                    });
+                    
+                    // Add timeout for photo processing
+                    const timeoutPromise = new Promise((_, reject) => 
+                      setTimeout(() => reject(new Error('Photo processing timeout')), 10000)
+                    );
+                    
+                    const urls = await Promise.race([
+                      Promise.all(photoPromises),
+                      timeoutPromise
+                    ]);
+                    photos = urls.filter(Boolean);
+                  } catch (error) {
+                    console.warn(`Failed to process photos for trail ${trail.id}:`, error);
+                    photos = [];
+                    processedPhotos = false;
+                  }
+                }
+
+                // Fetch reviews and calculate ratings with timeout
+                let trailReviews = [];
+                let hasReviews = false;
+                try {
+                  const reviewPromise = fetchTrailReviews(trail.id);
+                  const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Review fetch timeout')), 8000)
+                  );
+                  
+                  trailReviews = await Promise.race([reviewPromise, timeoutPromise]);
+                  hasReviews = true;
+                } catch (error) {
+                  console.warn(`Failed to fetch reviews for trail ${trail.id}:`, error);
+                  trailReviews = [];
+                }
+                
+                const averageRating = calculateAverageRating(trailReviews);
+                const reviewCount = trailReviews.length;
+                
+                // Fetch alerts with timeout
+                let trailAlerts = [];
+                let hasAlerts = false;
+                try {
+                  const alertPromise = fetchTrailAlerts(trail.id);
+                  const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Alert fetch timeout')), 5000)
+                  );
+                  
+                  trailAlerts = await Promise.race([alertPromise, timeoutPromise]);
+                  hasAlerts = true;
+                } catch (error) {
+                  console.warn(`Failed to fetch alerts for trail ${trail.id}:`, error);
+                  trailAlerts = [];
+                }
+                
+                // Store data
+                reviewsData[trail.id] = trailReviews;
+                alertsData[trail.id] = trailAlerts;
+                
+                return {
+                  ...trail,
+                  photos,
+                  averageRating,
+                  reviewCount,
+                  processedPhotos,
+                  hasReviews,
+                  hasAlerts
+                };
+              } catch (error) {
+                console.error(`Failed to process trail ${trail.id}:`, error);
+                // Return trail with minimal data to prevent infinite loading
+                return {
+                  ...trail,
+                  photos: [],
+                  averageRating: 0,
+                  reviewCount: 0,
+                  processedPhotos: true, // Mark as processed to stop loading
+                  hasReviews: false,
+                  hasAlerts: false
+                };
+              }
+            })
+          );
+
+          // Update trails progressively
+          setTrails(prevTrails => 
+            prevTrails.map(trail => {
+              const updatedTrail = batchResults.find(t => t.id === trail.id);
+              return updatedTrail || trail;
+            })
+          );
+        }
+
         setReviews(reviewsData);
         setAlerts(alertsData);
       } catch (err) {
         setError("Could not load trails or reviews");
-      } finally {
         setLoading(false);
       }
     })();
@@ -323,13 +393,23 @@ export default function ReviewsMedia() {
     setModalOpen(false);
     setSelectedTrailId(null);
     setModalType(null);
+    setNewReview("");
+    setNewRating(0);
+    setIsAnonymous(false);
+  };
+
+  const closeSuccessPopup = () => {
+    setSuccessPopup({
+      isVisible: false,
+      message: ""
+    });
   };
 
   const handleAddReview = async () => {
     if (!newReview) return;
     try {
-      // Use actual user data instead of "anonymous"
-      const userDisplayName = user.displayName || user.email || "User";
+      // Use actual user data or anonymous based on user choice
+      const userDisplayName = isAnonymous ? "Anonymous" : (user.displayName || user.email || "User");
       
       const response = await fetch(
         "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
@@ -369,9 +449,12 @@ export default function ReviewsMedia() {
           : trail
       ));
       closeModal();
-      alert("✅ Review added successfully!");
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your review has been submitted successfully!"
+      });
     } catch (err) {
-      alert("❌ Failed to add review: " + err.message);
+      alert("Failed to add review: " + err.message);
     }
   };
 
@@ -390,9 +473,12 @@ export default function ReviewsMedia() {
       const alertsData = await fetchTrailAlerts(selectedTrailId);
       setAlerts((prev) => ({ ...prev, [selectedTrailId]: alertsData }));
       closeModal();
-      alert("✅ Alert added successfully!");
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your alert has been submitted successfully!"
+      });
     } catch (err) {
-      alert("❌ Failed to add alert: " + err.message);
+      alert("Failed to add alert: " + err.message);
     }
   };
 
@@ -418,154 +504,91 @@ export default function ReviewsMedia() {
       const updatedTrails = await fetchTrails();
       setTrails(updatedTrails);
       closeModal();
-      alert("✅ Images added successfully!");
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your images have been uploaded successfully!"
+      });
     } catch (err) {
-      alert("❌ Failed to add images: " + err.message);
+      alert("Failed to add images: " + err.message);
     }
   };
 
-  if (authLoading || loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (authLoading) return (
+    <div style={getResponsiveStyle("container")}>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        <div style={{ fontSize: "1.2rem", color: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <Shield size={18} />
+          Authenticating...
+        </div>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div style={getResponsiveStyle("container")}>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        <div style={{ color: "#ff6b6b", fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <AlertCircle size={18} />
+          {error}
+        </div>
+        <button 
+          style={{...getResponsiveStyle("primaryButton"), marginTop: "1rem"}} 
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div style={getResponsiveStyle("container")}>
-      {/* Add user info and logout button */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <h1>🌲 Hiking Trails</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {user ? (
-            <>
-              <span>Welcome, {user.displayName || user.email}!</span>
-              <button style={getResponsiveStyle("cancelButton")} onClick={handleLogout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <span>Please log in to submit reviews</span>
-          )}
-        </div>
-      </div>
+      <h1 style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <MessageSquare size={20} />
+        Trail Reviews & Media
+      </h1>
       
       <div style={getResponsiveStyle("gridContainer")}>
-        {trails.map((trail) => (
-          <div
-            key={trail.id}
-            style={getResponsiveStyle("card")}
-            onMouseEnter={() => !isMobile && setHoveredTrailId(trail.id)}
-            onMouseLeave={() => !isMobile && setHoveredTrailId(null)}
-            className="card"
-          >
-            <div style={getResponsiveStyle("imageContainer")}>
-              {trail.photos.length > 0 ? (
-                trail.photos.map((photoUrl, index) => (
-                  <div key={index} style={getResponsiveStyle("imageWrapper")}>
-                    <img
-                      src={photoUrl}
-                      alt={`Trail ${trail.name} ${index + 1}`}
-                      style={getResponsiveStyle("imageStyle")}
-                      onError={(e) => (e.target.style.display = "none")}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div style={getResponsiveStyle("imageWrapper")}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "100%",
-                      height: "100%",
-                      color: "#999",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    No images
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={getResponsiveStyle("trailHeader")}>
-              <h4 style={{ margin: 0 }}>{trail.name}</h4>
-              <span style={{ fontSize: "0.9rem", color: "#666" }}>
-                ⭐ {trail.averageRating ? trail.averageRating.toFixed(1) : "N/A"} 
-                {trail.reviewCount > 0 && ` (${trail.reviewCount})`}
-              </span>
-              {(hoveredTrailId === trail.id || isMobile) && (
-                <div style={getResponsiveStyle("buttonContainer")}>
-                  <button 
-                    style={{...getResponsiveStyle("button"), opacity: user ? 1 : 0.6}} 
-                    onClick={() => openModal(trail.id, "review")}
-                    title={user ? "Add Review" : "Please log in to review"}
-                  >
-                    Add Review
-                  </button>
-                  <button style={getResponsiveStyle("button")} onClick={() => openModal(trail.id, "images")}>
-                    Images
-                  </button>
-                  <button style={getResponsiveStyle("button")} onClick={() => openModal(trail.id, "alert")}>
-                    Alert
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {alerts[trail.id]?.length > 0 && (
-              <ul style={{ color: "red", marginTop: "0.5rem", fontSize: "0.9rem" }}>
-                {alerts[trail.id].map((a) => (
-                  <li key={a.id}>
-                    [{a.type}] {a.message}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <div
-              style={{
-                marginTop: "0.5rem",
-                maxHeight: "150px",
-                overflowY: "auto",
-                paddingRight: "0.5rem",
-              }}
-            >
-              {reviews[trail.id] && reviews[trail.id].length > 0 ? (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {reviews[trail.id].map((rev) => (
-                    <li
-                      key={rev.id}
-                      style={{
-                        marginBottom: "1rem",
-                        paddingBottom: "0.5rem",
-                        borderBottom: "1px solid #eee",
-                      }}
-                    >
-                      {rev.rating && (
-                        <div style={{ marginBottom: "0.25rem" }}>
-                          {"★".repeat(rev.rating)}
-                          {"☆".repeat(5 - rev.rating)}
-                        </div>
-                      )}
-
-                      <div>
-                        <strong style={{ marginRight: "0.5rem" }}>
-                          {rev.userName || "Anonymous"}
-                        </strong>
-                        <span style={{ color: "var(--muted)" }}>{rev.message}</span>
-                      </div>
-                    </li>
-                  ))}
-                  {reviews[trail.id].length > 3 && (
-                    <li>...and {reviews[trail.id].length - 3} more</li>
-                  )}
-                </ul>
-              ) : (
-                <p style={{ color: "#777", margin: 0 }}>No reviews yet.</p>
-              )}
-            </div>
-          </div>
-        ))}
+        {trails.map((trail) => {
+          // Show skeleton if trail is still loading (check if it has been processed)
+          // A trail is considered loaded if it has been processed (has processedPhotos flag or has data)
+          const isLoading = !trail.processedPhotos && !trail.hasReviews && !trail.hasAlerts;
+          
+          if (isLoading) {
+            return <ReviewsTrailSkeleton key={trail.id} />;
+          }
+          
+          return (
+            <ReviewsTrailCard
+              key={trail.id}
+              trail={trail}
+              alerts={alerts}
+              reviews={reviews}
+              user={user}
+              loadedImages={loadedImages}
+              setLoadedImages={setLoadedImages}
+              onShowAlertsPopup={handleShowAlertsPopup}
+              onHideAlertsPopup={handleHideAlertsPopup}
+              onOpenModal={openModal}
+            />
+          );
+        })}
       </div>
+
+      {/* Alerts Popup */}
+      <AlertsPopup
+        isVisible={alertsPopup.isVisible}
+        position={alertsPopup.position}
+        alerts={alertsPopup.alerts}
+        onMouseLeave={handleHideAlertsPopup}
+      />
+
+      {/* Success Popup */}
+      <SuccessPopup
+        isVisible={successPopup.isVisible}
+        message={successPopup.message}
+        onClose={closeSuccessPopup}
+      />
 
       {modalOpen && (
         <div style={getResponsiveStyle("modalOverlay")} onClick={closeModal}>
@@ -598,7 +621,7 @@ export default function ReviewsMedia() {
 
             {modalType === "review" && (
               <>
-                <h3>Add Review {user && `(as ${user.displayName || user.email})`}</h3>
+                <h3>Add Review {user && !isAnonymous && `(as ${user.displayName || user.email})`}</h3>
                 <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.5rem" }}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span
@@ -606,11 +629,16 @@ export default function ReviewsMedia() {
                       style={{
                         cursor: "pointer",
                         color: newRating >= star ? "gold" : "#ccc",
-                        fontSize: "1.5rem",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                       onClick={() => setNewRating(star)}
                     >
-                      ★
+                      <Star 
+                        size={20} 
+                        fill={newRating >= star ? "currentColor" : "none"} 
+                        color={newRating >= star ? "gold" : "#ccc"}
+                      />
                     </span>
                   ))}
                 </div>
@@ -621,6 +649,37 @@ export default function ReviewsMedia() {
                   placeholder="Write your review..."
                   style={getResponsiveStyle("textarea")}
                 />
+                
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "0.5rem", 
+                  marginTop: "1rem",
+                  marginBottom: "1rem"
+                }}>
+                  <input
+                    type="checkbox"
+                    id="anonymous-review"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      accentColor: "var(--accent)"
+                    }}
+                  />
+                  <label 
+                    htmlFor="anonymous-review"
+                    style={{
+                      color: "var(--text-secondary)",
+                      fontSize: "0.9rem",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Submit as anonymous
+                  </label>
+                </div>
+                
                 <div style={getResponsiveStyle("modalButtons")}>
                   <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
                   <button style={getResponsiveStyle("primaryButton")} onClick={handleAddReview}>Submit</button>
@@ -648,26 +707,6 @@ export default function ReviewsMedia() {
         </div>
       )}
 
-      {/* Hover + animation styles */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-          }
-          .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-          }
-          button:hover {
-            background-color: #019874 ;
-          }
-          @media (max-width: 768px) {
-            h1 { font-size: 1.8rem; }
-            h4 { font-size: 1rem; }
-          }
-        `}
-      </style>
     </div>
   );
 }

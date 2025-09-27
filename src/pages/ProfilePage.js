@@ -149,7 +149,7 @@ export default function Profile() {
                 {section.data.map((trail) => {
                   const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
                   return (
-                    <li key={trail.id} className={`trail-card ${difficultyClass}`}>
+                    <li key={trail.id} className={`profile-trail-card ${difficultyClass}`}>
                       <h4>{trail.name}</h4>
                       <p className="meta">
                         {trail.difficulty
@@ -170,7 +170,7 @@ export default function Profile() {
   );
 }
 
-const ProfileGlowCard = ({ avatarUrl, email }) => (
+export const ProfileGlowCard = ({ avatarUrl, email }) => (
   <GlowWrapper>
     <div className="card">
       <div className="bg uwu" />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ProfilePage from '../pages/ProfilePage';
+import ProfilePage, { ProfileGlowCard } from '../pages/ProfilePage';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
@@ -123,9 +123,9 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     
     await waitFor(() => {
-      expect(screen.getByText('My Profile')).toBeInTheDocument();
+      expect(screen.getByText('My Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Test User')).toBeInTheDocument();
-      expect(screen.getByText('Email: test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
     });
   });
 
@@ -304,7 +304,7 @@ describe('ProfilePage', () => {
     const mockUserData = {
       wishlist: [],
       favourites: [],
-      completedHikes: ['/Trails/trail1'],
+      completed: ['/Trails/trail1'],
       submittedTrails: []
     };
 
@@ -390,7 +390,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     
     await waitFor(() => {
-      expect(screen.getByText('No items in wishlist.')).toBeInTheDocument();
+      expect(screen.getByText('No wishlist yet.')).toBeInTheDocument();
       expect(screen.getByText('No favourites yet.')).toBeInTheDocument();
       expect(screen.getByText('No completed hikes yet.')).toBeInTheDocument();
       expect(screen.getByText('No submitted trails yet.')).toBeInTheDocument();
@@ -510,10 +510,10 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     
     await waitFor(() => {
-      expect(screen.getByTestId('wishlist-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('favourites-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('completed-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('submitted-icon')).toBeInTheDocument();
+      expect(screen.getAllByTestId('wishlist-icon')).toHaveLength(2);
+      expect(screen.getAllByTestId('favourites-icon')).toHaveLength(2);
+      expect(screen.getAllByTestId('completed-icon')).toHaveLength(2);
+      expect(screen.getAllByTestId('submitted-icon')).toHaveLength(2);
     });
   });
 
@@ -525,5 +525,67 @@ describe('ProfilePage', () => {
     unmount();
 
     expect(mockUnsubscribe).toHaveBeenCalled();
+  });
+
+  it('handles trail references as Firestore DocumentReference objects', async () => {
+    const mockUser = {
+      uid: 'test-uid',
+      displayName: 'Test User',
+      email: 'test@example.com',
+      photoURL: null
+    };
+
+    const mockUserData = {
+      wishlist: [{ path: 'Trails/trail1' }], // Mock DocumentReference object
+      favourites: [],
+      completed: [],
+      submittedTrails: []
+    };
+
+    const mockTrailData = {
+      id: 'trail1',
+      name: 'DocumentReference Trail'
+    };
+
+    mockOnAuthStateChanged.mockImplementation((callback) => {
+      callback(mockUser);
+      return jest.fn();
+    });
+
+    mockGetDoc
+      .mockResolvedValueOnce({ exists: () => true, data: () => mockUserData })
+      .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
+
+    render(<ProfilePage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('DocumentReference Trail')).toBeInTheDocument();
+    });
+  });
+
+  it('renders ProfileGlowCard component', () => {
+    const { container } = render(
+      <ProfileGlowCard 
+        avatarUrl="https://example.com/avatar.jpg" 
+        email="test@example.com" 
+      />
+    );
+    
+    expect(container.querySelector('.card')).toBeInTheDocument();
+    expect(container.querySelector('img')).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+    expect(container.querySelector('.email')).toHaveTextContent('test@example.com');
+  });
+
+  it('renders ProfileGlowCard component without avatar', () => {
+    const { container } = render(
+      <ProfileGlowCard 
+        avatarUrl={null} 
+        email="test@example.com" 
+      />
+    );
+    
+    expect(container.querySelector('.card')).toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument(); // Should show SVG placeholder
+    expect(container.querySelector('.email')).toHaveTextContent('test@example.com');
   });
 });

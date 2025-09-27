@@ -20,6 +20,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const isLanding = location.pathname === '/';
+  const isTrails = location.pathname === '/trails';
   const { show } = useToast();
   
   // Login via route; Google sign-in available on Login page
@@ -68,20 +69,19 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`navbar ${isLanding ? 'landing' : ''}`}>
-      <div className="nav-inner">
-        <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
-          <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
-        </Link>
+    <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
+    <div className="nav-inner">
+      <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
+        <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
+      </Link>
 
-        {/* Desktop nav links */}
-        <nav className="nav-links desktop-nav">
-          <NavLink to="/explorer">Trail Explorer</NavLink>
-          <button
-            type="button"
-            className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); } }}
-          >Trail Submission</button>
+      {/* Desktop nav links */}
+      <nav className="nav-links desktop-nav">
+        <button
+          type="button"
+          className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
+          onClick={()=>{ navigate('/trails'); }}
+        >Trails</button>
           <button
             type="button"
             className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}

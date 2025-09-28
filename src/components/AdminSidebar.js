@@ -2,7 +2,7 @@ import React from "react";
 import { MessageSquare, FileText, BarChart2, Settings } from "lucide-react";
 
 const tabs = [
-  { id: "chats", label: "Chats", icon: MessageSquare },
+  // { id: "chats", label: "Chats", icon: MessageSquare },
   { id: "feedback", label: "Feedback", icon: FileText },
   { id: "analytics", label: "Analytics", icon: BarChart2 },
   { id: "settings", label: "Settings", icon: Settings },

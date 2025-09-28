@@ -26,6 +26,7 @@ import Settings from './pages/Settings';
 import HelpCenter from './pages/HelpCenter';
 
 import AdminDashboard from './pages/AdminDashboard';
+import AdminRoute from './components/AdminRoute';
 
 function AppContent() {
   const location = useLocation();
@@ -93,7 +94,14 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/help" element={<HelpCenter />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
           <Route path="*" element={<Welcome />} />
         </Routes>
       </main>

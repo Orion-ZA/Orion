@@ -27,10 +27,13 @@ import ProfilePage from './pages/ProfilePage';
 import Settings from './pages/Settings';
 import HelpCenter from './pages/HelpCenter';
 
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRoute from './components/admin/AdminRoute';
+
 function AppContent() {
   const location = useLocation();
-  const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
-  const hideFooter = ['/login', '/signup', '/trails'].includes(location.pathname);
+  const hideNavFooter = ['/login', '/signup', '/admin'].includes(location.pathname);
+  const hideFooter = ['/login', '/signup', '/trails', '/admin'].includes(location.pathname);
   const firstRenderRef = useRef(true);
   const isLanding = location.pathname === '/';
   const isTrails = location.pathname === '/trails';
@@ -93,6 +96,14 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/help" element={<HelpCenter />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
           <Route path="*" element={<Welcome />} />
         </Routes>
       </main>

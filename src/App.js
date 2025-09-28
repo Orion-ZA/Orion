@@ -27,8 +27,8 @@ import ProfilePage from './pages/ProfilePage';
 import Settings from './pages/Settings';
 import HelpCenter from './pages/HelpCenter';
 
-import AdminDashboard from './pages/AdminDashboard';
-import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRoute from './components/admin/AdminRoute';
 
 function AppContent() {
   const location = useLocation();

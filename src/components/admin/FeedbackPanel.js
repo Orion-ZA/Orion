@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import useFeedback from "./hooks/useFeedback";
+import useFeedback from "./useFeedback";
+import "./FeedbackPanel.css";
 
 export default function FeedbackPanel() {
   const { feedbacks, loading } = useFeedback();
@@ -12,18 +13,16 @@ export default function FeedbackPanel() {
     : feedbacks.filter((f) => f.type === filter);
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">User Feedback</h2>
+    <div className="feedback-panel">
+      <h2 className="feedback-panel-title">User Feedback</h2>
 
       {/* Filter buttons */}
-      <div className="flex gap-2 mb-4">
+      <div className="feedback-filter-buttons">
         {["all", "praise", "bug", "suggestion", "general"].map((t) => (
           <button
             key={t}
             onClick={() => setFilter(t)}
-            className={`px-3 py-1 rounded-md text-sm border ${
-              filter === t ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-100"
-            }`}
+            className={`feedback-filter-button ${filter === t ? "active" : ""}`}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
@@ -31,25 +30,25 @@ export default function FeedbackPanel() {
       </div>
 
       {/* Feedback table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border">
-          <thead className="bg-gray-100 text-left">
+      <div className="feedback-table-container">
+        <table className="feedback-table">
+          <thead className="feedback-table-header">
             <tr>
-              <th className="p-2 border">Message</th>
-              <th className="p-2 border">Rating</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">Date</th>
+              <th>Message</th>
+              <th>Rating</th>
+              <th>Email</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((f) => (
-              <tr key={f.id} className="border-b">
-                <td className="p-2 border">{f.message}</td>
-                <td className="p-2 border">{f.rating ?? "-"}</td>
-                <td className="p-2 border">
+              <tr key={f.id} className="feedback-table-row">
+                <td className="feedback-table-cell">{f.message}</td>
+                <td className="feedback-table-cell">{f.rating ?? "-"}</td>
+                <td className="feedback-table-cell">
                   {f.contactAllowed ? f.email : "hidden"}
                 </td>
-                <td className="p-2 border">
+                <td className="feedback-table-cell">
                   {f.createdAt?.toDate().toLocaleString()}
                 </td>
               </tr>

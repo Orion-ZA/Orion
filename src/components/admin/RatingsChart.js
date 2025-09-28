@@ -1,6 +1,8 @@
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import useFeedback from "./hooks/useFeedback";
+import { Star, BarChart3 } from "lucide-react";
+import useFeedback from "./useFeedback";
+import "./RatingsChart.css";
 
 const RATING_COLORS = ["#FF6B6B", "#FF9E6D", "#FFD166", "#06D6A0", "#118AB2"];
 const TYPE_COLORS = {
@@ -14,10 +16,10 @@ export default function RatingsChart() {
   const { feedbacks, loading } = useFeedback();
 
   if (loading) return (
-    <div className="p-4 bg-white shadow rounded-lg">
-      <div className="animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-        <div className="h-64 bg-gray-100 rounded"></div>
+    <div className="ratings-chart-loading">
+      <div className="ratings-chart-loading-pulse">
+        <div className="ratings-chart-loading-title"></div>
+        <div className="ratings-chart-loading-chart"></div>
       </div>
     </div>
   );
@@ -45,10 +47,10 @@ export default function RatingsChart() {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
-          <p className="font-medium">{data.rating}</p>
-          <p className="text-sm text-gray-600">Count: {data.count}</p>
-          <p className="text-sm text-gray-600">Percentage: {data.percentage}%</p>
+        <div className="ratings-chart-tooltip">
+          <p className="ratings-chart-tooltip-title">{data.rating}</p>
+          <p className="ratings-chart-tooltip-text">Count: {data.count}</p>
+          <p className="ratings-chart-tooltip-text">Percentage: {data.percentage}%</p>
         </div>
       );
     }
@@ -56,22 +58,25 @@ export default function RatingsChart() {
   };
 
   return (
-    <div className="p-6 bg-white shadow rounded-lg">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-900">Ratings Distribution</h3>
-        <div className="flex items-center gap-4 mt-2 sm:mt-0">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-blue-600">{averageRating}</p>
-            <p className="text-sm text-gray-500">Average Rating</p>
+    <div className="ratings-chart">
+      <div className="ratings-chart-header">
+        <div className="ratings-chart-title-section">
+          <Star className="ratings-chart-title-icon" />
+          <h3 className="ratings-chart-title">Ratings Distribution</h3>
+        </div>
+        <div className="ratings-chart-stats">
+          <div className="ratings-chart-stat">
+            <p className="ratings-chart-stat-value blue">{averageRating}</p>
+            <p className="ratings-chart-stat-label">Average Rating</p>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">{totalWithRatings}</p>
-            <p className="text-sm text-gray-500">Total Ratings</p>
+          <div className="ratings-chart-stat">
+            <p className="ratings-chart-stat-value green">{totalWithRatings}</p>
+            <p className="ratings-chart-stat-label">Total Ratings</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="ratings-chart-grid">
         {/* Pie Chart */}
         <div>
           <ResponsiveContainer width="100%" height={250}>
@@ -101,15 +106,16 @@ export default function RatingsChart() {
         <div>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={ratingsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
               <XAxis 
                 dataKey="rating" 
                 angle={-45}
                 textAnchor="end"
                 height={60}
                 fontSize={12}
+                stroke="#a0a0a0"
               />
-              <YAxis fontSize={12} />
+              <YAxis fontSize={12} stroke="#a0a0a0" />
               <Tooltip content={<CustomTooltip />} />
               <Bar 
                 dataKey="count" 
@@ -125,17 +131,20 @@ export default function RatingsChart() {
       </div>
 
       {/* Legend with details */}
-      <div className="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="ratings-chart-legend">
         {ratingsData.map((item, index) => (
-          <div key={index} className="flex flex-col items-center p-2 bg-gray-50 rounded">
-            <div className="flex items-center gap-2 mb-1">
+          <div key={index} className="ratings-chart-legend-item">
+            <div className="ratings-chart-legend-item-header">
               <div 
-                className="w-3 h-3 rounded-full" 
+                className="ratings-chart-legend-color" 
                 style={{ backgroundColor: item.fill }}
               ></div>
-              <span className="text-sm font-medium">{item.count} {item.rating.split(' ')[0]}⭐ Count</span>
+              <span className="ratings-chart-legend-label">{item.rating}</span>
             </div>
-            <span className="text-xs text-gray-500">{item.percentage}%</span>
+            <div className="ratings-chart-legend-stats">
+              <span className="ratings-chart-legend-count">{item.count}</span>
+              <span className="ratings-chart-legend-percentage ratings-chart-legend-percentage-hover">{item.percentage}%</span>
+            </div>
           </div>
         ))}
       </div>

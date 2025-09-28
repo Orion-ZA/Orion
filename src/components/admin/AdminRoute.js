@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { auth, db } from "../firebaseConfig"; 
+import { auth, db } from "../../firebaseConfig"; 
 import { doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { useToast } from "./ToastContext";
+import { useToast } from "../ToastContext";
+import "./AdminRoute.css";
 
 export default function AdminRoute({ children }) {
   const [loading, setLoading] = useState(true);
@@ -56,10 +57,10 @@ export default function AdminRoute({ children }) {
   // Show loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying access...</p>
+      <div className="admin-route-loading">
+        <div className="admin-route-loading-content">
+          <div className="admin-route-spinner"></div>
+          <p className="admin-route-loading-text">Verifying access...</p>
         </div>
       </div>
     );
@@ -68,12 +69,12 @@ export default function AdminRoute({ children }) {
   // Show error state (optional - you might want to handle this differently)
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center text-red-600">
+      <div className="admin-route-error">
+        <div className="admin-route-error-content">
           <p>Access verification failed</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="admin-route-error-button"
           >
             Retry
           </button>

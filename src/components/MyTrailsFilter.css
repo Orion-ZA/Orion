@@ -1,0 +1,488 @@
+/* MyTrails Filter Component Styles */
+.mytrails-filter-container {
+  margin-bottom: 1.5rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mytrails-filters-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mytrails-search-input-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.mytrails-inline-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mytrails-inline-select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+/* Sort dropdowns can be slightly narrower */
+.mytrails-inline-select:last-of-type,
+.mytrails-inline-select:nth-last-of-type(2) {
+  min-width: 120px;
+}
+
+.mytrails-sort-order-button {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 48px;
+}
+
+.mytrails-sort-order-button:hover {
+  background: var(--bg-elev);
+  border-color: var(--border-strong);
+  color: var(--text-strong);
+}
+
+.mytrails-sort-order-button:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
+}
+
+.mytrails-inline-select:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
+}
+
+.mytrails-distance-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+.distance-slider-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.distance-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.distance-slider-wrapper {
+  padding: 1rem 16px; /* Add horizontal padding for thumb space */
+}
+
+.distance-slider-container {
+  position: relative;
+  height: 32px;
+  margin: 0;
+}
+
+.distance-slider {
+  position: absolute;
+  width: 100%;
+  height: 32px;
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+}
+
+/* Track styling - make it invisible since we'll use our own track */
+.distance-slider::-webkit-slider-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+}
+
+.distance-slider::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+  border: none;
+}
+
+/* Thumb styling */
+.distance-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  margin-top: -14px; /* Center on 4px track: (32px - 4px) / 2 */
+}
+
+.distance-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.distance-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  margin-top: -14px; /* Center on 4px track: (32px - 4px) / 2 */
+}
+
+.distance-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Background track */
+.distance-slider-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* Progress track */
+.distance-slider-progress {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  background: var(--primary);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Ensure proper z-index layering */
+.distance-slider-min::-webkit-slider-thumb {
+  z-index: 4; /* Higher z-index for min thumb */
+}
+
+.distance-slider-min::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 5; /* Even higher on hover */
+}
+
+.distance-slider-min::-moz-range-thumb {
+  z-index: 4; /* Higher z-index for min thumb */
+}
+
+.distance-slider-min::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 5; /* Even higher on hover */
+}
+
+.distance-slider-max::-webkit-slider-thumb {
+  z-index: 3;
+}
+
+.distance-slider-max::-moz-range-thumb {
+  z-index: 3;
+}
+
+.mytrails-clear-all-inline {
+  padding: 0.75rem 1rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 80px; /* Fixed width to prevent layout shifts */
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.mytrails-clear-all-inline.visible {
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--text);
+}
+
+.mytrails-clear-all-inline.visible:hover {
+  background: var(--bg-elev);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.mytrails-clear-all-inline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.mytrails-show-all-container {
+  display: flex;
+  align-items: center;
+  min-width: 100px;
+}
+
+.mytrails-show-all-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: color 0.2s ease;
+}
+
+.mytrails-show-all-label:hover {
+  color: var(--text-strong);
+}
+
+.mytrails-show-all-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.mytrails-show-all-text {
+  font-weight: 500;
+  user-select: none;
+}
+
+.mytrails-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-dim);
+  z-index: 1;
+}
+
+.mytrails-search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.mytrails-search-input:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
+}
+
+.mytrails-clear-search {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.mytrails-clear-search:hover {
+  color: var(--text);
+  background: var(--bg-alt);
+}
+
+
+
+/* Light Theme Styles */
+html[data-theme='light'] .mytrails-filter-container {
+  background: #ffffff;
+  border-color: rgba(13,110,109,0.2);
+}
+
+html[data-theme='light'] .mytrails-search-input {
+  background: rgba(13,110,109,0.05);
+  border-color: rgba(13,110,109,0.2);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+}
+
+html[data-theme='light'] .mytrails-inline-select {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(13,110,109,0.2);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-inline-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+}
+
+html[data-theme='light'] .mytrails-sort-order-button {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(13,110,109,0.2);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-sort-order-button:hover {
+  background: rgba(13,110,109,0.1);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-sort-order-button:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+}
+
+html[data-theme='light'] .distance-slider-container::before {
+  background: rgba(13,110,109,0.2);
+}
+
+html[data-theme='light'] .distance-slider-progress {
+  background: var(--primary);
+}
+
+html[data-theme='light'] .mytrails-clear-all-inline {
+  background: rgba(13,110,109,0.1);
+  border-color: rgba(13,110,109,0.2);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-clear-all-inline.visible {
+  background: rgba(13,110,109,0.1);
+  border-color: rgba(13,110,109,0.2);
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-clear-all-inline.visible:hover {
+  background: rgba(13,110,109,0.15);
+  border-color: var(--primary);
+}
+
+
+html[data-theme='light'] .mytrails-show-all-label {
+  color: var(--text);
+}
+
+html[data-theme='light'] .mytrails-show-all-label:hover {
+  color: var(--text-strong);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mytrails-filters-row {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .mytrails-search-input-wrapper {
+    min-width: auto;
+  }
+  
+  .mytrails-inline-filters {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .mytrails-inline-select {
+    min-width: 120px;
+  }
+  
+  /* Sort dropdowns on mobile */
+  .mytrails-inline-select:last-of-type,
+  .mytrails-inline-select:nth-last-of-type(2) {
+    min-width: 100px;
+  }
+  
+  .mytrails-sort-order-button {
+    min-width: 44px;
+    height: 44px;
+  }
+  
+  .mytrails-distance-slider {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mytrails-filters-row {
+    padding: 0.75rem;
+  }
+  
+  .mytrails-inline-filters {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .mytrails-inline-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .mytrails-distance-slider {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .mytrails-clear-all-inline {
+    width: 100%;
+  }
+  
+  .mytrails-show-all-container {
+    min-width: auto;
+  }
+  
+}
+

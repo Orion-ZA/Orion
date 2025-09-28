@@ -12,10 +12,6 @@
   padding: 20px;
   text-align: center;
   margin-bottom: 30px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .profile-card .edit-btn {
@@ -37,6 +33,8 @@
   position: relative;
   overflow: hidden;
   letter-spacing: .25px;
+  width: fit-content;
+  min-width: 180px;
 }
 
 .profile-card .edit-btn:hover { 
@@ -56,28 +54,6 @@
   mix-blend-mode: overlay; 
   opacity: .6; 
   pointer-events: none; 
-}
-
-.profile-avatar-large {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 20px;
-  border: 3px solid var(--primary);
-}
-
-.profile-avatar-placeholder {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-alt);
-  color: var(--text-dim);
-  border: 3px solid var(--border);
 }
 
 .profile-section {
@@ -123,7 +99,7 @@
   list-style: none;
 }
 
-.trail-card {
+.profile-trail-card {
   background: var(--bg-alt);
   border-radius: 14px;
   padding: 14px;
@@ -132,31 +108,31 @@
  
 }
 
-.trail-card:hover {
+.profile-trail-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px -4px rgba(0,0,0,0.3);
 }
 
-.trail-card h4 {
+.profile-trail-card h4 {
   margin: 0 0 8px;
   color: var(--primary);
   font-weight: 600;
 }
 
-.trail-card .meta {
+.profile-trail-card .meta {
   font-size: 0.85rem;
   color: var(--text-dim);
 }
 /* trail names based on difficulty */
-.trail-card.easy h4 {
+.profile-trail-card.easy h4 {
   color: #2ecc71; /* green */
 }
 
-.trail-card.moderate h4 {
+.profile-trail-card.moderate h4 {
   color: #f1c40f; /* yellow */
 }
 
-.trail-card.hard h4 {
+.profile-trail-card.hard h4 {
   color: #e74c3c; /* red */
 }
 

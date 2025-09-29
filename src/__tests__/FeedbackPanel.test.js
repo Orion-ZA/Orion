@@ -103,7 +103,6 @@ describe('FeedbackPanel', () => {
     expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Rating')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
-    expect(screen.getByText('Date')).toBeInTheDocument();
   });
 
   it('renders all feedback items when filter is "all"', () => {
@@ -224,7 +223,7 @@ describe('FeedbackPanel', () => {
     expect(screen.getByText('hidden')).toBeInTheDocument();
   });
 
-  it('formats dates correctly', () => {
+  it('handles feedback data correctly without date display', () => {
     mockUseFeedback.mockReturnValue({
       feedbacks: mockFeedbacks,
       loading: false,
@@ -232,9 +231,11 @@ describe('FeedbackPanel', () => {
 
     render(<FeedbackPanel />);
     
-    // Check that dates are formatted using toLocaleString() format
-    const dateElements = screen.getAllByText(/2023\/01\/01|2023\/01\/02|2023\/01\/03|2023\/01\/04/);
-    expect(dateElements.length).toBeGreaterThan(0);
+    // Verify that feedback messages are still displayed correctly
+    expect(screen.getByText('Great app!')).toBeInTheDocument();
+    expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
+    expect(screen.getByText('Add more trail filters')).toBeInTheDocument();
+    expect(screen.getByText('General feedback')).toBeInTheDocument();
   });
 
   it('applies active class to selected filter button', () => {
@@ -394,6 +395,8 @@ describe('FeedbackPanel', () => {
     render(<FeedbackPanel />);
     
     const cells = screen.getAllByRole('cell');
+    // Should have 3 cells per row (Message, Rating, Email) - no Date column
+    expect(cells).toHaveLength(3);
     cells.forEach(cell => {
       expect(cell).toHaveClass('feedback-table-cell');
     });

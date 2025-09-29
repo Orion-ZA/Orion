@@ -37,7 +37,6 @@ export default function FeedbackPanel() {
               <th>Message</th>
               <th>Rating</th>
               <th>Email</th>
-              <th>Date</th>
             </tr>
           </thead>
           <tbody>
@@ -47,9 +46,6 @@ export default function FeedbackPanel() {
                 <td className="feedback-table-cell">{f.rating ?? "-"}</td>
                 <td className="feedback-table-cell">
                   {f.contactAllowed ? f.email : "hidden"}
-                </td>
-                <td className="feedback-table-cell">
-                  {f.createdAt?.toDate().toLocaleString()}
                 </td>
               </tr>
             ))}

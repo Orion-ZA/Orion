@@ -109,22 +109,15 @@
 
 .feedback-table-cell:first-child {
   border-radius: 0 0 0 6px;
-  width: 20%;
+  width: 50%;
 }
 
 .feedback-table-cell:nth-child(2) {
-  width: 15%;
+  width: 20%;
 }
 
 .feedback-table-cell:nth-child(3) {
-  width: 25%;
-}
-
-.feedback-table-cell:nth-child(4) {
-  width: 40%;
-}
-
-.feedback-table-cell:last-child {
+  width: 30%;
   border-radius: 0 0 16px 0;
 }
 

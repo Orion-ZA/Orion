@@ -17,7 +17,7 @@ export default function Dashboard() {
             <h3>Browse Trails</h3>
             <p className="muted">Search by location, difficulty, distance, and terrain.</p>
             <div>
-              <Link to="/explorer" className="button">Open Explorer</Link>
+              <Link to="/trails" className="button">Open Trails</Link>
             </div>
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function Dashboard() {
             <h3>Contribute</h3>
             <p className="muted">Submit trails, add photos, and write reviews.</p>
             <div>
-              <Link to="/submit" className="button">Submit a Trail</Link>
+              <Link to="/trails" className="button">Submit a Trail</Link>
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function Dashboard() {
           <div>
             <h2 style={{margin:'0 0 .5rem'}}>Find your next trail</h2>
             <p className="muted" style={{maxWidth:'68ch', margin:'0 auto 1rem'}}>Discover crowdsourced insights on difficulty, terrain, distance, photos, and real-time alerts from the community.</p>
-            <Link to="/explorer" className="button">Browse Trails</Link>
+            <Link to="/trails" className="button">Browse Trails</Link>
           </div>
         </div>
       </section>
@@ -90,7 +90,7 @@ export default function Dashboard() {
   <div className="card glass scale-in reveal" style={{padding:'1rem', '--delay':'240ms'}}>
           <h4>Search & Filter</h4>
           <p className="muted">Find the perfect trail for your next trip.</p>
-          <Link to="/explorer" className="button">Search Trails</Link>
+          <Link to="/trails" className="button">Search Trails</Link>
         </div>
       </section>
     </div>

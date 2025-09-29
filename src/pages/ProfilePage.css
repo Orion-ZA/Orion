@@ -1,0 +1,196 @@
+
+.profile-page {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 1rem;
+
+}
+
+.profile-card {
+  background: var(--bg-elev);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.profile-card .edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 11px 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+  color: #041d1d;
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: filter .25s ease, transform .08s ease, box-shadow .3s ease;
+  margin-top: 1rem;
+  box-shadow: 0 6px 18px -4px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .25px;
+  width: fit-content;
+  min-width: 180px;
+}
+
+.profile-card .edit-btn:hover { 
+  filter: brightness(1.06); 
+  box-shadow: 0 10px 28px -6px rgba(0,0,0,0.45), 0 0 0 1px var(--primary-accent); 
+}
+
+.profile-card .edit-btn:active { 
+  transform: translateY(2px); 
+}
+
+.profile-card .edit-btn::after { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.5), rgba(255,255,255,0) 55%); 
+  mix-blend-mode: overlay; 
+  opacity: .6; 
+  pointer-events: none; 
+}
+
+.profile-section {
+  background: var(--bg-elev);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.profile-section h2 {
+  margin-bottom: 15px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-section h3 {
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+.profile-section ul {
+  list-style-type:none;
+  margin-left: 20px;
+  text-align: left;
+  color: var(--text);
+}
+
+.profile-section p {
+  color: var(--text-dim);
+}
+ /* new add ons */
+.trail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-trail-card {
+  background: var(--bg-alt);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+ 
+}
+
+.profile-trail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px -4px rgba(0,0,0,0.3);
+}
+
+.profile-trail-card h4 {
+  margin: 0 0 8px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.profile-trail-card .meta {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+/* trail names based on difficulty */
+.profile-trail-card.easy h4 {
+  color: #2ecc71; /* green */
+}
+
+.profile-trail-card.moderate h4 {
+  color: #f1c40f; /* yellow */
+}
+
+.profile-trail-card.hard h4 {
+  color: #e74c3c; /* red */
+}
+
+/* Profile header layout */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: left;
+  flex-wrap: wrap;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+/* Stats overview */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 20px 0 30px;
+}
+
+.stat-card {
+  background: var(--bg-alt);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px -4px rgba(0,0,0,0.3);
+}
+
+.stat-card h3 {
+  font-size: 1.6rem;
+  margin: 10px 0;
+  color: var(--primary);
+}
+
+/* Trail sections in a responsive grid */
+.trail-sections {
+  display: grid;
+  gap: 20px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .profile-info {
+    text-align: center;
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import SearchBar from '../components/SearchBar';
 import styles from './Welcome.module.css';
 
 const HERO_IMAGES = [
@@ -38,6 +39,14 @@ export default function Welcome() {
   // Observe stats section visibility to trigger animations
   useEffect(() => {
     if (!statsRef.current) return;
+    
+    // Check if IntersectionObserver is available
+    if (typeof IntersectionObserver === 'undefined') {
+      // Fallback: immediately show stats if IntersectionObserver is not available
+      setStatsVisible(true);
+      return;
+    }
+    
     const el = statsRef.current;
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -88,15 +97,14 @@ export default function Welcome() {
           <p className={styles['welcome-subtitle']}>Find trails, see community reviews, and plan your next outdoor adventure.</p>
 
           <div className={styles['welcome-search']} role="search" aria-label="Search trails">
-            <div className={styles['welcome-search-inner']}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles['welcome-search-icon']}><path fillRule="evenodd" clipRule="evenodd" d="M3.75 10.875a7.125 7.125 0 1 1 14.25 0 7.125 7.125 0 0 1-14.25 0Zm7.125-8.625a8.625 8.625 0 1 0 5.546 15.231l4.049 4.05a.75.75 0 0 0 1.06-1.061l-4.049-4.05a8.625 8.625 0 0 0-6.606-14.17Z"></path></svg>
-              <input type="search" placeholder="Search by city, park, or trail name" aria-label="Search" />
-              <button type="button" className={styles['welcome-search-btn']}>Search</button>
-            </div>
+            <SearchBar 
+              placeholder="Search by city, park, or trail name"
+              className={styles['welcome-search-bar']}
+            />
           </div>
 
           <div className={styles['welcome-explore']}>
-            <Link to="/explorer">Explore nearby trails</Link>
+            <Link to="/trails">Explore nearby trails</Link>
           </div>
         </div>
       </section>

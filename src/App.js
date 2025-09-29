@@ -6,6 +6,8 @@ import Footer from './components/Footer';
 import { LoaderProvider, useLoader } from './components/LoaderContext.js';
 import FullScreenLoader from './components/FullScreenLoader.js';
 import { ToastProvider } from './components/ToastContext';
+import { SearchProvider } from './components/SearchContext';
+import faviconAsset from './assets/orion_logo_clear.png';
 
 
 import Login from './pages/Login';
@@ -15,17 +17,26 @@ import Dashboard from './pages/Dashboard';
 import CreateProfile from './pages/CreateProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import TrailExplorer from './pages/TrailExplorer';
-import TrailSubmission from './pages/TrailSubmission';
+import Trails from './pages/Trails';
 import ReviewsMedia from './pages/ReviewsMedia';
 import MyTrails from './pages/MyTrails';
 import AlertsUpdates from './pages/AlertsUpdates';
 
+import Feedback from './pages/Feedback';
+import ProfilePage from './pages/ProfilePage';
+import Settings from './pages/Settings';
+import HelpCenter from './pages/HelpCenter';
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRoute from './components/admin/AdminRoute';
+
 function AppContent() {
   const location = useLocation();
-  const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+  const hideNavFooter = ['/login', '/signup', '/admin'].includes(location.pathname);
+  const hideFooter = ['/login', '/signup', '/trails', '/admin'].includes(location.pathname);
   const firstRenderRef = useRef(true);
   const isLanding = location.pathname === '/';
+  const isTrails = location.pathname === '/trails';
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'));
@@ -63,7 +74,7 @@ function AppContent() {
     <div className="app-shell">
       {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-  <main className="page-fade" key={location.pathname} style={isLanding ? { paddingTop: 0 } : undefined}>
+  <main className="page-fade" key={location.pathname} style={isLanding || isTrails ? { paddingTop: 0 } : undefined}>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
@@ -77,25 +88,50 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/explorer" element={<TrailExplorer />} />
-          <Route path="/submit" element={<TrailSubmission />} />
+          <Route path="/trails" element={<Trails />} />
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
-          <Route path="*" element={<Dashboard />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route path="*" element={<Welcome />} />
         </Routes>
       </main>
-      {!hideNavFooter && <Footer />}
+      {!hideFooter && <Footer />}
     </div>
   );
 }
 
 function App() {
+  useEffect(() => {
+    const existing = document.querySelector("link[rel='icon']");
+    const link = existing || document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.sizes = '192x192';
+    link.href = faviconAsset;
+    if (!existing) {
+      document.head.appendChild(link);
+    }
+  }, []);
+
   return (
     <LoaderProvider>
       <ToastProvider>
         <Router>
-          <AppContent />
+          <SearchProvider>
+            <AppContent />
+          </SearchProvider>
         </Router>
       </ToastProvider>
     </LoaderProvider>

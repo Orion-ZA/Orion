@@ -1,0 +1,117 @@
+.admin-route-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #1a1d29;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-route-loading-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  background: #252836;
+  padding: 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #4a5568;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.admin-route-spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 1.5rem;
+  width: 1.5rem;
+  border: 2px solid #4a5568;
+  border-top: 2px solid #68d391;
+  margin: 0 auto;
+}
+
+.admin-route-loading-text {
+  margin-top: 0.75rem;
+  color: #8b9dc3;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.admin-route-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #1a1d29;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-route-error-content {
+  text-align: center;
+  color: #b8c5d6;
+  position: relative;
+  z-index: 2;
+  background: #252836;
+  padding: 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #4a5568;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.admin-route-error-content h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: #b8c5d6;
+}
+
+.admin-route-error-content p {
+  color: #8b9dc3;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+}
+
+.admin-route-error-button {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #e53e3e;
+  color: #fff;
+  border: 1px solid #fc8181;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.admin-route-error-button:hover {
+  background: #c53030;
+  border-color: #feb2b2;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-10px) translateY(-5px); }
+  50% { transform: translateX(5px) translateY(-10px); }
+  75% { transform: translateX(-5px) translateY(5px); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

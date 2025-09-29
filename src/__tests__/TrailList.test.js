@@ -1,45 +1,39 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TrailList from '../components/lists/TrailList';
 
+// Mock fetch globally
+global.fetch = jest.fn();
+
+// Mock trail data
 const mockTrails = [
   {
     id: 1,
-    name: "Melville Koppies Trail",
-    difficulty: "Moderate",
-    distance: 4.5,
-    elevationGain: 600,
-    rating: 4.8,
+    name: 'Test Trail 1',
+    difficulty: 'Easy',
+    distance: 2.5,
+    elevationGain: 100,
     location: { latitude: -26.1755, longitude: 27.9715 },
-    tags: ["rocky", "panoramic", "city-views"],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-1"
+    averageRating: 4.5,
+    reviewCount: 10
   },
   {
     id: 2,
-    name: "Klipriviersberg Loop",
-    difficulty: "Hard",
-    distance: 8.9,
-    elevationGain: 1100,
-    rating: 4.6,
-    location: { latitude: -26.2940, longitude: 28.0250 },
-    tags: ["bushveld", "wildlife", "nature-reserve"],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-2"
+    name: 'Test Trail 2',
+    difficulty: 'Moderate',
+    distance: 5.0,
+    elevationGain: 300,
+    location: { latitude: -26.2000, longitude: 28.0000 },
+    averageRating: undefined, // Will trigger API call
+    reviewCount: undefined
   },
   {
     id: 3,
-    name: "Modderfontein Reserve Path",
-    difficulty: "Easy",
-    distance: 3.1,
-    elevationGain: 200,
-    rating: 4.5,
-    location: { latitude: -26.0690, longitude: 28.1400 },
-    tags: ["grassland", "family-friendly", "flat"],
-    status: { status: "open", lastUpdated: new Date() },
-    createdBy: "sample-user-3"
+    name: 'Test Trail 3',
+    difficulty: 'Hard',
+    distance: 8.0,
+    elevationGain: 600,
+    location: { latitude: -26.1500, longitude: 27.9500 }
   }
 ];
 
@@ -48,224 +42,592 @@ const mockUserLocation = {
   longitude: 28.0473
 };
 
-const mockCalculateDistance = jest.fn((lat1, lon1, lat2, lon2) => 5.2);
+const mockReviews = [
+  { rating: 5, comment: 'Great trail!' },
+  { rating: 4, comment: 'Good hike' },
+  { rating: 3, comment: 'Average' }
+];
 
 const defaultProps = {
   trails: mockTrails,
-  userLocation: null,
+  userLocation: mockUserLocation,
   selectedTrail: null,
   onSelectTrail: jest.fn(),
-  calculateDistance: mockCalculateDistance,
-  maxDistance: 80
+  calculateDistance: jest.fn((lat1, lon1, lat2, lon2) => {
+    // Simple mock distance calculation that always returns a number
+    return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2)) * 111; // Rough km conversion
+  }),
+  maxDistance: 10
 };
 
 describe('TrailList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    fetch.mockClear();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('Rendering', () => {
-    test('renders trail list with correct count', () => {
+    it('renders loading state initially', () => {
       render(<TrailList {...defaultProps} />);
       
-      expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      expect(screen.getByText('Loading ratings...')).toBeInTheDocument();
     });
 
-    test('renders all trail items', () => {
+    it('renders trail list after loading', async () => {
+      // Mock successful API response
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
       render(<TrailList {...defaultProps} />);
       
-      expect(screen.getByText('Melville Koppies Trail')).toBeInTheDocument();
-      expect(screen.getByText('Klipriviersberg Loop')).toBeInTheDocument();
-      expect(screen.getByText('Modderfontein Reserve Path')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      });
     });
 
-    test('displays trail information correctly', () => {
+    it('displays correct trail count', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
       render(<TrailList {...defaultProps} />);
       
-      // Check trail details
-      expect(screen.getByText('4.5 km • 600 m gain')).toBeInTheDocument();
-      expect(screen.getByText('⭐ 4.8')).toBeInTheDocument();
-      expect(screen.getByText('8.9 km • 1100 m gain')).toBeInTheDocument();
-      expect(screen.getByText('⭐ 4.6')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      });
     });
 
-    test('displays trail tags', () => {
+    it('displays max distance when user location is provided', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
       render(<TrailList {...defaultProps} />);
       
-      expect(screen.getByText('🏷️ rocky, panoramic, city-views')).toBeInTheDocument();
-      expect(screen.getByText('🏷️ bushveld, wildlife, nature-reserve')).toBeInTheDocument();
-      expect(screen.getByText('🏷️ grassland, family-friendly, flat')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('within 10 km')).toBeInTheDocument();
+      });
+    });
+
+    it('does not display max distance when user location is not provided', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      render(<TrailList {...defaultProps} userLocation={null} />);
+      
+      await waitFor(() => {
+        expect(screen.queryByText(/within/)).not.toBeInTheDocument();
+      });
     });
   });
 
-  describe('User Location', () => {
-    test('does not display distance when user location is not available', () => {
+  describe('Trail Display', () => {
+    beforeEach(async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+    });
+
+    it('displays trail names', async () => {
       render(<TrailList {...defaultProps} />);
       
-      expect(screen.queryByText(/km away/)).not.toBeInTheDocument();
-      expect(mockCalculateDistance).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+        expect(screen.getByText('Test Trail 2')).toBeInTheDocument();
+        expect(screen.getByText('Test Trail 3')).toBeInTheDocument();
+      });
+    });
+
+    it('displays trail difficulty with correct colors', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        const easyTrail = screen.getByText('Easy');
+        const moderateTrail = screen.getByText('Moderate');
+        const hardTrail = screen.getByText('Hard');
+        
+        expect(easyTrail).toBeInTheDocument();
+        expect(moderateTrail).toBeInTheDocument();
+        expect(hardTrail).toBeInTheDocument();
+      });
+    });
+
+    it('displays trail distance and elevation', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('2.5 km • 100 m gain')).toBeInTheDocument();
+        expect(screen.getByText('5 km • 300 m gain')).toBeInTheDocument();
+        expect(screen.getByText('8 km • 600 m gain')).toBeInTheDocument();
+      });
+    });
+
+    it('displays ratings when available', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('⭐ 4.5 (10)')).toBeInTheDocument();
+      });
+    });
+
+    it('displays N/A for ratings when not available', async () => {
+      // Mock empty reviews for this test
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: [] })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        const naRatings = screen.getAllByText('⭐ N/A');
+        expect(naRatings.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('displays distance from user location when available', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        const distanceElements = screen.getAllByText(/km away/);
+        expect(distanceElements.length).toBe(3);
+      });
+    });
+
+    it('does not display distance when user location is not available', async () => {
+      render(<TrailList {...defaultProps} userLocation={null} />);
+      
+      await waitFor(() => {
+        expect(screen.queryByText(/km away/)).not.toBeInTheDocument();
+      });
     });
   });
 
   describe('Trail Selection', () => {
-    test('calls onSelectTrail when a trail is clicked', () => {
-      const mockOnSelectTrail = jest.fn();
-      
-      render(<TrailList {...defaultProps} onSelectTrail={mockOnSelectTrail} />);
-      
-      const firstTrail = screen.getByText('Melville Koppies Trail').closest('div');
-      fireEvent.click(firstTrail);
-      
-      expect(mockOnSelectTrail).toHaveBeenCalledWith(mockTrails[0]);
+    beforeEach(async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
     });
 
-    test('highlights selected trail', () => {
-      const selectedTrail = mockTrails[0];
+    it('calls onSelectTrail when trail is clicked', async () => {
+      const onSelectTrail = jest.fn();
+      render(<TrailList {...defaultProps} onSelectTrail={onSelectTrail} />);
       
-      render(<TrailList {...defaultProps} selectedTrail={selectedTrail} />);
+      await waitFor(() => {
+        const trailElement = screen.getByText('Test Trail 1');
+        fireEvent.click(trailElement.closest('div'));
+      });
       
-      // The selected trail should have different styling
-      // We can check this by looking for the trail name in the selected state
-      const selectedTrailElement = screen.getByText('Melville Koppies Trail');
-      expect(selectedTrailElement).toBeInTheDocument();
+      expect(onSelectTrail).toHaveBeenCalledWith(mockTrails[0]);
     });
 
-    test('handles multiple trail selections', async () => {
-      const mockOnSelectTrail = jest.fn();
+    it('highlights selected trail', async () => {
+      render(<TrailList {...defaultProps} selectedTrail={mockTrails[0]} />);
       
-      render(<TrailList {...defaultProps} onSelectTrail={mockOnSelectTrail} />);
+      await waitFor(() => {
+        const trailElement = screen.getByText('Test Trail 1').closest('div[style*="background-color"]');
+        expect(trailElement).toHaveStyle('background-color: rgb(240, 240, 240)');
+      });
+    });
+
+    it('does not highlight unselected trails', async () => {
+      render(<TrailList {...defaultProps} selectedTrail={mockTrails[0]} />);
       
-      // Click first trail
-      const firstTrail = screen.getByText('Melville Koppies Trail');
-      fireEvent.click(firstTrail);
-      
-      // Click second trail
-      const secondTrail = screen.getByText('Klipriviersberg Loop');
-      fireEvent.click(secondTrail);
-      
-      expect(mockOnSelectTrail).toHaveBeenCalledTimes(2);
-      expect(mockOnSelectTrail).toHaveBeenNthCalledWith(1, mockTrails[0]);
-      expect(mockOnSelectTrail).toHaveBeenNthCalledWith(2, mockTrails[1]);
+      await waitFor(() => {
+        const trailElement = screen.getByText('Test Trail 2').closest('div[style*="background-color"]');
+        expect(trailElement).toHaveStyle('background-color: transparent');
+      });
     });
   });
 
   describe('Empty State', () => {
-    test('displays message when no trails are available', () => {
+    it('displays empty state when no trails are provided', async () => {
       render(<TrailList {...defaultProps} trails={[]} />);
       
-      expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
-      expect(screen.getByText('No trails found. Try adjusting your filters or increasing the distance.')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('No trails found. Try adjusting your filters or increasing the distance.')).toBeInTheDocument();
+      });
+    });
+
+    it('displays correct count for empty trails', async () => {
+      render(<TrailList {...defaultProps} trails={[]} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('Difficulty Colors', () => {
-    test('displays correct difficulty colors', () => {
+  describe('API Integration', () => {
+    it('fetches reviews for trails without averageRating', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
       render(<TrailList {...defaultProps} />);
       
-      // Check that difficulty text is rendered (color is handled by CSS)
-      expect(screen.getByText('Moderate')).toBeInTheDocument();
-      expect(screen.getByText('Hard')).toBeInTheDocument();
-      expect(screen.getByText('Easy')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith(
+          'https://us-central1-orion-sdp.cloudfunctions.net/getTrailReviews?trailId=2'
+        );
+      });
+    });
+
+    it('does not fetch reviews for trails with existing averageRating', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        // Should not fetch for trail with id 1 (has averageRating)
+        expect(fetch).not.toHaveBeenCalledWith(
+          expect.stringContaining('trailId=1')
+        );
+      });
+    });
+
+    it('handles API errors gracefully', async () => {
+      fetch.mockRejectedValue(new Error('API Error'));
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        // Should still render trails even if API fails
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+    });
+
+    it('handles non-ok API responses', async () => {
+      fetch.mockResolvedValue({
+        ok: false,
+        status: 404
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        // Should still render trails even if API returns error
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+    });
+
+    it('handles empty reviews response', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: [] })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+    });
+
+    it('handles missing reviews in response', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({})
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Rating Calculation', () => {
+    it('calculates average rating correctly', async () => {
+      const reviewsWithRatings = [
+        { rating: 5 },
+        { rating: 4 },
+        { rating: 3 },
+        { rating: 2 }
+      ];
+
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: reviewsWithRatings })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        // Average should be (5+4+3+2)/4 = 3.5
+        expect(screen.getAllByText('⭐ 3.5 (4)')).toHaveLength(2);
+      });
+    });
+
+    it('handles reviews with missing ratings', async () => {
+      const reviewsWithMissingRatings = [
+        { rating: 5 },
+        { rating: null },
+        { rating: 3 }
+      ];
+
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: reviewsWithMissingRatings })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        // Average should be (5+0+3)/3 = 2.67
+        expect(screen.getAllByText('⭐ 2.7 (3)')).toHaveLength(2);
+      });
+    });
+
+    it('handles empty reviews array', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: [] })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getAllByText('⭐ N/A')).toHaveLength(2);
+      });
+    });
+
+    it('handles null reviews', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: null })
+      });
+
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getAllByText('⭐ N/A')).toHaveLength(2);
+      });
     });
   });
 
   describe('Distance Calculation', () => {
-    test('displays calculated distance correctly', () => {
-      mockCalculateDistance.mockReturnValue(12.5);
+    beforeEach(async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+    });
+
+    it('calls calculateDistance for each trail when user location is provided', async () => {
+      const calculateDistance = jest.fn().mockReturnValue(5.2);
+      render(<TrailList {...defaultProps} calculateDistance={calculateDistance} />);
       
-      render(<TrailList {...defaultProps} userLocation={mockUserLocation} />);
+      await waitFor(() => {
+        expect(calculateDistance).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    it('displays calculated distance correctly', async () => {
+      const calculateDistance = jest.fn().mockReturnValue(5.2);
+      render(<TrailList {...defaultProps} calculateDistance={calculateDistance} />);
       
-      const distanceElements = screen.getAllByText(/12.5 km away/);
-      expect(distanceElements).toHaveLength(3);
+      await waitFor(() => {
+        expect(screen.getAllByText('📍 5.2 km away')).toHaveLength(3);
+      });
+    });
+
+    it('does not call calculateDistance when user location is not provided', async () => {
+      const calculateDistance = jest.fn();
+      render(<TrailList {...defaultProps} userLocation={null} calculateDistance={calculateDistance} />);
+      
+      await waitFor(() => {
+        expect(calculateDistance).not.toHaveBeenCalled();
+      });
     });
   });
 
-  describe('Props Validation', () => {
-    test('handles missing optional props gracefully', () => {
-      const minimalProps = {
-        trails: mockTrails,
-        onSelectTrail: jest.fn(),
-        calculateDistance: mockCalculateDistance
-      };
+  describe('Component Lifecycle', () => {
+    it('recalculates ratings when trails prop changes', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      const { rerender } = render(<TrailList {...defaultProps} />);
       
-      render(<TrailList {...minimalProps} />);
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      });
+
+      const newTrails = [mockTrails[0]];
+      rerender(<TrailList {...defaultProps} trails={newTrails} />);
       
-      expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (1)')).toBeInTheDocument();
+      });
     });
 
-    test('handles trails without tags', () => {
-      const trailsWithoutTags = [
+    it('handles rapid prop changes', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      const { rerender } = render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      });
+
+      // Rapid changes
+      rerender(<TrailList {...defaultProps} trails={[]} />);
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+      });
+
+      rerender(<TrailList {...defaultProps} trails={mockTrails} />);
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+      });
+
+      rerender(<TrailList {...defaultProps} trails={[mockTrails[0]]} />);
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (1)')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('handles trails with missing properties', async () => {
+      const incompleteTrails = [
         {
-          ...mockTrails[0],
-          tags: []
+          id: 1,
+          name: 'Incomplete Trail',
+          difficulty: 'Easy',
+          distance: 2.0,
+          elevationGain: 100,
+          location: { latitude: -26.1755, longitude: 27.9715 }
         }
       ];
+
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      render(<TrailList {...defaultProps} trails={incompleteTrails} />);
       
-      render(<TrailList {...defaultProps} trails={trailsWithoutTags} />);
-      
-      expect(screen.getByText('Trails Near You (1)')).toBeInTheDocument();
-      expect(screen.queryByText('🏷️')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Incomplete Trail')).toBeInTheDocument();
+      });
     });
 
-    test('handles trails with missing optional fields', () => {
-      const minimalTrail = {
-        id: 1,
-        name: "Test Trail",
-        difficulty: "Easy",
-        distance: 2.0,
-        elevationGain: 100,
-        rating: 4.0,
-        location: { latitude: -26.1755, longitude: 27.9715 }
-      };
+    it('handles empty trails array', async () => {
+      render(<TrailList {...defaultProps} trails={[]} />);
       
-      render(<TrailList {...defaultProps} trails={[minimalTrail]} />);
-      
-      expect(screen.getByText('Test Trail')).toBeInTheDocument();
-      expect(screen.getByText('2 km • 100 m gain')).toBeInTheDocument();
-      expect(screen.getByText('⭐ 4')).toBeInTheDocument();
-    });
-  });
-
-  describe('User Interactions', () => {
-    test('handles hover effects', async () => {
-      render(<TrailList {...defaultProps} />);
-      
-      const trailElement = screen.getByText('Melville Koppies Trail');
-      
-      // The hover effect should be applied (this is mainly CSS, but we can verify the element exists)
-      expect(trailElement).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+      });
     });
 
-    test('maintains selection state after hover', async () => {
-      const selectedTrail = mockTrails[0];
+    it('handles null trails prop', async () => {
+      render(<TrailList {...defaultProps} trails={null} />);
       
-      render(<TrailList {...defaultProps} selectedTrail={selectedTrail} />);
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+        expect(screen.getByText('No trails found. Try adjusting your filters or increasing the distance.')).toBeInTheDocument();
+      });
+    });
+
+    it('handles undefined trails prop', async () => {
+      render(<TrailList {...defaultProps} trails={undefined} />);
       
-      const trailElement = screen.getByText('Melville Koppies Trail');
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+        expect(screen.getByText('No trails found. Try adjusting your filters or increasing the distance.')).toBeInTheDocument();
+      });
+    });
+
+    it('handles non-array trails prop', async () => {
+      render(<TrailList {...defaultProps} trails="not an array" />);
       
-      // Trail should still be selected
-      expect(trailElement).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (0)')).toBeInTheDocument();
+        expect(screen.getByText('No trails found. Try adjusting your filters or increasing the distance.')).toBeInTheDocument();
+      });
+    });
+
+    it('handles missing callback functions', async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
+      });
+
+      expect(() => {
+        render(
+          <TrailList
+            trails={mockTrails}
+            userLocation={mockUserLocation}
+            selectedTrail={null}
+            calculateDistance={defaultProps.calculateDistance}
+            maxDistance={10}
+          />
+        );
+      }).not.toThrow();
     });
   });
 
   describe('Accessibility', () => {
-    test('trail items are clickable', () => {
-      render(<TrailList {...defaultProps} />);
-      
-      const trailElements = screen.getAllByText(/Trail/);
-      trailElements.forEach(element => {
-        expect(element).toBeInTheDocument();
+    beforeEach(async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ reviews: mockReviews })
       });
     });
 
-    test('displays trail information in a readable format', () => {
+    it('has proper clickable trail elements', async () => {
       render(<TrailList {...defaultProps} />);
       
-      // Check that all important information is displayed
-      expect(screen.getByText('Melville Koppies Trail')).toBeInTheDocument();
-      expect(screen.getByText('Moderate')).toBeInTheDocument();
-      expect(screen.getByText('4.5 km • 600 m gain')).toBeInTheDocument();
-      expect(screen.getByText('⭐ 4.8')).toBeInTheDocument();
+      await waitFor(() => {
+        const trailElements = screen.getAllByText(/Test Trail/);
+        trailElements.forEach(element => {
+          const clickableDiv = element.closest('div[style*="cursor: pointer"]');
+          expect(clickableDiv).toBeInTheDocument();
+        });
+      });
+    });
+
+    it('has proper semantic structure', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Trails Near You (3)')).toBeInTheDocument();
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+    });
+
+    it('displays information in readable format', async () => {
+      render(<TrailList {...defaultProps} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('2.5 km • 100 m gain')).toBeInTheDocument();
+        expect(screen.getByText('⭐ 4.5 (10)')).toBeInTheDocument();
+        expect(screen.getAllByText('📍 0.0 km away')).toHaveLength(3);
+      });
     });
   });
 });

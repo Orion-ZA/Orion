@@ -1,0 +1,97 @@
+/* Reset any potential overflow issues */
+.admin-dashboard * {
+  box-sizing: border-box;
+}
+
+/* Make admin dashboard take full viewport by breaking out of app-shell constraints */
+.admin-dashboard {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure no body overflow when admin dashboard is active */
+body.admin-dashboard-active {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+html.admin-dashboard-active {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+}
+
+/* Override app-shell and main constraints for admin dashboard */
+body.admin-dashboard-active .app-shell {
+  display: block !important;
+  min-height: 100vh !important;
+  grid-template-rows: none !important;
+  position: relative !important;
+}
+
+body.admin-dashboard-active main {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh !important;
+  position: relative !important;
+}
+
+/* Fallback using :has() for modern browsers */
+body:has(.admin-dashboard) {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+html:has(.admin-dashboard) {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+.app-shell:has(.admin-dashboard) {
+  display: block !important;
+  min-height: 100vh !important;
+  grid-template-rows: none !important;
+}
+
+main:has(.admin-dashboard) {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh !important;
+}
+
+/* Remove duplicate admin-dashboard rule */
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -1,57 +1,103 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebaseConfig";
+import { storage, auth } from "../firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { Shield, AlertCircle, Star, MessageSquare } from "lucide-react";
 
-const modalOverlayStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.19)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 9999,
+// Import components
+import AlertsPopup from "../components/AlertsPopup";
+import ReviewsTrailCard from "../components/ReviewsTrailCard";
+import ReviewsTrailSkeleton from "../components/ReviewsTrailSkeleton";
+import SuccessPopup from "../components/SuccessPopup";
+import "./ReviewsMedia.css";
+
+// =========================
+// 🎨 Responsive Styles
+// =========================
+const responsiveStyles = {
+  container: {
+    padding: "1.5rem",
+    maxWidth: "1200px",
+    margin: "0 auto",
+    fontFamily: "'Inter', sans-serif",
+    color: "#f5f5f5",
+  },
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gap: "1.5rem",
+    marginTop: "2rem",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    backdropFilter: "blur(6px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+    padding: "1rem",
+  },
+  modalContent: {
+    background: "#1c2540",
+    padding: "2rem",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "500px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    boxShadow: "0 12px 32px rgba(0,0,0,0.4)",
+    transform: "scale(0.95)",
+    animation: "fadeIn 0.25s ease forwards",
+  },
+  textarea: {
+    width: "100%",
+    minHeight: "100px",
+    marginTop: "0.5rem",
+    padding: "0.75rem",
+    borderRadius: "8px",
+    border: "1px solid #444",
+    background: "#0b132b",
+    color: "#f5f5f5",
+    fontSize: "1rem",
+    resize: "vertical",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "1rem",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  primaryButton: {
+    padding: "0.6rem 1.2rem",
+    borderRadius: "20px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    backgroundColor: "#00b894",
+    color: "#fff",
+    transition: "background 0.2s ease",
+  },
+  cancelButton: {
+    padding: "0.6rem 1.2rem",
+    borderRadius: "20px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    backgroundColor: "#636e72",
+    color: "#fff",
+  },
 };
 
-const modalContentStyle = {
-  background: "#0b132b",
-  padding: "2rem",
-  borderRadius: "12px",
-  width: 400,
-  maxWidth: "90%",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-};
+// Helper for inline style
+const getResponsiveStyle = (styleKey) => responsiveStyles[styleKey] || {};
 
-const textareaStyle = {
-  width: "100%",
-  minHeight: 100,
-  marginTop: "0.5rem",
-  padding: "0.5rem",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  fontSize: "1rem",
-  resize: "vertical",
-};
-
-const inputFileStyle = { marginTop: "0.5rem" };
-
-const buttonStyle = {
-  padding: "0.5rem 1rem",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: 500,
-  backgroundColor: "#007bff",
-  color: "#fff",
-};
-
-const primaryButtonStyle = { ...buttonStyle, backgroundColor: "#007bff", color: "#fff" };
-const cancelButtonStyle = { ...buttonStyle, backgroundColor: "#f0f0f0", color: "#333" };
-
-// Fetch trails API
+// =========================
+// 📡 API Helpers
+// =========================
 async function fetchTrails() {
   const res = await fetch("https://us-central1-orion-sdp.cloudfunctions.net/getTrails");
   if (!res.ok) throw new Error("Failed to fetch trails");
@@ -67,7 +113,6 @@ async function fetchTrailReviews(trailId) {
   return data.reviews || [];
 }
 
-// Add this helper function outside the component
 async function fetchTrailAlerts(trailId) {
   try {
     const res = await fetch(
@@ -81,6 +126,17 @@ async function fetchTrailAlerts(trailId) {
   }
 }
 
+// Add this function to calculate average rating
+function calculateAverageRating(reviews) {
+  if (!reviews || reviews.length === 0) return 0;
+  
+  const sum = reviews.reduce((total, review) => total + (review.rating || 0), 0);
+  return sum / reviews.length;
+}
+
+// =========================
+// 🌲 Main Component
+// =========================
 export default function ReviewsMedia() {
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
@@ -88,62 +144,223 @@ export default function ReviewsMedia() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredTrailId, setHoveredTrailId] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [alertsPopup, setAlertsPopup] = useState({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    alerts: []
+  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [selectedTrailId, setSelectedTrailId] = useState(null);
 
   const [newReview, setNewReview] = useState("");
+  const [newRating, setNewRating] = useState(0);
   const [newImages, setNewImages] = useState([]);
   const [alertType, setAlertType] = useState("general");
   const [alertMessage, setAlertMessage] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Success popup state
+  const [successPopup, setSuccessPopup] = useState({
+    isVisible: false,
+    message: ""
+  });
+
+  // Add user authentication state
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Set up auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const handleShowAlertsPopup = (event, trailAlerts) => {
+    if (!trailAlerts || trailAlerts.length === 0) return;
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    setAlertsPopup({
+      isVisible: true,
+      position: {
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 8
+      },
+      alerts: trailAlerts
+    });
+  };
+
+  const handleHideAlertsPopup = () => {
+    setAlertsPopup({
+      isVisible: false,
+      position: { x: 0, y: 0 },
+      alerts: []
+    });
+  };
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to load before fetching trails
     (async () => {
       try {
         const data = await fetchTrails();
+        
+        // Process trails progressively - show them as they load
+        setTrails(data.map(trail => ({ 
+          ...trail, 
+          photos: [], 
+          averageRating: 0, 
+          reviewCount: 0,
+          processedPhotos: false,
+          hasReviews: false,
+          hasAlerts: false
+        })));
+        setLoading(false);
 
-        const trailsWithUrls = await Promise.all(
-          data.map(async (trail) => {
-            if (trail.photos && Array.isArray(trail.photos) && trail.photos.length > 0) {
-              const urls = await Promise.all(
-                trail.photos.map(async (path) => {
-                  try {
-                    if (path.startsWith("https://")) return path;
-                    return await getDownloadURL(ref(storage, path));
-                  } catch {
-                    return null;
-                  }
-                })
-              );
-              return { ...trail, photos: urls.filter(Boolean) };
-            }
-            return { ...trail, photos: [] };
-          })
-        );
-
-        setTrails(trailsWithUrls);
-
+        // Process photos, reviews, and alerts in parallel for each trail
         const reviewsData = {};
         const alertsData = {};
+        
+        // Process trails in batches to avoid overwhelming the browser
+        const batchSize = 5;
+        for (let i = 0; i < data.length; i += batchSize) {
+          const batch = data.slice(i, i + batchSize);
+          
+          const batchResults = await Promise.all(
+            batch.map(async (trail) => {
+              try {
+                // Process photos with timeout
+                let photos = [];
+                let processedPhotos = true;
+                if (trail.photos?.length > 0) {
+                  try {
+                    const photoPromises = trail.photos.map(async (path) => {
+                      try {
+                        if (path.startsWith("https://")) return path;
+                        return await getDownloadURL(ref(storage, path));
+                      } catch {
+                        return null;
+                      }
+                    });
+                    
+                    // Add timeout for photo processing
+                    const timeoutPromise = new Promise((_, reject) => 
+                      setTimeout(() => reject(new Error('Photo processing timeout')), 10000)
+                    );
+                    
+                    const urls = await Promise.race([
+                      Promise.all(photoPromises),
+                      timeoutPromise
+                    ]);
+                    photos = urls.filter(Boolean);
+                  } catch (error) {
+                    console.warn(`Failed to process photos for trail ${trail.id}:`, error);
+                    photos = [];
+                    processedPhotos = false;
+                  }
+                }
 
-        // Use the external helper function
-        await Promise.all(
-          trailsWithUrls.map(async (trail) => {
-            reviewsData[trail.id] = await fetchTrailReviews(trail.id);
-            alertsData[trail.id] = await fetchTrailAlerts(trail.id);
-          })
-        );
+                // Fetch reviews and calculate ratings with timeout
+                let trailReviews = [];
+                let hasReviews = false;
+                try {
+                  const reviewPromise = fetchTrailReviews(trail.id);
+                  const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Review fetch timeout')), 8000)
+                  );
+                  
+                  trailReviews = await Promise.race([reviewPromise, timeoutPromise]);
+                  hasReviews = true;
+                } catch (error) {
+                  console.warn(`Failed to fetch reviews for trail ${trail.id}:`, error);
+                  trailReviews = [];
+                }
+                
+                const averageRating = calculateAverageRating(trailReviews);
+                const reviewCount = trailReviews.length;
+                
+                // Fetch alerts with timeout
+                let trailAlerts = [];
+                let hasAlerts = false;
+                try {
+                  const alertPromise = fetchTrailAlerts(trail.id);
+                  const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Alert fetch timeout')), 5000)
+                  );
+                  
+                  trailAlerts = await Promise.race([alertPromise, timeoutPromise]);
+                  hasAlerts = true;
+                } catch (error) {
+                  console.warn(`Failed to fetch alerts for trail ${trail.id}:`, error);
+                  trailAlerts = [];
+                }
+                
+                // Store data
+                reviewsData[trail.id] = trailReviews;
+                alertsData[trail.id] = trailAlerts;
+                
+                return {
+                  ...trail,
+                  photos,
+                  averageRating,
+                  reviewCount,
+                  processedPhotos,
+                  hasReviews,
+                  hasAlerts
+                };
+              } catch (error) {
+                console.error(`Failed to process trail ${trail.id}:`, error);
+                // Return trail with minimal data to prevent infinite loading
+                return {
+                  ...trail,
+                  photos: [],
+                  averageRating: 0,
+                  reviewCount: 0,
+                  processedPhotos: true, // Mark as processed to stop loading
+                  hasReviews: false,
+                  hasAlerts: false
+                };
+              }
+            })
+          );
+
+          // Update trails progressively
+          setTrails(prevTrails => 
+            prevTrails.map(trail => {
+              const updatedTrail = batchResults.find(t => t.id === trail.id);
+              return updatedTrail || trail;
+            })
+          );
+        }
 
         setReviews(reviewsData);
         setAlerts(alertsData);
       } catch (err) {
         setError("Could not load trails or reviews");
-      } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [authLoading]);
 
   const uploadPhotos = async (files) => {
     const urls = [];
@@ -157,85 +374,43 @@ export default function ReviewsMedia() {
   };
 
   const openModal = (trailId, type) => {
+    // Check if user is logged in for review submission
+    if (type === "review" && !user) {
+      alert("Please log in to submit a review");
+      return;
+    }
+    
     setSelectedTrailId(trailId);
     setModalType(type);
     setNewReview("");
+    setNewRating(0);
     setNewImages([]);
     setAlertType("general");
     setAlertMessage("");
     setModalOpen(true);
   };
-
   const closeModal = () => {
     setModalOpen(false);
     setSelectedTrailId(null);
     setModalType(null);
+    setNewReview("");
+    setNewRating(0);
+    setIsAnonymous(false);
   };
 
-  const handleAddAlert = async () => {
-    if (!alertMessage) return;
-
-    try {
-      const response = await fetch(
-        "https://us-central1-orion-sdp.cloudfunctions.net/addAlert",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trailId: selectedTrailId,
-            message: alertMessage,
-            type: alertType
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Instead of trying to construct the alert locally, refetch the alerts for this trail
-      try {
-        const alertsResponse = await fetch(
-          `https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=${selectedTrailId}`
-        );
-        const alertsData = await alertsResponse.json();
-        
-        if (alertsResponse.ok) {
-          setAlerts((prev) => ({
-            ...prev,
-            [selectedTrailId]: alertsData.alerts || []
-          }));
-        }
-      } catch (fetchError) {
-        console.error("Error refetching alerts:", fetchError);
-        // Fallback: add a temporary alert to local state
-        const newAlert = {
-          id: `temp-${Date.now()}`,
-          message: alertMessage,
-          type: alertType,
-          timestamp: new Date().toISOString()
-        };
-        
-        setAlerts((prev) => ({
-          ...prev,
-          [selectedTrailId]: [...(prev[selectedTrailId] || []), newAlert]
-        }));
-      }
-
-      closeModal();
-      alert("✅ Alert added successfully!");
-    } catch (err) {
-      console.error("Error adding alert:", err);
-      alert("❌ Failed to add alert: " + err.message);
-    }
+  const closeSuccessPopup = () => {
+    setSuccessPopup({
+      isVisible: false,
+      message: ""
+    });
   };
 
   const handleAddReview = async () => {
     if (!newReview) return;
-
     try {
+      // Use actual user data or anonymous based on user choice
+      const userDisplayName = isAnonymous ? "Anonymous" : (user.displayName || user.email || "User");
+      
       const response = await fetch(
         "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
         {
@@ -246,44 +421,72 @@ export default function ReviewsMedia() {
             review: {
               id: uuidv4(),
               message: newReview,
+              rating: newRating,
               timestamp: new Date().toISOString(),
-              // Add user info if available
-              userId: "anonymous", // You might want to get this from auth
-              userName: "Anonymous User"
+              userId: user.uid, // Use actual user ID
+              userName: userDisplayName, // Use actual user name
+              userEmail: user.email // Optional: store email for reference
             }
           }),
         }
       );
 
       const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Server returned ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch reviews for this trail
+      // Refetch reviews to update the average rating
       const updatedReviews = await fetchTrailReviews(selectedTrailId);
       setReviews((prev) => ({
         ...prev,
         [selectedTrailId]: updatedReviews,
       }));
 
+      // Update the trail's average rating
+      const averageRating = calculateAverageRating(updatedReviews);
+      setTrails(prev => prev.map(trail => 
+        trail.id === selectedTrailId 
+          ? {...trail, averageRating, reviewCount: updatedReviews.length}
+          : trail
+      ));
       closeModal();
-      alert("✅ Review added successfully!");
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your review has been submitted successfully!"
+      });
     } catch (err) {
-      console.error("Error adding review:", err);
-      alert("❌ Failed to add review: " + err.message);
+      alert("Failed to add review: " + err.message);
+    }
+  };
+
+  const handleAddAlert = async () => {
+    if (!alertMessage) return;
+    try {
+      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/addAlert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trailId: selectedTrailId,
+          message: alertMessage,
+          type: alertType,
+        }),
+      });
+      const alertsData = await fetchTrailAlerts(selectedTrailId);
+      setAlerts((prev) => ({ ...prev, [selectedTrailId]: alertsData }));
+      closeModal();
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your alert has been submitted successfully!"
+      });
+    } catch (err) {
+      alert("Failed to add alert: " + err.message);
     }
   };
 
   const handleAddImages = async () => {
-    if (!newImages || newImages.length === 0) return;
-
+    if (!newImages.length) return;
     try {
-      // Upload images to Firebase Storage
       const uploadedUrls = await uploadPhotos(newImages);
-      
-      // Update trail with new images
+
       const response = await fetch(
         "https://us-central1-orion-sdp.cloudfunctions.net/updateTrailImages",
         {
@@ -297,145 +500,106 @@ export default function ReviewsMedia() {
       );
 
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server returned ${response.status}`);
-      }
-
-      // Refetch trails to update images
+      if (!response.ok) throw new Error(result.error || `Server returned ${response.status}`);
       const updatedTrails = await fetchTrails();
-      const trailsWithUrls = await Promise.all(
-        updatedTrails.map(async (trail) => {
-          if (trail.photos && Array.isArray(trail.photos) && trail.photos.length > 0) {
-            const urls = await Promise.all(
-              trail.photos.map(async (path) => {
-                try {
-                  if (path.startsWith("https://")) return path;
-                  return await getDownloadURL(ref(storage, path));
-                } catch {
-                  return null;
-                }
-              })
-            );
-            return { ...trail, photos: urls.filter(Boolean) };
-          }
-          return { ...trail, photos: [] };
-        })
-      );
-
-      setTrails(trailsWithUrls);
+      setTrails(updatedTrails);
       closeModal();
-      alert("✅ Images added successfully!");
+      setSuccessPopup({
+        isVisible: true,
+        message: "Your images have been uploaded successfully!"
+      });
     } catch (err) {
-      console.error("Error adding images:", err);
-      alert("❌ Failed to add images: " + err.message);
+      alert("Failed to add images: " + err.message);
     }
   };
 
-  if (loading) return <p>Loading trails...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (authLoading) return (
+    <div style={getResponsiveStyle("container")}>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        <div style={{ fontSize: "1.2rem", color: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <Shield size={18} />
+          Authenticating...
+        </div>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div style={getResponsiveStyle("container")}>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        <div style={{ color: "#ff6b6b", fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <AlertCircle size={18} />
+          {error}
+        </div>
+        <button 
+          style={{...getResponsiveStyle("primaryButton"), marginTop: "1rem"}} 
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="container fade-in-up">
-      <h1>Trails</h1>
-      <div className="grid cols-3" style={{ marginTop: "1rem" }}>
-        {trails.map((trail) => (
-          <div
-            className="card"
-            key={trail.id}
-            style={{ padding: "1rem", position: "relative" }}
-            onMouseEnter={() => setHoveredTrailId(trail.id)}
-            onMouseLeave={() => setHoveredTrailId(null)}
-          >
-            <div
-              style={{
-                display: "flex",
-                overflowX: "auto",
-                gap: "0.5rem",
-                marginBottom: "0.5rem",
-              }}
-            >
-              {trail.photos.length > 0 ? (
-                trail.photos.map((photoUrl, index) => (
-                  <img
-                    key={index}
-                    src={photoUrl}
-                    alt={`Trail ${trail.name} ${index + 1}`}
-                    style={{
-                      height: 100,
-                      borderRadius: 6,
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
-                ))
-              ) : (
-                <div
-                  style={{
-                    height: 100,
-                    width: "100%",
-                    backgroundColor: "#eee",
-                    borderRadius: 6,
-                  }}
-                >
-                  No images
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <h4 style={{ margin: 0 }}>{trail.name}</h4>
-              {hoveredTrailId === trail.id && (
-                <div style={{ display: "flex", gap: "0.25rem" }}>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "review")}>
-                    Add Review
-                  </button>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "images")}>
-                    Add Images
-                  </button>
-                  <button style={buttonStyle} onClick={() => openModal(trail.id, "alert")}>
-                    Add Alert
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {alerts[trail.id] && alerts[trail.id].length > 0 && (
-              <ul style={{ color: "red", marginTop: "0.25rem" }}>
-                {alerts[trail.id].map((a) => (
-                  <li key={a.id}>
-                    [{a.type}] {a.message}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <div style={{ marginTop: "0.5rem" }}>
-              {reviews[trail.id] && reviews[trail.id].length > 0 ? (
-                <ul style={{ color: "var(--muted)", paddingLeft: "1rem" }}>
-                  {reviews[trail.id].map((rev) => (
-                    <li key={rev.id}>{rev.message}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="muted">No reviews yet.</p>
-              )}
-            </div>
-          </div>
-        ))}
+    <div style={getResponsiveStyle("container")}>
+      <h1 style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <MessageSquare size={20} />
+        Trail Reviews & Media
+      </h1>
+      
+      <div style={getResponsiveStyle("gridContainer")}>
+        {trails.map((trail) => {
+          // Show skeleton if trail is still loading (check if it has been processed)
+          // A trail is considered loaded if it has been processed (has processedPhotos flag or has data)
+          const isLoading = !trail.processedPhotos && !trail.hasReviews && !trail.hasAlerts;
+          
+          if (isLoading) {
+            return <ReviewsTrailSkeleton key={trail.id} />;
+          }
+          
+          return (
+            <ReviewsTrailCard
+              key={trail.id}
+              trail={trail}
+              alerts={alerts}
+              reviews={reviews}
+              user={user}
+              loadedImages={loadedImages}
+              setLoadedImages={setLoadedImages}
+              onShowAlertsPopup={handleShowAlertsPopup}
+              onHideAlertsPopup={handleHideAlertsPopup}
+              onOpenModal={openModal}
+            />
+          );
+        })}
       </div>
 
+      {/* Alerts Popup */}
+      <AlertsPopup
+        isVisible={alertsPopup.isVisible}
+        position={alertsPopup.position}
+        alerts={alertsPopup.alerts}
+        onMouseLeave={handleHideAlertsPopup}
+      />
+
+      {/* Success Popup */}
+      <SuccessPopup
+        isVisible={successPopup.isVisible}
+        message={successPopup.message}
+        onClose={closeSuccessPopup}
+      />
+
       {modalOpen && (
-        <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
+        <div style={getResponsiveStyle("modalOverlay")} onClick={closeModal}>
+          <div style={getResponsiveStyle("modalContent")} onClick={(e) => e.stopPropagation()}>
             {modalType === "alert" && (
               <>
                 <h3>Add Alert</h3>
-                <label>Type:</label>
                 <select
                   value={alertType}
                   onChange={(e) => setAlertType(e.target.value)}
-                  style={{ width: "100%", marginBottom: "0.5rem" }}
+                  style={{ width: "100%", marginBottom: "0.5rem", padding: "0.5rem", borderRadius: "6px" }}
                 >
                   <option value="general">General</option>
                   <option value="closure">Closure</option>
@@ -446,39 +610,83 @@ export default function ReviewsMedia() {
                   value={alertMessage}
                   onChange={(e) => setAlertMessage(e.target.value)}
                   placeholder="Enter alert message..."
-                  style={textareaStyle}
+                  style={getResponsiveStyle("textarea")}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddAlert}>
-                    Submit
-                  </button>
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddAlert}>Submit</button>
                 </div>
               </>
             )}
-            
+
             {modalType === "review" && (
               <>
-                <h3>Add Review</h3>
+                <h3>Add Review {user && !isAnonymous && `(as ${user.displayName || user.email})`}</h3>
+                <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.5rem" }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      style={{
+                        cursor: "pointer",
+                        color: newRating >= star ? "gold" : "#ccc",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      onClick={() => setNewRating(star)}
+                    >
+                      <Star 
+                        size={20} 
+                        fill={newRating >= star ? "currentColor" : "none"} 
+                        color={newRating >= star ? "gold" : "#ccc"}
+                      />
+                    </span>
+                  ))}
+                </div>
+
                 <textarea
                   value={newReview}
                   onChange={(e) => setNewReview(e.target.value)}
                   placeholder="Write your review..."
-                  style={textareaStyle}
+                  style={getResponsiveStyle("textarea")}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddReview}>
-                    Submit
-                  </button>
+                
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "0.5rem", 
+                  marginTop: "1rem",
+                  marginBottom: "1rem"
+                }}>
+                  <input
+                    type="checkbox"
+                    id="anonymous-review"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      accentColor: "var(--accent)"
+                    }}
+                  />
+                  <label 
+                    htmlFor="anonymous-review"
+                    style={{
+                      color: "var(--text-secondary)",
+                      fontSize: "0.9rem",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Submit as anonymous
+                  </label>
+                </div>
+                
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddReview}>Submit</button>
                 </div>
               </>
             )}
-            
+
             {modalType === "images" && (
               <>
                 <h3>Add Images</h3>
@@ -487,21 +695,18 @@ export default function ReviewsMedia() {
                   multiple
                   accept="image/*"
                   onChange={(e) => setNewImages(Array.from(e.target.files))}
-                  style={inputFileStyle}
+                  style={{ marginTop: "0.5rem", width: "100%" }}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem" }}>
-                  <button style={cancelButtonStyle} onClick={closeModal}>
-                    Cancel
-                  </button>
-                  <button style={primaryButtonStyle} onClick={handleAddImages}>
-                    Upload
-                  </button>
+                <div style={getResponsiveStyle("modalButtons")}>
+                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
+                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddImages}>Upload</button>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
     </div>
   );
 }

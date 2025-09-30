@@ -83,7 +83,7 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .trails-map-controls {
-    top: 4rem;
+    top: 7.5rem; /* Position below search bar: 4.5rem (navbar) + 2.25rem (search bar) + 0.75rem (margin) */
     right: 1rem;
   }
 }

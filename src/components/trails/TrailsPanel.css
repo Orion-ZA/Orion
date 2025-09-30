@@ -729,7 +729,7 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .trails-panel-toggle {
-    top: 4rem;
+    top: 7.5rem; /* Position below search bar: 4.5rem (navbar) + 2.25rem (search bar) + 0.75rem (margin) */
     left: 0.5rem;
   }
   
@@ -750,26 +750,59 @@
       0 -8px 32px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(255, 255, 255, 0.1),
       inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    resize: vertical;
+    overflow: hidden;
+    transition: height 0.1s ease-out;
+  }
+  
+  /* Dragging state */
+  .trails-panel-toggle.open.dragging {
+    transition: none;
+    user-select: none;
+  }
+  
+  /* Drag handle styles */
+  .drag-handle {
+    transition: background-color 0.2s ease;
+  }
+  
+  .drag-handle:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+  }
+  
+  .drag-handle:active {
+    background: rgba(255, 255, 255, 0.7) !important;
   }
   
   .header-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.375rem;
+    flex-wrap: wrap;
   }
   
   .sort-dropdown {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
     justify-content: space-between;
   }
   
   .sort-select {
     flex: 1;
     margin-right: 0.25rem;
+    min-width: 100px;
   }
   
   .action-button {
-    width: 100%;
+    flex: 0 0 auto;
+    min-width: 40px;
     justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .action-button.primary {
+    flex: 1;
+    min-width: 80px;
   }
   
   .trail-actions {

@@ -1,7 +1,7 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 9999;
   background: rgba(28,37,65,0.9);
   backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -159,6 +159,32 @@ html[data-theme='light'] .mobile-nav-links a:hover,
 html[data-theme='light'] .mobile-nav-links .as-link:hover {
   background: rgba(13,110,109,0.12);
 }
+html[data-theme='light'] .mobile-nav-links .as-link.active {
+  background: rgba(13,110,109,0.18);
+  color: var(--text);
+}
+html[data-theme='light'] .mobile-profile-header {
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme='light'] .mobile-profile-name {
+  color: var(--text);
+}
+html[data-theme='light'] .mobile-profile-email {
+  color: var(--text-dim);
+}
+html[data-theme='light'] .mobile-profile-chevron {
+  color: var(--text-dim);
+}
+html[data-theme='light'] .mobile-profile-item {
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme='light'] .mobile-profile-item:hover {
+  background: rgba(13,110,109,0.12);
+}
+html[data-theme='light'] .mobile-logout {
+  border-top: 1px solid var(--border);
+}
 
 .desktop-actions { 
   display: inline-flex; 
@@ -181,6 +207,14 @@ html[data-theme='light'] .mobile-nav-links .as-link:hover {
   justify-content: center; 
   gap: 6px; 
   transition-duration: .5s; 
+  z-index: 10001; 
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  transition: background-color 0.2s ease;
+}
+.toggle:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 .bars { 
   width: 100%; 
@@ -200,26 +234,41 @@ html[data-theme='light'] .mobile-nav-links .as-link:hover {
 /* Mobile menu */
 .mobile-menu {
   position: fixed;
-  top: 100%;
+  top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   background: rgba(10,15,30,0.98);
   border-bottom: 1px solid var(--border);
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
   transition: all .3s ease;
-  z-index: 40;
-  max-height: calc(100vh - 70px);
+  z-index: 10000;
+  height: 100vh;
+  width: 100vw;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: 1rem 0 2rem;
+  padding-top: 80px; /* Account for navbar height */
 }
 .mobile-menu.open {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Ensure mobile menu covers entire viewport regardless of page content */
+.mobile-menu {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  z-index: 10000 !important;
 }
 .mobile-nav-links {
   display: flex;
@@ -249,6 +298,7 @@ html[data-theme='light'] .mobile-nav-links .as-link:hover {
   cursor: pointer;
 }
 .mobile-nav-links .as-link:hover { background: var(--glass); color: var(--text); }
+.mobile-nav-links .as-link.active { background: rgba(91,192,190,.18); color: var(--text); }
 .mobile-actions {
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -308,7 +358,7 @@ html[data-theme="light"] .profile-trigger:hover { background: rgba(0,0,0,0.04); 
 .profile-dropdown {
   position: absolute; top: 100%; right: 0; margin-top: 8px; width: 240px;
   background: var(--bg-elev); border: 1px solid var(--border);
-  border-radius: 14px; box-shadow: var(--shadow); z-index: 1000; overflow: hidden;
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 75; overflow: hidden;
   animation: scale-in .25s ease both; color: var(--text);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   transition: background-color .45s ease, border-color .45s ease, color .45s ease;
@@ -343,26 +393,40 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   padding: 16px;
 }
 
+.mobile-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 8px;
+}
+
+.mobile-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.mobile-profile-text {
+  flex: 1;
+}
+
 .mobile-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-
-.mobile-profile-info {
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .mobile-profile-name {
   margin: 0 0 4px 0;
   font-weight: 600;
   color: white;
+  font-size: 16px;
 }
 
 .mobile-profile-email {
@@ -371,8 +435,23 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   color: rgba(255, 255, 255, 0.8);
 }
 
+.mobile-profile-chevron {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.mobile-profile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 8px;
+}
+
 .mobile-profile-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   padding: 12px 0;
   background: none;
@@ -381,10 +460,22 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   color: white;
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-profile-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
 }
 
 .mobile-logout {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }

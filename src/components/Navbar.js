@@ -15,6 +15,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const closeTimerRef = useRef(null);
   const navigate = useNavigate();
@@ -29,6 +30,27 @@ export default function Navbar() {
     const unsub = onAuthStateChanged(auth, setUser);
     return () => unsub();
   }, []);
+
+  // Close mobile menu when clicking outside and prevent body scroll
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (open && !event.target.closest('.navbar')) {
+        setOpen(false);
+        setMobileProfileOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('click', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+        document.body.style.overflow = 'unset';
+      };
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [open]);
 
   // --- Auth (Google only) ---
   const googleProviderRef = useRef(new GoogleAuthProvider());
@@ -190,39 +212,76 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
           <div className="mobile-nav-links">
-            <NavLink to="/explorer" onClick={() => setOpen(false)}>Trail Explorer</NavLink>
-            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/submit'); setOpen(false);} }}>Trail Submission</button>
-            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false);} }}>Reviews & Media</button>
-            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false);} }}>MyTrails</button>
-            <button type="button" className="as-link" onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false);} }}>Alerts & Updates</button>
+            <button
+              type="button"
+              className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
+              onClick={() => { navigate('/trails'); setOpen(false); }}
+            >Trails</button>
+            <button
+              type="button"
+              className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
+              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false); } }}
+            >Reviews & Media</button>
+            <button
+              type="button"
+              className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
+              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false); } }}
+            >MyTrails</button>
+            <button
+              type="button"
+              className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
+              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false); } }}
+            >Alerts & Updates</button>
           </div>
           <div className="mobile-actions">
             {user ? (
               <div className="mobile-profile">
-                <div className="mobile-profile-info">
-                  {user?.photoURL && (
-                    <img 
-                      src={user.photoURL} 
-                      alt="User avatar" 
-                      className="mobile-avatar" 
-                    />
-                  )}
-                  
-                  <p className="mobile-profile-name">{user.displayName || user.email}</p>
-                  <p className="mobile-profile-email">{user.email}</p>
+                <div 
+                  className="mobile-profile-header"
+                  onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
+                >
+                  <div className="mobile-profile-info">
+                    {user?.photoURL && (
+                      <img 
+                        src={user.photoURL} 
+                        alt="User avatar" 
+                        className="mobile-avatar" 
+                      />
+                    )}
+                    
+                    <div className="mobile-profile-text">
+                      <p className="mobile-profile-name">{user.displayName || user.email}</p>
+                      <p className="mobile-profile-email">{user.email}</p>
+                    </div>
+                  </div>
+                  <span className="mobile-profile-chevron">
+                    {mobileProfileOpen ? '▲' : '▼'}
+                  </span>
                 </div>
-                <button className="mobile-profile-item" onClick={() => { navigate('/favorites'); setOpen(false); }}>
-                  Favorites
-                </button>
-                <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); }}>
-                  Settings
-                </button>
-                <button className="mobile-profile-item" onClick={() => { navigate('/feedback'); setOpen(false); }}>
-                  Feedback
-                </button>
-                <div className="mobile-logout">
-                  <LogoutButton />
-                </div>
+                
+                {mobileProfileOpen && (
+                  <div className="mobile-profile-menu">
+                    <button className="mobile-profile-item" onClick={() => { navigate('/profile'); setOpen(false); setMobileProfileOpen(false); }}>
+                      <ProfileIcon className="mobile-menu-icon" />
+                      Profile
+                    </button>
+                    <button className="mobile-profile-item" onClick={() => { navigate('/help'); setOpen(false); setMobileProfileOpen(false); }}>
+                      <HelpCenterIcon className="mobile-menu-icon" />
+                      Help Center
+                    </button>
+                    <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); setMobileProfileOpen(false); }}>
+                      <SettingsIcon className="mobile-menu-icon" />
+                      Settings
+                    </button>
+                    <button className="mobile-profile-item" onClick={() => { navigate('/feedback'); setOpen(false); setMobileProfileOpen(false); }}>
+                      <FeedbackIcon className="mobile-menu-icon" />
+                      Feedback
+                    </button>
+                    <div className="mobile-logout">
+                      <LogoutButton />
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <button 

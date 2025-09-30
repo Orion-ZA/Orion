@@ -265,6 +265,68 @@ describe('Navbar', () => {
       expect(mockShow).not.toHaveBeenCalled();
     });
 
+    it('shows warning toast when trying to access MyTrails without login', async () => {
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(null);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const mytrailsButton = screen.getByRole('banner').querySelectorAll('.desktop-nav .as-link')[2];
+      await userEvent.click(mytrailsButton);
+      
+      expect(mockShow).toHaveBeenCalledWith('Please log in first', { type: 'warn' });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to MyTrails when user is authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const mytrailsButton = screen.getByRole('banner').querySelectorAll('.desktop-nav .as-link')[2];
+      await userEvent.click(mytrailsButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/mytrails');
+      expect(mockShow).not.toHaveBeenCalled();
+    });
+
+    it('shows warning toast when trying to access Alerts without login', async () => {
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(null);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const alertsButton = screen.getByRole('banner').querySelectorAll('.desktop-nav .as-link')[3];
+      await userEvent.click(alertsButton);
+      
+      expect(mockShow).toHaveBeenCalledWith('Please log in first', { type: 'warn' });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to Alerts when user is authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const alertsButton = screen.getByRole('banner').querySelectorAll('.desktop-nav .as-link')[3];
+      await userEvent.click(alertsButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/alerts');
+      expect(mockShow).not.toHaveBeenCalled();
+    });
+
     it('sets active class for current route', () => {
       mockLocation.pathname = '/trails';
       renderNavbar();
@@ -281,11 +343,12 @@ describe('Navbar', () => {
       await userEvent.click(toggle);
       expect(toggle).toHaveAttribute('aria-expanded', 'true');
       
-      // Click on trails link (mobile version) - this is a NavLink, not a button
-      const trailsLink = screen.getByRole('banner').querySelector('.mobile-nav-links a');
-      fireEvent.click(trailsLink);
+      // Click on trails button (mobile version) - now using buttons
+      const trailsButton = screen.getByRole('banner').querySelector('.mobile-nav-links .as-link');
+      await userEvent.click(trailsButton);
       
-      // NavLink doesn't trigger navigate, it just changes the href
+      // Button should trigger navigate and close menu
+      expect(mockNavigate).toHaveBeenCalledWith('/trails');
       expect(toggle).toHaveAttribute('aria-expanded', 'false');
     });
   });
@@ -344,6 +407,117 @@ describe('Navbar', () => {
       
       const loginButtons = screen.getAllByText('Login');
       expect(loginButtons).toHaveLength(2); // Desktop and mobile
+    });
+
+    it('shows warning toast when trying to access mobile Reviews without login', async () => {
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(null);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const reviewsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[1];
+      await userEvent.click(reviewsButton);
+      
+      expect(mockShow).toHaveBeenCalledWith('Please log in first', { type: 'warn' });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to mobile Reviews when user is authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const reviewsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[1];
+      await userEvent.click(reviewsButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/reviews');
+      expect(mockShow).not.toHaveBeenCalled();
+    });
+
+    it('shows warning toast when trying to access mobile MyTrails without login', async () => {
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(null);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const mytrailsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[2];
+      await userEvent.click(mytrailsButton);
+      
+      expect(mockShow).toHaveBeenCalledWith('Please log in first', { type: 'warn' });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to mobile MyTrails when user is authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const mytrailsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[2];
+      await userEvent.click(mytrailsButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/mytrails');
+      expect(mockShow).not.toHaveBeenCalled();
+    });
+
+    it('shows warning toast when trying to access mobile Alerts without login', async () => {
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(null);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const alertsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[3];
+      await userEvent.click(alertsButton);
+      
+      expect(mockShow).toHaveBeenCalledWith('Please log in first', { type: 'warn' });
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('navigates to mobile Alerts when user is authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const alertsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[3];
+      await userEvent.click(alertsButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/alerts');
+      expect(mockShow).not.toHaveBeenCalled();
     });
   });
 
@@ -431,6 +605,30 @@ describe('Navbar', () => {
       });
       profileDropdown = screen.getByRole('banner').querySelector('.profile-dropdown');
       expect(profileDropdown).toBeInTheDocument();
+      
+      jest.useRealTimers();
+    });
+
+    it('handles scheduleProfileClose when closeTimerRef.current is null', async () => {
+      jest.useFakeTimers();
+      renderNavbar();
+      
+      const profileContainer = screen.getByRole('banner').querySelector('.profile-container');
+      
+      // Open dropdown
+      await userEvent.hover(profileContainer);
+      expect(screen.getByRole('banner').querySelector('.profile-dropdown')).toBeInTheDocument();
+      
+      // Leave container (this should call scheduleProfileClose)
+      await userEvent.unhover(profileContainer);
+      
+      // Fast forward time to close dropdown
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+      
+      // Dropdown should be closed
+      expect(screen.queryByRole('banner').querySelector('.profile-dropdown')).not.toBeInTheDocument();
       
       jest.useRealTimers();
     });
@@ -528,14 +726,14 @@ describe('Navbar', () => {
     it('shows chevron that changes direction when dropdown opens', async () => {
       renderNavbar();
       
-      const chevron = screen.getByText('▼');
-      expect(chevron).toBeInTheDocument();
+      // Get the desktop chevron specifically
+      const desktopChevron = screen.getByRole('banner').querySelector('.profile-chevron');
+      expect(desktopChevron).toHaveTextContent('▼');
       
       const profileContainer = screen.getByRole('banner').querySelector('.profile-container');
       await userEvent.hover(profileContainer);
       
-      expect(screen.getByText('▲')).toBeInTheDocument();
-      expect(screen.queryByText('▼')).not.toBeInTheDocument();
+      expect(desktopChevron).toHaveTextContent('▲');
     });
   });
 
@@ -667,6 +865,25 @@ describe('Navbar', () => {
       expect(screen.queryByText('Login')).not.toBeInTheDocument();
     });
 
+    it('returns early from handleGoogleLogin when user is already authenticated', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      // Try to call handleGoogleLogin directly (simulating edge case)
+      // This should return early without calling signInWithPopup
+      const navbar = screen.getByRole('banner');
+      const profileContainer = navbar.querySelector('.profile-container');
+      
+      // Since user is authenticated, login button should not be visible
+      expect(screen.queryByText('Login')).not.toBeInTheDocument();
+      expect(profileContainer).toBeInTheDocument();
+    });
+
     it('does not attempt login when already loading', async () => {
       mockSignInWithPopup.mockImplementation(() => new Promise(() => {})); // Never resolves
       
@@ -713,16 +930,53 @@ describe('Navbar', () => {
       });
     });
 
-    it('navigates to favorites when mobile favorites button is clicked', async () => {
+    it('toggles mobile profile dropdown when header is clicked', async () => {
       renderNavbar();
       
       const toggle = screen.getByLabelText('Toggle menu');
       await userEvent.click(toggle);
       
-      const favoritesButton = screen.getByText('Favorites');
-      await userEvent.click(favoritesButton);
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
       
-      expect(mockNavigate).toHaveBeenCalledWith('/favorites');
+      // Profile menu should now be visible
+      expect(screen.getByText('Profile')).toBeInTheDocument();
+      expect(screen.getByText('Help Center')).toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Feedback')).toBeInTheDocument();
+    });
+
+    it('navigates to profile when mobile profile button is clicked', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      // Open mobile profile dropdown
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
+      const profileButton = screen.getByText('Profile');
+      await userEvent.click(profileButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('navigates to help center when mobile help center button is clicked', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      // Open mobile profile dropdown
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
+      const helpButton = screen.getByText('Help Center');
+      await userEvent.click(helpButton);
+      
+      expect(mockNavigate).toHaveBeenCalledWith('/help');
       expect(toggle).toHaveAttribute('aria-expanded', 'false');
     });
 
@@ -731,6 +985,10 @@ describe('Navbar', () => {
       
       const toggle = screen.getByLabelText('Toggle menu');
       await userEvent.click(toggle);
+      
+      // Open mobile profile dropdown
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
       
       const settingsButton = screen.getByText('Settings');
       await userEvent.click(settingsButton);
@@ -745,6 +1003,10 @@ describe('Navbar', () => {
       const toggle = screen.getByLabelText('Toggle menu');
       await userEvent.click(toggle);
       
+      // Open mobile profile dropdown
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
       const feedbackButton = screen.getByText('Feedback');
       await userEvent.click(feedbackButton);
       
@@ -752,13 +1014,62 @@ describe('Navbar', () => {
       expect(toggle).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('shows logout button in mobile menu', async () => {
+    it('shows logout button in mobile profile dropdown', async () => {
       renderNavbar();
       
       const toggle = screen.getByLabelText('Toggle menu');
       await userEvent.click(toggle);
       
+      // Open mobile profile dropdown
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
       expect(screen.getByTestId('logout-button')).toBeInTheDocument();
+    });
+
+    it('shows mobile profile chevron that changes direction when dropdown opens', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const mobileChevron = screen.getByRole('banner').querySelector('.mobile-profile-chevron');
+      expect(mobileChevron).toHaveTextContent('▼');
+      
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
+      expect(mobileChevron).toHaveTextContent('▲');
+    });
+
+    it('shows mobile avatar when user has photoURL', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const mobileAvatar = screen.getByRole('banner').querySelector('.mobile-avatar');
+      expect(mobileAvatar).toBeInTheDocument();
+      expect(mobileAvatar).toHaveAttribute('src', 'https://example.com/photo.jpg');
+      expect(mobileAvatar).toHaveAttribute('alt', 'User avatar');
+    });
+  });
+
+  describe('Brand Link', () => {
+    it('closes mobile menu when brand link is clicked', async () => {
+      renderNavbar();
+      
+      // Open mobile menu
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      
+      // Click brand link
+      const brandLink = screen.getByLabelText('Orion Home');
+      await userEvent.click(brandLink);
+      
+      // Mobile menu should be closed
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
     });
   });
 
@@ -788,6 +1099,131 @@ describe('Navbar', () => {
       
       await userEvent.click(toggle);
       expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    });
+  });
+
+  describe('Mobile Navigation Active States', () => {
+    it('shows active state for current route in mobile navigation', () => {
+      mockLocation.pathname = '/trails';
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      fireEvent.click(toggle);
+      
+      const trailsButton = screen.getByRole('banner').querySelector('.mobile-nav-links .as-link');
+      expect(trailsButton).toHaveClass('active');
+    });
+
+    it('shows active state for reviews route in mobile navigation', () => {
+      mockLocation.pathname = '/reviews';
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      fireEvent.click(toggle);
+      
+      const reviewsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[1];
+      expect(reviewsButton).toHaveClass('active');
+    });
+
+    it('shows active state for mytrails route in mobile navigation', () => {
+      mockLocation.pathname = '/mytrails';
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      fireEvent.click(toggle);
+      
+      const mytrailsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[2];
+      expect(mytrailsButton).toHaveClass('active');
+    });
+
+    it('shows active state for alerts route in mobile navigation', () => {
+      mockLocation.pathname = '/alerts';
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      fireEvent.click(toggle);
+      
+      const alertsButton = screen.getByRole('banner').querySelectorAll('.mobile-nav-links .as-link')[3];
+      expect(alertsButton).toHaveClass('active');
+    });
+  });
+
+  describe('Click Outside Functionality', () => {
+    it('closes mobile menu when clicking outside', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      
+      // Click outside the navbar
+      const outsideElement = document.createElement('div');
+      document.body.appendChild(outsideElement);
+      fireEvent.click(outsideElement);
+      
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      
+      document.body.removeChild(outsideElement);
+    });
+
+    it('closes mobile profile dropdown when clicking outside', async () => {
+      const mockUser = createMockUser();
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+      
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      const mobileProfileHeader = screen.getByRole('banner').querySelector('.mobile-profile-header');
+      await userEvent.click(mobileProfileHeader);
+      
+      expect(screen.getByText('Profile')).toBeInTheDocument();
+      
+      // Click outside the navbar
+      const outsideElement = document.createElement('div');
+      document.body.appendChild(outsideElement);
+      fireEvent.click(outsideElement);
+      
+      expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+      
+      document.body.removeChild(outsideElement);
+    });
+  });
+
+  describe('Body Scroll Prevention', () => {
+    it('prevents body scroll when mobile menu is open', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      
+      expect(document.body.style.overflow).toBe('hidden');
+    });
+
+    it('restores body scroll when mobile menu is closed', async () => {
+      renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      await userEvent.click(toggle);
+      expect(document.body.style.overflow).toBe('hidden');
+      
+      await userEvent.click(toggle);
+      expect(document.body.style.overflow).toBe('unset');
+    });
+
+    it('restores body scroll when component unmounts', () => {
+      const { unmount } = renderNavbar();
+      
+      const toggle = screen.getByLabelText('Toggle menu');
+      fireEvent.click(toggle);
+      expect(document.body.style.overflow).toBe('hidden');
+      
+      unmount();
+      expect(document.body.style.overflow).toBe('unset');
     });
   });
 

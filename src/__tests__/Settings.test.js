@@ -209,7 +209,7 @@ describe('SettingsPage', () => {
     });
 
     it('switches to preferences tab when clicked', () => {
-      const preferencesTab = screen.getByText('Preferences');
+      const preferencesTab = screen.getByText('Prefs');
       fireEvent.click(preferencesTab);
 
       expect(screen.getByText('Preferences')).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('SettingsPage', () => {
     });
 
     it('switches to notifications tab when clicked', () => {
-      const notificationsTab = screen.getByText('Notifications');
+      const notificationsTab = screen.getByText('Alerts');
       fireEvent.click(notificationsTab);
 
       expect(screen.getByText('Notification Preferences')).toBeInTheDocument();
@@ -552,7 +552,7 @@ describe('SettingsPage', () => {
       });
 
       // Switch to preferences tab
-      const preferencesTab = screen.getByText('Preferences');
+      const preferencesTab = screen.getByText('Prefs');
       fireEvent.click(preferencesTab);
     });
 
@@ -623,7 +623,7 @@ describe('SettingsPage', () => {
       });
 
       // Switch to notifications tab
-      const notificationsTab = screen.getByText('Notifications');
+      const notificationsTab = screen.getByText('Alerts');
       fireEvent.click(notificationsTab);
     });
 
@@ -851,7 +851,7 @@ describe('SettingsPage', () => {
       });
 
       // Switch to preferences tab
-      const preferencesTab = screen.getByText('Preferences');
+      const preferencesTab = screen.getByText('Prefs');
       fireEvent.click(preferencesTab);
 
       // Check that resolved theme is displayed

@@ -10,7 +10,7 @@ const AlertsPopup = ({ isVisible, position, alerts, onMouseLeave }) => {
         position: 'fixed',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        zIndex: 1000
+        zIndex: 75
       }}
       onMouseLeave={onMouseLeave}
     >

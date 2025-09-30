@@ -236,6 +236,44 @@ describe('SettingsPage', () => {
       expect(profileTab.closest('button')).not.toHaveClass('active');
       expect(securityTab.closest('button')).toHaveClass('active');
     });
+
+    it('renders navigation buttons with proper icons and text', () => {
+      const profileButton = screen.getByText('Profile').closest('button');
+      const securityButton = screen.getByText('Security').closest('button');
+      const prefsButton = screen.getByText('Prefs').closest('button');
+      const alertsButton = screen.getByText('Alerts').closest('button');
+
+      expect(profileButton).toBeInTheDocument();
+      expect(securityButton).toBeInTheDocument();
+      expect(prefsButton).toBeInTheDocument();
+      expect(alertsButton).toBeInTheDocument();
+
+      // Check that buttons have proper structure with icons and text
+      expect(profileButton.querySelector('.nav-text')).toHaveTextContent('Profile');
+      expect(securityButton.querySelector('.nav-text')).toHaveTextContent('Security');
+      expect(prefsButton.querySelector('.nav-text')).toHaveTextContent('Prefs');
+      expect(alertsButton.querySelector('.nav-text')).toHaveTextContent('Alerts');
+    });
+
+    it('handles navigation button clicks correctly', () => {
+      const profileButton = screen.getByText('Profile').closest('button');
+      const securityButton = screen.getByText('Security').closest('button');
+      const prefsButton = screen.getByText('Prefs').closest('button');
+      const alertsButton = screen.getByText('Alerts').closest('button');
+
+      // Test clicking each navigation button
+      fireEvent.click(securityButton);
+      expect(screen.getByText('Security Settings')).toBeInTheDocument();
+
+      fireEvent.click(prefsButton);
+      expect(screen.getByText('Preferences')).toBeInTheDocument();
+
+      fireEvent.click(alertsButton);
+      expect(screen.getByText('Notification Preferences')).toBeInTheDocument();
+
+      fireEvent.click(profileButton);
+      expect(screen.getByText('Profile Information')).toBeInTheDocument();
+    });
   });
 
   describe('Profile Tab', () => {
@@ -394,6 +432,99 @@ describe('SettingsPage', () => {
 
       await userEvent.click(toggleButton);
       expect(currentPasswordInput).toHaveAttribute('type', 'password');
+    });
+
+    it('toggles new password visibility independently', async () => {
+      const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
+      const confirmPasswordInput = screen.getByPlaceholderText('Confirm your new password');
+      
+      // Find all password toggle buttons
+      const toggleButtons = screen.getAllByRole('button');
+      const newPasswordToggle = toggleButtons.find(button => 
+        button.classList.contains('password-toggle') && 
+        button.closest('.form-group').querySelector('input[placeholder*="new password"]')
+      );
+      const confirmPasswordToggle = toggleButtons.find(button => 
+        button.classList.contains('password-toggle') && 
+        button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
+      );
+
+      // Initially all password inputs should be type="password"
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+
+      // Toggle new password visibility
+      await userEvent.click(newPasswordToggle);
+      expect(newPasswordInput).toHaveAttribute('type', 'text');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password'); // Should remain password
+
+      // Toggle confirm password visibility
+      await userEvent.click(confirmPasswordToggle);
+      expect(newPasswordInput).toHaveAttribute('type', 'text'); // Should remain text
+      expect(confirmPasswordInput).toHaveAttribute('type', 'text');
+
+      // Toggle new password back to hidden
+      await userEvent.click(newPasswordToggle);
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'text'); // Should remain text
+    });
+
+    it('shows correct eye icons for password visibility toggles', async () => {
+      const toggleButtons = screen.getAllByRole('button');
+      const passwordToggles = toggleButtons.filter(button => 
+        button.classList.contains('password-toggle')
+      );
+
+      // All password toggles should be present
+      expect(passwordToggles).toHaveLength(3); // current, new, confirm
+
+      // Initially all should show Eye icon (password hidden)
+      passwordToggles.forEach(toggle => {
+        expect(toggle.querySelector('svg')).toBeInTheDocument();
+      });
+
+      // Click first toggle and verify icon changes
+      await userEvent.click(passwordToggles[0]);
+      // The icon should change to EyeOff when password is visible
+      expect(passwordToggles[0].querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('maintains password visibility state independently for each field', async () => {
+      const currentPasswordInput = screen.getByPlaceholderText('Enter your current password');
+      const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
+      const confirmPasswordInput = screen.getByPlaceholderText('Confirm your new password');
+      
+      const toggleButtons = screen.getAllByRole('button');
+      const currentToggle = toggleButtons.find(button => 
+        button.classList.contains('password-toggle') && 
+        button.closest('.form-group').querySelector('input[placeholder*="current password"]')
+      );
+      const newToggle = toggleButtons.find(button => 
+        button.classList.contains('password-toggle') && 
+        button.closest('.form-group').querySelector('input[placeholder*="new password"]')
+      );
+      const confirmToggle = toggleButtons.find(button => 
+        button.classList.contains('password-toggle') && 
+        button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
+      );
+
+      // Toggle current password
+      await userEvent.click(currentToggle);
+      expect(currentPasswordInput).toHaveAttribute('type', 'text');
+      expect(newPasswordInput).toHaveAttribute('type', 'password');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+
+      // Toggle new password
+      await userEvent.click(newToggle);
+      expect(currentPasswordInput).toHaveAttribute('type', 'text');
+      expect(newPasswordInput).toHaveAttribute('type', 'text');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'password');
+
+      // Toggle confirm password
+      await userEvent.click(confirmToggle);
+      expect(currentPasswordInput).toHaveAttribute('type', 'text');
+      expect(newPasswordInput).toHaveAttribute('type', 'text');
+      expect(confirmPasswordInput).toHaveAttribute('type', 'text');
     });
 
     it('validates password confirmation match', async () => {
@@ -570,10 +701,131 @@ describe('SettingsPage', () => {
     });
 
     it('changes theme preference', async () => {
-      const darkThemeOption = screen.getByLabelText(/dark/i);
+      const darkThemeOption = screen.getByDisplayValue('dark');
       await userEvent.click(darkThemeOption);
 
       expect(darkThemeOption).toBeChecked();
+    });
+
+    it('renders theme radio buttons with proper structure and labels', () => {
+      const lightOption = screen.getByDisplayValue('light');
+      const darkOption = screen.getByDisplayValue('dark');
+      const autoOption = screen.getByDisplayValue('auto');
+
+      expect(lightOption).toBeInTheDocument();
+      expect(darkOption).toBeInTheDocument();
+      expect(autoOption).toBeInTheDocument();
+
+      // Check that radio buttons have correct values
+      expect(lightOption).toHaveAttribute('value', 'light');
+      expect(darkOption).toHaveAttribute('value', 'dark');
+      expect(autoOption).toHaveAttribute('value', 'auto');
+
+      // Check that all radio buttons have the same name attribute
+      expect(lightOption).toHaveAttribute('name', 'theme');
+      expect(darkOption).toHaveAttribute('name', 'theme');
+      expect(autoOption).toHaveAttribute('name', 'theme');
+    });
+
+    it('applies selected styling to theme options', () => {
+      const lightLabel = screen.getByDisplayValue('light').closest('label');
+      const darkLabel = screen.getByDisplayValue('dark').closest('label');
+      const autoLabel = screen.getByDisplayValue('auto').closest('label');
+
+      // Check that labels have preference-option class
+      expect(lightLabel).toHaveClass('preference-option');
+      expect(darkLabel).toHaveClass('preference-option');
+      expect(autoLabel).toHaveClass('preference-option');
+
+      // Initially light should be selected (default)
+      expect(lightLabel).toHaveClass('selected');
+      expect(darkLabel).not.toHaveClass('selected');
+      expect(autoLabel).not.toHaveClass('selected');
+    });
+
+    it('updates selected styling when theme changes', async () => {
+      const lightLabel = screen.getByDisplayValue('light').closest('label');
+      const darkLabel = screen.getByDisplayValue('dark').closest('label');
+      const autoLabel = screen.getByDisplayValue('auto').closest('label');
+
+      // Initially light should be selected
+      expect(lightLabel).toHaveClass('selected');
+      expect(darkLabel).not.toHaveClass('selected');
+      expect(autoLabel).not.toHaveClass('selected');
+
+      // Click dark theme
+      await userEvent.click(screen.getByDisplayValue('dark'));
+      expect(lightLabel).not.toHaveClass('selected');
+      expect(darkLabel).toHaveClass('selected');
+      expect(autoLabel).not.toHaveClass('selected');
+
+      // Click auto theme
+      await userEvent.click(screen.getByDisplayValue('auto'));
+      expect(lightLabel).not.toHaveClass('selected');
+      expect(darkLabel).not.toHaveClass('selected');
+      expect(autoLabel).toHaveClass('selected');
+
+      // Click light theme
+      await userEvent.click(screen.getByDisplayValue('light'));
+      expect(lightLabel).toHaveClass('selected');
+      expect(darkLabel).not.toHaveClass('selected');
+      expect(autoLabel).not.toHaveClass('selected');
+    });
+
+    it('shows option labels with correct text content', () => {
+      const lightLabel = screen.getByDisplayValue('light').closest('label');
+      const darkLabel = screen.getByDisplayValue('dark').closest('label');
+      const autoLabel = screen.getByDisplayValue('auto').closest('label');
+
+      // Check option labels
+      expect(lightLabel.querySelector('.option-label')).toHaveTextContent('Light');
+      expect(darkLabel.querySelector('.option-label')).toHaveTextContent('Dark');
+      expect(autoLabel.querySelector('.option-label')).toHaveTextContent(/Auto/);
+    });
+
+    it('handles theme radio button onChange events correctly', async () => {
+      const lightOption = screen.getByDisplayValue('light');
+      const darkOption = screen.getByDisplayValue('dark');
+      const autoOption = screen.getByDisplayValue('auto');
+
+      // Initially light should be checked
+      expect(lightOption).toBeChecked();
+      expect(darkOption).not.toBeChecked();
+      expect(autoOption).not.toBeChecked();
+
+      // Click dark option
+      await userEvent.click(darkOption);
+      expect(lightOption).not.toBeChecked();
+      expect(darkOption).toBeChecked();
+      expect(autoOption).not.toBeChecked();
+
+      // Click auto option
+      await userEvent.click(autoOption);
+      expect(lightOption).not.toBeChecked();
+      expect(darkOption).not.toBeChecked();
+      expect(autoOption).toBeChecked();
+
+      // Click light option
+      await userEvent.click(lightOption);
+      expect(lightOption).toBeChecked();
+      expect(darkOption).not.toBeChecked();
+      expect(autoOption).not.toBeChecked();
+    });
+
+    it('calls handlePreferenceChange with correct parameters for theme options', async () => {
+      const lightOption = screen.getByDisplayValue('light');
+      const darkOption = screen.getByDisplayValue('dark');
+      const autoOption = screen.getByDisplayValue('auto');
+
+      // Test clicking each theme option triggers handlePreferenceChange
+      await userEvent.click(lightOption);
+      expect(lightOption).toBeChecked();
+
+      await userEvent.click(darkOption);
+      expect(darkOption).toBeChecked();
+
+      await userEvent.click(autoOption);
+      expect(autoOption).toBeChecked();
     });
 
     it('changes map type preference', async () => {

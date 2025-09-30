@@ -37,7 +37,7 @@ const responsiveStyles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 9999,
+    zIndex: 70,
     padding: "1rem",
   },
   modalContent: {
@@ -549,7 +549,7 @@ export default function ReviewsMedia() {
       </h1>
       
       <div style={getResponsiveStyle("gridContainer")}>
-        {trails.map((trail) => {
+        {Array.isArray(trails) ? trails.map((trail) => {
           // Show skeleton if trail is still loading (check if it has been processed)
           // A trail is considered loaded if it has been processed (has processedPhotos flag or has data)
           const isLoading = !trail.processedPhotos && !trail.hasReviews && !trail.hasAlerts;
@@ -572,7 +572,11 @@ export default function ReviewsMedia() {
               onOpenModal={openModal}
             />
           );
-        })}
+        }) : (
+          <div style={{ textAlign: "center", padding: "2rem", color: "#f5f5f5" }}>
+            <div>Loading trails...</div>
+          </div>
+        )}
       </div>
 
       {/* Alerts Popup */}

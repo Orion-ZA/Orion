@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3, MapPin } from 'lucide-react';
@@ -31,6 +31,12 @@ const TrailsPanel = ({
   const selectedTrailRef = useRef(null);
   const [authorNames, setAuthorNames] = useState({});
   const { show: showToast } = useToast();
+  
+  // Drag functionality for mobile
+  const [isDragging, setIsDragging] = useState(false);
+  const [panelHeight, setPanelHeight] = useState(50); // Default 50vh
+  const dragStartY = useRef(0);
+  const initialHeight = useRef(0);
 
   // Sort trails based on selected criteria
   const sortedTrails = useMemo(() => {
@@ -151,6 +157,47 @@ const TrailsPanel = ({
     }
   };
 
+  // Drag handlers for mobile panel resizing
+  const handleDragStart = useCallback((e) => {
+    if (window.innerWidth <= 768) { // Only on mobile
+      setIsDragging(true);
+      dragStartY.current = e.touches ? e.touches[0].clientY : e.clientY;
+      initialHeight.current = panelHeight;
+      e.preventDefault();
+    }
+  }, [panelHeight]);
+
+  const handleDragMove = useCallback((e) => {
+    if (isDragging && window.innerWidth <= 768) {
+      const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+      const deltaY = dragStartY.current - currentY; // Inverted because dragging up should increase height
+      const newHeight = Math.max(20, Math.min(90, initialHeight.current + (deltaY / window.innerHeight) * 100));
+      setPanelHeight(newHeight);
+      e.preventDefault();
+    }
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Add event listeners for drag functionality
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('touchmove', handleDragMove, { passive: false });
+      document.addEventListener('touchend', handleDragEnd);
+      document.addEventListener('mousemove', handleDragMove);
+      document.addEventListener('mouseup', handleDragEnd);
+    }
+
+    return () => {
+      document.removeEventListener('touchmove', handleDragMove);
+      document.removeEventListener('touchend', handleDragEnd);
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
   // Resolve and cache author display names for visible trails
   useEffect(() => {
     const fetchMissingAuthors = async () => {
@@ -194,7 +241,10 @@ const TrailsPanel = ({
   }, [filteredTrails, authorNames]);
 
   return (
-    <div className={`trails-panel-toggle ${isPanelOpen ? 'open' : ''}`}>
+    <div 
+      className={`trails-panel-toggle ${isPanelOpen ? 'open' : ''} ${isDragging ? 'dragging' : ''}`}
+      style={isPanelOpen && window.innerWidth <= 768 ? { height: `${panelHeight}vh` } : {}}
+    >
       <button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         className="trails-toggle-btn"
@@ -208,6 +258,28 @@ const TrailsPanel = ({
           </svg>
         )}
       </button>
+
+      {/* Drag handle for mobile */}
+      {isPanelOpen && window.innerWidth <= 768 && (
+        <div
+          className="drag-handle"
+          onTouchStart={handleDragStart}
+          onMouseDown={handleDragStart}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '40px',
+            height: '4px',
+            background: 'rgba(255, 255, 255, 0.3)',
+            borderRadius: '2px',
+            cursor: 'ns-resize',
+            zIndex: 10,
+            touchAction: 'none'
+          }}
+        />
+      )}
 
       {isPanelOpen && (
         <div className="trails-panel-content">

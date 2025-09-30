@@ -73,7 +73,7 @@ describe('AlertsPopup', () => {
         position: 'fixed',
         left: '150px',
         top: '300px',
-        zIndex: '1000'
+        zIndex: '75'
       });
     });
 

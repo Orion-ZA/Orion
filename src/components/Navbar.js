@@ -3,17 +3,20 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton.js';
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 import { useToast } from './ToastContext';
 import ProfileIcon from './ProfileIcon';
 import SettingsIcon from './SettingsIcon';
 import FeedbackIcon from './FeedbackIcon';
 import HelpCenterIcon from './HelpCenterIcon';
 import OrionLogo from '../assets/orion_logo_clear.png';
+import AdminIcon from './admin/AdminIcon';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // new state for admin status
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -23,9 +26,55 @@ export default function Navbar() {
   const isLanding = location.pathname === '/';
   const isTrails = location.pathname === '/trails';
   const { show } = useToast();
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   // Login via route; Google sign-in available on Login page
 
+  useEffect(() => {
+      let unsubscribe = () => {};
+  
+      const checkAdminRole = async (user) => {
+        if (!user) {
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
+  
+        try {
+          const userDocRef = doc(db, "Users", user.uid);
+          const userSnapshot = await getDoc(userDocRef);
+          
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            // Check multiple possible role fields for flexibility
+            const userRole = userData.profileInfo?.role || userData.role;
+            setIsAdmin(userRole === "admin");
+          } else {
+            console.warn("User document not found for:", user.uid);
+            setIsAdmin(false);
+          }
+        } catch (err) {
+          console.error("Error checking admin role:", err);
+          setError("Failed to verify admin privileges");
+          setIsAdmin(false);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      // Listen for auth state changes
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        setError(null);
+        checkAdminRole(user);
+      });
+  
+      // Cleanup function
+      return () => unsubscribe();
+    }, []);
+
+  // normal users
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, setUser);
     return () => unsub();
@@ -178,7 +227,17 @@ export default function Navbar() {
                       <FeedbackIcon className="menu-icon" />
                       Feedback
                     </button>
-                    
+
+                    {/* Admin button only available for admins */}
+                    {isAdmin && (
+                      <button
+                        className="profile-menu-item"
+                        onClick={() => navigate('/admin')}
+                      >
+                        <AdminIcon className="menu-item" />
+                        Admin
+                      </button>
+                    )}
                     <hr className="profile-divider" />
                     
                     <div className="profile-menu-item logout-item">

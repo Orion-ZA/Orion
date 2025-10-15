@@ -5,11 +5,12 @@ import userEvent from '@testing-library/user-event';
 import Navbar from '../components/Navbar';
 import { auth } from '../firebaseConfig';
 
-// Mock Firebase Auth
+// Mock Firebase Auth and Firestore
 jest.mock('../firebaseConfig', () => ({
   auth: {
     currentUser: null,
   },
+  db: {},
 }));
 
 jest.mock('firebase/auth', () => ({
@@ -17,6 +18,11 @@ jest.mock('firebase/auth', () => ({
   GoogleAuthProvider: jest.fn(),
   signInWithPopup: jest.fn(),
   signInWithRedirect: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  doc: jest.fn(),
+  getDoc: jest.fn(),
 }));
 
 // Mock child components
@@ -47,6 +53,12 @@ jest.mock('../components/FeedbackIcon', () => {
 jest.mock('../components/HelpCenterIcon', () => {
   return function MockHelpCenterIcon({ className }) {
     return <div data-testid="help-center-icon" className={className}>HelpCenterIcon</div>;
+  };
+});
+
+jest.mock('../components/admin/AdminIcon', () => {
+  return function MockAdminIcon({ className }) {
+    return <div data-testid="admin-icon" className={className}>AdminIcon</div>;
   };
 });
 
@@ -107,6 +119,8 @@ describe('Navbar', () => {
   let mockSignInWithPopup;
   let mockSignInWithRedirect;
   let mockGoogleAuthProvider;
+  let mockDoc;
+  let mockGetDoc;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -114,10 +128,13 @@ describe('Navbar', () => {
     
     // Get the mocked functions
     const firebaseAuth = require('firebase/auth');
+    const firebaseFirestore = require('firebase/firestore');
     mockOnAuthStateChanged = firebaseAuth.onAuthStateChanged;
     mockSignInWithPopup = firebaseAuth.signInWithPopup;
     mockSignInWithRedirect = firebaseAuth.signInWithRedirect;
     mockGoogleAuthProvider = firebaseAuth.GoogleAuthProvider;
+    mockDoc = firebaseFirestore.doc;
+    mockGetDoc = firebaseFirestore.getDoc;
     
     mockOnAuthStateChanged.mockReturnValue(mockUnsubscribe);
     mockGoogleAuthProvider.mockImplementation(() => ({}));
@@ -1224,6 +1241,304 @@ describe('Navbar', () => {
       
       unmount();
       expect(document.body.style.overflow).toBe('unset');
+    });
+  });
+
+  describe('Admin Role Management - Lines 47-56 Coverage', () => {
+    let mockUser;
+    let mockUserDocRef;
+    let mockUserSnapshot;
+
+    beforeEach(() => {
+      mockUser = createMockUser();
+      mockUserDocRef = { id: 'test-uid' };
+      mockUserSnapshot = {
+        exists: jest.fn(),
+        data: jest.fn(),
+      };
+      
+      mockDoc.mockReturnValue(mockUserDocRef);
+      mockGetDoc.mockResolvedValue(mockUserSnapshot);
+    });
+
+    it('covers line 47: calls getDoc with userDocRef', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockGetDoc).toHaveBeenCalledWith(mockUserDocRef);
+      });
+    });
+
+    it('covers line 49: checks userSnapshot.exists() returns true', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+      });
+    });
+
+    it('covers line 50: calls userSnapshot.data() when document exists', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+    });
+
+    it('covers line 52: checks userRole from profileInfo.role', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+        role: 'user', // This should be ignored
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+    });
+
+    it('covers line 52: checks userRole from root role field when profileInfo.role is not available', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        role: 'admin',
+        profileInfo: { role: 'user' }, // This should be ignored
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+    });
+
+    it('covers line 53: sets isAdmin to true when userRole is "admin"', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+    });
+
+    it('covers line 54: enters else block when userSnapshot.exists() returns false', async () => {
+      mockUserSnapshot.exists.mockReturnValue(false);
+      
+      // Mock console.warn to verify it's called
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledWith("User document not found for:", mockUser.uid);
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('covers line 55: logs warning message when user document not found', async () => {
+      mockUserSnapshot.exists.mockReturnValue(false);
+      
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith("User document not found for:", mockUser.uid);
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('covers line 56: sets isAdmin to false when user document not found', async () => {
+      mockUserSnapshot.exists.mockReturnValue(false);
+      
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledWith("User document not found for:", mockUser.uid);
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('covers error handling: sets isAdmin to false when Firestore throws an error', async () => {
+      const firestoreError = new Error('Firestore connection failed');
+      mockGetDoc.mockRejectedValue(firestoreError);
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockDoc).toHaveBeenCalledWith({}, "Users", mockUser.uid);
+        expect(mockGetDoc).toHaveBeenCalledWith(mockUserDocRef);
+        expect(consoleSpy).toHaveBeenCalledWith("Error checking admin role:", firestoreError);
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('covers line 47-56: complete flow with admin user showing admin button', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockDoc).toHaveBeenCalledWith({}, "Users", mockUser.uid);
+        expect(mockGetDoc).toHaveBeenCalledWith(mockUserDocRef);
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+
+      // Check that admin button is visible in profile dropdown
+      const profileContainer = screen.getByRole('banner').querySelector('.profile-container');
+      await userEvent.hover(profileContainer);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Admin')).toBeInTheDocument();
+        expect(screen.getByTestId('admin-icon')).toBeInTheDocument();
+      });
+    });
+
+    it('covers line 47-56: complete flow with non-admin user not showing admin button', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'user' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      await waitFor(() => {
+        expect(mockDoc).toHaveBeenCalledWith({}, "Users", mockUser.uid);
+        expect(mockGetDoc).toHaveBeenCalledWith(mockUserDocRef);
+        expect(mockUserSnapshot.exists).toHaveBeenCalled();
+        expect(mockUserSnapshot.data).toHaveBeenCalled();
+      });
+
+      // Check that admin button is not visible in profile dropdown
+      const profileContainer = screen.getByRole('banner').querySelector('.profile-container');
+      await userEvent.hover(profileContainer);
+      
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('admin-icon')).not.toBeInTheDocument();
+    });
+
+    it('covers line 1016: admin button click navigates to admin page', async () => {
+      mockUserSnapshot.exists.mockReturnValue(true);
+      mockUserSnapshot.data.mockReturnValue({
+        profileInfo: { role: 'admin' },
+      });
+
+      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
+        callback(mockUser);
+        return mockUnsubscribe;
+      });
+
+      renderNavbar();
+
+      // Wait for admin role to be set and admin button to appear
+      const profileContainer = screen.getByRole('banner').querySelector('.profile-container');
+      await userEvent.hover(profileContainer);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Admin')).toBeInTheDocument();
+      });
+
+      // Click the admin button
+      const adminButton = screen.getByText('Admin');
+      await userEvent.click(adminButton);
+
+      // Verify navigation was called
+      expect(mockNavigate).toHaveBeenCalledWith('/admin');
     });
   });
 

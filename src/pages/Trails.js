@@ -254,6 +254,7 @@ export default function TrailsPage() {
       });
       
       setSelectedTrail(trail); // Set as selected trail for panel highlighting
+      setIsPanelOpen(true); // Open the trails panel to show the selected trail
     }
   };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, auth } from "../firebaseConfig";
@@ -138,6 +139,7 @@ function calculateAverageRating(reviews) {
 // 🌲 Main Component
 // =========================
 export default function ReviewsMedia() {
+  const navigate = useNavigate();
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
   const [alerts, setAlerts] = useState({});
@@ -189,6 +191,11 @@ export default function ReviewsMedia() {
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const handleOpenTrailDetail = (trail) => {
+    // Navigate to the trail detail page
+    navigate(`/trails/${trail.id}`, { state: { trail } });
   };
 
   const handleShowAlertsPopup = (event, trailAlerts) => {
@@ -570,6 +577,7 @@ export default function ReviewsMedia() {
               onShowAlertsPopup={handleShowAlertsPopup}
               onHideAlertsPopup={handleHideAlertsPopup}
               onOpenModal={openModal}
+              onOpenTrailDetail={handleOpenTrailDetail}
             />
           );
         }) : (

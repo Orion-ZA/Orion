@@ -289,9 +289,9 @@
 }
 
 .actions-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
-  flex-wrap: wrap;
   order: 2;
 }
 
@@ -304,9 +304,8 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
-  min-width: 0;
   justify-content: center;
+  min-height: 44px;
 }
 
 .reviews-media-action-btn svg {
@@ -359,6 +358,19 @@
   background: var(--bg-elevated);
   border-color: #ef4444;
   color: #ef4444;
+  transform: translateY(-1px);
+}
+
+.reviews-media-detail-btn {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.reviews-media-detail-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-1px);
 }
 
@@ -597,8 +609,14 @@
     flex-direction: column;
   }
   
+  .actions-buttons {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
   .reviews-media-action-btn {
-    flex: none;
+    min-height: 40px;
+    padding: 0.625rem 0.875rem;
   }
   
   /* Carousel is responsive by default */

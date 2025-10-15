@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import ReviewsPopup from './ReviewsPopup';
 
 const ReviewsTrailCard = ({ 
@@ -11,7 +11,8 @@ const ReviewsTrailCard = ({
   setLoadedImages,
   onShowAlertsPopup,
   onHideAlertsPopup,
-  onOpenModal 
+  onOpenModal,
+  onOpenTrailDetail
 }) => {
   const trailAlerts = alerts[trail.id];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -153,6 +154,17 @@ const ReviewsTrailCard = ({
           >
             <AlertTriangle size={16} />
             <span>Alert</span>
+          </button>
+          <button 
+            className="reviews-media-action-btn reviews-media-detail-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenTrailDetail && onOpenTrailDetail(trail);
+            }}
+            title="View Trail Details"
+          >
+            <ExternalLink size={16} />
+            <span>Details</span>
           </button>
         </div>
       </div>

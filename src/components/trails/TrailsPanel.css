@@ -457,6 +457,22 @@
   border-radius: 12px 12px 0 0;
 }
 
+/* Expand Button */
+.action-btn.expand {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+}
+
+.trail-item:hover .action-btn.expand {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Thumbnail */
 .trail-thumb {
   width: 100%;

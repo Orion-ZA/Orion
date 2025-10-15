@@ -1,0 +1,1694 @@
+/* Trail Detail Page */
+.trail-detail-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, 
+    rgba(28, 37, 65, 0.75) 0%, 
+    rgba(28, 37, 65, 0.65) 50%, 
+    rgba(28, 37, 65, 0.75) 100%);
+  color: #fff;
+  padding: 0;
+}
+
+/* Header */
+.trail-detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(28, 37, 65, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.share-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  border: none;
+  color: #052b2b;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(91,192,190,0.25);
+}
+
+.share-button:hover {
+  background: #4db3b1;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(91,192,190,0.35);
+}
+
+/* Main Content */
+.trail-detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Image Gallery */
+.trail-detail-image-gallery {
+  margin-bottom: 32px;
+}
+
+.trail-detail-main-image {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.1) saturate(1.1);
+}
+
+.trail-detail-image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.trail-detail-image-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.trail-detail-image-nav-btn.prev {
+  left: 16px;
+}
+
+.trail-detail-image-nav-btn.next {
+  right: 16px;
+}
+
+.trail-detail-image-counter {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.trail-detail-thumbnails {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.trail-detail-thumbnail {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trail-detail-thumbnail:hover {
+  border-color: rgba(74, 158, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.trail-detail-thumbnail.active {
+  border-color: #4a9eff;
+}
+
+.trail-detail-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.05) saturate(1.05);
+}
+
+/* Trail Info */
+.trail-detail-info {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-title-section {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.trail-detail-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.trail-detail-directions-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(34, 139, 34, 0.2);
+  border: 1px solid #228b22;
+  border-radius: 8px;
+  color: #228b22;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.trail-detail-directions-btn:hover {
+  background: rgba(34, 139, 34, 0.3);
+  border-color: #32cd32;
+  color: #32cd32;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Details Grid */
+.trail-detail-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.trail-detail-detail-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.trail-detail-detail-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-detail-icon {
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trail-detail-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trail-detail-detail-label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trail-detail-detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Description */
+.trail-detail-description {
+  margin-bottom: 32px;
+}
+
+.trail-detail-description h3 {
+  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  color: #4a9eff;
+}
+
+.trail-detail-description p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #ccc;
+  margin: 0;
+}
+
+/* Tags */
+.trail-detail-tags {
+  margin-bottom: 32px;
+}
+
+.trail-detail-tags h3 {
+  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  color: #4a9eff;
+}
+
+.trail-detail-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trail-detail-tag {
+  background: rgba(74, 158, 255, 0.2);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  color: #4a9eff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Route Information */
+.trail-detail-route {
+  margin-bottom: 32px;
+}
+
+.trail-detail-route h3 {
+  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  color: #4a9eff;
+}
+
+.trail-detail-route-info p {
+  margin: 8px 0;
+  color: #ccc;
+}
+
+/* Weather Section */
+.trail-detail-weather-section {
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 28px;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.trail-detail-weather-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.trail-detail-weather-section h3 {
+  font-size: 1.6rem;
+  margin: 0 0 24px 0;
+  color: #4a9eff;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.trail-detail-weather-forecast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+}
+
+.trail-detail-weather-day {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.trail-detail-weather-day::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4a9eff, #74c0fc, #4a9eff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.trail-detail-weather-day:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-weather-day:hover::before {
+  opacity: 1;
+}
+
+.trail-detail-weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.trail-detail-weather-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.trail-detail-weather-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+.weather-icon.sun {
+  color: #ffd700;
+  animation: sunGlow 3s ease-in-out infinite alternate;
+}
+
+.weather-icon.cloud {
+  color: #b0c4de;
+}
+
+.weather-icon.rain {
+  color: #4682b4;
+  animation: rainDrop 2s ease-in-out infinite;
+}
+
+.weather-icon.snow {
+  color: #e6f3ff;
+  animation: snowFall 3s ease-in-out infinite;
+}
+
+.weather-icon.storm {
+  color: #4169e1;
+  animation: stormFlash 1.5s ease-in-out infinite;
+}
+
+.weather-icon.default {
+  color: #87ceeb;
+}
+
+@keyframes sunGlow {
+  0% { transform: scale(1); filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3)); }
+  100% { transform: scale(1.1); filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.6)); }
+}
+
+@keyframes rainDrop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes snowFall {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(5deg); }
+}
+
+@keyframes stormFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.trail-detail-weather-temps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.trail-detail-weather-high {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff6b6b;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.trail-detail-weather-low {
+  font-size: 16px;
+  font-weight: 600;
+  color: #74c0fc;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #74c0fc, #90cdf4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.trail-detail-weather-condition {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.trail-detail-weather-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trail-detail-weather-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.trail-detail-weather-detail-item svg {
+  opacity: 0.8;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* User Actions */
+.trail-detail-user-actions {
+  margin-bottom: 32px;
+}
+
+.trail-detail-user-actions h3 {
+  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  color: #4a9eff;
+}
+
+.trail-detail-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.trail-detail-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trail-detail-action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-action-btn.active {
+  background: rgba(91, 192, 190, 0.2);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Action button variants when active */
+.trail-detail-action-btn.favourites.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 1);
+  color: rgba(239, 68, 68, 1);
+}
+
+.trail-detail-action-btn.wishlist.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 1);
+  color: rgba(245, 158, 11, 1);
+}
+
+.trail-detail-action-btn.completed.active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 1);
+  color: rgba(34, 197, 94, 1);
+}
+
+.trail-detail-action-btn.edit {
+  background: rgba(25, 118, 210, 0.2);
+  border-color: #1976d2;
+  color: #1976d2;
+}
+
+.trail-detail-action-btn.edit:hover {
+  background: rgba(25, 118, 210, 0.3);
+}
+
+/* Tab Section */
+.trail-detail-tab-section {
+  margin-bottom: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Tab Navigation */
+.trail-detail-tab-nav {
+  display: flex;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trail-detail-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.trail-detail-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.trail-detail-tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: rgba(91, 192, 190, 0.1);
+}
+
+.trail-detail-tab-btn svg {
+  transition: all 0.2s ease;
+}
+
+.trail-detail-tab-btn.active svg {
+  color: var(--primary);
+}
+
+/* Tab Content */
+.trail-detail-tab-content {
+  height: 500px;
+  overflow: hidden;
+}
+
+.trail-detail-tab-panel {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Reviews Tab */
+.trail-detail-reviews-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.trail-detail-reviews-section h3 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #4a9eff;
+}
+
+.trail-detail-review-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trail-detail-review-sort label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.trail-detail-sort-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trail-detail-sort-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-sort-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.2);
+}
+
+.trail-detail-reviews-container {
+  max-height: none;
+  height: 100%;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  flex: 1;
+}
+
+.trail-detail-reviews-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trail-detail-reviews-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.trail-detail-reviews-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.trail-detail-reviews-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.trail-detail-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.trail-detail-review {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.trail-detail-review:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-review-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.trail-detail-review-author {
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-review-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.trail-detail-review-date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin-left: auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-review-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-no-reviews {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+/* Weather Section */
+.trail-detail-weather-section {
+  margin-bottom: 32px;
+}
+
+.trail-detail-weather-section h3 {
+  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  color: #4a9eff;
+}
+
+.trail-detail-weather-forecast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.trail-detail-weather-day {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.trail-detail-weather-day:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.trail-detail-weather-date {
+  font-weight: 600;
+  color: #4a9eff;
+  margin-bottom: 8px;
+}
+
+.trail-detail-weather-temps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.trail-detail-weather-high {
+  font-weight: 600;
+  color: #fff;
+}
+
+.trail-detail-weather-low {
+  color: #888;
+}
+
+.trail-detail-weather-condition {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.trail-detail-weather-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Loading and Error States */
+.trail-detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #888;
+}
+
+.trail-detail-no-weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  text-align: center;
+}
+
+.trail-detail-no-weather p {
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(74, 158, 255, 0.3);
+  border-top: 3px solid #4a9eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.trail-detail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 32px;
+}
+
+.trail-detail-error h2 {
+  font-size: 2rem;
+  margin: 0 0 16px 0;
+  color: #ff6b6b;
+}
+
+.trail-detail-error p {
+  font-size: 1.1rem;
+  color: #888;
+  margin: 0 0 24px 0;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #4a9eff;
+  border: none;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #3a8eef;
+  transform: translateY(-2px);
+}
+
+/* Media Tab */
+.trail-detail-media-gallery {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.trail-detail-media-gallery::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trail-detail-media-gallery::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.trail-detail-media-gallery::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.trail-detail-media-gallery::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.trail-detail-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
+
+.trail-detail-media-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trail-detail-media-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.trail-detail-media-thumbnail {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.05) saturate(1.05);
+}
+
+.trail-detail-no-media {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  padding: 32px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Alerts Tab */
+.trail-detail-alerts-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  flex: 1;
+}
+
+.trail-detail-alerts-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trail-detail-alerts-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.trail-detail-alerts-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.trail-detail-alerts-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.trail-detail-alert-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.trail-detail-alert-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.trail-detail-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.trail-detail-alert-header h4 {
+  margin: 0;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-alert-header svg {
+  color: var(--primary);
+}
+
+.trail-detail-status-info p {
+  margin: 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.status-open {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.status-closed {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.status-unknown {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.trail-detail-closure-notice {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.trail-detail-safety-tips ul {
+  margin: 0;
+  padding-left: 20px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.trail-detail-safety-tips li {
+  margin: 8px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Contribution Buttons */
+.trail-detail-contribute-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  justify-content: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.trail-detail-contribute-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.trail-detail-contribute-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.trail-detail-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.trail-detail-media-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.trail-detail-alerts-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+/* Contribution Modal */
+.trail-detail-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.trail-detail-modal-content {
+  background: #1c2540;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transform: scale(0.95);
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.trail-detail-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+}
+
+.trail-detail-modal-header h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-modal-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.trail-detail-modal-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.trail-detail-modal-body {
+  padding: 0 2rem;
+}
+
+.trail-detail-form-group {
+  margin-bottom: 0.5rem;
+}
+
+.trail-detail-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.trail-detail-rating-input {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.trail-detail-star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.trail-detail-star-btn:hover {
+  transform: scale(1.1);
+}
+
+.trail-detail-textarea {
+  width: 100%;
+  min-height: 100px;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #0b132b;
+  color: #f5f5f5;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.trail-detail-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.2);
+}
+
+.trail-detail-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.trail-detail-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.trail-detail-checkbox-label input[type="checkbox"] {
+  margin: 0;
+}
+
+.trail-detail-file-input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #0b132b;
+  color: #f5f5f5;
+  font-size: 1rem;
+}
+
+.trail-detail-file-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.2);
+}
+
+.trail-detail-image-preview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(91, 192, 190, 0.1);
+  border: 1px solid rgba(91, 192, 190, 0.3);
+  border-radius: 6px;
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.trail-detail-select {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #0b132b;
+  color: #f5f5f5;
+  font-size: 1rem;
+}
+
+.trail-detail-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.2);
+}
+
+.trail-detail-select option {
+  background: rgba(28, 37, 65, 0.95);
+  color: white;
+}
+
+.trail-detail-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0 2rem 2rem;
+  flex-wrap: wrap;
+}
+
+.trail-detail-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.trail-detail-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trail-detail-btn-secondary {
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: #636e72;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.trail-detail-btn-secondary:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.trail-detail-btn-primary {
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: #00b894;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.trail-detail-btn-primary:hover:not(:disabled) {
+  background-color: #00a085;
+}
+
+/* Modal Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trail-detail-header {
+    padding: 12px 16px;
+  }
+
+  .trail-detail-content {
+    padding: 16px;
+  }
+
+  .trail-detail-main-image {
+    height: 250px;
+  }
+
+  .trail-detail-title {
+    font-size: 2rem;
+  }
+
+  .trail-detail-directions-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .trail-detail-weather-section {
+    padding: 20px 16px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+  }
+
+  .trail-detail-weather-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .trail-detail-weather-forecast {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .trail-detail-weather-day {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+
+  .trail-detail-weather-header {
+    margin-bottom: 10px;
+  }
+
+  .trail-detail-weather-date {
+    font-size: 13px;
+  }
+
+  .weather-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .trail-detail-weather-temps {
+    margin-bottom: 10px;
+    padding: 6px 0;
+  }
+
+  .trail-detail-weather-high {
+    font-size: 18px;
+  }
+
+  .trail-detail-weather-low {
+    font-size: 14px;
+  }
+
+  .trail-detail-weather-condition {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .trail-detail-weather-details {
+    gap: 6px;
+  }
+
+  .trail-detail-weather-detail-item {
+    font-size: 10px;
+    gap: 3px;
+  }
+
+  .trail-detail-weather-detail-item svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .trail-detail-info {
+    padding: 20px;
+  }
+
+  .trail-detail-details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .trail-detail-action-buttons {
+    flex-direction: column;
+  }
+
+  .trail-detail-action-btn {
+    justify-content: center;
+  }
+
+  .trail-detail-weather-forecast {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .trail-detail-reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .trail-detail-review-sort {
+    align-self: stretch;
+  }
+  
+  .trail-detail-sort-select {
+    flex: 1;
+  }
+
+  /* Tab responsive */
+  .trail-detail-tab-nav {
+    flex-direction: column;
+  }
+
+  .trail-detail-tab-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: none;
+    border-right: 3px solid transparent;
+  }
+
+  .trail-detail-tab-btn.active {
+    border-bottom-color: transparent;
+    border-right-color: var(--primary);
+  }
+
+  .trail-detail-tab-content {
+    height: 400px;
+  }
+
+  .trail-detail-tab-panel {
+    padding: 16px;
+  }
+
+  .trail-detail-media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .trail-detail-media-thumbnail {
+    height: 120px;
+  }
+
+  /* Contribution responsive */
+  .trail-detail-reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .trail-detail-modal-content {
+    margin: 1rem;
+    max-height: 85vh;
+  }
+
+  .trail-detail-modal-header {
+    padding: 16px 20px;
+  }
+
+  .trail-detail-modal-body {
+    padding: 20px;
+  }
+
+  .trail-detail-modal-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+
+  .trail-detail-btn {
+    width: 100%;
+  }
+
+  /* Contribution buttons mobile */
+  .trail-detail-contribute-btn {
+    min-height: 40px;
+    padding: 0.625rem 0.875rem;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trail-detail-main-image {
+    height: 200px;
+  }
+
+  .trail-detail-title {
+    font-size: 1.5rem;
+  }
+
+  .trail-detail-weather-forecast {
+    grid-template-columns: 1fr;
+  }
+
+  .trail-detail-thumbnails {
+    justify-content: center;
+  }
+}

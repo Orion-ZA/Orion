@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { auth, db } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
 import { useSearch } from '../components/SearchContext';
@@ -20,6 +20,7 @@ const API_BASE_URL = 'https://us-central1-orion-sdp.cloudfunctions.net';
 export default function TrailsPage() {
   const mapRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { searchQuery, setSearchQuery, updateTrailsData, getLocationCoordinates, getLocationNameFromCoordinates } = useSearch();
   const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -238,6 +239,12 @@ export default function TrailsPage() {
     setIsSearchMode(false);
     setSearchLocation(null);
     handleRecenter();
+  };
+
+  // Trail detail page handlers
+  const handleOpenTrailDetail = (trail) => {
+    // Navigate to the trail detail page
+    navigate(`/trails/${trail.id}`, { state: { trail } });
   };
 
   // Handle trail click to center and zoom map
@@ -671,6 +678,7 @@ export default function TrailsPage() {
           searchLocation={searchLocation}
           isSearchMode={isSearchMode}
           onRecenterFromSearch={handleRecenterFromSearch}
+          onOpenTrailDetail={handleOpenTrailDetail}
         />
       </div>
 

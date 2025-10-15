@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3, MapPin } from 'lucide-react';
+import { Heart, Bookmark, Check, Filter, FilterX, X, ChevronUp, ChevronDown, Edit3, MapPin, ExternalLink } from 'lucide-react';
 import { useToast } from '../ToastContext';
 import { getDifficultyColor, getDifficultyIcon, calculateDistance } from './TrailUtils';
 import './TrailsPanel.css';
@@ -23,7 +23,8 @@ const TrailsPanel = ({
   onEditTrail,
   searchLocation,
   isSearchMode,
-  onRecenterFromSearch
+  onRecenterFromSearch,
+  onOpenTrailDetail
 }) => {
   const [sortBy, setSortBy] = useState('distanceAway');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -31,6 +32,7 @@ const TrailsPanel = ({
   const selectedTrailRef = useRef(null);
   const [authorNames, setAuthorNames] = useState({});
   const { show: showToast } = useToast();
+  
   
   // Drag functionality for mobile
   const [isDragging, setIsDragging] = useState(false);
@@ -107,16 +109,28 @@ const TrailsPanel = ({
   // Scroll to selected trail when it changes
   useEffect(() => {
     if (selectedTrail && selectedTrailRef.current && trailsListRef.current) {
-      // Small delay to ensure the DOM has updated
-      setTimeout(() => {
-        selectedTrailRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest'
-        });
-      }, 100);
+      // Check if the selected trail is actually in the current filtered/sorted trails
+      const isTrailInCurrentList = sortedTrails.some(trail => trail.id === selectedTrail.id);
+      
+      if (isTrailInCurrentList) {
+        // Small delay to ensure the DOM has updated
+        setTimeout(() => {
+          // Double-check that the ref is still valid before calling scrollIntoView
+          if (selectedTrailRef.current) {
+            try {
+              selectedTrailRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest'
+              });
+            } catch (error) {
+              console.warn('Failed to scroll to selected trail:', error);
+            }
+          }
+        }, 100);
+      }
     }
-  }, [selectedTrail]);
+  }, [selectedTrail, sortedTrails]);
 
   // Handle scroll events to unselect trail
   useEffect(() => {
@@ -156,6 +170,7 @@ const TrailsPanel = ({
       setSortOrder('asc');
     }
   };
+
 
   // Drag handlers for mobile panel resizing
   const handleDragStart = useCallback((e) => {
@@ -379,6 +394,18 @@ const TrailsPanel = ({
                       ) : (
                         <div className="trail-thumb placeholder" aria-label="No photo available" />
                       )}
+                      
+                      {/* Expand Button */}
+                      <button
+                        className="action-btn expand"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenTrailDetail && onOpenTrailDetail(trail);
+                        }}
+                        title="View Trail Details"
+                      >
+                        <ExternalLink size={16} />
+                      </button>
                       
                       <div className="trail-actions-overlay" onClick={(e) => e.stopPropagation()}>
                         {currentUserId && (

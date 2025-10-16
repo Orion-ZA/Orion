@@ -307,37 +307,37 @@ export default function TrailsManagement() {
             const alerts = trailAlerts[trail.id] || [];
             
             return (
-              <div key={trail.id} className="trail-card">
-                <div className="trail-header">
-                  <div className="trail-title-section">
+              <div key={trail.id} className="admin-trail-card">
+                <div className="admin-trail-header">
+                  <div className="admin-trail-title-section">
                     <button
                       onClick={() => toggleTrailExpansion(trail.id)}
-                      className="expand-button"
+                      className="admin-expand-button"
                       title={isExpanded ? "Collapse" : "Expand"}
                     >
-                      {isExpanded ? <ChevronDown className="expand-icon" /> : <ChevronRight className="expand-icon" />}
+                      {isExpanded ? <ChevronDown className="admin-expand-icon" /> : <ChevronRight className="admin-expand-icon" />}
                     </button>
-                    <h3 className="trail-name">{trail.name || 'Unnamed Trail'}</h3>
+                    <h3 className="admin-trail-name">{trail.name || 'Unnamed Trail'}</h3>
                   </div>
-                  <div className="trail-actions">
+                  <div className="admin-trail-actions">
                     <button
                       onClick={() => handleEditTrail(trail)}
-                      className="edit-button"
+                      className="admin-edit-button"
                       title="Edit Trail"
                     >
-                      <Edit className="edit-icon" />
+                      <Edit className="admin-edit-icon" />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(trail)}
-                      className="delete-button"
+                      className="admin-delete-button"
                       title="Delete Trail"
                     >
-                      <Trash2 className="delete-icon" />
+                      <Trash2 className="admin-delete-icon" />
                     </button>
                   </div>
                 </div>
                 
-                <div className="trail-details">
+                <div className="admin-trail-details">
                   <div className="detail-row">
                     <span className="detail-label">Location:</span>
                     <span className="detail-value">{formatLocation(trail.location)}</span>
@@ -401,26 +401,26 @@ export default function TrailsManagement() {
                           </div>
                         ) : (
                           reviews.map((review) => (
-                            <div key={review.id} className="review-item">
-                              <div className="review-header">
-                                <div className="review-rating">
+                            <div key={review.id} className="admin-review-item">
+                              <div className="admin-review-header">
+                                <div className="admin-review-rating">
                                   {renderStars(review.rating || 0)}
-                                  <span className="rating-text">({review.rating || 0}/5)</span>
+                                  <span className="admin-rating-text">({review.rating || 0}/5)</span>
                                 </div>
                                 <button
                                   onClick={() => setDeleteConfirm({...review, type: 'review', trailName: trail.name})}
-                                  className="delete-small-button"
+                                  className="admin-delete-small-button"
                                   title="Delete Review"
                                 >
-                                  <Trash2 className="delete-icon" />
+                                  <Trash2 className="admin-delete-icon" />
                                 </button>
                               </div>
-                              <p className={`review-comment ${!review.comment ? 'no-comment' : ''}`}>
+                              <p className={`admin-review-comment ${!review.comment ? 'no-comment' : ''}`}>
                                 {review.comment ? `"${review.comment}"` : "No comment provided"}
                               </p>
-                              <div className="review-meta">
-                                <span className="review-user">User: {review.userId || 'Unknown'}</span>
-                                <span className="review-date">{formatDate(review.timestamp)}</span>
+                              <div className="admin-review-meta">
+                                <span className="admin-review-user">User: {review.userId || 'Unknown'}</span>
+                                <span className="admin-review-date">{formatDate(review.timestamp)}</span>
                               </div>
                             </div>
                           ))
@@ -459,7 +459,7 @@ export default function TrailsManagement() {
                                   className="delete-small-button"
                                   title="Delete Alert"
                                 >
-                                  <Trash2 className="delete-icon" />
+                                  <Trash2 className="admin-delete-icon" />
                                 </button>
                               </div>
                               <p className="alert-message">{alert.message || 'No message'}</p>

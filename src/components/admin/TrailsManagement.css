@@ -117,7 +117,7 @@
   opacity: 0.5;
 }
 
-.trail-card {
+.admin-trail-card {
   background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -127,12 +127,12 @@
   overflow: hidden;
 }
 
-.trail-card:hover {
+.admin-trail-card:hover {
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: 0 4px 20px rgba(0, 122, 255, 0.1);
 }
 
-.trail-header {
+.admin-trail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -141,7 +141,7 @@
   min-width: 0;
 }
 
-.trail-title-section {
+.admin-trail-title-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -149,7 +149,7 @@
   min-width: 0;
 }
 
-.trail-name {
+.admin-trail-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
@@ -202,7 +202,7 @@
   color: var(--text);
 }
 
-.expand-button {
+.admin-expand-button {
   background: rgba(0, 122, 255, 0.1);
   border: 1px solid rgba(0, 122, 255, 0.3);
   color: #007aff;
@@ -215,17 +215,17 @@
   justify-content: center;
 }
 
-.expand-button:hover {
+.admin-expand-button:hover {
   background: rgba(0, 122, 255, 0.2);
   border-color: rgba(0, 122, 255, 0.5);
 }
 
-.expand-icon {
+.admin-expand-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.trail-actions {
+.admin-trail-actions {
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -281,7 +281,7 @@
   height: 1rem;
 }
 
-.trail-details {
+.admin-trail-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
@@ -478,7 +478,7 @@
 }
 
 /* Review Item Styles */
-.review-item {
+.admin-review-item {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(40, 40, 40, 0.6));
   border-radius: 8px;
   padding: 0.6rem;
@@ -490,7 +490,7 @@
   overflow: hidden;
 }
 
-.review-item::before {
+.admin-review-item::before {
   content: '';
   position: absolute;
   top: 0;
@@ -501,17 +501,17 @@
   opacity: 0.6;
 }
 
-.review-item:hover {
+.admin-review-item:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
   border-color: rgba(0, 122, 255, 0.2);
 }
 
-.review-item:last-child {
+.admin-review-item:last-child {
   margin-bottom: 0;
 }
 
-.review-header {
+.admin-review-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -520,7 +520,7 @@
   flex-wrap: wrap;
 }
 
-.review-rating {
+.admin-review-rating {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -546,7 +546,7 @@
   opacity: 0.5;
 }
 
-.rating-text {
+.admin-rating-text {
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 600;
@@ -557,7 +557,7 @@
   white-space: nowrap;
 }
 
-.delete-small-button {
+.admin-delete-small-button {
   background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(255, 107, 107, 0.04));
   border: 1px solid rgba(255, 107, 107, 0.2);
   color: #ff6b6b;
@@ -573,14 +573,14 @@
   flex-shrink: 0;
 }
 
-.delete-small-button:hover {
+.admin-delete-small-button:hover {
   background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(255, 107, 107, 0.08));
   border-color: rgba(255, 107, 107, 0.4);
   transform: scale(1.02);
   box-shadow: 0 1px 4px rgba(255, 107, 107, 0.2);
 }
 
-.review-comment {
+.admin-review-comment {
   color: #ffffff;
   font-size: 0.8rem;
   line-height: 1.3;
@@ -598,7 +598,7 @@
   align-items: center;
 }
 
-.review-comment:not(.no-comment)::before {
+.admin-review-comment:not(.no-comment)::before {
   content: '"';
   position: absolute;
   top: -0.15rem;
@@ -608,7 +608,7 @@
   opacity: 0.4;
 }
 
-.review-comment:not(.no-comment)::after {
+.admin-review-comment:not(.no-comment)::after {
   content: '"';
   position: absolute;
   bottom: -0.3rem;
@@ -618,13 +618,13 @@
   opacity: 0.4;
 }
 
-.review-comment.no-comment {
+.admin-review-comment.no-comment {
   color: #a0a0a0;
   font-style: normal;
   opacity: 0.7;
 }
 
-.review-meta {
+.admin-review-meta {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -636,7 +636,7 @@
   flex-wrap: wrap;
 }
 
-.review-user {
+.admin-review-user {
   font-weight: 500;
   color: #007aff;
   background: rgba(0, 122, 255, 0.08);
@@ -647,7 +647,7 @@
   font-size: 0.65rem;
 }
 
-.review-date {
+.admin-review-date {
   font-style: italic;
   opacity: 0.7;
   font-size: 0.65rem;
@@ -1031,11 +1031,11 @@
     justify-content: flex-start;
   }
   
-  .trail-details {
+  .admin-trail-details {
     grid-template-columns: 1fr;
   }
   
-  .trail-header {
+  .admin-trail-header {
     flex-wrap: nowrap;
     gap: 0.75rem;
   }
@@ -1086,30 +1086,30 @@
     max-height: 250px;
   }
   
-  .review-item,
+  .admin-review-item,
   .alert-item {
     padding: 1rem;
     margin-bottom: 0.75rem;
   }
   
-  .review-header,
+  .admin-review-header,
   .alert-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.4rem;
   }
   
-  .review-rating,
+  .admin-review-rating,
   .alert-type {
     width: 100%;
     justify-content: space-between;
   }
   
-  .delete-small-button {
+  .admin-delete-small-button {
     align-self: flex-end;
   }
   
-  .review-meta,
+  .admin-review-meta,
   .alert-meta {
     flex-direction: column;
     align-items: flex-start;
@@ -1149,7 +1149,7 @@
     width: 100%;
   }
   
-  .trail-name {
+  .admin-trail-name {
     font-size: 1.1rem;
   }
   
@@ -1174,13 +1174,13 @@
     max-height: 180px;
   }
   
-  .review-item,
+  .admin-review-item,
   .alert-item {
     padding: 0.4rem;
     margin-bottom: 0.4rem;
   }
   
-  .review-comment,
+  .admin-review-comment,
   .alert-message {
     font-size: 0.9rem;
     padding: 0.5rem;
@@ -1191,7 +1191,7 @@
     height: 0.7rem !important;
   }
   
-  .rating-text {
+  .admin-rating-text {
     font-size: 0.8rem;
     padding: 0.2rem 0.4rem;
   }
@@ -1206,8 +1206,8 @@
     padding: 0.2rem 0.5rem;
   }
   
-  .review-user,
-  .review-date,
+  .admin-review-user,
+  .admin-review-date,
   .alert-meta {
     font-size: 0.8rem;
   }
@@ -1231,7 +1231,7 @@
     padding: 0.75rem;
   }
   
-  .trail-name {
+  .admin-trail-name {
     font-size: 1rem;
   }
   
@@ -1251,12 +1251,12 @@
     padding: 0.15rem 0.3rem;
   }
   
-  .review-item,
+  .admin-review-item,
   .alert-item {
     padding: 0.35rem;
   }
   
-  .review-comment,
+  .admin-review-comment,
   .alert-message {
     font-size: 0.85rem;
     padding: 0.4rem;

@@ -76,7 +76,7 @@ export default function ReviewsManagement() {
       stars.push(
         <Star
           key={i}
-          className={`star ${i <= rating ? 'filled' : 'empty'}`}
+          className={`admin-star ${i <= rating ? 'filled' : 'empty'}`}
         />
       );
     }
@@ -85,9 +85,9 @@ export default function ReviewsManagement() {
 
   if (loading) {
     return (
-      <div className="reviews-management">
-        <div className="reviews-loading">
-          <div className="loading-spinner"></div>
+      <div className="admin-reviews-management">
+        <div className="admin-reviews-loading">
+          <div className="admin-loading-spinner"></div>
           <p>Loading reviews...</p>
         </div>
       </div>
@@ -96,80 +96,80 @@ export default function ReviewsManagement() {
 
   if (error) {
     return (
-      <div className="reviews-management">
-        <div className="reviews-error">
-          <MessageSquare className="error-icon" />
+      <div className="admin-reviews-management">
+        <div className="admin-reviews-error">
+          <MessageSquare className="admin-error-icon" />
           <p>{error}</p>
-          <button onClick={fetchReviews} className="retry-button">Retry</button>
+          <button onClick={fetchReviews} className="admin-retry-button">Retry</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="reviews-management">
-      <div className="reviews-header">
+    <div className="admin-reviews-management">
+      <div className="admin-reviews-header">
         <h2>Reviews Management</h2>
-        <div className="reviews-stats">
-          <span className="stat-item">
-            <MessageSquare className="stat-icon" />
+        <div className="admin-reviews-stats">
+          <span className="admin-stat-item">
+            <MessageSquare className="admin-stat-icon" />
             Total Reviews: {reviews.length}
           </span>
         </div>
       </div>
 
-      <div className="reviews-list">
+      <div className="admin-reviews-list">
         {reviews.length === 0 ? (
-          <div className="no-reviews">
-            <MessageSquare className="no-reviews-icon" />
+          <div className="admin-no-reviews">
+            <MessageSquare className="admin-no-reviews-icon" />
             <p>No reviews found</p>
           </div>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="review-card">
-              <div className="review-header">
-                <div className="review-trail-info">
-                  <h3 className="trail-name">{review.trailName}</h3>
-                  <div className="review-rating">
+            <div key={review.id} className="admin-review-card">
+              <div className="admin-review-header">
+                <div className="admin-review-trail-info">
+                  <h3 className="admin-trail-name">{review.trailName}</h3>
+                  <div className="admin-review-rating">
                     {renderStars(review.rating || 0)}
-                    <span className="rating-text">({review.rating || 0}/5)</span>
+                    <span className="admin-rating-text">({review.rating || 0}/5)</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setDeleteConfirm(review)}
-                  className="delete-button"
+                  className="admin-delete-button"
                   title="Delete Review"
                 >
-                  <Trash2 className="delete-icon" />
+                  <Trash2 className="admin-delete-icon" />
                 </button>
               </div>
               
-              <div className="review-content">
+              <div className="admin-review-content">
                 {review.comment && (
-                  <p className="review-comment">"{review.comment}"</p>
+                  <p className="admin-review-comment">"{review.comment}"</p>
                 )}
               </div>
               
-              <div className="review-details">
-                <div className="detail-row">
-                  <span className="detail-label">User ID:</span>
-                  <span className="detail-value">{review.userId || 'N/A'}</span>
+              <div className="admin-review-details">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">User ID:</span>
+                  <span className="admin-detail-value">{review.userId || 'N/A'}</span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Trail ID:</span>
-                  <span className="detail-value">{review.trailId || 'N/A'}</span>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Trail ID:</span>
+                  <span className="admin-detail-value">{review.trailId || 'N/A'}</span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Posted:</span>
-                  <span className="detail-value">{formatDate(review.timestamp)}</span>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Posted:</span>
+                  <span className="admin-detail-value">{formatDate(review.timestamp)}</span>
                 </div>
                 
                 {review.photos && review.photos.length > 0 && (
-                  <div className="detail-row full-width">
-                    <span className="detail-label">Photos:</span>
-                    <span className="detail-value">{review.photos.length} photo(s)</span>
+                  <div className="admin-detail-row admin-full-width">
+                    <span className="admin-detail-label">Photos:</span>
+                    <span className="admin-detail-value">{review.photos.length} photo(s)</span>
                   </div>
                 )}
               </div>
@@ -179,28 +179,28 @@ export default function ReviewsManagement() {
       </div>
 
       {deleteConfirm && (
-        <div className="delete-modal-overlay">
-          <div className="delete-modal">
+        <div className="admin-delete-modal-overlay">
+          <div className="admin-delete-modal">
             <h3>Confirm Deletion</h3>
             <p>Are you sure you want to delete this review?</p>
-            <div className="review-preview">
-              <p className="review-preview-trail">Trail: {deleteConfirm.trailName}</p>
-              <p className="review-preview-rating">Rating: {deleteConfirm.rating}/5</p>
+            <div className="admin-review-preview">
+              <p className="admin-review-preview-trail">Trail: {deleteConfirm.trailName}</p>
+              <p className="admin-review-preview-rating">Rating: {deleteConfirm.rating}/5</p>
               {deleteConfirm.comment && (
-                <p className="review-preview-comment">"{deleteConfirm.comment}"</p>
+                <p className="admin-review-preview-comment">"{deleteConfirm.comment}"</p>
               )}
             </div>
-            <p className="warning-text">This action cannot be undone.</p>
-            <div className="modal-actions">
+            <p className="admin-warning-text">This action cannot be undone.</p>
+            <div className="admin-modal-actions">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="cancel-button"
+                className="admin-cancel-button"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteReview(deleteConfirm.id, deleteConfirm.trailId)}
-                className="confirm-delete-button"
+                className="admin-confirm-delete-button"
               >
                 Delete Review
               </button>

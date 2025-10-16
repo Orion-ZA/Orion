@@ -62,9 +62,9 @@ export default function UsersManagement() {
 
   if (loading) {
     return (
-      <div className="users-management">
-        <div className="users-loading">
-          <div className="loading-spinner"></div>
+      <div className="admin-users-management">
+        <div className="admin-users-loading">
+          <div className="admin-loading-spinner"></div>
           <p>Loading users...</p>
         </div>
       </div>
@@ -73,101 +73,101 @@ export default function UsersManagement() {
 
   if (error) {
     return (
-      <div className="users-management">
-        <div className="users-error">
-          <Users className="error-icon" />
+      <div className="admin-users-management">
+        <div className="admin-users-error">
+          <Users className="admin-error-icon" />
           <p>{error}</p>
-          <button onClick={fetchUsers} className="retry-button">Retry</button>
+          <button onClick={fetchUsers} className="admin-retry-button">Retry</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="users-management">
-      <div className="users-header">
+    <div className="admin-users-management">
+      <div className="admin-users-header">
         <h2>Users Management</h2>
-        <div className="users-stats">
-          <span className="stat-item">
-            <Users className="stat-icon" />
+        <div className="admin-users-stats">
+          <span className="admin-stat-item">
+            <Users className="admin-stat-icon" />
             Total Users: {users.length}
           </span>
         </div>
       </div>
 
-      <div className="users-list">
+      <div className="admin-users-list">
         {users.length === 0 ? (
-          <div className="no-users">
-            <Users className="no-users-icon" />
+          <div className="admin-no-users">
+            <Users className="admin-no-users-icon" />
             <p>No users found</p>
           </div>
         ) : (
           users.map((user) => (
-            <div key={user.id} className="user-card">
-              <div className="user-header">
-                <div className="user-info">
-                  <h3 className="user-name">{getUserName(user)}</h3>
-                  <p className="user-email">{getUserEmail(user)}</p>
+            <div key={user.id} className="admin-user-card">
+              <div className="admin-user-header">
+                <div className="admin-user-info">
+                  <h3 className="admin-user-name">{getUserName(user)}</h3>
+                  <p className="admin-user-email">{getUserEmail(user)}</p>
                 </div>
                 <button
                   onClick={() => setDeleteConfirm(user)}
-                  className="delete-button"
+                  className="admin-delete-button"
                   title="Delete User"
                 >
-                  <Trash2 className="delete-icon" />
+                  <Trash2 className="admin-delete-icon" />
                 </button>
               </div>
               
-              <div className="user-details">
-                <div className="detail-row">
-                  <span className="detail-label">Joined:</span>
-                  <span className="detail-value">{formatDate(user.profileInfo?.joinedDate)}</span>
+              <div className="admin-user-details">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Joined:</span>
+                  <span className="admin-detail-value">{formatDate(user.profileInfo?.joinedDate)}</span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Submitted Trails:</span>
-                  <span className="detail-value">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Submitted Trails:</span>
+                  <span className="admin-detail-value">
                     {user.submittedTrails ? user.submittedTrails.length : 0}
                   </span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Favorites:</span>
-                  <span className="detail-value">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Favorites:</span>
+                  <span className="admin-detail-value">
                     {user.favourites ? user.favourites.length : 0}
                   </span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Completed:</span>
-                  <span className="detail-value">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Completed:</span>
+                  <span className="admin-detail-value">
                     {user.completed ? user.completed.length : 0}
                   </span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Wishlist:</span>
-                  <span className="detail-value">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Wishlist:</span>
+                  <span className="admin-detail-value">
                     {user.wishlist ? user.wishlist.length : 0}
                   </span>
                 </div>
               </div>
 
-              <div className="user-activity">
-                <div className="activity-item">
-                  <MapPin className="activity-icon" />
+              <div className="admin-user-activity">
+                <div className="admin-activity-item">
+                  <MapPin className="admin-activity-icon" />
                   <span>Submitted {user.submittedTrails ? user.submittedTrails.length : 0} trails</span>
                 </div>
-                <div className="activity-item">
-                  <Heart className="activity-icon" />
+                <div className="admin-activity-item">
+                  <Heart className="admin-activity-icon" />
                   <span>{user.favourites ? user.favourites.length : 0} favorites</span>
                 </div>
-                <div className="activity-item">
-                  <CheckCircle className="activity-icon" />
+                <div className="admin-activity-item">
+                  <CheckCircle className="admin-activity-icon" />
                   <span>{user.completed ? user.completed.length : 0} completed</span>
                 </div>
-                <div className="activity-item">
-                  <Star className="activity-icon" />
+                <div className="admin-activity-item">
+                  <Star className="admin-activity-icon" />
                   <span>{user.wishlist ? user.wishlist.length : 0} in wishlist</span>
                 </div>
               </div>
@@ -177,21 +177,21 @@ export default function UsersManagement() {
       </div>
 
       {deleteConfirm && (
-        <div className="delete-modal-overlay">
-          <div className="delete-modal">
+        <div className="admin-delete-modal-overlay">
+          <div className="admin-delete-modal">
             <h3>Confirm Deletion</h3>
             <p>Are you sure you want to delete the user "{getUserName(deleteConfirm)}"?</p>
-            <p className="warning-text">This action cannot be undone and will remove all user data including submitted trails and reviews.</p>
-            <div className="modal-actions">
+            <p className="admin-warning-text">This action cannot be undone and will remove all user data including submitted trails and reviews.</p>
+            <div className="admin-modal-actions">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="cancel-button"
+                className="admin-cancel-button"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteUser(deleteConfirm.id, getUserName(deleteConfirm))}
-                className="confirm-delete-button"
+                className="admin-confirm-delete-button"
               >
                 Delete User
               </button>

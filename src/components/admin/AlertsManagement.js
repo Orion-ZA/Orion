@@ -66,21 +66,21 @@ export default function AlertsManagement() {
   const getAlertTypeIcon = (type) => {
     switch (type?.toLowerCase()) {
       case 'community':
-        return <MessageSquare className="alert-type-icon" />;
+        return <MessageSquare className="admin-alert-type-icon" />;
       case 'authority':
-        return <MapPin className="alert-type-icon" />;
+        return <MapPin className="admin-alert-type-icon" />;
       case 'emergency':
-        return <AlertTriangle className="alert-type-icon" />;
+        return <AlertTriangle className="admin-alert-type-icon" />;
       default:
-        return <AlertTriangle className="alert-type-icon" />;
+        return <AlertTriangle className="admin-alert-type-icon" />;
     }
   };
 
   if (loading) {
     return (
-      <div className="alerts-management">
-        <div className="alerts-loading">
-          <div className="loading-spinner"></div>
+      <div className="admin-alerts-management">
+        <div className="admin-alerts-loading">
+          <div className="admin-loading-spinner"></div>
           <p>Loading alerts...</p>
         </div>
       </div>
@@ -89,83 +89,83 @@ export default function AlertsManagement() {
 
   if (error) {
     return (
-      <div className="alerts-management">
-        <div className="alerts-error">
-          <AlertTriangle className="error-icon" />
+      <div className="admin-alerts-management">
+        <div className="admin-alerts-error">
+          <AlertTriangle className="admin-error-icon" />
           <p>{error}</p>
-          <button onClick={fetchAlerts} className="retry-button">Retry</button>
+          <button onClick={fetchAlerts} className="admin-retry-button">Retry</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="alerts-management">
-      <div className="alerts-header">
+    <div className="admin-alerts-management">
+      <div className="admin-alerts-header">
         <h2>Alerts Management</h2>
-        <div className="alerts-stats">
-          <span className="stat-item">
-            <AlertTriangle className="stat-icon" />
+        <div className="admin-alerts-stats">
+          <span className="admin-stat-item">
+            <AlertTriangle className="admin-stat-icon" />
             Total Alerts: {alerts.length}
           </span>
-          <span className="stat-item">
-            <Eye className="stat-icon" />
+          <span className="admin-stat-item">
+            <Eye className="admin-stat-icon" />
             Active: {alerts.filter(alert => alert.isActive).length}
           </span>
         </div>
       </div>
 
-      <div className="alerts-list">
+      <div className="admin-alerts-list">
         {alerts.length === 0 ? (
-          <div className="no-alerts">
-            <AlertTriangle className="no-alerts-icon" />
+          <div className="admin-no-alerts">
+            <AlertTriangle className="admin-no-alerts-icon" />
             <p>No alerts found</p>
           </div>
         ) : (
           alerts.map((alert) => (
-            <div key={alert.id} className={`alert-card ${alert.isActive ? 'active' : 'inactive'}`}>
-              <div className="alert-header">
-                <div className="alert-type">
+            <div key={alert.id} className={`admin-alert-card ${alert.isActive ? 'active' : 'inactive'}`}>
+              <div className="admin-alert-header">
+                <div className="admin-alert-type">
                   {getAlertTypeIcon(alert.type)}
                   <span 
-                    className="alert-type-text"
+                    className="admin-alert-type-text"
                     style={{ color: getAlertTypeColor(alert.type) }}
                   >
                     {alert.type || 'Unknown'}
                   </span>
                 </div>
-                <div className="alert-status">
+                <div className="admin-alert-status">
                   {alert.isActive ? (
-                    <Eye className="status-icon active" />
+                    <Eye className="admin-status-icon active" />
                   ) : (
-                    <EyeOff className="status-icon inactive" />
+                    <EyeOff className="admin-status-icon inactive" />
                   )}
-                  <span className={`status-text ${alert.isActive ? 'active' : 'inactive'}`}>
+                  <span className={`admin-status-text ${alert.isActive ? 'active' : 'inactive'}`}>
                     {alert.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <button
                   onClick={() => setDeleteConfirm(alert)}
-                  className="delete-button"
+                  className="admin-delete-button"
                   title="Delete Alert"
                 >
-                  <Trash2 className="delete-icon" />
+                  <Trash2 className="admin-delete-icon" />
                 </button>
               </div>
               
-              <div className="alert-content">
-                <p className="alert-message">{alert.message || 'No message'}</p>
+              <div className="admin-alert-content">
+                <p className="admin-alert-message">{alert.message || 'No message'}</p>
               </div>
               
-              <div className="alert-details">
-                <div className="detail-row">
-                  <span className="detail-label">Trail ID:</span>
-                  <span className="detail-value">{alert.trailId || 'N/A'}</span>
+              <div className="admin-alert-details">
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Trail ID:</span>
+                  <span className="admin-detail-value">{alert.trailId || 'N/A'}</span>
                 </div>
                 
-                <div className="detail-row">
-                  <span className="detail-label">Created:</span>
-                  <span className="detail-value">{formatDate(alert.timestamp)}</span>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Created:</span>
+                  <span className="admin-detail-value">{formatDate(alert.timestamp)}</span>
                 </div>
               </div>
             </div>
@@ -174,25 +174,25 @@ export default function AlertsManagement() {
       </div>
 
       {deleteConfirm && (
-        <div className="delete-modal-overlay">
-          <div className="delete-modal">
+        <div className="admin-delete-modal-overlay">
+          <div className="admin-delete-modal">
             <h3>Confirm Deletion</h3>
             <p>Are you sure you want to delete this alert?</p>
-            <div className="alert-preview">
-              <p className="alert-preview-message">"{deleteConfirm.message}"</p>
-              <p className="alert-preview-type">Type: {deleteConfirm.type}</p>
+            <div className="admin-alert-preview">
+              <p className="admin-alert-preview-message">"{deleteConfirm.message}"</p>
+              <p className="admin-alert-preview-type">Type: {deleteConfirm.type}</p>
             </div>
-            <p className="warning-text">This action cannot be undone.</p>
-            <div className="modal-actions">
+            <p className="admin-warning-text">This action cannot be undone.</p>
+            <div className="admin-modal-actions">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="cancel-button"
+                className="admin-cancel-button"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteAlert(deleteConfirm.id)}
-                className="confirm-delete-button"
+                className="admin-confirm-delete-button"
               >
                 Delete Alert
               </button>

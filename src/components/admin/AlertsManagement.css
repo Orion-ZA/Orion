@@ -1,10 +1,10 @@
-.alerts-management {
+.admin-alerts-management {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.alerts-header {
+.admin-alerts-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -13,19 +13,19 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.alerts-header h2 {
+.admin-alerts-header h2 {
   color: #ffffff;
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0;
 }
 
-.alerts-stats {
+.admin-alerts-stats {
   display: flex;
   gap: 1rem;
 }
 
-.stat-item {
+.admin-stat-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -34,12 +34,12 @@
   font-weight: 500;
 }
 
-.stat-icon {
+.admin-stat-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.alerts-loading {
+.admin-alerts-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,7 +48,7 @@
   color: #a0a0a0;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 2rem;
   height: 2rem;
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -63,7 +63,7 @@
   100% { transform: rotate(360deg); }
 }
 
-.alerts-error {
+.admin-alerts-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,13 +73,13 @@
   text-align: center;
 }
 
-.error-icon {
+.admin-error-icon {
   width: 3rem;
   height: 3rem;
   margin-bottom: 1rem;
 }
 
-.retry-button {
+.admin-retry-button {
   background: #007aff;
   color: white;
   border: none;
@@ -91,16 +91,16 @@
   transition: background 0.2s;
 }
 
-.retry-button:hover {
+.admin-retry-button:hover {
   background: #0056b3;
 }
 
-.alerts-list {
+.admin-alerts-list {
   display: grid;
   gap: 1.5rem;
 }
 
-.no-alerts {
+.admin-no-alerts {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -110,14 +110,14 @@
   text-align: center;
 }
 
-.no-alerts-icon {
+.admin-no-alerts-icon {
   width: 3rem;
   height: 3rem;
   margin-bottom: 1rem;
   opacity: 0.5;
 }
 
-.alert-card {
+.admin-alert-card {
   background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -125,78 +125,78 @@
   transition: all 0.2s ease;
 }
 
-.alert-card.active {
+.admin-alert-card.active {
   border-color: rgba(52, 199, 89, 0.3);
   box-shadow: 0 4px 20px rgba(52, 199, 89, 0.1);
 }
 
-.alert-card.inactive {
+.admin-alert-card.inactive {
   border-color: rgba(160, 160, 160, 0.3);
   opacity: 0.7;
 }
 
-.alert-card:hover {
+.admin-alert-card:hover {
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: 0 4px 20px rgba(0, 122, 255, 0.1);
 }
 
-.alert-header {
+.admin-alert-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.alert-type {
+.admin-alert-type {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.alert-type-icon {
+.admin-alert-type-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.alert-type-text {
+.admin-alert-type-text {
   font-weight: 600;
   font-size: 0.9rem;
   text-transform: capitalize;
 }
 
-.alert-status {
+.admin-alert-status {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.status-icon {
+.admin-status-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.status-icon.active {
+.admin-status-icon.active {
   color: #34c759;
 }
 
-.status-icon.inactive {
+.admin-status-icon.inactive {
   color: #a0a0a0;
 }
 
-.status-text {
+.admin-status-text {
   font-size: 0.85rem;
   font-weight: 500;
 }
 
-.status-text.active {
+.admin-status-text.active {
   color: #34c759;
 }
 
-.status-text.inactive {
+.admin-status-text.inactive {
   color: #a0a0a0;
 }
 
-.delete-button {
+.admin-delete-button {
   background: rgba(255, 107, 107, 0.1);
   border: 1px solid rgba(255, 107, 107, 0.3);
   color: #ff6b6b;
@@ -209,21 +209,21 @@
   justify-content: center;
 }
 
-.delete-button:hover {
+.admin-delete-button:hover {
   background: rgba(255, 107, 107, 0.2);
   border-color: rgba(255, 107, 107, 0.5);
 }
 
-.delete-icon {
+.admin-delete-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.alert-content {
+.admin-alert-content {
   margin-bottom: 1rem;
 }
 
-.alert-message {
+.admin-alert-message {
   color: #ffffff;
   font-size: 1rem;
   line-height: 1.5;
@@ -234,19 +234,19 @@
   border-left: 4px solid #007aff;
 }
 
-.alert-details {
+.admin-alert-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
 
-.detail-row {
+.admin-detail-row {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.detail-label {
+.admin-detail-label {
   color: #a0a0a0;
   font-size: 0.8rem;
   font-weight: 500;
@@ -254,13 +254,13 @@
   letter-spacing: 0.05em;
 }
 
-.detail-value {
+.admin-detail-value {
   color: #ffffff;
   font-size: 0.9rem;
   font-weight: 400;
 }
 
-.delete-modal-overlay {
+.admin-delete-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -274,7 +274,7 @@
   backdrop-filter: blur(4px);
 }
 
-.delete-modal {
+.admin-delete-modal {
   background: rgba(30, 30, 30, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -284,20 +284,20 @@
   text-align: center;
 }
 
-.delete-modal h3 {
+.admin-delete-modal h3 {
   color: #ffffff;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
 }
 
-.delete-modal p {
+.admin-delete-modal p {
   color: #a0a0a0;
   margin: 0 0 1rem 0;
   line-height: 1.4;
 }
 
-.alert-preview {
+.admin-alert-preview {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   padding: 1rem;
@@ -305,31 +305,31 @@
   text-align: left;
 }
 
-.alert-preview-message {
+.admin-alert-preview-message {
   color: #ffffff;
   font-style: italic;
   margin: 0 0 0.5rem 0;
 }
 
-.alert-preview-type {
+.admin-alert-preview-type {
   color: #a0a0a0;
   font-size: 0.9rem;
   margin: 0;
 }
 
-.warning-text {
+.admin-warning-text {
   color: #ff6b6b !important;
   font-weight: 500;
 }
 
-.modal-actions {
+.admin-modal-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
 }
 
-.cancel-button,
-.confirm-delete-button {
+.admin-cancel-button,
+.admin-confirm-delete-button {
   flex: 1;
   padding: 0.75rem 1rem;
   border-radius: 8px;
@@ -339,46 +339,46 @@
   border: none;
 }
 
-.cancel-button {
+.admin-cancel-button {
   background: rgba(255, 255, 255, 0.1);
   color: #a0a0a0;
 }
 
-.cancel-button:hover {
+.admin-cancel-button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.confirm-delete-button {
+.admin-confirm-delete-button {
   background: #ff3b30;
   color: white;
 }
 
-.confirm-delete-button:hover {
+.admin-confirm-delete-button:hover {
   background: #d70015;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .alerts-management {
+  .admin-alerts-management {
     padding: 1rem;
   }
   
-  .alerts-header {
+  .admin-alerts-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
   
-  .alerts-stats {
+  .admin-alerts-stats {
     width: 100%;
     justify-content: flex-start;
   }
   
-  .alert-details {
+  .admin-alert-details {
     grid-template-columns: 1fr;
   }
   
-  .modal-actions {
+  .admin-modal-actions {
     flex-direction: column;
   }
 }

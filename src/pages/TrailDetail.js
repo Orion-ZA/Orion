@@ -17,6 +17,7 @@ import WeatherSection from '../components/trails/WeatherSection';
 import UserActions from '../components/trails/UserActions';
 import TabSection from '../components/trails/TabSection';
 import ContributionModal from '../components/trails/ContributionModal';
+import { estimateDuration } from '../components/trails/TrailUtils';
 
 const TrailDetail = () => {
   const { trailId } = useParams();
@@ -70,37 +71,6 @@ const TrailDetail = () => {
     return sortedReviews;
   };
 
-  // Estimate duration based on distance
-  const estimateDuration = (distance) => {
-    if (!distance || distance <= 0) return 'Not specified';
-    
-    // Average hiking speed: 3-4 km/h
-    // Add extra time for elevation gain, difficulty, breaks
-    const baseHours = distance / 3.5; // Use 3.5 km/h as average
-    const minHours = baseHours * 0.8; // 20% faster
-    const maxHours = baseHours * 1.4; // 40% slower for breaks, elevation, etc.
-    
-    // Ensure min is always less than max
-    const finalMinHours = Math.min(minHours, maxHours - 0.1);
-    const finalMaxHours = Math.max(maxHours, minHours + 0.1);
-    
-    const formatTime = (hours) => {
-      if (hours < 1) {
-        return `${Math.round(hours * 60)} min`;
-      } else if (hours < 2) {
-        const minutes = Math.round((hours - Math.floor(hours)) * 60);
-        return minutes > 0 ? `${Math.floor(hours)}h ${minutes}m` : `${Math.floor(hours)}h`;
-      } else {
-        const minutes = Math.round((hours - Math.floor(hours)) * 60);
-        return minutes > 0 ? `${Math.floor(hours)}h ${minutes}m` : `${Math.floor(hours)}h`;
-      }
-    };
-    
-    const minTime = formatTime(finalMinHours);
-    const maxTime = formatTime(finalMaxHours);
-    
-    return `${minTime} - ${maxTime}`;
-  };
 
   // Get trail data from location state or fetch from Firestore
   useEffect(() => {

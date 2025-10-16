@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Heart, Bookmark, Check, Edit3, MapPin, ArrowLeft, Share2, Calendar, Clock, TrendingUp, Users, Star, ChevronLeft, ChevronRight, MessageSquare, Image, Bell, Plus, Upload, AlertTriangle, Navigation, Sun, Cloud, CloudRain, CloudSnow, Wind, Droplets } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import { v4 as uuidv4 } from 'uuid';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebaseConfig';
 import './TrailDetail.css';
+
+// Import new components
+import TrailImageGallery from '../components/trails/TrailImageGallery';
+import TrailInfo from '../components/trails/TrailInfo';
+import WeatherSection from '../components/trails/WeatherSection';
+import UserActions from '../components/trails/UserActions';
+import TabSection from '../components/trails/TabSection';
+import ContributionModal from '../components/trails/ContributionModal';
 
 const TrailDetail = () => {
   const { trailId } = useParams();
@@ -347,23 +355,6 @@ const TrailDetail = () => {
     }
   };
 
-  const getWeatherIcon = (condition) => {
-    const conditionLower = condition.toLowerCase();
-    
-    if (conditionLower.includes('clear') || conditionLower.includes('sunny')) {
-      return <Sun size={24} className="weather-icon sun" />;
-    } else if (conditionLower.includes('cloud')) {
-      return <Cloud size={24} className="weather-icon cloud" />;
-    } else if (conditionLower.includes('rain') || conditionLower.includes('drizzle')) {
-      return <CloudRain size={24} className="weather-icon rain" />;
-    } else if (conditionLower.includes('snow') || conditionLower.includes('sleet')) {
-      return <CloudSnow size={24} className="weather-icon snow" />;
-    } else if (conditionLower.includes('storm') || conditionLower.includes('thunder')) {
-      return <CloudRain size={24} className="weather-icon storm" />;
-    } else {
-      return <Cloud size={24} className="weather-icon default" />;
-    }
-  };
 
   const processWeatherData = (data) => {
     const dailyForecasts = {};
@@ -638,17 +629,6 @@ const TrailDetail = () => {
     }
   };
 
-  const nextImage = () => {
-    if (trail?.images && trail.images.length > 0) {
-      setCurrentImageIndex((prev) => (prev + 1) % trail.images.length);
-    }
-  };
-
-  const prevImage = () => {
-    if (trail?.images && trail.images.length > 0) {
-      setCurrentImageIndex((prev) => (prev - 1 + trail.images.length) % trail.images.length);
-    }
-  };
 
   const goToImage = (index) => {
     setCurrentImageIndex(index);
@@ -700,583 +680,73 @@ const TrailDetail = () => {
       {/* Main Content */}
       <div className="trail-detail-content">
         {/* Image Gallery */}
-        {trail.images && trail.images.length > 0 && (
-          <div className="trail-detail-image-gallery">
-            <div className="trail-detail-main-image">
-              <img 
-                src={trail.images[currentImageIndex]} 
-                alt={`${trail.name} - Image ${currentImageIndex + 1}`}
-              />
-              
-              {trail.images.length > 1 && (
-                <>
-                  <button 
-                    className="trail-detail-image-nav-btn prev" 
-                    onClick={prevImage}
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button 
-                    className="trail-detail-image-nav-btn next" 
-                    onClick={nextImage}
-                    aria-label="Next image"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                  
-                  <div className="trail-detail-image-counter">
-                    {currentImageIndex + 1} / {trail.images.length}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {trail.images.length > 1 && (
-              <div className="trail-detail-thumbnails">
-                {trail.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className={`trail-detail-thumbnail ${index === currentImageIndex ? 'active' : ''}`}
-                    onClick={() => goToImage(index)}
-                  >
-                    <img src={image} alt={`Thumbnail ${index + 1}`} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <TrailImageGallery 
+          images={trail.images}
+          currentImageIndex={currentImageIndex}
+          onImageChange={setCurrentImageIndex}
+          onGoToImage={goToImage}
+        />
 
         {/* Trail Info */}
-        <div className="trail-detail-info">
-          <div className="trail-detail-title-section">
-            <h1 className="trail-detail-title">{trail.name}</h1>
-            <div className="trail-detail-location">
-              <button
-                className="trail-detail-directions-btn"
-                onClick={handleDirections}
-                title="Get directions to this trail"
-              >
-                <Navigation size={16} />
-                Get Directions
-              </button>
-            </div>
-          </div>
-
-          {/* Details Grid */}
-          <div className="trail-detail-details-grid">
-            <div className="trail-detail-detail-card">
-              <div className="trail-detail-detail-icon">
-                <TrendingUp size={20} />
-              </div>
-              <div className="trail-detail-detail-info">
-                <div className="trail-detail-detail-label">Difficulty</div>
-                <div className="trail-detail-detail-value">{trail.difficulty}</div>
-              </div>
-            </div>
-
-            <div className="trail-detail-detail-card">
-              <div className="trail-detail-detail-icon">
-                <Clock size={20} />
-              </div>
-              <div className="trail-detail-detail-info">
-                <div className="trail-detail-detail-label">Duration</div>
-                <div className="trail-detail-detail-value">{estimateDuration(trail.distance)}</div>
-              </div>
-            </div>
-
-            <div className="trail-detail-detail-card">
-              <div className="trail-detail-detail-icon">
-                <TrendingUp size={20} />
-              </div>
-              <div className="trail-detail-detail-info">
-                <div className="trail-detail-detail-label">Distance</div>
-                <div className="trail-detail-detail-value">{trail.distance} km</div>
-              </div>
-            </div>
-
-            <div className="trail-detail-detail-card">
-              <div className="trail-detail-detail-icon">
-                <Users size={20} />
-              </div>
-              <div className="trail-detail-detail-info">
-                <div className="trail-detail-detail-label">Author</div>
-                <div className="trail-detail-detail-value">{authorName}</div>
-              </div>
-            </div>
-
-            {trail.elevationGain && trail.elevationGain > 0 && (
-              <div className="trail-detail-detail-card">
-                <div className="trail-detail-detail-icon">
-                  <TrendingUp size={20} />
-                </div>
-                <div className="trail-detail-detail-info">
-                  <div className="trail-detail-detail-label">Elevation Gain</div>
-                  <div className="trail-detail-detail-value">{trail.elevationGain} m</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          {trail.description && (
-            <div className="trail-detail-description">
-              <h3>Description</h3>
-              <p>{trail.description}</p>
-            </div>
-          )}
-
-          {/* Tags */}
-          {trail.tags && trail.tags.length > 0 && (
-            <div className="trail-detail-tags">
-              <h3>Tags</h3>
-              <div className="trail-detail-tag-list">
-                {trail.tags.map((tag, index) => (
-                  <span key={index} className="trail-detail-tag">{tag}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Route Information */}
-          {trail.route && trail.route.length > 0 && (
-            <div className="trail-detail-route">
-              <h3>Route Information</h3>
-              <div className="trail-detail-route-info">
-                <p><strong>Route Points:</strong> {trail.route.length} waypoints</p>
-                <p><strong>Route Type:</strong> {trail.routeType || 'Custom'}</p>
-              </div>
-            </div>
-          )}
+        <TrailInfo 
+          trail={trail}
+          authorName={authorName}
+          onDirections={handleDirections}
+          estimateDuration={estimateDuration}
+        />
 
           {/* Weather Forecast */}
-          <div className="trail-detail-weather-section">
-            <h3>Weather Forecast</h3>
-            {loadingWeather ? (
-              <div className="trail-detail-loading">
-                <div className="trail-detail-loading-spinner"></div>
-                Loading weather data...
-              </div>
-            ) : weatherData && weatherData.length > 0 ? (
-             <div className="trail-detail-weather-forecast">
-               {weatherData.map((day, index) => (
-                 <div key={index} className="trail-detail-weather-day">
-                   <div className="trail-detail-weather-header">
-                     <div className="trail-detail-weather-date">
-                       {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                     </div>
-                     <div className="trail-detail-weather-icon">
-                       {getWeatherIcon(day.condition)}
-                     </div>
-                   </div>
-                   
-                   <div className="trail-detail-weather-temps">
-                     <span className="trail-detail-weather-high">{Math.round(day.maxTemp)}°</span>
-                     <span className="trail-detail-weather-low">{Math.round(day.minTemp)}°</span>
-                   </div>
-                   
-                   <div className="trail-detail-weather-condition">{day.condition}</div>
-                   
-                   <div className="trail-detail-weather-details">
-                     <div className="trail-detail-weather-detail-item">
-                       <Droplets size={14} />
-                       <span>{day.humidity}%</span>
-                     </div>
-                     <div className="trail-detail-weather-detail-item">
-                       <Wind size={14} />
-                       <span>{day.windSpeed} m/s</span>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-             </div>
-            ) : (
-              <div className="trail-detail-no-weather">
-                <p>Weather data not available for this location.</p>
-                <p style={{ fontSize: '12px', marginTop: '8px', opacity: 0.7 }}>
-                  This could be due to API limits or location data issues.
-                </p>
-              </div>
-            )}
-          </div>
+          <WeatherSection 
+            weatherData={weatherData}
+            loadingWeather={loadingWeather}
+          />
 
           {/* User Actions */}
-          {user && (
-            <div className="trail-detail-user-actions">
-              <h3>My Actions</h3>
-              <div className="trail-detail-action-buttons">
-                <button
-                  className={`trail-detail-action-btn favourites ${userSaved.favourites.includes(trail.id) ? 'active' : ''}`}
-                  onClick={() => handleTrailAction('favourites', trail.id)}
-                  title={userSaved.favourites.includes(trail.id) ? 'Remove from favourites' : 'Add to favourites'}
-                >
-                  <Heart size={16} />
-                  {userSaved.favourites.includes(trail.id) ? 'Favourited' : 'Favourite'}
-                </button>
-
-                <button
-                  className={`trail-detail-action-btn wishlist ${userSaved.wishlist.includes(trail.id) ? 'active' : ''}`}
-                  onClick={() => handleTrailAction('wishlist', trail.id)}
-                  title={userSaved.wishlist.includes(trail.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                >
-                  <Bookmark size={16} />
-                  {userSaved.wishlist.includes(trail.id) ? 'In Wishlist' : 'Add to Wishlist'}
-                </button>
-
-                <button
-                  className={`trail-detail-action-btn completed ${userSaved.completed.includes(trail.id) ? 'active' : ''}`}
-                  onClick={() => handleTrailAction('completed', trail.id)}
-                  title={userSaved.completed.includes(trail.id) ? 'Mark as not completed' : 'Mark as completed'}
-                >
-                  <Check size={16} />
-                  {userSaved.completed.includes(trail.id) ? 'Completed' : 'Mark Complete'}
-                </button>
-
-                {user.uid === trail.authorId && (
-                  <button
-                    className="trail-detail-action-btn edit"
-                    onClick={() => navigate(`/trails/${trail.id}/edit`)}
-                    title="Edit trail"
-                  >
-                    <Edit3 size={16} />
-                    Edit Trail
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          <UserActions 
+            user={user}
+            trail={trail}
+            userSaved={userSaved}
+            onTrailAction={handleTrailAction}
+          />
 
           {/* Tab Section */}
-          <div className="trail-detail-tab-section">
-            {/* Tab Navigation */}
-            <div className="trail-detail-tab-nav">
-              <button
-                className={`trail-detail-tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
-                onClick={() => setActiveTab('reviews')}
-              >
-                <MessageSquare size={18} />
-                Reviews ({reviews.length})
-              </button>
-              <button
-                className={`trail-detail-tab-btn ${activeTab === 'media' ? 'active' : ''}`}
-                onClick={() => setActiveTab('media')}
-              >
-                <Image size={18} />
-                Media ({trail?.photos?.length || 0})
-              </button>
-              <button
-                className={`trail-detail-tab-btn ${activeTab === 'alerts' ? 'active' : ''}`}
-                onClick={() => setActiveTab('alerts')}
-              >
-                <Bell size={18} />
-                Alerts
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="trail-detail-tab-content">
-              {/* Reviews Tab */}
-              {activeTab === 'reviews' && (
-                <div className="trail-detail-tab-panel">
-                  <div className="trail-detail-reviews-header">
-                    <button
-                      className="trail-detail-contribute-btn"
-                      onClick={() => openContributionModal('review')}
-                      title="Add a review"
-                    >
-                      <Plus size={16} />
-                      Add Review
-                    </button>
-                    {reviews.length > 0 && (
-                      <div className="trail-detail-review-sort">
-                        <label htmlFor="review-sort">Sort by:</label>
-                        <select
-                          id="review-sort"
-                          value={reviewSortBy}
-                          onChange={(e) => setReviewSortBy(e.target.value)}
-                          className="trail-detail-sort-select"
-                        >
-                          <option value="newest">Newest First</option>
-                          <option value="oldest">Oldest First</option>
-                          <option value="highest">Highest Rating</option>
-                          <option value="lowest">Lowest Rating</option>
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {loadingReviews ? (
-                    <div className="trail-detail-loading">Loading reviews...</div>
-                  ) : reviews.length > 0 ? (
-                    <div className="trail-detail-reviews-container">
-                      <div className="trail-detail-reviews-list">
-                        {getSortedReviews().map((review) => (
-                          <div key={review.id} className="trail-detail-review">
-                            <div className="trail-detail-review-header">
-                              <div className="trail-detail-review-author">
-                                <strong>{review.userName || 'Anonymous'}</strong>
-                              </div>
-                              <div className="trail-detail-review-rating">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    size={16}
-                                    fill={i < (review.rating || 0) ? "currentColor" : "none"}
-                                    color={i < (review.rating || 0) ? "#ffc107" : "rgba(255, 255, 255, 0.3)"}
-                                  />
-                                ))}
-                              </div>
-                              <div className="trail-detail-review-date">
-                                {new Date(review.timestamp).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="trail-detail-review-content">
-                              <p>{review.comment}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="trail-detail-no-reviews">No reviews yet. Be the first to review this trail!</p>
-                  )}
-                </div>
-              )}
-
-              {/* Media Tab */}
-              {activeTab === 'media' && (
-                <div className="trail-detail-tab-panel">
-                  <div className="trail-detail-media-header">
-                    <button
-                      className="trail-detail-contribute-btn"
-                      onClick={() => openContributionModal('image')}
-                      title="Upload images"
-                    >
-                      <Upload size={16} />
-                      Upload Images
-                    </button>
-                  </div>
-                  <div className="trail-detail-media-gallery">
-                    {trail?.photos && trail.photos.length > 0 ? (
-                      <div className="trail-detail-media-grid">
-                        {trail.photos.map((photo, index) => (
-                          <div
-                            key={index}
-                            className="trail-detail-media-item"
-                            onClick={() => setCurrentImageIndex(index)}
-                          >
-                            <img
-                              src={photo}
-                              alt={`Trail photo ${index + 1}`}
-                              className="trail-detail-media-thumbnail"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="trail-detail-no-media">No photos available for this trail.</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Alerts Tab */}
-              {activeTab === 'alerts' && (
-                <div className="trail-detail-tab-panel">
-                  <div className="trail-detail-alerts-header">
-                    <button
-                      className="trail-detail-contribute-btn"
-                      onClick={() => openContributionModal('alert')}
-                      title="Add an alert"
-                    >
-                      <AlertTriangle size={16} />
-                      Add Alert
-                    </button>
-                  </div>
-                  <div className="trail-detail-alerts-content">
-                    {/* Trail Status Alert */}
-                    <div className="trail-detail-alert-item">
-                      <div className="trail-detail-alert-header">
-                        <Bell size={20} />
-                        <h4>Trail Status</h4>
-                      </div>
-                      <div className="trail-detail-status-info">
-                        <p>Status: <span className={`status-${trail?.status || 'unknown'}`}>{trail?.status || 'Unknown'}</span></p>
-                        {trail?.status === 'closed' && (
-                          <p className="trail-detail-closure-notice">
-                            ⚠️ This trail is currently closed. Please check back later or contact local authorities for more information.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Safety Tips */}
-                    <div className="trail-detail-alert-item">
-                      <div className="trail-detail-alert-header">
-                        <Bell size={20} />
-                        <h4>Safety Tips</h4>
-                      </div>
-                      <div className="trail-detail-safety-tips">
-                        <ul>
-                          <li>Always bring enough water and snacks</li>
-                          <li>Check weather conditions before starting</li>
-                          <li>Inform someone of your hiking plans</li>
-                          <li>Bring a first aid kit and emergency supplies</li>
-                          <li>Stay on marked trails</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <TabSection 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            reviews={reviews}
+            trail={trail}
+            reviewSortBy={reviewSortBy}
+            setReviewSortBy={setReviewSortBy}
+            loadingReviews={loadingReviews}
+            getSortedReviews={getSortedReviews}
+            onOpenContributionModal={openContributionModal}
+            currentImageIndex={currentImageIndex}
+            setCurrentImageIndex={setCurrentImageIndex}
+          />
         </div>
-      </div>
 
-      {/* Contribution Modal */}
-      {showContributionModal && (
-        <div className="trail-detail-modal-overlay" onClick={closeContributionModal}>
-          <div className="trail-detail-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="trail-detail-modal-header">
-              <h3>
-                {contributionType === 'review' && 'Add Review'}
-                {contributionType === 'image' && 'Upload Images'}
-                {contributionType === 'alert' && 'Add Alert'}
-              </h3>
-              <button className="trail-detail-modal-close" onClick={closeContributionModal}>
-                ×
-              </button>
-            </div>
-
-            <div className="trail-detail-modal-body">
-              {/* Review Form */}
-              {contributionType === 'review' && (
-                <div className="trail-detail-form-group">
-                  <label>Rating</label>
-                  <div className="trail-detail-rating-input">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        className="trail-detail-star-btn"
-                        onClick={() => setNewRating(star)}
-                      >
-                        <Star 
-                          size={20} 
-                          fill={star <= newRating ? "currentColor" : "none"} 
-                          color={star <= newRating ? "gold" : "#ccc"}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Review Text */}
-              {contributionType === 'review' && (
-                <div className="trail-detail-form-group">
-                  <label>Your Review</label>
-                  <textarea
-                    value={newReview}
-                    onChange={(e) => setNewReview(e.target.value)}
-                    placeholder="Share your experience on this trail..."
-                    className="trail-detail-textarea"
-                    rows={4}
-                  />
-                </div>
-              )}
-
-              {/* Anonymous Option for Reviews */}
-              {contributionType === 'review' && (
-                <div className="trail-detail-form-group">
-                  <label className="trail-detail-checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isAnonymous}
-                      onChange={(e) => setIsAnonymous(e.target.checked)}
-                    />
-                    Post anonymously
-                  </label>
-                </div>
-              )}
-
-              {/* Image Upload */}
-              {contributionType === 'image' && (
-                <div className="trail-detail-form-group">
-                  <label>Select Images</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="trail-detail-file-input"
-                  />
-                  {newImages.length > 0 && (
-                    <div className="trail-detail-image-preview">
-                      <p>{newImages.length} image(s) selected</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Alert Type */}
-              {contributionType === 'alert' && (
-                <div className="trail-detail-form-group">
-                  <label>Alert Type</label>
-                  <select
-                    value={alertType}
-                    onChange={(e) => setAlertType(e.target.value)}
-                    className="trail-detail-select"
-                  >
-                    <option value="general">General</option>
-                    <option value="safety">Safety</option>
-                    <option value="weather">Weather</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="wildlife">Wildlife</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Alert Message */}
-              {contributionType === 'alert' && (
-                <div className="trail-detail-form-group">
-                  <label>Alert Message</label>
-                  <textarea
-                    value={alertMessage}
-                    onChange={(e) => setAlertMessage(e.target.value)}
-                    placeholder="Describe the alert or important information..."
-                    className="trail-detail-textarea"
-                    rows={4}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="trail-detail-modal-footer">
-              <button
-                className="trail-detail-btn trail-detail-btn-secondary"
-                onClick={closeContributionModal}
-                disabled={uploading}
-              >
-                Cancel
-              </button>
-              <button
-                className="trail-detail-btn trail-detail-btn-primary"
-                onClick={() => {
-                  if (contributionType === 'review') handleAddReview();
-                  if (contributionType === 'image') handleAddImages();
-                  if (contributionType === 'alert') handleAddAlert();
-                }}
-                disabled={uploading}
-              >
-                {uploading ? 'Submitting...' : 'Submit'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Contribution Modal */}
+        <ContributionModal 
+        showContributionModal={showContributionModal}
+        contributionType={contributionType}
+        newReview={newReview}
+        setNewReview={setNewReview}
+        newRating={newRating}
+        setNewRating={setNewRating}
+        isAnonymous={isAnonymous}
+        setIsAnonymous={setIsAnonymous}
+        newImages={newImages}
+        alertMessage={alertMessage}
+        setAlertMessage={setAlertMessage}
+        alertType={alertType}
+        setAlertType={setAlertType}
+        uploading={uploading}
+        onCloseContributionModal={closeContributionModal}
+        onAddReview={handleAddReview}
+        onAddImages={handleAddImages}
+        onAddAlert={handleAddAlert}
+        onImageUpload={handleImageUpload}
+      />
     </div>
   );
 };

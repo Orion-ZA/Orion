@@ -1,17 +1,42 @@
 import React from "react";
-import { BarChart2, FileText } from "lucide-react";
+import { BarChart2, FileText, MapPin, Users, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./AdminHeader.css";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart2 },
   { id: "feedback", label: "Feedback", icon: FileText },
+  { id: "trails", label: "Trails", icon: MapPin },
+  { id: "users", label: "Users", icon: Users },
 ];
 
 export default function Header({ activeTab, setActiveTab }) {
+  const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    // Check if there's a previous page in history
+    if (window.history.length > 1) {
+      navigate(-1); // Go back to previous page
+    } else {
+      // Fallback to dashboard if no history
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <header className="admin-header">
       <div className="admin-header-content">
-        <h1 className="admin-header-title">Admin Dashboard</h1>
+        <div className="admin-header-left">
+          <button
+            onClick={handleBackClick}
+            className="admin-back-button"
+            title="Go back"
+          >
+            <ArrowLeft className="admin-back-icon" />
+            <span className="admin-back-text">Back</span>
+          </button>
+          <h1 className="admin-header-title">Admin Dashboard</h1>
+        </div>
         <div className="admin-header-tabs">
           {tabs.map((tab) => (
             <button

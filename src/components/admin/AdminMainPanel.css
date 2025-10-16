@@ -69,6 +69,13 @@
   animation: slideInUp 0.3s ease-out;
 }
 
+.admin-management-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: slideInUp 0.3s ease-out;
+}
+
 .admin-section {
   margin-bottom: 2rem;
 }

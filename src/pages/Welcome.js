@@ -26,6 +26,54 @@ const HERO_IMAGES = [
   },
 ];
 
+const ABOUT_HIGHLIGHTS = [
+  {
+    title: 'Community powered data',
+    copy: 'Realtime trail alerts, recent reviews, and photos curated by thousands of local explorers so you always know what to expect.',
+  },
+  {
+    title: 'Sustainable adventures',
+    copy: 'We partner with parks and conservancies to champion Leave No Trace principles and protect the places we roam.',
+  },
+  {
+    title: 'Designed for every device',
+    copy: 'Plan from your desktop, then enjoy quick trail access, offline downloads, and safety tools on mobile when you head outside.',
+  },
+];
+
+const SHOWCASE_SECTIONS = [
+  {
+    id: 'explorer',
+    eyebrow: 'Trail Explorer',
+    title: 'Plan smarter adventures with precision filters',
+    description:
+      'Dial in the perfect route using difficulty, elevation, distance, tags, and crowd-sourced insights. Preview weather overlays and terrain in a single glance.',
+    bullets: ['Smart filtering & saved searches', 'Live weather + topo previews', 'Trail health and seasonal alerts'],
+    action: { label: 'Jump into Explorer', to: '/trails' },
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=60',
+  },
+  {
+    id: 'submit',
+    eyebrow: 'Trail Submission',
+    title: 'Share discoveries and build the collective map',
+    description:
+      'Upload GPS recordings, photos, and rich notes in minutes. Orion cleans the data, flags hazards, and notifies your community instantly.',
+    bullets: ['Guided submission workflow', 'Automatic geo-cleanup & QA', 'Instant visibility to followers'],
+    action: { label: 'Start a submission', to: '/trails#submit' },
+    image: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=60',
+  },
+  {
+    id: 'reviews',
+    eyebrow: 'Reviews & Media',
+    title: 'Relive the story with immersive media hubs',
+    description:
+      'Scroll cinematic trip reports, drone flyovers, and bite-sized video recaps — all organized per trail so you can scout conditions before you arrive.',
+    bullets: ['High-res galleries & reels', 'Verified condition updates', 'AI summaries for quick reads'],
+    action: { label: 'Browse community stories', to: '/reviews' },
+    image: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?auto=format&fit=crop&w=1400&q=60',
+  },
+];
+
 export default function Welcome() {
   const [idx, setIdx] = useState(0);
   const statsRef = useRef(null);
@@ -79,7 +127,7 @@ export default function Welcome() {
 
   return (
     <div className={styles['welcome-page']}>
-      <section className={styles['welcome-hero']} aria-labelledby="welcome-heading">
+      <section id="home" className={`${styles['welcome-hero']} ${styles['anchor-target']}`} aria-labelledby="welcome-heading">
         {/* Background slides */}
         {HERO_IMAGES.map((img, i) => (
           <picture key={i} className={`${styles['welcome-slide']} ${idx === i ? styles['active'] : ''}`}>
@@ -90,7 +138,7 @@ export default function Welcome() {
         <div className={styles['welcome-hero-gradient']} aria-hidden="true"></div>
 
         {/* Content */}
-        <div className={styles['welcome-content']}>
+        <div className={`${styles['welcome-content']} reveal`} style={{ '--delay': '120ms' }}>
           <h1 id="welcome-heading" className={styles['welcome-title']}>
             <span className={styles['typewriter']}>{typedTitle}</span>
           </h1>
@@ -109,8 +157,80 @@ export default function Welcome() {
         </div>
       </section>
 
+      {/* About */}
+      <section
+        id="about"
+        className={`${styles['about-section']} ${styles['anchor-target']} reveal`}
+        style={{ '--delay': '160ms' }}
+        aria-labelledby="about-heading"
+      >
+        <div className={styles['about-inner']}>
+          <div className={styles['about-copy']}>
+            <p className={styles['section-eyebrow']}>About Orion</p>
+            <h2 id="about-heading">Charting new paths with the trail community</h2>
+            <p>
+              Orion helps millions of outdoor lovers find the right trail, navigate safely, and share their story — all while
+              stewarding the environments we explore. Every dataset, alert, and review you see is refined through our hybrid of
+              verified partners and passionate hikers like you.
+            </p>
+            <div className={styles['about-cta']}>
+              <Link to="/signup" className={styles['cta-link']}>
+                Join the community
+              </Link>
+              <Link to="/feedback" className={styles['cta-link-secondary']}>
+                See what&apos;s new
+              </Link>
+            </div>
+          </div>
+
+          <div className={styles['about-grid']}>
+            {ABOUT_HIGHLIGHTS.map(({ title, copy }, i) => (
+              <article key={title} className={`${styles['about-card']} reveal`} style={{ '--delay': `${220 + i * 80}ms` }}>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {SHOWCASE_SECTIONS.map(({ id, eyebrow, title, description, bullets, action, image }, index) => (
+        <section
+          key={id}
+          id={id}
+          className={`${styles['highlight-section']} ${styles['anchor-target']} ${index % 2 ? styles['is-reversed'] : ''} reveal`}
+          style={{ '--delay': `${180 + index * 90}ms` }}
+          aria-labelledby={`${id}-heading`}
+        >
+          <div className={styles['highlight-inner']}>
+            <div className={styles['highlight-copy']}>
+              <p className={styles['section-eyebrow']}>{eyebrow}</p>
+              <h2 id={`${id}-heading`}>{title}</h2>
+              <p>{description}</p>
+              <ul className={styles['highlight-points']}>
+                {bullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <Link to={action.to} className={styles['cta-link']}>
+                {action.label}
+              </Link>
+            </div>
+            <div className={styles['highlight-media']}>
+              <div className={styles['highlight-media-frame']} style={{ '--bg-image': `url(${image})` }}></div>
+            </div>
+          </div>
+        </section>
+      ))}
+
       {/* Stats Section */}
-      <section ref={statsRef} className={styles['stats-section']} aria-label="Orion hiking stats">
+      <section
+        ref={statsRef}
+        id="stats"
+        className={`${styles['stats-section']} ${styles['anchor-target']} reveal`}
+        style={{ '--delay': '220ms' }}
+        aria-label="Orion hiking stats"
+      >
         <div className={styles['stats-inner']}>
           <div className={styles['stats-grid']}>
             <StatCard
@@ -144,7 +264,12 @@ export default function Welcome() {
       </section>
 
       {/* Browse by Activity Section */}
-      <section className={styles['activities-section']} aria-labelledby="browse-activity-heading">
+      <section
+        id="activities"
+        className={`${styles['activities-section']} ${styles['anchor-target']} reveal`}
+        style={{ '--delay': '260ms' }}
+        aria-labelledby="browse-activity-heading"
+      >
         <div className={styles['activities-inner']}>
           <h2 id="browse-activity-heading" className={styles['section-title']}>Browse by activity</h2>
           <div className={styles['activity-grid']}>

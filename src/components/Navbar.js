@@ -3,103 +3,32 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton.js';
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from 'firebase/auth';
-import { auth, db } from '../firebaseConfig';
-import { doc, getDoc } from "firebase/firestore";
+import { auth } from '../firebaseConfig';
 import { useToast } from './ToastContext';
 import ProfileIcon from './ProfileIcon';
 import SettingsIcon from './SettingsIcon';
 import FeedbackIcon from './FeedbackIcon';
 import HelpCenterIcon from './HelpCenterIcon';
 import OrionLogo from '../assets/orion_logo_clear.png';
-import AdminIcon from './admin/AdminIcon';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false); // new state for admin status
   const [profileOpen, setProfileOpen] = useState(false);
-  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const closeTimerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const isLanding = location.pathname === '/';
-  const isTrails = location.pathname === '/trails';
+  const isLandingRoute = location.pathname === '/';
+  const isOverlayRoute = isLandingRoute || location.pathname === '/trails';
   const { show } = useToast();
-
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
   
   // Login via route; Google sign-in available on Login page
 
   useEffect(() => {
-      let unsubscribe = () => {};
-  
-      const checkAdminRole = async (user) => {
-        if (!user) {
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-  
-        try {
-          const userDocRef = doc(db, "Users", user.uid);
-          const userSnapshot = await getDoc(userDocRef);
-          
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            // Check multiple possible role fields for flexibility
-            const userRole = userData.profileInfo?.role || userData.role;
-            setIsAdmin(userRole === "admin");
-          } else {
-            console.warn("User document not found for:", user.uid);
-            setIsAdmin(false);
-          }
-        } catch (err) {
-          console.error("Error checking admin role:", err);
-          setError("Failed to verify admin privileges");
-          setIsAdmin(false);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      // Listen for auth state changes
-      unsubscribe = onAuthStateChanged(auth, (user) => {
-        setError(null);
-        checkAdminRole(user);
-      });
-  
-      // Cleanup function
-      return () => unsubscribe();
-    }, []);
-
-  // normal users
-  useEffect(() => {
     const unsub = onAuthStateChanged(auth, setUser);
     return () => unsub();
   }, []);
-
-  // Close mobile menu when clicking outside and prevent body scroll
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (open && !event.target.closest('.navbar')) {
-        setOpen(false);
-        setMobileProfileOpen(false);
-      }
-    };
-
-    if (open) {
-      document.addEventListener('click', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.removeEventListener('click', handleClickOutside);
-        document.body.style.overflow = 'unset';
-      };
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [open]);
 
   // --- Auth (Google only) ---
   const googleProviderRef = useRef(new GoogleAuthProvider());
@@ -139,35 +68,85 @@ export default function Navbar() {
     closeTimerRef.current = setTimeout(() => setProfileOpen(false), 220);
   };
 
-  return (
-    <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
-    <div className="nav-inner">
-      <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
-        <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
-      </Link>
+  const closeMobileMenu = () => setOpen(false);
 
-      {/* Desktop nav links */}
-      <nav className="nav-links desktop-nav">
-        <button
-          type="button"
-          className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-          onClick={()=>{ navigate('/trails'); }}
-        >Trails</button>
-          <button
-            type="button"
-            className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); } }}
-          >Reviews & Media</button>
-          <button
-            type="button"
-            className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}
-          >MyTrails</button>
-          <button
-            type="button"
-            className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); } }}
-          >Alerts & Updates</button>
+  const handleGuardedNavigation = (path) => {
+    if (!user) {
+      show('Please log in first', { type: 'warn' });
+    } else {
+      navigate(path);
+    }
+  };
+
+  const scrollToSection = (target) => {
+    closeMobileMenu();
+    const id = target.startsWith('#') ? target.slice(1) : target;
+    const el = typeof document !== 'undefined' ? document.getElementById(id) : null;
+    if (el) {
+      const prefersReducedMotion =
+        typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+          ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          : false;
+      el.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+  };
+
+  const landingLinks = [
+    { label: 'Home', target: 'home' },
+    { label: 'About', target: 'about' },
+    { label: 'Trail Explorer', target: 'explorer' },
+    { label: 'Trail Submission', target: 'submit' },
+    { label: 'Reviews & Media', target: 'reviews' },
+    { label: 'Activities', target: 'activities' },
+  ];
+
+  return (
+    <header className={`navbar ${isOverlayRoute ? 'landing' : ''}`}>
+      <div className="nav-inner">
+        <Link className="brand" to="/" onClick={closeMobileMenu} aria-label="Orion Home">
+          <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
+        </Link>
+
+        {/* Desktop nav links */}
+        <nav className="nav-links desktop-nav">
+          {isLandingRoute ? (
+            landingLinks.map(({ label, target }) => (
+              <a
+                key={target}
+                href={`#${target}`}
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  scrollToSection(target);
+                }}
+              >
+                {label}
+              </a>
+            ))
+          ) : (
+            <>
+              <NavLink to="/explorer">Trail Explorer</NavLink>
+              <button
+                type="button"
+                className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
+                onClick={() => handleGuardedNavigation('/submit')}
+              >Trail Submission</button>
+              <button
+                type="button"
+                className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
+                onClick={() => handleGuardedNavigation('/reviews')}
+              >Reviews & Media</button>
+              <button
+                type="button"
+                className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
+                onClick={() => handleGuardedNavigation('/mytrails')}
+              >MyTrails</button>
+              <button
+                type="button"
+                className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
+                onClick={() => handleGuardedNavigation('/alerts')}
+              >Alerts & Updates</button>
+            </>
+          )}
         </nav>
 
         {/* Desktop login/logout */}
@@ -227,17 +206,7 @@ export default function Navbar() {
                       <FeedbackIcon className="menu-icon" />
                       Feedback
                     </button>
-
-                    {/* Admin button only available for admins */}
-                    {isAdmin && (
-                      <button
-                        className="profile-menu-item"
-                        onClick={() => navigate('/admin')}
-                      >
-                        <AdminIcon className="menu-item" />
-                        Admin
-                      </button>
-                    )}
+                    
                     <hr className="profile-divider" />
                     
                     <div className="profile-menu-item logout-item">
@@ -259,7 +228,7 @@ export default function Navbar() {
           type="checkbox"
           id="checkbox"
           checked={open}
-          onChange={() => setOpen(o => !o)}
+          onChange={() => setOpen((o) => !o)}
           aria-hidden
         />
         <label htmlFor="checkbox" className="toggle" aria-label="Toggle menu" aria-expanded={open}>
@@ -271,76 +240,56 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
           <div className="mobile-nav-links">
-            <button
-              type="button"
-              className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-              onClick={() => { navigate('/trails'); setOpen(false); }}
-            >Trails</button>
-            <button
-              type="button"
-              className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false); } }}
-            >Reviews & Media</button>
-            <button
-              type="button"
-              className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false); } }}
-            >MyTrails</button>
-            <button
-              type="button"
-              className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false); } }}
-            >Alerts & Updates</button>
+            {isLandingRoute ? (
+              landingLinks.map(({ label, target }) => (
+                <a
+                  key={target}
+                  href={`#${target}`}
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    scrollToSection(target);
+                  }}
+                >
+                  {label}
+                </a>
+              ))
+            ) : (
+              <>
+                <NavLink to="/explorer" onClick={closeMobileMenu}>Trail Explorer</NavLink>
+                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/submit'); closeMobileMenu(); }}>Trail Submission</button>
+                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/reviews'); closeMobileMenu(); }}>Reviews & Media</button>
+                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/mytrails'); closeMobileMenu(); }}>MyTrails</button>
+                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/alerts'); closeMobileMenu(); }}>Alerts & Updates</button>
+              </>
+            )}
           </div>
           <div className="mobile-actions">
             {user ? (
               <div className="mobile-profile">
-                <div 
-                  className="mobile-profile-header"
-                  onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
-                >
-                  <div className="mobile-profile-info">
-                    {user?.photoURL && (
-                      <img 
-                        src={user.photoURL} 
-                        alt="User avatar" 
-                        className="mobile-avatar" 
-                      />
-                    )}
-                    
-                    <div className="mobile-profile-text">
-                      <p className="mobile-profile-name">{user.displayName || user.email}</p>
-                      <p className="mobile-profile-email">{user.email}</p>
-                    </div>
-                  </div>
-                  <span className="mobile-profile-chevron">
-                    {mobileProfileOpen ? '▲' : '▼'}
-                  </span>
+                <div className="mobile-profile-info">
+                  {user?.photoURL && (
+                    <img 
+                      src={user.photoURL} 
+                      alt="User avatar" 
+                      className="mobile-avatar" 
+                    />
+                  )}
+                  
+                  <p className="mobile-profile-name">{user.displayName || user.email}</p>
+                  <p className="mobile-profile-email">{user.email}</p>
                 </div>
-                
-                {mobileProfileOpen && (
-                  <div className="mobile-profile-menu">
-                    <button className="mobile-profile-item" onClick={() => { navigate('/profile'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <ProfileIcon className="mobile-menu-icon" />
-                      Profile
-                    </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/help'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <HelpCenterIcon className="mobile-menu-icon" />
-                      Help Center
-                    </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <SettingsIcon className="mobile-menu-icon" />
-                      Settings
-                    </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/feedback'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <FeedbackIcon className="mobile-menu-icon" />
-                      Feedback
-                    </button>
-                    <div className="mobile-logout">
-                      <LogoutButton />
-                    </div>
-                  </div>
-                )}
+                <button className="mobile-profile-item" onClick={() => { navigate('/favorites'); setOpen(false); }}>
+                  Favorites
+                </button>
+                <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); }}>
+                  Settings
+                </button>
+                <button className="mobile-profile-item" onClick={() => { navigate('/feedback'); setOpen(false); }}>
+                  Feedback
+                </button>
+                <div className="mobile-logout">
+                  <LogoutButton />
+                </div>
               </div>
             ) : (
               <button 

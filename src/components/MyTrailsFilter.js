@@ -52,11 +52,11 @@ const MyTrailsFilter = ({
   }, [hasActiveFilters]);
 
   return (
-    <div className="mytrails-filter-container">
+    <div className="mytrails-filter-panel">
       {/* Search and Filters Row */}
-      <div className="mytrails-filters-row">
+      <div className="mytrails-filter-row">
         {/* Search Bar */}
-        <div className="mytrails-search-input-wrapper">
+        <div className="mytrails-search-wrapper">
           <Search size={18} className="mytrails-search-icon" />
           <input
             type="text"
@@ -68,7 +68,7 @@ const MyTrailsFilter = ({
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="mytrails-clear-search"
+              className="mytrails-search-clear"
               aria-label="Clear search"
             >
               <X size={16} />
@@ -77,12 +77,12 @@ const MyTrailsFilter = ({
         </div>
 
         {/* Inline Filter Options */}
-        <div className="mytrails-inline-filters">
+        <div className="mytrails-filter-controls">
           {/* Difficulty Filter */}
           <select
             value={filters.difficulty}
             onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-            className="mytrails-inline-select"
+            className="mytrails-filter-select"
           >
             <option value="all">All Difficulties</option>
             <option value="Easy">Easy</option>
@@ -91,7 +91,7 @@ const MyTrailsFilter = ({
           </select>
 
           {/* Distance Range Slider */}
-          <div className="mytrails-distance-slider">
+          <div className="mytrails-range-slider">
             <div className="distance-slider-header">
               <span className="distance-label">Distance: {filters.minDistance} - {filters.maxDistance} km</span>
             </div>
@@ -141,7 +141,7 @@ const MyTrailsFilter = ({
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="mytrails-inline-select"
+              className="mytrails-filter-select"
             >
               <option value="all">All Status</option>
               <option value="open">Open</option>
@@ -153,7 +153,7 @@ const MyTrailsFilter = ({
           <select
             value={sorting.sortBy}
             onChange={(e) => onSortChange(e.target.value, sorting.sortOrder)}
-            className="mytrails-inline-select"
+            className="mytrails-filter-select"
           >
             <option value="name">Sort by Name</option>
             <option value="distance">Sort by Distance</option>
@@ -164,7 +164,7 @@ const MyTrailsFilter = ({
           {/* Sort Order Toggle Button */}
           <button
             onClick={handleSortOrderToggle}
-            className="mytrails-sort-order-button"
+            className="mytrails-sort-button"
             title={`Sort ${sorting.sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
             aria-label={`Sort ${sorting.sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
           >
@@ -172,7 +172,7 @@ const MyTrailsFilter = ({
           </button>
 
           {/* Show All Checkbox */}
-          <div className="mytrails-show-all-container">
+          <div className="mytrails-show-all-wrapper">
             <label className="mytrails-show-all-label">
               <input
                 type="checkbox"
@@ -187,7 +187,7 @@ const MyTrailsFilter = ({
           {/* Clear All Button */}
           <button
             onClick={clearAllFilters}
-            className={`mytrails-clear-all-inline ${hasActiveFilters ? 'visible' : 'hidden'}`}
+            className={`mytrails-clear-button ${hasActiveFilters ? 'visible' : 'hidden'}`}
             aria-label="Clear all filters"
             disabled={!hasActiveFilters}
           >

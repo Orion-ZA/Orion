@@ -76,8 +76,10 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
     
-    expect(screen.getByTestId('mode')).toHaveTextContent('auto');
-    expect(screen.getByTestId('resolved')).toHaveTextContent('light');
+  expect(screen.getByTestId('mode')).toHaveTextContent('dark');
+  expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
+  expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+  expect(document.documentElement.style.colorScheme).toBe('dark');
   });
 
   it('loads saved mode from localStorage', () => {
@@ -133,13 +135,19 @@ describe('ThemeProvider', () => {
 
   it('follows system preference when mode is auto', () => {
     mockMediaQuery.matches = true; // System prefers dark
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
+
     expect(screen.getByTestId('mode')).toHaveTextContent('auto');
     expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
@@ -148,13 +156,19 @@ describe('ThemeProvider', () => {
 
   it('follows system preference for light when mode is auto', () => {
     mockMediaQuery.matches = false; // System prefers light
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
+
     expect(screen.getByTestId('mode')).toHaveTextContent('auto');
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
@@ -205,6 +219,12 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
     
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
+
     expect(mockMatchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)');
     expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
@@ -223,7 +243,7 @@ describe('ThemeProvider', () => {
     });
     
     // Should not add event listener for non-auto modes
-    expect(mockAddEventListener).toHaveBeenCalledTimes(1); // Only the initial call
+    expect(mockAddEventListener).not.toHaveBeenCalled();
   });
 
   it('updates theme when system preference changes in auto mode', () => {
@@ -235,6 +255,12 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
     
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
+
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
     
     // Simulate system preference change to dark
@@ -255,6 +281,12 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
+
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
     
     unmount();
     
@@ -272,6 +304,12 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
     
+    const setAutoButton = screen.getByTestId('set-auto');
+
+    act(() => {
+      setAutoButton.click();
+    });
+
     expect(screen.getByTestId('mode')).toHaveTextContent('auto');
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
     
@@ -301,8 +339,8 @@ describe('ThemeProvider', () => {
         <TestComponentWithRenderCount />
       </ThemeProvider>
     );
-    
-    const initialRenderCount = renderCount;
+
+    expect(screen.getByTestId('render-count')).toHaveTextContent('1');
     
     // Rerender should not cause unnecessary re-renders due to stable function reference
     rerender(
@@ -310,7 +348,7 @@ describe('ThemeProvider', () => {
         <TestComponentWithRenderCount />
       </ThemeProvider>
     );
-    
-    expect(renderCount).toBe(initialRenderCount + 1);
+
+    expect(screen.getByTestId('render-count')).toHaveTextContent('2');
   });
 });

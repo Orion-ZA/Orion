@@ -70,11 +70,20 @@ export default function Navbar() {
 
   const closeMobileMenu = () => setOpen(false);
 
-  const handleGuardedNavigation = (path) => {
+  const handleGuardedNavigation = (destination) => {
     if (!user) {
       show('Please log in first', { type: 'warn' });
     } else {
-      navigate(path);
+      const target =
+        typeof destination === 'string'
+          ? { to: destination }
+          : destination && typeof destination === 'object'
+            ? destination
+            : null;
+
+      if (target?.to) {
+        navigate(target.to, target.state ? { state: target.state } : undefined);
+      }
     }
   };
 
@@ -100,6 +109,20 @@ export default function Navbar() {
     { label: 'Activities', target: 'activities' },
   ];
 
+  const appLinks = [
+    { label: 'Trail Explorer', type: 'nav', to: '/trails' },
+    {
+      label: 'Trail Submission',
+      type: 'guarded',
+      to: '/trails',
+      state: { openSubmission: true },
+      active: ['/trails'],
+    },
+    { label: 'Reviews & Media', type: 'guarded', to: '/reviews', active: ['/reviews'] },
+    { label: 'MyTrails', type: 'guarded', to: '/mytrails', active: ['/mytrails'] },
+    { label: 'Alerts & Updates', type: 'guarded', to: '/alerts', active: ['/alerts'] },
+  ];
+
   return (
     <header className={`navbar ${isOverlayRoute ? 'landing' : ''}`}>
       <div className="nav-inner">
@@ -109,44 +132,39 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <nav className="nav-links desktop-nav">
-          {isLandingRoute ? (
-            landingLinks.map(({ label, target }) => (
-              <a
-                key={target}
-                href={`#${target}`}
-                onClick={(evt) => {
-                  evt.preventDefault();
-                  scrollToSection(target);
-                }}
-              >
-                {label}
-              </a>
-            ))
-          ) : (
-            <>
-              <NavLink to="/explorer">Trail Explorer</NavLink>
-              <button
-                type="button"
-                className={`as-link ${location.pathname === '/submit' ? 'active' : ''}`}
-                onClick={() => handleGuardedNavigation('/submit')}
-              >Trail Submission</button>
-              <button
-                type="button"
-                className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
-                onClick={() => handleGuardedNavigation('/reviews')}
-              >Reviews & Media</button>
-              <button
-                type="button"
-                className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
-                onClick={() => handleGuardedNavigation('/mytrails')}
-              >MyTrails</button>
-              <button
-                type="button"
-                className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
-                onClick={() => handleGuardedNavigation('/alerts')}
-              >Alerts & Updates</button>
-            </>
-          )}
+          {isLandingRoute
+            ? landingLinks.map(({ label, target }) => (
+                <a
+                  key={target}
+                  href={`#${target}`}
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    scrollToSection(target);
+                  }}
+                >
+                  {label}
+                </a>
+              ))
+            : appLinks.map(({ label, type, to, state, active }) => {
+                if (type === 'nav') {
+                  return (
+                    <NavLink key={label} to={to}>
+                      {label}
+                    </NavLink>
+                  );
+                }
+                const isActive = Array.isArray(active) && active.includes(location.pathname);
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    className={`as-link ${isActive ? 'active' : ''}`}
+                    onClick={() => handleGuardedNavigation({ to, state })}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
         </nav>
 
         {/* Desktop login/logout */}
@@ -240,28 +258,38 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
           <div className="mobile-nav-links">
-            {isLandingRoute ? (
-              landingLinks.map(({ label, target }) => (
-                <a
-                  key={target}
-                  href={`#${target}`}
-                  onClick={(evt) => {
-                    evt.preventDefault();
-                    scrollToSection(target);
-                  }}
-                >
-                  {label}
-                </a>
-              ))
-            ) : (
-              <>
-                <NavLink to="/explorer" onClick={closeMobileMenu}>Trail Explorer</NavLink>
-                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/submit'); closeMobileMenu(); }}>Trail Submission</button>
-                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/reviews'); closeMobileMenu(); }}>Reviews & Media</button>
-                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/mytrails'); closeMobileMenu(); }}>MyTrails</button>
-                <button type="button" className="as-link" onClick={() => { handleGuardedNavigation('/alerts'); closeMobileMenu(); }}>Alerts & Updates</button>
-              </>
-            )}
+            {isLandingRoute
+              ? landingLinks.map(({ label, target }) => (
+                  <a
+                    key={target}
+                    href={`#${target}`}
+                    onClick={(evt) => {
+                      evt.preventDefault();
+                      scrollToSection(target);
+                    }}
+                  >
+                    {label}
+                  </a>
+                ))
+              : appLinks.map(({ label, type, to, state }) =>
+                  type === 'nav' ? (
+                    <NavLink key={label} to={to} onClick={closeMobileMenu}>
+                      {label}
+                    </NavLink>
+                  ) : (
+                    <button
+                      key={label}
+                      type="button"
+                      className="as-link"
+                      onClick={() => {
+                        handleGuardedNavigation({ to, state });
+                        closeMobileMenu();
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                )}
           </div>
           <div className="mobile-actions">
             {user ? (
@@ -278,8 +306,11 @@ export default function Navbar() {
                   <p className="mobile-profile-name">{user.displayName || user.email}</p>
                   <p className="mobile-profile-email">{user.email}</p>
                 </div>
-                <button className="mobile-profile-item" onClick={() => { navigate('/favorites'); setOpen(false); }}>
-                  Favorites
+                <button className="mobile-profile-item" onClick={() => { navigate('/profile'); setOpen(false); }}>
+                  Profile
+                </button>
+                <button className="mobile-profile-item" onClick={() => { navigate('/help'); setOpen(false); }}>
+                  Help Center
                 </button>
                 <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); }}>
                   Settings

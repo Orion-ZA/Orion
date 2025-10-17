@@ -41,7 +41,7 @@ jest.mock('react-map-gl/mapbox', () => {
     React.useEffect(() => {
       if (onLoad) onLoad();
       if (onMove) onMove({ viewState: { zoom: 10 } });
-    }, []);
+    }, [onLoad, onMove]);
 
     return (
       <div data-testid="mock-map" onClick={onClick}>{children}</div>
@@ -133,8 +133,8 @@ describe('TrailMap', () => {
     render(<TrailMap {...defaultProps()} trails={trails} onTrailClick={onTrailClick} />);
     // Click the marker wrapper
     const markers = screen.getAllByTestId('mock-marker');
-    fireEvent.click(markers[markers.length - 1]);
-    expect(onTrailClick).toHaveBeenCalledWith(trails[0]);
+  fireEvent.click(markers[markers.length - 1]);
+  expect(onTrailClick).toHaveBeenCalledWith(expect.objectContaining(trails[0]));
   });
 
   it('applies difficulty color and icon for trail marker', () => {
@@ -203,10 +203,10 @@ describe('TrailMap', () => {
       { id: 't1', name: 'Trail A', longitude: 10, latitude: 20, difficulty: 'Easy' },
     ];
     render(<TrailMap {...props} trails={trails} />);
-    const markerWrapper = screen.getAllByTestId('mock-marker')[0].querySelector('.trail-marker-wrapper');
+  const markerWrapper = screen.getAllByTestId('trail-marker-wrapper')[0];
     // Simulate mouse events on wrapper
-    fireEvent.mouseEnter(markerWrapper);
-    expect(props.setHoveredTrail).toHaveBeenCalledWith(trails[0]);
+  fireEvent.mouseEnter(markerWrapper);
+  expect(props.setHoveredTrail).toHaveBeenCalledWith(expect.objectContaining(trails[0]));
     fireEvent.mouseLeave(markerWrapper);
     expect(props.setHoveredTrail).toHaveBeenCalledWith(null);
   });

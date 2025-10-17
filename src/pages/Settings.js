@@ -239,28 +239,28 @@ const SettingsPage = () => {
                 onClick={() => setActiveTab('profile')}
               >
                 <User size={18} />
-                <span className="nav-text">Profile</span>
+                Profile
               </button>
               <button 
                 className={activeTab === 'security' ? 'active' : ''}
                 onClick={() => setActiveTab('security')}
               >
                 <Lock size={18} />
-                <span className="nav-text">Security</span>
+                Security
               </button>
               <button 
                 className={activeTab === 'preferences' ? 'active' : ''}
                 onClick={() => setActiveTab('preferences')}
               >
                 <Palette size={18} />
-                <span className="nav-text">Prefs</span>
+                Preferences
               </button>
               <button 
                 className={activeTab === 'notifications' ? 'active' : ''}
                 onClick={() => setActiveTab('notifications')}
               >
                 <Bell size={18} />
-                <span className="nav-text">Alerts</span>
+                Notifications
               </button>
             </nav>
           </div>

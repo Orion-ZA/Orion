@@ -10,7 +10,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 const STORAGE_KEY = 'orion-theme';
 
 const ThemeContext = createContext({
-  mode: 'auto',               // explicit user choice
+  mode: 'dark',               // explicit user choice
   resolved: 'dark',           // actual theme applied (light or dark)
   setMode: () => {},          // function to change mode
 });
@@ -19,7 +19,7 @@ export function ThemeProvider({ children }) {
   const prefQuery = useRef(null);
   const [mode, setMode] = useState(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-    return saved || 'auto';
+    return saved || 'dark';
   });
   const [resolved, setResolved] = useState('dark');
 

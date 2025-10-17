@@ -10,7 +10,7 @@ const tabs = [
   { id: "users", label: "Users", icon: Users },
 ];
 
-export default function Header({ activeTab, setActiveTab }) {
+export default function AdminHeader({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
 
   const handleBackClick = () => {

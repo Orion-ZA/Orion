@@ -7,6 +7,15 @@ import AdminHeader from '../components/admin/AdminHeader';
 jest.mock('lucide-react', () => ({
   BarChart2: () => <div data-testid="bar-chart-icon" />,
   FileText: () => <div data-testid="file-text-icon" />,
+  MapPin: () => <div data-testid="map-pin-icon" />,
+  Users: () => <div data-testid="users-icon" />,
+  ArrowLeft: () => <div data-testid="arrow-left-icon" />,
+}));
+
+// Mock react-router-dom
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
 }));
 
 describe('AdminHeader', () => {
@@ -14,6 +23,7 @@ describe('AdminHeader', () => {
 
   beforeEach(() => {
     mockSetActiveTab.mockClear();
+    mockNavigate.mockClear();
   });
 
   it('renders admin dashboard title', () => {
@@ -27,6 +37,8 @@ describe('AdminHeader', () => {
     
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Feedback')).toBeInTheDocument();
+    expect(screen.getByText('Trails')).toBeInTheDocument();
+    expect(screen.getByText('Users')).toBeInTheDocument();
   });
 
   it('renders tab icons', () => {
@@ -34,6 +46,8 @@ describe('AdminHeader', () => {
     
     expect(screen.getAllByTestId('bar-chart-icon')).toHaveLength(1);
     expect(screen.getAllByTestId('file-text-icon')).toHaveLength(1);
+    expect(screen.getAllByTestId('map-pin-icon')).toHaveLength(1);
+    expect(screen.getAllByTestId('users-icon')).toHaveLength(1);
   });
 
   it('applies active class to the correct tab', () => {
@@ -64,6 +78,43 @@ describe('AdminHeader', () => {
     expect(mockSetActiveTab).toHaveBeenCalledWith('dashboard');
   });
 
+  it('renders back button', () => {
+    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+    
+    expect(screen.getByText('Back')).toBeInTheDocument();
+    expect(screen.getByTestId('arrow-left-icon')).toBeInTheDocument();
+  });
+
+  it('calls navigate(-1) when back button is clicked and history length > 1', () => {
+    // Mock window.history.length to be greater than 1
+    Object.defineProperty(window, 'history', {
+      value: { length: 2 },
+      writable: true
+    });
+
+    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+    
+    const backButton = screen.getByText('Back');
+    fireEvent.click(backButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
+  });
+
+  it('calls navigate("/dashboard") when back button is clicked and history length <= 1', () => {
+    // Mock window.history.length to be 1 or less
+    Object.defineProperty(window, 'history', {
+      value: { length: 1 },
+      writable: true
+    });
+
+    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+    
+    const backButton = screen.getByText('Back');
+    fireEvent.click(backButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
+
   it('renders online status indicator', () => {
     render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
     
@@ -92,13 +143,19 @@ describe('AdminHeader', () => {
     
     const dashboardTab = screen.getByText('Dashboard').closest('button');
     const feedbackTab = screen.getByText('Feedback').closest('button');
+    const trailsTab = screen.getByText('Trails').closest('button');
+    const usersTab = screen.getByText('Users').closest('button');
     
     expect(dashboardTab).toHaveClass('admin-header-tab');
     expect(feedbackTab).toHaveClass('admin-header-tab');
+    expect(trailsTab).toHaveClass('admin-header-tab');
+    expect(usersTab).toHaveClass('admin-header-tab');
     
     // Check for icon elements (they have the class but are rendered as components)
     expect(dashboardTab.querySelector('[data-testid="bar-chart-icon"]')).toBeInTheDocument();
     expect(feedbackTab.querySelector('[data-testid="file-text-icon"]')).toBeInTheDocument();
+    expect(trailsTab.querySelector('[data-testid="map-pin-icon"]')).toBeInTheDocument();
+    expect(usersTab.querySelector('[data-testid="users-icon"]')).toBeInTheDocument();
   });
 
   it('handles multiple tab clicks correctly', () => {
@@ -122,14 +179,20 @@ describe('AdminHeader', () => {
     
     const dashboardTab = screen.getByText('Dashboard').closest('button');
     const feedbackTab = screen.getByText('Feedback').closest('button');
+    const trailsTab = screen.getByText('Trails').closest('button');
+    const usersTab = screen.getByText('Users').closest('button');
     
     // Buttons are accessible by default, check they are clickable
     expect(dashboardTab).toBeInTheDocument();
     expect(feedbackTab).toBeInTheDocument();
+    expect(trailsTab).toBeInTheDocument();
+    expect(usersTab).toBeInTheDocument();
     
     // Check that buttons are properly structured
     expect(dashboardTab.tagName).toBe('BUTTON');
     expect(feedbackTab.tagName).toBe('BUTTON');
+    expect(trailsTab.tagName).toBe('BUTTON');
+    expect(usersTab.tagName).toBe('BUTTON');
   });
 
   it('renders with different activeTab values', () => {
@@ -137,16 +200,24 @@ describe('AdminHeader', () => {
     
     let dashboardTab = screen.getByText('Dashboard').closest('button');
     let feedbackTab = screen.getByText('Feedback').closest('button');
+    let trailsTab = screen.getByText('Trails').closest('button');
+    let usersTab = screen.getByText('Users').closest('button');
     
     expect(dashboardTab).toHaveClass('active');
     expect(feedbackTab).not.toHaveClass('active');
+    expect(trailsTab).not.toHaveClass('active');
+    expect(usersTab).not.toHaveClass('active');
     
     rerender(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
     
     dashboardTab = screen.getByText('Dashboard').closest('button');
     feedbackTab = screen.getByText('Feedback').closest('button');
+    trailsTab = screen.getByText('Trails').closest('button');
+    usersTab = screen.getByText('Users').closest('button');
     
     expect(dashboardTab).not.toHaveClass('active');
     expect(feedbackTab).toHaveClass('active');
+    expect(trailsTab).not.toHaveClass('active');
+    expect(usersTab).not.toHaveClass('active');
   });
 });

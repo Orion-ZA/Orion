@@ -22,7 +22,7 @@ const AlertsPopup = ({ isVisible, position, alerts, onMouseLeave }) => {
           {alerts.map((alert, index) => (
             <div key={alert.id || index} className="alerts-popup-item">
               <span className="alerts-popup-type">[{alert.type}]</span>
-              <span className="alerts-popup-message">{alert.message}</span>
+              <span className="alerts-popup-message">{alert.message || alert.comment || 'No message'}</span>
             </div>
           ))}
         </div>

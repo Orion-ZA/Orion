@@ -2,6 +2,8 @@ import React from "react";
 import FeedbackPanel from "./FeedbackPanel";
 import RatingsChart from "./RatingsChart";
 import FeedbackTypeChart from "./FeedbackTypeChart";
+import TrailsManagement from "./TrailsManagement";
+import UsersManagement from "./UsersManagement";
 import "./AdminMainPanel.css";
 
 export default function AdminMainPanel({ activeTab }) {
@@ -31,6 +33,18 @@ export default function AdminMainPanel({ activeTab }) {
       {activeTab === "feedback" && (
         <div className="admin-feedback-standalone">
           <FeedbackPanel />
+        </div>
+      )}
+
+      {activeTab === "trails" && (
+        <div className="admin-management-section">
+          <TrailsManagement />
+        </div>
+      )}
+
+      {activeTab === "users" && (
+        <div className="admin-management-section">
+          <UsersManagement />
         </div>
       )}
     </main>

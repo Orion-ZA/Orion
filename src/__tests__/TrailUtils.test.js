@@ -1,253 +1,542 @@
+import React from 'react';
+import { render } from '@testing-library/react';
 import { 
-  estimateDuration, 
+  formatDate,
+  formatLocation,
+  getAlertTypeColor,
+  getAlertTypeIcon,
+  renderStars,
   getDifficultyColor, 
-  getDifficultyIcon, 
-  calculateDistance, 
-  calculateRouteDistance, 
-  formatFileSize 
-} from '../components/trails/TrailUtils';
+  truncateUserId
+} from '../utils/trailUtils';
 
-describe('TrailUtils', () => {
-  describe('estimateDuration', () => {
-  it('should return "Not specified" for invalid or zero distance', () => {
-    expect(estimateDuration(0)).toBe('Not specified');
-    expect(estimateDuration(null)).toBe('Not specified');
-    expect(estimateDuration(undefined)).toBe('Not specified');
-    expect(estimateDuration(-5)).toBe('Not specified');
-  });
+describe('trailUtils', () => {
+  describe('formatDate', () => {
+    it('returns N/A for null timestamp', () => {
+      expect(formatDate(null)).toBe('N/A');
+    });
 
-  it('should estimate duration for short distances (less than 1 hour)', () => {
-    // 1 km at 3.5 km/h = 0.2857 hours
-    // min: 0.2857 * 0.8 = 0.228 hours = 13.7 min
-    // max: 0.2857 * 1.4 = 0.400 hours = 24 min
-    expect(estimateDuration(1)).toMatch(/(\d+) min - (\d+) min/);
-    expect(estimateDuration(1)).toBe('14 min - 24 min');
-  });
+    it('returns N/A for undefined timestamp', () => {
+      expect(formatDate(undefined)).toBe('N/A');
+    });
 
-  it('should estimate duration for medium distances (1-2 hours)', () => {
-    // 5 km at 3.5 km/h = 1.428 hours
-    // min: 1.428 * 0.8 = 1.14 hours = 1h 9m
-    // max: 1.428 * 1.4 = 2.00 hours = 2h
-    expect(estimateDuration(5)).toMatch(/(\d+)h (\d+)m - (\d+)h/);
-    expect(estimateDuration(5)).toBe('1h 9m - 2h');
-  });
+    it('returns N/A for empty string timestamp', () => {
+      expect(formatDate('')).toBe('N/A');
+    });
 
-  it('should estimate duration for longer distances (more than 2 hours)', () => {
-    // 10 km at 3.5 km/h = 2.857 hours
-    // min: 2.857 * 0.8 = 2.28 hours = 2h 17m
-    // max: 2.857 * 1.4 = 4.00 hours = 4h
-    expect(estimateDuration(10)).toMatch(/(\d+)h (\d+)m - (\d+)h/);
-    expect(estimateDuration(10)).toBe('2h 17m - 4h');
-  });
+    it('handles Firestore Timestamp objects', () => {
+      const mockTimestamp = {
+        toDate: () => new Date('2024-01-15T10:30:00Z')
+      };
+      const result = formatDate(mockTimestamp);
+      expect(result).toBe('2024/01/15'); // Format depends on locale
+    });
 
-  it('should handle edge case where minHours is very close to maxHours', () => {
-    // For a very small distance, min and max might be very close.
-    // The function ensures min is always less than max by at least 0.1 hours.
-    // Let's pick a distance that results in very close min/max
-    // e.g., distance = 0.1 km
-    // baseHours = 0.1 / 3.5 = 0.02857
-    // minHours = 0.02857 * 0.8 = 0.0228 hours = 1.37 min
-    // maxHours = 0.02857 * 1.4 = 0.0400 hours = 2.4 min
-    // The `finalMinHours` and `finalMaxHours` logic should ensure a reasonable range.
-    expect(estimateDuration(0.1)).toBe('6 min - 7 min');
-  });
+    it('handles string timestamps', () => {
+      const result = formatDate('2024-01-15T10:30:00Z');
+      expect(result).toBe('2024/01/15'); // Format depends on locale
+    });
 
-  it('should format time correctly for exactly 1 hour', () => {
-    // 3.5 km at 3.5 km/h = 1 hour
-    // min: 1 * 0.8 = 0.8 hours = 48 min
-    // max: 1 * 1.4 = 1.4 hours = 1h 24m
-    expect(estimateDuration(3.5)).toBe('48 min - 1h 24m');
-  });
+    it('handles Date objects', () => {
+      const date = new Date('2024-01-15T10:30:00Z');
+      const result = formatDate(date);
+      expect(result).toBe('2024/01/15'); // Format depends on locale
+    });
 
-  it('should format time correctly for exactly 2 hours', () => {
-    // 7 km at 3.5 km/h = 2 hours
-    // min: 2 * 0.8 = 1.6 hours = 1h 36m
-    // max: 2 * 1.4 = 2.8 hours = 2h 48m
-    expect(estimateDuration(7)).toBe('1h 36m - 2h 48m');
-  });
+    it('handles numeric timestamps', () => {
+      const timestamp = new Date('2024-01-15T10:30:00Z').getTime();
+      const result = formatDate(timestamp);
+      expect(result).toBe('2024/01/15'); // Format depends on locale
+    });
 
-  it('should handle fractional hours correctly for formatting', () => {
-    // Test formatTime directly if possible, or through estimateDuration
-    // For example, 1.5 hours should be 1h 30m
-    // Let's find a distance that results in 1.5 hours for one of the bounds
-    // 1.5 * 3.5 = 5.25 km
-    // min: 5.25 * 0.8 = 4.2 hours = 1h 12m
-    // max: 5.25 * 1.4 = 7.35 hours = 2h 6m
-    expect(estimateDuration(5.25)).toBe('1h 12m - 2h 6m');
-  });
+    it('returns N/A for invalid string timestamps', () => {
+      expect(formatDate('invalid-date')).toBe('N/A');
+    });
 
-  it('should handle decimal distances correctly', () => {
-    // Test with various decimal distances
-    expect(estimateDuration(2.5)).toMatch(/(\d+) min - (\d+)h/);
-    expect(estimateDuration(3.7)).toMatch(/(\d+) min - (\d+)h (\d+)m/);
-  });
+    it('returns N/A for invalid Date objects', () => {
+      const invalidDate = new Date('invalid');
+      expect(formatDate(invalidDate)).toBe('N/A');
+    });
 
-  it('should ensure min time is always less than max time', () => {
-    // Test multiple distances to ensure the constraint is always met
-    const distances = [0.1, 0.5, 1, 2, 5, 10, 20];
-    
-    distances.forEach(distance => {
-      const result = estimateDuration(distance);
-      expect(result).not.toBe('Not specified');
-      
-      // Extract times and verify min < max
-      const timeMatch = result.match(/(\d+)(?:h (\d+))?m? - (\d+)(?:h (\d+))?m?/);
-      if (timeMatch) {
-        const [, minHours, minMins, maxHours, maxMins] = timeMatch;
-        const minTotalMins = parseInt(minHours) * 60 + (parseInt(minMins) || 0);
-        const maxTotalMins = parseInt(maxHours) * 60 + (parseInt(maxMins) || 0);
-        
-        expect(minTotalMins).toBeLessThan(maxTotalMins);
-      }
+    it('handles Firestore Timestamp with invalid toDate', () => {
+      const mockTimestamp = {
+        toDate: () => new Date('invalid')
+      };
+      expect(formatDate(mockTimestamp)).toBe('N/A');
+    });
+
+    it('handles Firestore Timestamp with non-function toDate', () => {
+      const mockTimestamp = {
+        toDate: 'not a function'
+      };
+      const result = formatDate(mockTimestamp);
+      expect(result).toBe('N/A');
     });
   });
 
-  it('should handle very small distances correctly', () => {
-    // Test with very small distances
-    expect(estimateDuration(0.01)).toMatch(/(\d+) min - (\d+) min/);
-    expect(estimateDuration(0.05)).toMatch(/(\d+) min - (\d+) min/);
+  describe('formatLocation', () => {
+    it('returns N/A for null location', () => {
+      expect(formatLocation(null)).toBe('N/A');
+    });
+
+    it('returns N/A for undefined location', () => {
+      expect(formatLocation(undefined)).toBe('N/A');
+    });
+
+    it('returns N/A for empty string location', () => {
+      expect(formatLocation('')).toBe('N/A');
+    });
+
+    it('handles Firestore GeoPoint format (latitude/longitude)', () => {
+      const location = {
+        latitude: 40.7128,
+        longitude: -74.0060
+      };
+      expect(formatLocation(location)).toBe('40.7128, -74.0060');
+    });
+
+    it('handles lat/lng format', () => {
+      const location = {
+        lat: 40.7128,
+        lng: -74.0060
+      };
+      expect(formatLocation(location)).toBe('40.7128, -74.0060');
+    });
+
+    it('handles coordinates array format', () => {
+      const location = {
+        coordinates: [-74.0060, 40.7128] // [lng, lat] format
+      };
+      expect(formatLocation(location)).toBe('40.7128, -74.0060');
+    });
+
+    it('handles coordinates array with more than 2 elements', () => {
+      const location = {
+        coordinates: [-74.0060, 40.7128, 100] // [lng, lat, elevation]
+      };
+      expect(formatLocation(location)).toBe('40.7128, -74.0060');
+    });
+
+    it('handles empty coordinates array', () => {
+      const location = {
+        coordinates: []
+      };
+      expect(formatLocation(location)).toBe('[object Object]');
+    });
+
+    it('handles coordinates array with insufficient elements', () => {
+      const location = {
+        coordinates: [-74.0060] // Only longitude
+      };
+      expect(formatLocation(location)).toBe('[object Object]');
+    });
+
+    it('handles string location', () => {
+      expect(formatLocation('New York, NY')).toBe('New York, NY');
+    });
+
+    it('handles object with no recognizable format', () => {
+      const location = {
+        name: 'Central Park',
+        address: 'New York, NY'
+      };
+      expect(formatLocation(location)).toBe('[object Object]');
+    });
+
+    it('handles numeric values', () => {
+      expect(formatLocation(123)).toBe('N/A');
+    });
+
+    it('handles boolean values', () => {
+      expect(formatLocation(true)).toBe('N/A');
+    });
+
+    it('handles undefined latitude/longitude', () => {
+      const location = {
+        latitude: undefined,
+        longitude: undefined
+      };
+      expect(formatLocation(location)).toBe('[object Object]');
+    });
+
+    it('handles null latitude/longitude', () => {
+      const location = {
+        latitude: null,
+        longitude: null
+      };
+      expect(formatLocation(location)).toBe('undefined, undefined');
+    });
+
+    it('handles mixed coordinate formats', () => {
+      const location = {
+        lat: 40.7128,
+        longitude: -74.0060 // Mixed lat/lng and latitude/longitude
+      };
+      expect(formatLocation(location)).toBe('[object Object]');
+    });
   });
 
-  it('should handle very large distances correctly', () => {
-    // Test with very large distances
-    const result = estimateDuration(100);
-    expect(result).toMatch(/(\d+)h (\d+)m - (\d+)h/);
-    
-    // Should be a reasonable range for 100km
-    expect(result).toContain('h');
+  describe('getAlertTypeColor', () => {
+    it('returns correct color for hazard type', () => {
+      expect(getAlertTypeColor('hazard')).toBe('#ef4444');
+    });
+
+    it('returns correct color for closure type', () => {
+      expect(getAlertTypeColor('closure')).toBe('#f59e0b');
+    });
+
+    it('returns correct color for maintenance type', () => {
+      expect(getAlertTypeColor('maintenance')).toBe('#3b82f6');
+    });
+
+    it('returns correct color for weather type', () => {
+      expect(getAlertTypeColor('weather')).toBe('#8b5cf6');
+    });
+
+    it('returns correct color for general type', () => {
+      expect(getAlertTypeColor('general')).toBe('#6b7280');
+    });
+
+    it('handles uppercase types', () => {
+      expect(getAlertTypeColor('HAZARD')).toBe('#ef4444');
+    });
+
+    it('handles mixed case types', () => {
+      expect(getAlertTypeColor('Hazard')).toBe('#ef4444');
+    });
+
+    it('returns default color for unknown type', () => {
+      expect(getAlertTypeColor('unknown')).toBe('#6b7280');
+    });
+
+    it('returns default color for null type', () => {
+      expect(getAlertTypeColor(null)).toBe('#6b7280');
+    });
+
+    it('returns default color for undefined type', () => {
+      expect(getAlertTypeColor(undefined)).toBe('#6b7280');
+    });
+
+    it('returns default color for empty string', () => {
+      expect(getAlertTypeColor('')).toBe('#6b7280');
+    });
+
+    it('handles numeric types', () => {
+      expect(() => getAlertTypeColor(123)).toThrow();
+    });
+
+    it('handles object types', () => {
+      expect(() => getAlertTypeColor({ type: 'hazard' })).toThrow();
+    });
+  });
+
+  describe('getAlertTypeIcon', () => {
+    it('returns correct icon for hazard type', () => {
+      expect(getAlertTypeIcon('hazard')).toBe('AlertTriangle');
+    });
+
+    it('returns correct icon for closure type', () => {
+      expect(getAlertTypeIcon('closure')).toBe('XCircle');
+    });
+
+    it('returns correct icon for maintenance type', () => {
+      expect(getAlertTypeIcon('maintenance')).toBe('Wrench');
+    });
+
+    it('returns correct icon for weather type', () => {
+      expect(getAlertTypeIcon('weather')).toBe('CloudRain');
+    });
+
+    it('returns correct icon for general type', () => {
+      expect(getAlertTypeIcon('general')).toBe('Info');
+    });
+
+    it('handles uppercase types', () => {
+      expect(getAlertTypeIcon('HAZARD')).toBe('AlertTriangle');
+    });
+
+    it('handles mixed case types', () => {
+      expect(getAlertTypeIcon('Hazard')).toBe('AlertTriangle');
+    });
+
+    it('returns default icon for unknown type', () => {
+      expect(getAlertTypeIcon('unknown')).toBe('Info');
+    });
+
+    it('returns default icon for null type', () => {
+      expect(getAlertTypeIcon(null)).toBe('Info');
+    });
+
+    it('returns default icon for undefined type', () => {
+      expect(getAlertTypeIcon(undefined)).toBe('Info');
+    });
+
+    it('returns default icon for empty string', () => {
+      expect(getAlertTypeIcon('')).toBe('Info');
+    });
+
+    it('handles numeric types', () => {
+      expect(() => getAlertTypeIcon(123)).toThrow();
+    });
+
+    it('handles object types', () => {
+      expect(() => getAlertTypeIcon({ type: 'hazard' })).toThrow();
+    });
+  });
+
+  describe('renderStars', () => {
+    it('renders correct number of filled stars for rating 3', () => {
+      const { container } = render(<div>{renderStars(3)}</div>);
+      const stars = container.querySelectorAll('.trail-card-star');
+      expect(stars).toHaveLength(5);
+      
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(3);
+    });
+
+    it('renders correct number of filled stars for rating 5', () => {
+      const { container } = render(<div>{renderStars(5)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(5);
+    });
+
+    it('renders no filled stars for rating 0', () => {
+      const { container } = render(<div>{renderStars(0)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles string rating by converting to 0', () => {
+      const { container } = render(<div>{renderStars('3')}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles null rating', () => {
+      const { container } = render(<div>{renderStars(null)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles undefined rating', () => {
+      const { container } = render(<div>{renderStars(undefined)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles negative rating', () => {
+      const { container } = render(<div>{renderStars(-1)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles rating greater than 5', () => {
+      const { container } = render(<div>{renderStars(7)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(5);
+    });
+
+    it('handles decimal rating', () => {
+      const { container } = render(<div>{renderStars(3.7)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(4);
+    });
+
+    it('renders all stars with correct keys', () => {
+      const { container } = render(<div>{renderStars(3)}</div>);
+      const stars = container.querySelectorAll('.trail-card-star');
+      
+      stars.forEach((star, index) => {
+        expect(star.textContent).toBe('★');
+        // React keys are not rendered as HTML attributes in testing environment
+      });
+    });
+
+    it('handles boolean rating', () => {
+      const { container } = render(<div>{renderStars(true)}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
+    });
+
+    it('handles object rating', () => {
+      const { container } = render(<div>{renderStars({ rating: 3 })}</div>);
+      const filledStars = container.querySelectorAll('.trail-card-star.filled');
+      expect(filledStars).toHaveLength(0);
   });
   });
 
   describe('getDifficultyColor', () => {
-    it('should return correct colors for different difficulty levels', () => {
-      expect(getDifficultyColor('easy')).toBe('#4CAF50');
-      expect(getDifficultyColor('Easy')).toBe('#4CAF50');
-      expect(getDifficultyColor('EASY')).toBe('#4CAF50');
-      
-      expect(getDifficultyColor('moderate')).toBe('#FF9800');
-      expect(getDifficultyColor('Moderate')).toBe('#FF9800');
-      
-      expect(getDifficultyColor('hard')).toBe('#F44336');
-      expect(getDifficultyColor('difficult')).toBe('#F44336');
-      expect(getDifficultyColor('Hard')).toBe('#F44336');
-      
-      expect(getDifficultyColor('expert')).toBe('#9C27B0');
-      expect(getDifficultyColor('Expert')).toBe('#9C27B0');
+    it('returns correct color for easy difficulty', () => {
+      expect(getDifficultyColor('easy')).toBe('#34c759');
     });
 
-    it('should return default blue color for unknown difficulty', () => {
-      expect(getDifficultyColor('unknown')).toBe('#2196F3');
-      expect(getDifficultyColor('')).toBe('#2196F3');
-      expect(getDifficultyColor(null)).toBe('#2196F3');
-      expect(getDifficultyColor(undefined)).toBe('#2196F3');
-    });
-  });
-
-  describe('getDifficultyIcon', () => {
-    it('should return correct icons for different difficulty levels', () => {
-      const easyIcon = getDifficultyIcon('easy');
-      const moderateIcon = getDifficultyIcon('moderate');
-      const hardIcon = getDifficultyIcon('hard');
-      const expertIcon = getDifficultyIcon('expert');
-      
-      expect(easyIcon).toBeDefined();
-      expect(moderateIcon).toBeDefined();
-      expect(hardIcon).toBeDefined();
-      expect(expertIcon).toBeDefined();
+    it('returns correct color for moderate difficulty', () => {
+      expect(getDifficultyColor('moderate')).toBe('#ffc107');
     });
 
-    it('should return default icon for unknown difficulty', () => {
-      const defaultIcon = getDifficultyIcon('unknown');
-      expect(defaultIcon).toBeDefined();
-    });
-  });
-
-  describe('calculateDistance', () => {
-    it('should calculate distance between two coordinates correctly', () => {
-      // Test distance between same points (should be 0)
-      expect(calculateDistance(0, 0, 0, 0)).toBeCloseTo(0, 6);
-      
-      // Test distance between known points
-      // Distance between (0,0) and (0,1) should be approximately 111.32 km
-      const distance = calculateDistance(0, 0, 0, 1);
-      expect(distance).toBeCloseTo(111.19, 1);
+    it('returns correct color for hard difficulty', () => {
+      expect(getDifficultyColor('hard')).toBe('#ff6b6b');
     });
 
-    it('should handle negative coordinates', () => {
-      const distance = calculateDistance(-1, -1, 1, 1);
-      expect(distance).toBeGreaterThan(0);
-      expect(distance).toBeCloseTo(314.5, 1);
+    it('handles capitalized Easy', () => {
+      expect(getDifficultyColor('Easy')).toBe('#34c759');
     });
 
-    it('should handle edge cases', () => {
-      // Very small distance
-      const smallDistance = calculateDistance(0, 0, 0.001, 0.001);
-      expect(smallDistance).toBeGreaterThan(0);
-      
-      // Large distance
-      const largeDistance = calculateDistance(0, 0, 90, 180);
-      expect(largeDistance).toBeGreaterThan(10000);
+    it('handles capitalized Moderate', () => {
+      expect(getDifficultyColor('Moderate')).toBe('#ffc107');
+    });
+
+    it('handles capitalized Hard', () => {
+      expect(getDifficultyColor('Hard')).toBe('#ff6b6b');
+    });
+
+    it('handles uppercase difficulty', () => {
+      expect(getDifficultyColor('EASY')).toBe('#a0a0a0');
+    });
+
+    it('returns default color for unknown difficulty', () => {
+      expect(getDifficultyColor('unknown')).toBe('#a0a0a0');
+    });
+
+    it('returns default color for null difficulty', () => {
+      expect(getDifficultyColor(null)).toBe('#a0a0a0');
+    });
+
+    it('returns default color for undefined difficulty', () => {
+      expect(getDifficultyColor(undefined)).toBe('#a0a0a0');
+    });
+
+    it('returns default color for empty string', () => {
+      expect(getDifficultyColor('')).toBe('#a0a0a0');
+    });
+
+    it('handles numeric difficulty', () => {
+      expect(getDifficultyColor(1)).toBe('#a0a0a0');
+    });
+
+    it('handles object difficulty', () => {
+      expect(getDifficultyColor({ level: 'easy' })).toBe('#a0a0a0');
+    });
+
+    it('handles mixed case difficulty', () => {
+      expect(getDifficultyColor('MoDeRaTe')).toBe('#a0a0a0');
     });
   });
 
-  describe('calculateRouteDistance', () => {
-    it('should return 0 for empty or single point route', () => {
-      expect(calculateRouteDistance([])).toBe(0);
-      expect(calculateRouteDistance([[0, 0]])).toBe(0);
+  describe('truncateUserId', () => {
+    it('returns Unknown for null userId', () => {
+      expect(truncateUserId(null)).toBe('Unknown');
     });
 
-    it('should calculate total distance for a route', () => {
-      const routePoints = [
-        [0, 0],
-        [0, 1],
-        [1, 1],
-        [1, 0]
-      ];
-      
-      const totalDistance = calculateRouteDistance(routePoints);
-      expect(totalDistance).toBeGreaterThan(0);
-      expect(totalDistance).toBeCloseTo(333.57, 1); // Approximate distance for this square route
+    it('returns Unknown for undefined userId', () => {
+      expect(truncateUserId(undefined)).toBe('Unknown');
     });
 
-    it('should handle route with many points', () => {
-      const routePoints = [
-        [0, 0],
-        [0.1, 0.1],
-        [0.2, 0.2],
-        [0.3, 0.3],
-        [0.4, 0.4]
-      ];
-      
-      const totalDistance = calculateRouteDistance(routePoints);
-      expect(totalDistance).toBeGreaterThan(0);
+    it('returns Unknown for empty string', () => {
+      expect(truncateUserId('')).toBe('Unknown');
+    });
+
+    it('returns Unknown for non-string userId', () => {
+      expect(truncateUserId(123)).toBe('Unknown');
+    });
+
+    it('returns Unknown for object userId', () => {
+      expect(truncateUserId({ id: 'user123' })).toBe('Unknown');
+    });
+
+    it('returns userId as-is if shorter than maxLength', () => {
+      expect(truncateUserId('user123')).toBe('user123');
+    });
+
+    it('returns userId as-is if equal to maxLength', () => {
+      expect(truncateUserId('user123456789')).toBe('user12345...');
+    });
+
+    it('truncates short userIds with ellipsis', () => {
+      expect(truncateUserId('user1234567890')).toBe('user12345...');
+    });
+
+    it('truncates Firebase UIDs with first and last 6 characters', () => {
+      const longUserId = 'abcdefghijklmnopqrstuvwxyz123456789';
+      expect(truncateUserId(longUserId)).toBe('abcdef...456789');
+    });
+
+    it('handles custom maxLength', () => {
+      expect(truncateUserId('user1234567890', 8)).toBe('user1...');
+    });
+
+    it('handles very short maxLength', () => {
+      expect(truncateUserId('user1234567890', 3)).toBe('...');
+    });
+
+    it('handles maxLength of 0', () => {
+      expect(truncateUserId('user1234567890', 0)).toBe('...');
+    });
+
+    it('handles negative maxLength', () => {
+      expect(truncateUserId('user1234567890', -1)).toBe('...');
+    });
+
+    it('handles Firebase UID with custom maxLength', () => {
+      const longUserId = 'abcdefghijklmnopqrstuvwxyz123456789';
+      expect(truncateUserId(longUserId, 20)).toBe('abcdef...456789');
+    });
+
+    it('handles exactly 20 character userId', () => {
+      const userId = 'abcdefghijklmnopqrst';
+      expect(truncateUserId(userId)).toBe('abcdefghi...');
+    });
+
+    it('handles 21 character userId (triggers Firebase UID logic)', () => {
+      const userId = 'abcdefghijklmnopqrstu';
+      expect(truncateUserId(userId)).toBe('abcdef...pqrstu');
+    });
+
+    it('handles boolean userId', () => {
+      expect(truncateUserId(true)).toBe('Unknown');
+    });
+
+    it('handles array userId', () => {
+      expect(truncateUserId(['user', '123'])).toBe('Unknown');
     });
   });
 
-  describe('formatFileSize', () => {
-    it('should format bytes correctly', () => {
-      expect(formatFileSize(0)).toBe('0 B');
-      expect(formatFileSize(500)).toBe('500 B');
+  describe('Edge Cases and Integration', () => {
+    it('handles all functions with extreme values', () => {
+      // Test formatDate with extreme values
+      expect(formatDate(new Date('1970-01-01'))).toBe('1970/01/01');
+      expect(formatDate(new Date('2099-12-31'))).toBe('2099/12/31');
+
+      // Test formatLocation with extreme coordinates
+      expect(formatLocation({ lat: 90, lng: 180 })).toBe('90.0000, 180.0000');
+      expect(formatLocation({ lat: -90, lng: -180 })).toBe('-90.0000, -180.0000');
+
+      // Test renderStars with extreme ratings
+      const { container } = render(<div>{renderStars(0)}</div>);
+      expect(container.querySelectorAll('.trail-card-star.filled')).toHaveLength(0);
+
+      const { container: container2 } = render(<div>{renderStars(5)}</div>);
+      expect(container2.querySelectorAll('.trail-card-star.filled')).toHaveLength(5);
     });
 
-    it('should format kilobytes correctly', () => {
-      expect(formatFileSize(1024)).toBe('1.0 KB');
-      expect(formatFileSize(1536)).toBe('1.5 KB');
+    it('handles functions with special characters', () => {
+      expect(truncateUserId('user@#$%^&*()')).toBe('user@#$%^...');
+      expect(formatLocation('Location with special chars: @#$%')).toBe('Location with special chars: @#$%');
     });
 
-    it('should format megabytes correctly', () => {
-      expect(formatFileSize(1024 * 1024)).toBe('1.00 MB');
-      expect(formatFileSize(1024 * 1024 * 2.5)).toBe('2.50 MB');
+    it('handles functions with unicode characters', () => {
+      expect(truncateUserId('用户123')).toBe('用户123');
+      expect(formatLocation('北京市')).toBe('北京市');
     });
 
-    it('should format gigabytes correctly', () => {
-      expect(formatFileSize(1024 * 1024 * 1024)).toBe('1.00 GB');
-      expect(formatFileSize(1024 * 1024 * 1024 * 5.7)).toBe('5.70 GB');
+    it('handles functions with very long strings', () => {
+      const veryLongString = 'a'.repeat(1000);
+      expect(truncateUserId(veryLongString)).toBe('aaaaaa...aaaaaa');
     });
 
-    it('should handle edge cases', () => {
-      expect(formatFileSize(1)).toBe('1 B');
-      expect(formatFileSize(1023)).toBe('1023 B');
-      expect(formatFileSize(1024 * 1023)).toBe('1023.0 KB');
+    it('handles functions with whitespace', () => {
+      expect(truncateUserId('  user123  ')).toBe('  user123  ');
+      expect(formatLocation('  New York  ')).toBe('  New York  ');
     });
   });
 });

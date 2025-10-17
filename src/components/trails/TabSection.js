@@ -99,7 +99,7 @@ const TabSection = ({
                         </div>
                       </div>
                       <div className="trail-detail-review-content">
-                        <p>{review.comment}</p>
+                        <p>{review.comment || review.message || 'No comment provided'}</p>
                       </div>
                     </div>
                   ))}

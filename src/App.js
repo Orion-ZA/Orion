@@ -18,6 +18,7 @@ import CreateProfile from './pages/CreateProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Trails from './pages/Trails';
+import TrailDetail from './pages/TrailDetail';
 import ReviewsMedia from './pages/ReviewsMedia';
 import MyTrails from './pages/MyTrails';
 import AlertsUpdates from './pages/AlertsUpdates';
@@ -109,6 +110,7 @@ function AppContent() {
             }
           />
           <Route path="/trails" element={<Trails />} />
+          <Route path="/trails/:trailId" element={<TrailDetail />} />
           <Route path="/reviews" element={<ReviewsMedia />} />
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />

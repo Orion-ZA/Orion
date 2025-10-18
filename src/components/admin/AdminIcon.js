@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function AdminIcon({ className = '', title = 'Admin', size = 18 }) {
+export default function AdminIcon({ className = '', title = 'Admin', size = 18, color = 'currentColor' }) {
   return (
     <svg
       className={className}
@@ -8,14 +8,18 @@ export default function AdminIcon({ className = '', title = 'Admin', size = 18 }
       height={size}
       viewBox="0 0 24 24"
       fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden={title ? "false" : "true"}
       role="img"
       xmlns="http://www.w3.org/2000/svg"
     >
       <title>{title}</title>
-      <path d="M12 2l3 3 4 1-1 4 1 4-4 1-3 3-3-3-4-1 1-4-1-4 4-1 3-3z" fill="currentColor" />
-      <circle cx="12" cy="12" r="3" fill="#fff" opacity="0.9" />
-      <path d="M12 10.2c.99 0 1.8.81 1.8 1.8S12.99 13.8 12 13.8 10.2 12.99 10.2 12s.81-1.8 1.8-1.8z" fill="currentColor" />
+      {/* Crown */}
+      <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/>
+      <path d="M5 21h14"/>
     </svg>
   );
 }

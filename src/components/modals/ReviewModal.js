@@ -47,25 +47,25 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
 
   return (
     <div 
-      className={`modal-overlay ${isOpen ? 'open' : ''}`} 
+      className={`my-trails-modal-overlay ${isOpen ? 'open' : ''}`} 
       onClick={handleOverlayClick}
     >
-      <div className="modal-content">
-        <button className="modal-close-btn" onClick={handleClose} aria-label="Close modal">
+      <div className="my-trails-modal-content">
+        <button className="my-trails-modal-close-btn" onClick={handleClose} aria-label="Close modal">
           ×
         </button>
         <h3>Review: {trailName}</h3>
         
-        <div className="input-group">
+        <div className="my-trails-input-group">
           <label>
             Rating (1-5)
           </label>
-          <div className="rating-input">
+          <div className="my-trails-rating-input">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
-                className={`star ${rating >= star ? 'active' : ''}`}
+                className={`my-trails-star ${rating >= star ? 'active' : ''}`}
                 onClick={() => setRating(star)}
                 aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
               >
@@ -75,7 +75,7 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
           </div>
         </div>
 
-        <div className="input-group">
+        <div className="my-trails-input-group">
           <label>
             Comment
           </label>
@@ -87,11 +87,11 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
           />
         </div>
 
-        <div className="modal-actions">
-          <button className="btn-secondary" onClick={handleClose}>
+        <div className="my-trails-modal-actions">
+          <button className="my-trails-btn-secondary" onClick={handleClose}>
             Cancel
           </button>
-          <button className="btn-primary" onClick={handleSubmit}>
+          <button className="my-trails-btn-primary" onClick={handleSubmit}>
             Submit Review
           </button>
         </div>

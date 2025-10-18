@@ -439,6 +439,165 @@ describe('ReviewsTrailCard Component', () => {
     });
   });
 
+  describe('Alert Expiration Logic', () => {
+    test('filters out expired timed alerts', () => {
+      const expiredAlerts = {
+        'trail-1': [
+          { 
+            id: 'alert-1', 
+            type: 'warning', 
+            message: 'Trail closed due to weather',
+            isTimed: true,
+            expiresAt: new Date(Date.now() - 1000) // 1 second ago
+          },
+          { 
+            id: 'alert-2', 
+            type: 'info', 
+            message: 'Trail maintenance scheduled',
+            isTimed: false
+          }
+        ]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={expiredAlerts} />);
+      
+      // Should only show 1 alert (the non-timed one)
+      expect(screen.getByText('1')).toBeInTheDocument();
+    });
+
+    test('handles Firestore timestamp objects in alerts', () => {
+      const alertsWithFirestoreTimestamp = {
+        'trail-1': [
+          { 
+            id: 'alert-1', 
+            type: 'warning', 
+            message: 'Trail closed due to weather',
+            isTimed: true,
+            expiresAt: {
+              toDate: () => new Date(Date.now() - 1000) // 1 second ago
+            }
+          }
+        ]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={alertsWithFirestoreTimestamp} />);
+      
+      // Should not show any alerts since it's expired
+      expect(screen.queryByText('1')).not.toBeInTheDocument();
+    });
+
+    test('handles alerts without isTimed property', () => {
+      const alertsWithoutTimed = {
+        'trail-1': [
+          { 
+            id: 'alert-1', 
+            type: 'warning', 
+            message: 'Trail closed due to weather',
+            expiresAt: new Date(Date.now() - 1000)
+          }
+        ]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={alertsWithoutTimed} />);
+      
+      // Should show the alert since isTimed is falsy
+      expect(screen.getByText('1')).toBeInTheDocument();
+    });
+
+    test('handles alerts without expiresAt property', () => {
+      const alertsWithoutExpiresAt = {
+        'trail-1': [
+          { 
+            id: 'alert-1', 
+            type: 'warning', 
+            message: 'Trail closed due to weather',
+            isTimed: true
+          }
+        ]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={alertsWithoutExpiresAt} />);
+      
+      // Should show the alert since expiresAt is falsy
+      expect(screen.getByText('1')).toBeInTheDocument();
+    });
+
+    test('handles invalid date in expiresAt', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      
+      const alertsWithInvalidDate = {
+        'trail-1': [
+          { 
+            id: 'alert-1', 
+            type: 'warning', 
+            message: 'Trail closed due to weather',
+            isTimed: true,
+            expiresAt: {
+              toDate: () => {
+                throw new Error('Invalid date conversion');
+              }
+            }
+          }
+        ]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={alertsWithInvalidDate} />);
+      
+      // Should show the alert since error handling returns false
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(consoleSpy).toHaveBeenCalledWith('Error checking alert expiration:', expect.any(Error));
+      
+      consoleSpy.mockRestore();
+    });
+
+    test('handles null alert object', () => {
+      const alertsWithNull = {
+        'trail-1': [null]
+      };
+      
+      render(<ReviewsTrailCard {...defaultProps} alerts={alertsWithNull} />);
+      
+      // Should show the alert since null alert passes the isAlertExpired check (returns false)
+      expect(screen.getByText('1')).toBeInTheDocument();
+    });
+  });
+
+  describe('Trail Detail Button', () => {
+    test('calls onOpenTrailDetail when provided', () => {
+      const mockOnOpenTrailDetail = jest.fn();
+      render(<ReviewsTrailCard {...defaultProps} onOpenTrailDetail={mockOnOpenTrailDetail} />);
+      
+      const detailsButton = screen.getByText('Details');
+      fireEvent.click(detailsButton);
+      
+      expect(mockOnOpenTrailDetail).toHaveBeenCalledWith(mockTrail);
+    });
+
+    test('does not call onOpenTrailDetail when not provided', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
+      
+      const detailsButton = screen.getByText('Details');
+      fireEvent.click(detailsButton);
+      
+      // Should not throw an error
+      expect(detailsButton).toBeInTheDocument();
+    });
+
+    test('prevents event propagation when clicking details button', () => {
+      const mockOnOpenTrailDetail = jest.fn();
+      
+      render(<ReviewsTrailCard {...defaultProps} onOpenTrailDetail={mockOnOpenTrailDetail} />);
+      
+      const detailsButton = screen.getByText('Details');
+      
+      // Simulate the click event
+      fireEvent.click(detailsButton);
+      
+      // Should call the onOpenTrailDetail function
+      expect(mockOnOpenTrailDetail).toHaveBeenCalledWith(mockTrail);
+    });
+  });
+
   describe('Edge Cases', () => {
     test('handles trail with undefined photos', () => {
       const trailWithUndefinedPhotos = { ...mockTrail, photos: undefined };
@@ -481,6 +640,27 @@ describe('ReviewsTrailCard Component', () => {
       render(<ReviewsTrailCard {...defaultProps} reviews={reviewsWithoutRatings} />);
       
       expect(screen.getByText('Great trail!')).toBeInTheDocument();
+    });
+
+    test('handles trail with no reviewCount', () => {
+      const trailWithoutReviewCount = { ...mockTrail, reviewCount: 0 };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithoutReviewCount} />);
+      
+      expect(screen.getByText('4.5')).toBeInTheDocument();
+    });
+
+    test('handles trail with undefined reviewCount', () => {
+      const trailWithUndefinedReviewCount = { ...mockTrail, reviewCount: undefined };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithUndefinedReviewCount} />);
+      
+      expect(screen.getByText('4.5')).toBeInTheDocument();
+    });
+
+    test('handles trail with null reviewCount', () => {
+      const trailWithNullReviewCount = { ...mockTrail, reviewCount: null };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithNullReviewCount} />);
+      
+      expect(screen.getByText('4.5')).toBeInTheDocument();
     });
   });
 });

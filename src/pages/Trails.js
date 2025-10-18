@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { auth, db } from "../firebaseConfig";
 import useTrails from '../components/hooks/useTrails';
 import { useSearch } from '../components/SearchContext';
@@ -21,6 +21,7 @@ export default function TrailsPage() {
   const mapRef = useRef(null);
   const handledNavStateRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { searchQuery, setSearchQuery, updateTrailsData, getLocationCoordinates, getLocationNameFromCoordinates } = useSearch();
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showSubmissionPanel, setShowSubmissionPanel] = useState(false);
@@ -70,9 +71,66 @@ export default function TrailsPage() {
     }
   }, [trails, updateTrailsData]);
 
-  // Auto-detect user location on component mount
+  // Handle search query from Welcome page or search bar
   useEffect(() => {
-    getTrailsUserLocation();
+    if (location.state?.searchQuery) {
+      setSearchQuery(location.state.searchQuery);
+      
+      if (location.state.action === 'zoom') {
+        // Handle zoom action - find and zoom to the trail or location
+        handleSearchZoom(location.state.searchQuery);
+      } else {
+        // Legacy behavior - filter trails (keeping for backward compatibility)
+        handleFilterChange('searchQuery', location.state.searchQuery);
+      }
+      
+      // Clear the state to prevent re-applying on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, setSearchQuery, handleFilterChange]);
+
+  // Handle trail centering from MyTrails page
+  useEffect(() => {
+    if (location.state?.action === 'centerTrail' && location.state?.trailToCenter) {
+      const trailToCenter = location.state.trailToCenter;
+      // Open the trails panel
+      setIsPanelOpen(true);
+      
+      // Center the map on the trail with a delay to ensure map is ready
+      const centerMapOnTrail = () => {
+        if (trailToCenter.longitude && trailToCenter.latitude && mapRef.current) {
+          const map = mapRef.current.getMap();
+          
+          // Use smooth transition with easeTo
+          map.easeTo({
+            center: [trailToCenter.longitude, trailToCenter.latitude],
+            zoom: 15, // Zoom in closer for individual trail view
+            duration: 1500, // 1.5 second smooth transition
+            essential: true
+          });
+          
+          // Set as selected trail for panel highlighting
+          setSelectedTrail(trailToCenter);
+        }
+      };
+      
+      // Add a small delay to ensure map is ready
+      setTimeout(centerMapOnTrail, 500);
+      
+      // Clear the state to prevent re-applying on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Auto-detect user location on component mount (only if not centering to a trail)
+  useEffect(() => {
+    // Only get user location if we're not centering to a specific trail
+    if (location.state?.action !== 'centerTrail') {
+      getTrailsUserLocation(true); // Allow centering to user location
+    } else {
+      // Still get user location but don't center the map
+      getTrailsUserLocation(false);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load user's saved trails
@@ -119,7 +177,7 @@ export default function TrailsPage() {
   }, []);
 
   // Get user location for trails
-  const getTrailsUserLocation = () => {
+  const getTrailsUserLocation = (shouldCenterMap = true) => {
     setTrailsIsLoadingLocation(true);
     setTrailsLocationError(null);
     
@@ -138,23 +196,26 @@ export default function TrailsPage() {
         setTrailsUserLocation(location);
         setTrailsIsLoadingLocation(false);
         
-        // Smooth transition to user location using map.easeTo
-        if (mapRef.current) {
-          const map = mapRef.current.getMap();
-          map.easeTo({
-            center: [location.longitude, location.latitude],
-            zoom: 14,
-            duration: 2000, // 2 second smooth transition
-            essential: true
-          });
-        } else {
-          // Fallback to viewport update if map not ready
-          setViewport(prev => ({
-            ...prev,
-            longitude: location.longitude,
-            latitude: location.latitude,
-            zoom: 14
-          }));
+        // Only center map if shouldCenterMap is true
+        if (shouldCenterMap) {
+          // Smooth transition to user location using map.easeTo
+          if (mapRef.current) {
+            const map = mapRef.current.getMap();
+            map.easeTo({
+              center: [location.longitude, location.latitude],
+              zoom: 14,
+              duration: 2000, // 2 second smooth transition
+              essential: true
+            });
+          } else {
+            // Fallback to viewport update if map not ready
+            setViewport(prev => ({
+              ...prev,
+              longitude: location.longitude,
+              latitude: location.latitude,
+              zoom: 14
+            }));
+          }
         }
       },
       (error) => {
@@ -224,26 +285,29 @@ export default function TrailsPage() {
     handleRecenter();
   };
 
+  // Trail detail page handlers
+  const handleOpenTrailDetail = (trail) => {
+    // Navigate to the trail detail page
+    navigate(`/trails/${trail.id}`, { state: { trail } });
+  };
+
   // Handle trail click to center and zoom map
-  const handleTrailClick = useCallback((trail) => {
-    if (!trail || !mapRef.current) return;
-
-    const lng = Number(trail.longitude);
-    const lat = Number(trail.latitude);
-    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
-    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return;
-
-    const map = mapRef.current.getMap();
-
-    map.easeTo({
-      center: [lng, lat],
-      zoom: 15,
-      duration: 1500,
-      essential: true,
-    });
-
-    setSelectedTrail({ ...trail, longitude: lng, latitude: lat });
-  }, [mapRef, setSelectedTrail]);
+  const handleTrailClick = (trail) => {
+    if (trail.longitude && trail.latitude && mapRef.current) {
+      const map = mapRef.current.getMap();
+      
+      // Use smooth transition with easeTo
+      map.easeTo({
+        center: [trail.longitude, trail.latitude],
+        zoom: 15, // Zoom in closer for individual trail view
+        duration: 1500, // 1.5 second smooth transition
+        essential: true // This animation is considered essential with respect to prefers-reduced-motion
+      });
+      
+      setSelectedTrail(trail); // Set as selected trail for panel highlighting
+      setIsPanelOpen(true); // Open the trails panel to show the selected trail
+    }
+  };
 
   // Handle search zoom - find trail or location and zoom to it
   const handleSearchZoom = useCallback(async (query) => {
@@ -667,7 +731,7 @@ export default function TrailsPage() {
           onZoomOut={handleZoomOut}
           onResetNorth={handleResetNorth}
           onRecenter={handleRecenter}
-          onFindLocation={getTrailsUserLocation}
+          onFindLocation={() => getTrailsUserLocation(true)}
           mapBearing={mapBearing}
           mapPitch={mapPitch}
           mapCenter={mapCenter}
@@ -695,6 +759,7 @@ export default function TrailsPage() {
           searchLocation={searchLocation}
           isSearchMode={isSearchMode}
           onRecenterFromSearch={handleRecenterFromSearch}
+          onOpenTrailDetail={handleOpenTrailDetail}
         />
       </div>
 
@@ -757,7 +822,7 @@ export default function TrailsPage() {
       {trailsLocationError && (
         <div className="error-overlay">
           <p>{trailsLocationError}</p>
-          <button onClick={getTrailsUserLocation} className="button secondary">
+          <button onClick={() => getTrailsUserLocation(true)} className="button secondary">
             Try Again
           </button>
         </div>

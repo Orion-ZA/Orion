@@ -1,0 +1,334 @@
+.admin-users-management {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-users-header h2 {
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-users-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.admin-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin-stat-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.admin-users-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #a0a0a0;
+}
+
+.admin-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid #007aff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.admin-users-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #ff6b6b;
+  text-align: center;
+}
+
+.admin-error-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+}
+
+.admin-retry-button {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.admin-retry-button:hover {
+  background: #0056b3;
+}
+
+.admin-users-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-no-users {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+.admin-no-users-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.admin-user-card {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.admin-user-card:hover {
+  border-color: rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.1);
+}
+
+.admin-user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.admin-user-info {
+  flex: 1;
+}
+
+.admin-user-name {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.admin-user-email {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.admin-delete-button {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-delete-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.5);
+}
+
+.admin-delete-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.admin-user-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-detail-label {
+  color: #a0a0a0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-detail-value {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.admin-user-activity {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0a0a0;
+  font-size: 0.85rem;
+}
+
+.admin-activity-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #007aff;
+}
+
+.admin-delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.admin-delete-modal {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.admin-delete-modal h3 {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.admin-delete-modal p {
+  color: #a0a0a0;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.admin-warning-text {
+  color: #ff6b6b !important;
+  font-weight: 500;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.admin-cancel-button,
+.admin-confirm-delete-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.admin-cancel-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #a0a0a0;
+}
+
+.admin-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-confirm-delete-button {
+  background: #ff3b30;
+  color: white;
+}
+
+.admin-confirm-delete-button:hover {
+  background: #d70015;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-users-management {
+    padding: 1rem;
+  }
+  
+  .admin-users-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .admin-users-stats {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .admin-user-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-user-activity {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-modal-actions {
+    flex-direction: column;
+  }
+}

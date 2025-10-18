@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage, auth } from "../firebaseConfig";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { storage, auth, db } from "../firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { Shield, AlertCircle, Star, MessageSquare } from "lucide-react";
 
@@ -10,6 +12,8 @@ import AlertsPopup from "../components/AlertsPopup";
 import ReviewsTrailCard from "../components/ReviewsTrailCard";
 import ReviewsTrailSkeleton from "../components/ReviewsTrailSkeleton";
 import SuccessPopup from "../components/SuccessPopup";
+import AlertModal from "../components/modals/AlertModal";
+import { useTrailAlerts } from "../hooks/useTrailAlerts";
 import "./ReviewsMedia.css";
 
 // =========================
@@ -138,9 +142,9 @@ function calculateAverageRating(reviews) {
 // 🌲 Main Component
 // =========================
 export default function ReviewsMedia() {
+  const navigate = useNavigate();
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
-  const [alerts, setAlerts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredTrailId, setHoveredTrailId] = useState(null);
@@ -159,9 +163,10 @@ export default function ReviewsMedia() {
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [newImages, setNewImages] = useState([]);
-  const [alertType, setAlertType] = useState("general");
-  const [alertMessage, setAlertMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Alert modal states
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Success popup state
   const [successPopup, setSuccessPopup] = useState({
@@ -172,6 +177,9 @@ export default function ReviewsMedia() {
   // Add user authentication state
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Use the useTrailAlerts hook
+  const { trailAlerts, loadingStates, fetchTrailAlerts, isAlertExpired, getTimeRemaining } = useTrailAlerts();
 
   // Set up auth state listener
   useEffect(() => {
@@ -191,8 +199,17 @@ export default function ReviewsMedia() {
     }
   };
 
+  const handleOpenTrailDetail = (trail) => {
+    // Navigate to the trail detail page
+    navigate(`/trails/${trail.id}`, { state: { trail } });
+  };
+
   const handleShowAlertsPopup = (event, trailAlerts) => {
     if (!trailAlerts || trailAlerts.length === 0) return;
+    
+    // Filter out expired alerts
+    const activeAlerts = trailAlerts.filter(alert => !isAlertExpired(alert));
+    if (activeAlerts.length === 0) return;
     
     const rect = event.currentTarget.getBoundingClientRect();
     setAlertsPopup({
@@ -201,7 +218,7 @@ export default function ReviewsMedia() {
         x: rect.left + rect.width / 2,
         y: rect.bottom + 8
       },
-      alerts: trailAlerts
+      alerts: activeAlerts
     });
   };
 
@@ -299,25 +316,17 @@ export default function ReviewsMedia() {
                 const averageRating = calculateAverageRating(trailReviews);
                 const reviewCount = trailReviews.length;
                 
-                // Fetch alerts with timeout
-                let trailAlerts = [];
+                // Fetch alerts using the hook
                 let hasAlerts = false;
                 try {
-                  const alertPromise = fetchTrailAlerts(trail.id);
-                  const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Alert fetch timeout')), 5000)
-                  );
-                  
-                  trailAlerts = await Promise.race([alertPromise, timeoutPromise]);
+                  await fetchTrailAlerts(trail.id);
                   hasAlerts = true;
                 } catch (error) {
                   console.warn(`Failed to fetch alerts for trail ${trail.id}:`, error);
-                  trailAlerts = [];
                 }
                 
                 // Store data
                 reviewsData[trail.id] = trailReviews;
-                alertsData[trail.id] = trailAlerts;
                 
                 return {
                   ...trail,
@@ -354,7 +363,6 @@ export default function ReviewsMedia() {
         }
 
         setReviews(reviewsData);
-        setAlerts(alertsData);
       } catch (err) {
         setError("Could not load trails or reviews");
         setLoading(false);
@@ -380,13 +388,23 @@ export default function ReviewsMedia() {
       return;
     }
     
+    if (type === "alert" && !user) {
+      alert("Please log in to submit an alert");
+      return;
+    }
+    
+    if (type === "alert") {
+      setSelectedTrailId(trailId);
+      setShowAlertModal(true);
+      return;
+    }
+    
     setSelectedTrailId(trailId);
     setModalType(type);
     setNewReview("");
     setNewRating(0);
     setNewImages([]);
-    setAlertType("general");
-    setAlertMessage("");
+    setIsAnonymous(false);
     setModalOpen(true);
   };
   const closeModal = () => {
@@ -458,21 +476,28 @@ export default function ReviewsMedia() {
     }
   };
 
-  const handleAddAlert = async () => {
-    if (!alertMessage) return;
+  const handleAddAlert = async (alertData) => {
     try {
-      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/addAlert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const firestoreAlertData = {
           trailId: selectedTrailId,
-          message: alertMessage,
-          type: alertType,
-        }),
-      });
-      const alertsData = await fetchTrailAlerts(selectedTrailId);
-      setAlerts((prev) => ({ ...prev, [selectedTrailId]: alertsData }));
-      closeModal();
+        message: alertData.message,
+        type: alertData.type,
+        isActive: true,
+        timestamp: serverTimestamp(),
+      };
+
+      // Add expiration time if it's a timed alert
+      if (alertData.isTimed && alertData.duration) {
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + (alertData.duration * 60 * 1000));
+        firestoreAlertData.expiresAt = expiresAt;
+        firestoreAlertData.isTimed = true;
+      }
+
+      // Create alert directly in Firestore
+      await addDoc(collection(db, 'Alerts'), firestoreAlertData);
+
+      setShowAlertModal(false);
       setSuccessPopup({
         isVisible: true,
         message: "Your alert has been submitted successfully!"
@@ -562,7 +587,7 @@ export default function ReviewsMedia() {
             <ReviewsTrailCard
               key={trail.id}
               trail={trail}
-              alerts={alerts}
+              alerts={trailAlerts}
               reviews={reviews}
               user={user}
               loadedImages={loadedImages}
@@ -570,6 +595,7 @@ export default function ReviewsMedia() {
               onShowAlertsPopup={handleShowAlertsPopup}
               onHideAlertsPopup={handleHideAlertsPopup}
               onOpenModal={openModal}
+              onOpenTrailDetail={handleOpenTrailDetail}
             />
           );
         }) : (
@@ -597,32 +623,6 @@ export default function ReviewsMedia() {
       {modalOpen && (
         <div style={getResponsiveStyle("modalOverlay")} onClick={closeModal}>
           <div style={getResponsiveStyle("modalContent")} onClick={(e) => e.stopPropagation()}>
-            {modalType === "alert" && (
-              <>
-                <h3>Add Alert</h3>
-                <select
-                  value={alertType}
-                  onChange={(e) => setAlertType(e.target.value)}
-                  style={{ width: "100%", marginBottom: "0.5rem", padding: "0.5rem", borderRadius: "6px" }}
-                >
-                  <option value="general">General</option>
-                  <option value="closure">Closure</option>
-                  <option value="warning">Warning</option>
-                  <option value="condition">Condition</option>
-                </select>
-                <textarea
-                  value={alertMessage}
-                  onChange={(e) => setAlertMessage(e.target.value)}
-                  placeholder="Enter alert message..."
-                  style={getResponsiveStyle("textarea")}
-                />
-                <div style={getResponsiveStyle("modalButtons")}>
-                  <button style={getResponsiveStyle("cancelButton")} onClick={closeModal}>Cancel</button>
-                  <button style={getResponsiveStyle("primaryButton")} onClick={handleAddAlert}>Submit</button>
-                </div>
-              </>
-            )}
-
             {modalType === "review" && (
               <>
                 <h3>Add Review {user && !isAnonymous && `(as ${user.displayName || user.email})`}</h3>
@@ -709,6 +709,18 @@ export default function ReviewsMedia() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {selectedTrailId && (
+        <AlertModal
+          isVisible={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          onSubmit={handleAddAlert}
+          trailId={selectedTrailId}
+          trailName={trails.find(t => t.id === selectedTrailId)?.name}
+          loading={false}
+        />
       )}
 
     </div>

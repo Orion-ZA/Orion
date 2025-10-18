@@ -26,6 +26,15 @@
   letter-spacing: .5px; 
   flex-shrink: 0;
   transition: transform 0.18s cubic-bezier(.4,1.4,.6,1);
+  /* Constrain clickable area to just the logo size */
+  width: auto;
+  height: auto;
+  padding: 0;
+  /* Ensure the clickable area doesn't extend beyond the logo */
+  overflow: hidden;
+  /* Constrain the clickable area to match the logo dimensions */
+  max-width: clamp(78px,10vw,96px);
+  max-height: clamp(78px,10vw,96px);
 }
 .brand-logo { 
   /* Bigger visual footprint while keeping navbar height: use negative margins to let it overflow */
@@ -37,9 +46,13 @@
   margin-top: -18px; 
   margin-bottom: -18px; 
   pointer-events: auto;
+  /* Constrain the clickable area to just the logo dimensions */
+  position: relative;
+  z-index: 1;
 }
 @media (max-width: 640px) {
   .brand-logo { height: 64px; margin-top: -10px; margin-bottom: -10px; }
+  .brand { max-width: 64px; max-height: 64px; }
 }
 .brand:hover .brand-logo { transform: scale(1.12) rotate(-1.5deg); filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)); }
 html[data-theme='light'] .brand-logo { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.20)); }

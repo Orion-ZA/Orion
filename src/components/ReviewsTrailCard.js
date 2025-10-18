@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import ReviewsPopup from './ReviewsPopup';
 
 const ReviewsTrailCard = ({ 
@@ -11,9 +11,26 @@ const ReviewsTrailCard = ({
   setLoadedImages,
   onShowAlertsPopup,
   onHideAlertsPopup,
-  onOpenModal 
+  onOpenModal,
+  onOpenTrailDetail
 }) => {
+  // Helper function to check if an alert is expired
+  const isAlertExpired = (alert) => {
+    if (!alert || !alert.isTimed || !alert.expiresAt) return false;
+    
+    try {
+      const now = new Date();
+      const expiresAt = alert.expiresAt.toDate ? alert.expiresAt.toDate() : new Date(alert.expiresAt);
+      return now >= expiresAt;
+    } catch (error) {
+      console.warn('Error checking alert expiration:', error);
+      return false;
+    }
+  };
+
   const trailAlerts = alerts[trail.id];
+  // Filter out expired alerts
+  const activeAlerts = trailAlerts ? trailAlerts.filter(alert => !isAlertExpired(alert)) : [];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showReviewsPopup, setShowReviewsPopup] = useState(false);
@@ -41,14 +58,14 @@ const ReviewsTrailCard = ({
       {/* Trail Header with Alerts */}
       <div className="trail-header">
         <h4>{trail.name}</h4>
-        {trailAlerts && trailAlerts.length > 0 && (
+        {activeAlerts && activeAlerts.length > 0 && (
           <div 
             className="alerts-count-header"
-            onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
+            onMouseEnter={(e) => onShowAlertsPopup(e, activeAlerts)}
             onMouseLeave={onHideAlertsPopup}
           >
             <AlertTriangle size={16} />
-            <span className="alert-count">{trailAlerts.length}</span>
+            <span className="alert-count">{activeAlerts.length}</span>
           </div>
         )}
       </div>
@@ -153,6 +170,17 @@ const ReviewsTrailCard = ({
           >
             <AlertTriangle size={16} />
             <span>Alert</span>
+          </button>
+          <button 
+            className="reviews-media-action-btn reviews-media-detail-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenTrailDetail && onOpenTrailDetail(trail);
+            }}
+            title="View Trail Details"
+          >
+            <ExternalLink size={16} />
+            <span>Details</span>
           </button>
         </div>
       </div>

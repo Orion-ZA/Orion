@@ -1,0 +1,385 @@
+.admin-reviews-management {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-reviews-header h2 {
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-reviews-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.admin-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin-stat-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.admin-reviews-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #a0a0a0;
+}
+
+.admin-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid #007aff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.admin-reviews-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #ff6b6b;
+  text-align: center;
+}
+
+.admin-error-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+}
+
+.admin-retry-button {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.admin-retry-button:hover {
+  background: #0056b3;
+}
+
+.admin-reviews-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-no-reviews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+.admin-no-reviews-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.admin-review-card {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.admin-review-card:hover {
+  border-color: rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.1);
+}
+
+.admin-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.admin-review-trail-info {
+  flex: 1;
+}
+
+.admin-trail-name {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-review-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.admin-star {
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.admin-star.filled {
+  color: #ffd700;
+  fill: currentColor;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+}
+
+.admin-star.empty {
+  color: #666666;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.admin-star:hover {
+  transform: scale(1.1);
+}
+
+.admin-rating-text {
+  color: #a0a0a0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.admin-delete-button {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-delete-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.5);
+}
+
+.admin-delete-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.admin-review-content {
+  margin-bottom: 1rem;
+}
+
+.admin-review-comment {
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 4px solid #007aff;
+  font-style: italic;
+}
+
+.admin-review-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.admin-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-detail-row.admin-full-width {
+  grid-column: 1 / -1;
+}
+
+.admin-detail-label {
+  color: #a0a0a0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-detail-value {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.admin-delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.admin-delete-modal {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.admin-delete-modal h3 {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.admin-delete-modal p {
+  color: #a0a0a0;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.admin-review-preview {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.admin-review-preview-trail {
+  color: #ffffff;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-review-preview-rating {
+  color: #ffd700;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-review-preview-comment {
+  color: #a0a0a0;
+  font-style: italic;
+  margin: 0;
+}
+
+.admin-warning-text {
+  color: #ff6b6b !important;
+  font-weight: 500;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.admin-cancel-button,
+.admin-confirm-delete-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.admin-cancel-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #a0a0a0;
+}
+
+.admin-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-confirm-delete-button {
+  background: #ff3b30;
+  color: white;
+}
+
+.admin-confirm-delete-button:hover {
+  background: #d70015;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-reviews-management {
+    padding: 1rem;
+  }
+  
+  .admin-reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .admin-reviews-stats {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .admin-review-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-modal-actions {
+    flex-direction: column;
+  }
+}

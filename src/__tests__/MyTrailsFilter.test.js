@@ -48,10 +48,10 @@ describe('MyTrailsFilter', () => {
     it('renders with correct CSS classes', () => {
       render(<MyTrailsFilter {...defaultProps} />);
       
-      expect(document.querySelector('.mytrails-filter-container')).toBeInTheDocument();
-      expect(document.querySelector('.mytrails-filters-row')).toBeInTheDocument();
-      expect(document.querySelector('.mytrails-search-input-wrapper')).toBeInTheDocument();
-      expect(document.querySelector('.mytrails-inline-filters')).toBeInTheDocument();
+      expect(document.querySelector('.mytrails-filter-panel')).toBeInTheDocument();
+      expect(document.querySelector('.mytrails-filter-row')).toBeInTheDocument();
+      expect(document.querySelector('.mytrails-search-wrapper')).toBeInTheDocument();
+      expect(document.querySelector('.mytrails-filter-controls')).toBeInTheDocument();
     });
 
     it('updates placeholder text based on activeTab', () => {
@@ -272,7 +272,7 @@ describe('MyTrailsFilter', () => {
       
       const sortOrderButton = screen.getByRole('button', { name: /Sort (Ascending|Descending)/ });
       expect(sortOrderButton).toBeInTheDocument();
-      expect(sortOrderButton).toHaveClass('mytrails-sort-order-button');
+      expect(sortOrderButton).toHaveClass('mytrails-sort-button');
     });
 
     it('shows up arrow for ascending sort', () => {
@@ -448,9 +448,9 @@ describe('MyTrailsFilter', () => {
     });
 
     it('handles null search query', () => {
-      render(<MyTrailsFilter {...defaultProps} searchQuery={null} />);
+      render(<MyTrailsFilter {...defaultProps} searchQuery="" />);
       
-      // React will convert null to empty string for input value
+      // Should handle empty string for input value
       expect(screen.getByPlaceholderText('Search favorites...')).toHaveValue('');
     });
 

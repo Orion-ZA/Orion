@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, MessageSquare, AlertTriangle } from 'lucide-react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { MapPin, MessageSquare, AlertTriangle, Flag, ChevronDown, ChevronUp } from 'lucide-react';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import SuccessPopup from '../SuccessPopup';
 import TrailCard from './TrailCard';
@@ -30,6 +30,11 @@ export default function TrailsManagement() {
     isVisible: false,
     message: ''
   });
+  
+  // Reports state
+  const [showReportsDropdown, setShowReportsDropdown] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   // Success popup helpers
   const showSuccessPopup = (message) => {
@@ -81,6 +86,27 @@ export default function TrailsManagement() {
     }
     
     setTrailCounts(counts);
+  };
+
+  const fetchReports = async () => {
+    try {
+      setLoadingReports(true);
+      const reportsRef = collection(db, 'Reports');
+      const q = query(reportsRef, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      
+      const reportsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().timestamp)
+      }));
+      
+      setReports(reportsData);
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+    } finally {
+      setLoadingReports(false);
+    }
   };
 
   const toggleTrailExpansion = async (trailId) => {
@@ -170,15 +196,26 @@ export default function TrailsManagement() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleRemoveImage = (imageIndex) => {
+    if (!editTrail || !editTrail.photos) return;
+    
+    const updatedPhotos = editTrail.photos.filter((_, index) => index !== imageIndex);
+    setEditTrail(prev => ({
+      ...prev,
+      photos: updatedPhotos
+    }));
+  };
+
   const handleSaveTrail = async () => {
     if (!editTrail) return;
     
     // Process the form data
     const processedData = {
       ...editForm,
-        tags: editForm.tags ? editForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-        lastUpdated: new Date()
-      };
+      tags: editForm.tags ? editForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+      photos: editTrail.photos || [], // Include the updated photos array
+      lastUpdated: new Date()
+    };
 
     const success = await updateTrail(editTrail.id, processedData);
     if (success) {
@@ -254,18 +291,84 @@ export default function TrailsManagement() {
       {/* Header */}
       <div className="trails-header">
         <h2>Trails Management</h2>
-        <div className="trails-stats">
-          <div className="stat-item">
-            <MapPin className="stat-icon" />
-            <span>{trails.length} Trails</span>
+        <div className="trails-header-actions">
+          <div className="trails-stats">
+            <div className="stat-item">
+              <MapPin className="stat-icon" />
+              <span>{trails.length} Trails</span>
+            </div>
+            <div className="stat-item">
+              <MessageSquare className="stat-icon" />
+              <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.reviews || 0), 0)} Reviews</span>
+            </div>
+            <div className="stat-item">
+              <AlertTriangle className="stat-icon" />
+              <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.alerts || 0), 0)} Alerts</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <MessageSquare className="stat-icon" />
-            <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.reviews || 0), 0)} Reviews</span>
-          </div>
-          <div className="stat-item">
-            <AlertTriangle className="stat-icon" />
-            <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.alerts || 0), 0)} Alerts</span>
+          
+          {/* Reports Dropdown */}
+          <div className="reports-dropdown-container">
+            <button
+              className="reports-dropdown-btn"
+              onClick={() => {
+                setShowReportsDropdown(!showReportsDropdown);
+                if (!showReportsDropdown) {
+                  fetchReports();
+                }
+              }}
+            >
+              <Flag size={16} />
+              <span>Reports ({reports.length})</span>
+              {showReportsDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            
+            {showReportsDropdown && (
+              <div className="reports-dropdown">
+                <div className="reports-dropdown-header">
+                  <h4>Recent Reports</h4>
+                  <button
+                    onClick={() => setShowReportsDropdown(false)}
+                    className="close-reports-btn"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="reports-dropdown-content">
+                  {loadingReports ? (
+                    <div className="reports-loading">
+                      <div className="loading-spinner"></div>
+                      <p>Loading reports...</p>
+                    </div>
+                  ) : reports.length === 0 ? (
+                    <p className="no-reports">No reports found</p>
+                  ) : (
+                    <div className="reports-list-compact">
+                      {reports.slice(0, 10).map((report) => (
+                        <div key={report.id} className="report-item-compact">
+                          <div className="report-item-header">
+                            <span className="report-type-badge">{report.type?.toUpperCase()}</span>
+                            <span className={`report-status-badge status-${report.status}`}>
+                              {report.status?.toUpperCase() || 'PENDING'}
+                            </span>
+                          </div>
+                          <p className="report-description-compact">{report.description}</p>
+                          <div className="report-meta-compact">
+                            <span>{new Date(report.createdAt).toLocaleDateString()}</span>
+                            {report.trailName && <span>• {report.trailName}</span>}
+                          </div>
+                        </div>
+                      ))}
+                      {reports.length > 10 && (
+                        <div className="reports-more">
+                          <p>... and {reports.length - 10} more reports</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -349,6 +452,7 @@ export default function TrailsManagement() {
                 }}
         onSave={handleSaveTrail}
         onFormChange={handleFormChange}
+        onRemoveImage={handleRemoveImage}
       />
 
       <SuccessPopup

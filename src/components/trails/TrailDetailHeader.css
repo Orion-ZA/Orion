@@ -1,0 +1,162 @@
+/* Trail Detail Header */
+.trail-detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(28, 37, 65, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.share-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  border: none;
+  color: #052b2b;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(91,192,190,0.25);
+}
+
+.share-button:hover {
+  background: #4db3b1;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(91,192,190,0.35);
+}
+
+.show-map-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.show-map-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.show-map-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.report-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.report-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+
+.report-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trail-detail-header {
+    padding: 12px 16px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .report-button,
+  .show-map-button,
+  .share-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .report-button,
+  .show-map-button,
+  .share-button {
+    padding: 8px 12px;
+    font-size: 12px;
+    justify-content: center;
+  }
+}

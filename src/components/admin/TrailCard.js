@@ -119,6 +119,37 @@ const TrailCard = ({
         </div>
       </div>
 
+      {/* Trail Description */}
+      {trail.description && (
+        <div className="trail-card-description">
+          <p>{String(trail.description)}</p>
+        </div>
+      )}
+
+      {/* Trail Images */}
+      {trail.photos && trail.photos.length > 0 && (
+        <div className="trail-card-images">
+          <h4 className="trail-card-images-title">Trail Images ({trail.photos.length})</h4>
+          <div className="trail-card-images-grid">
+            {trail.photos.slice(0, 6).map((photo, index) => (
+              <div key={index} className="trail-card-image-item">
+                <img 
+                  src={photo} 
+                  alt={`Trail image ${index + 1}`}
+                  className="trail-card-image"
+                  onClick={() => window.open(photo, '_blank')}
+                />
+              </div>
+            ))}
+            {trail.photos.length > 6 && (
+              <div className="trail-card-image-more">
+                <span>+{trail.photos.length - 6} more</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Trail Counters - Bottom Right */}
       <div className="trail-card-counters-bottom">
         <div className="trail-card-counter-item">

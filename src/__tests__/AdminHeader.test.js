@@ -10,6 +10,7 @@ jest.mock('lucide-react', () => ({
   MapPin: () => <div data-testid="map-pin-icon" />,
   Users: () => <div data-testid="users-icon" />,
   ArrowLeft: () => <div data-testid="arrow-left-icon" />,
+  Flag: () => <div data-testid="flag-icon" />,
 }));
 
 // Mock react-router-dom
@@ -34,11 +35,12 @@ describe('AdminHeader', () => {
 
   it('renders all tab buttons with correct labels', () => {
     render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Feedback')).toBeInTheDocument();
     expect(screen.getByText('Trails')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
+    expect(screen.getByText('Reports')).toBeInTheDocument();
   });
 
   it('renders tab icons', () => {
@@ -48,6 +50,7 @@ describe('AdminHeader', () => {
     expect(screen.getAllByTestId('file-text-icon')).toHaveLength(1);
     expect(screen.getAllByTestId('map-pin-icon')).toHaveLength(1);
     expect(screen.getAllByTestId('users-icon')).toHaveLength(1);
+    expect(screen.getAllByTestId('flag-icon')).toHaveLength(1);
   });
 
   it('applies active class to the correct tab', () => {
@@ -69,13 +72,22 @@ describe('AdminHeader', () => {
     expect(mockSetActiveTab).toHaveBeenCalledWith('feedback');
   });
 
-  it('calls setActiveTab with correct tab id for dashboard', () => {
+  it('calls setActiveTab with correct tab id for dashboard', () => { 
     render(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
-    
+
     const dashboardTab = screen.getByText('Dashboard');
     fireEvent.click(dashboardTab);
-    
+
     expect(mockSetActiveTab).toHaveBeenCalledWith('dashboard');
+  });
+
+  it('calls setActiveTab with correct tab id for reports', () => { 
+    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+    const reportsTab = screen.getByText('Reports');
+    fireEvent.click(reportsTab);
+
+    expect(mockSetActiveTab).toHaveBeenCalledWith('reports');
   });
 
   it('renders back button', () => {
@@ -145,17 +157,20 @@ describe('AdminHeader', () => {
     const feedbackTab = screen.getByText('Feedback').closest('button');
     const trailsTab = screen.getByText('Trails').closest('button');
     const usersTab = screen.getByText('Users').closest('button');
+    const reportsTab = screen.getByText('Reports').closest('button');
     
     expect(dashboardTab).toHaveClass('admin-header-tab');
     expect(feedbackTab).toHaveClass('admin-header-tab');
     expect(trailsTab).toHaveClass('admin-header-tab');
     expect(usersTab).toHaveClass('admin-header-tab');
+    expect(reportsTab).toHaveClass('admin-header-tab');
     
     // Check for icon elements (they have the class but are rendered as components)
     expect(dashboardTab.querySelector('[data-testid="bar-chart-icon"]')).toBeInTheDocument();
     expect(feedbackTab.querySelector('[data-testid="file-text-icon"]')).toBeInTheDocument();
     expect(trailsTab.querySelector('[data-testid="map-pin-icon"]')).toBeInTheDocument();
     expect(usersTab.querySelector('[data-testid="users-icon"]')).toBeInTheDocument();
+    expect(reportsTab.querySelector('[data-testid="flag-icon"]')).toBeInTheDocument();
   });
 
   it('handles multiple tab clicks correctly', () => {
@@ -202,11 +217,13 @@ describe('AdminHeader', () => {
     let feedbackTab = screen.getByText('Feedback').closest('button');
     let trailsTab = screen.getByText('Trails').closest('button');
     let usersTab = screen.getByText('Users').closest('button');
+    let reportsTab = screen.getByText('Reports').closest('button');
     
     expect(dashboardTab).toHaveClass('active');
     expect(feedbackTab).not.toHaveClass('active');
     expect(trailsTab).not.toHaveClass('active');
     expect(usersTab).not.toHaveClass('active');
+    expect(reportsTab).not.toHaveClass('active');
     
     rerender(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
     
@@ -214,10 +231,26 @@ describe('AdminHeader', () => {
     feedbackTab = screen.getByText('Feedback').closest('button');
     trailsTab = screen.getByText('Trails').closest('button');
     usersTab = screen.getByText('Users').closest('button');
+    reportsTab = screen.getByText('Reports').closest('button');
     
     expect(dashboardTab).not.toHaveClass('active');
     expect(feedbackTab).toHaveClass('active');
     expect(trailsTab).not.toHaveClass('active');
     expect(usersTab).not.toHaveClass('active');
+    expect(reportsTab).not.toHaveClass('active');
+    
+    rerender(<AdminHeader activeTab="reports" setActiveTab={mockSetActiveTab} />);
+    
+    dashboardTab = screen.getByText('Dashboard').closest('button');
+    feedbackTab = screen.getByText('Feedback').closest('button');
+    trailsTab = screen.getByText('Trails').closest('button');
+    usersTab = screen.getByText('Users').closest('button');
+    reportsTab = screen.getByText('Reports').closest('button');
+    
+    expect(dashboardTab).not.toHaveClass('active');
+    expect(feedbackTab).not.toHaveClass('active');
+    expect(trailsTab).not.toHaveClass('active');
+    expect(usersTab).not.toHaveClass('active');
+    expect(reportsTab).toHaveClass('active');
   });
 });

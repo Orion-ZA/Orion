@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart2, FileText, MapPin, Users, ArrowLeft } from "lucide-react";
+import { BarChart2, FileText, MapPin, Users, ArrowLeft, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "./AdminHeader.css";
 
@@ -8,6 +8,7 @@ const tabs = [
   { id: "feedback", label: "Feedback", icon: FileText },
   { id: "trails", label: "Trails", icon: MapPin },
   { id: "users", label: "Users", icon: Users },
+  { id: "reports", label: "Reports", icon: Flag },
 ];
 
 export default function AdminHeader({ activeTab, setActiveTab }) {

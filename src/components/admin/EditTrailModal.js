@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2, Image as ImageIcon } from 'lucide-react';
 import './ModalComponents.css';
 
 const EditTrailModal = ({ 
@@ -8,7 +8,8 @@ const EditTrailModal = ({
   editForm, 
   onClose, 
   onSave, 
-  onFormChange 
+  onFormChange,
+  onRemoveImage
 }) => {
   console.log('EditTrailModal render - isVisible:', isVisible, 'editTrail:', editTrail);
   
@@ -108,6 +109,38 @@ const EditTrailModal = ({
               <option value="maintenance">Under Maintenance</option>
             </select>
           </div>
+
+          {/* Trail Images Management */}
+          {editTrail.photos && editTrail.photos.length > 0 && (
+            <div className="form-group">
+              <label>
+                <ImageIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                Trail Images ({editTrail.photos.length})
+              </label>
+              <div className="edit-modal-images-grid">
+                {editTrail.photos.map((photo, index) => (
+                  <div key={index} className="edit-modal-image-item">
+                    <img 
+                      src={photo} 
+                      alt={`Trail image ${index + 1}`}
+                      className="edit-modal-image"
+                    />
+                    <button
+                      type="button"
+                      className="edit-modal-remove-image-btn"
+                      onClick={() => onRemoveImage(index)}
+                      title="Remove this image"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="edit-modal-images-note">
+                Click the trash icon to remove an image. Changes will be saved when you click "Save Changes".
+              </p>
+            </div>
+          )}
           
           <div className="modal-footer">
             <button type="button" onClick={onClose} className="cancel-button">

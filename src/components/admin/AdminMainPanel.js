@@ -4,6 +4,7 @@ import RatingsChart from "./RatingsChart";
 import FeedbackTypeChart from "./FeedbackTypeChart";
 import TrailsManagement from "./TrailsManagement";
 import UsersManagement from "./UsersManagement";
+import ReportsManagement from "./ReportsManagement";
 import "./AdminMainPanel.css";
 
 export default function AdminMainPanel({ activeTab }) {
@@ -45,6 +46,12 @@ export default function AdminMainPanel({ activeTab }) {
       {activeTab === "users" && (
         <div className="admin-management-section">
           <UsersManagement />
+        </div>
+      )}
+
+      {activeTab === "reports" && (
+        <div className="admin-management-section">
+          <ReportsManagement />
         </div>
       )}
     </main>

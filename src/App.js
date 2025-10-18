@@ -28,36 +28,56 @@ import ProfilePage from './pages/ProfilePage';
 import Settings from './pages/Settings';
 import HelpCenter from './pages/HelpCenter';
 
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminRoute from './components/admin/AdminRoute';
-
 function AppContent() {
   const location = useLocation();
-  const hideNavFooter = ['/login', '/signup', '/admin'].includes(location.pathname);
-  const hideFooter = ['/login', '/signup', '/trails', '/admin'].includes(location.pathname);
+  const hideNavFooter = ['/login', '/signup'].includes(location.pathname);
+  const hideFooter = ['/login', '/signup', '/trails'].includes(location.pathname);
   const firstRenderRef = useRef(true);
   const isLanding = location.pathname === '/';
   const isTrails = location.pathname === '/trails';
 
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll('.reveal'));
+    const revealEls = () => Array.from(document.querySelectorAll('.reveal'));
+
     if (!('IntersectionObserver' in window)) {
-      els.forEach(el => el.classList.add('is-visible'));
+      revealEls().forEach((el) => el.classList.add('is-visible'));
       return;
     }
 
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
+    const seen = new WeakSet();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }
+    );
+
+    const register = () => {
+      revealEls().forEach((el) => {
+        if (!seen.has(el)) {
+          seen.add(el);
+          io.observe(el);
         }
       });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+    };
 
-    els.forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    register();
+    const rafId = requestAnimationFrame(register);
+
+    const mo = new MutationObserver(register);
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      io.disconnect();
+      mo.disconnect();
+    };
+  }, [location.pathname]);
 
   const { show, triggerLoader } = useLoader();
 
@@ -98,14 +118,6 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/help" element={<HelpCenter />} />
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
           <Route path="*" element={<Welcome />} />
         </Routes>
       </main>

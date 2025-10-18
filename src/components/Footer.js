@@ -31,7 +31,8 @@ export default function Footer() {
 
         <div className="links-col">
           <p className="col-title">Explore</p>
-          <Link to="/trails">Trails</Link>
+          <Link to="/trails">Trail Explorer</Link>
+          <Link to="/trails" state={{ openSubmission: true }}>Submit a Trail</Link>
           <Link to="/reviews">Reviews & Media</Link>
           <Link to="/alerts">Alerts & Updates</Link>
         </div>

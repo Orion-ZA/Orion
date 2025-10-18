@@ -17,7 +17,7 @@ export default function Profile() {
   const [trailsData, setTrailsData] = useState({
     wishlist: [],
     favourites: [],
-    completed: [], // hikes marked as completed are pushed to this array in firestore instead of "completedHikes"
+    completedHikes: [],
     submittedTrails: []
   });
   const [loading, setLoading] = useState(true);
@@ -61,15 +61,15 @@ export default function Profile() {
             ).then((list) => list.filter(Boolean)); // filter out nulls
           };
 
-          const [wishlist, favourites, completed, submittedTrails] =
+          const [wishlist, favourites, completedHikes, submittedTrails] =
             await Promise.all([
               fetchTrails(data.wishlist || []),
               fetchTrails(data.favourites || []),
-              fetchTrails(data.completed || []),
+              fetchTrails(data.completedHikes || []),
               fetchTrails(data.submittedTrails || [])
             ]);
 
-          setTrailsData({ wishlist, favourites, completed, submittedTrails });
+          setTrailsData({ wishlist, favourites, completedHikes, submittedTrails });
         }
       } catch (err) {
         console.error("Error fetching user/trails:", err);
@@ -92,85 +92,73 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
-      <h1>My Dashboard</h1>
-
-      {/* Profile Header */}
+      <h1>My Profile</h1>
       <div className="profile-card">
-        {user?.photoURL ? (
-          <img
-            src={user.photoURL}
-            alt="User Avatar"
-            className="profile-avatar-large"
-          />
+        <ProfileGlowCard avatarUrl={user?.photoURL} email={user?.email} />
+        <button
+          className="edit-btn"
+          onClick={() => navigate('/settings')}
+        >
+          <Edit /> Edit Profile
+        </button>
+      </div>
+
+      <section className="profile-section">
+        <h2><WishlistIcon /> Wishlist</h2>
+        {trailsData.wishlist.length ? (
+          <ul>
+            {trailsData.wishlist.map((trail) => (
+              <li key={trail.id}>{trail.name}</li>
+            ))}
+          </ul>
         ) : (
-          <div className="profile-avatar-placeholder">No Image</div>
+          <p>No items in wishlist.</p>
         )}
-        <div className="profile-info">
-          <h2>{user?.displayName || "No Name"}</h2>
-          <p>{user?.email}</p>
-          <button className="edit-btn" onClick={() => navigate('/settings')}>
-            <Edit /> Edit Profile
-          </button>
-        </div>
-      </div>
+      </section>
 
-      {/* Stats Overview */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <SubmittedIcon /><h3>{trailsData.submittedTrails.length}</h3>
-          <p>Submitted</p>
-        </div>
-        <div className="stat-card">
-          <CompletedIcon /><h3>{trailsData.completed.length}</h3>
-          <p>Completed</p>
-        </div>
-        <div className="stat-card">
-          <FavouritesIcon /><h3>{trailsData.favourites.length}</h3>
-          <p>Favourites</p>
-        </div>
-        <div className="stat-card">
-          <WishlistIcon /><h3>{trailsData.wishlist.length}</h3>
-          <p>Wishlist</p>
-        </div>
-      </div>
+      <section className="profile-section">
+        <h2><FavouritesIcon /> Favourites</h2>
+        {trailsData.favourites.length ? (
+          <ul>
+            {trailsData.favourites.map((trail) => (
+              <li key={trail.id}>{trail.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No favourites yet.</p>
+        )}
+      </section>
 
-      {/* Trails Sections */}
-      <div className="trail-sections">
-        {[
-          { title: "Wishlist", icon: <WishlistIcon />, data: trailsData.wishlist },
-          { title: "Favourites", icon: <FavouritesIcon />, data: trailsData.favourites },
-          { title: "Completed Hikes", icon: <CompletedIcon />, data: trailsData.completed },
-          { title: "Submitted Trails", icon: <SubmittedIcon />, data: trailsData.submittedTrails },
-        ].map((section, idx) => (
-          <section key={idx} className="profile-section">
-            <h2>{section.icon} {section.title}</h2>
-            {section.data.length ? (
-              <ul className="trail-list">
-                {section.data.map((trail) => {
-                  const difficultyClass = trail.difficulty?.toLowerCase() || "unknown";
-                  return (
-                    <li key={trail.id} className={`profile-trail-card ${difficultyClass}`}>
-                      <h4>{trail.name}</h4>
-                      <p className="meta">
-                        {trail.difficulty
-                          ? `Difficulty: ${trail.difficulty}`
-                          : "No difficulty info"}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p>No {section.title.toLowerCase()} yet.</p>
-            )}
-          </section>
-        ))}
-      </div>
+      <section className="profile-section">
+        <h2><CompletedIcon /> Completed Hikes</h2>
+        {trailsData.completedHikes.length ? (
+          <ul>
+            {trailsData.completedHikes.map((trail) => (
+              <li key={trail.id}>{trail.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No completed hikes yet.</p>
+        )}
+      </section>
+
+      <section className="profile-section">
+        <h2><SubmittedIcon /> Submitted Trails</h2>
+        {trailsData.submittedTrails.length ? (
+          <ul>
+            {trailsData.submittedTrails.map((trail) => (
+              <li key={trail.id}>{trail.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No submitted trails yet.</p>
+        )}
+      </section>
     </div>
   );
 }
 
-export const ProfileGlowCard = ({ avatarUrl, email }) => (
+const ProfileGlowCard = ({ avatarUrl, email }) => (
   <GlowWrapper>
     <div className="card">
       <div className="bg uwu" />

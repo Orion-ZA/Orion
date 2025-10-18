@@ -1,12 +1,13 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 9999;
-  background: rgba(28,37,65,0.9);
-  backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  z-index: 50;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: none;
 }
 .nav-inner { 
+  position: relative;
   display: flex; 
   align-items: center; 
   justify-content: space-between; 
@@ -152,7 +153,7 @@ html[data-theme='light'] .nav-login-btn:hover {
 }
 html[data-theme='light'] .mobile-menu {
   background: rgba(255,255,255,0.96);
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
   color: var(--text);
 }
 html[data-theme='light'] .mobile-actions {
@@ -171,32 +172,6 @@ html[data-theme='light'] .mobile-profile-info {
 html[data-theme='light'] .mobile-nav-links a:hover,
 html[data-theme='light'] .mobile-nav-links .as-link:hover {
   background: rgba(13,110,109,0.12);
-}
-html[data-theme='light'] .mobile-nav-links .as-link.active {
-  background: rgba(13,110,109,0.18);
-  color: var(--text);
-}
-html[data-theme='light'] .mobile-profile-header {
-  border-bottom: 1px solid var(--border);
-}
-html[data-theme='light'] .mobile-profile-name {
-  color: var(--text);
-}
-html[data-theme='light'] .mobile-profile-email {
-  color: var(--text-dim);
-}
-html[data-theme='light'] .mobile-profile-chevron {
-  color: var(--text-dim);
-}
-html[data-theme='light'] .mobile-profile-item {
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
-}
-html[data-theme='light'] .mobile-profile-item:hover {
-  background: rgba(13,110,109,0.12);
-}
-html[data-theme='light'] .mobile-logout {
-  border-top: 1px solid var(--border);
 }
 
 .desktop-actions { 
@@ -220,14 +195,6 @@ html[data-theme='light'] .mobile-logout {
   justify-content: center; 
   gap: 6px; 
   transition-duration: .5s; 
-  z-index: 10001; 
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 4px;
-  transition: background-color 0.2s ease;
-}
-.toggle:hover {
-  background: rgba(0, 0, 0, 0.2);
 }
 .bars { 
   width: 100%; 
@@ -246,42 +213,31 @@ html[data-theme='light'] .mobile-logout {
 
 /* Mobile menu */
 .mobile-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: clamp(0px, 4vw, 24px);
+  left: auto;
+  width: min(320px, calc(100vw - 32px));
   background: rgba(10,15,30,0.98);
-  border-bottom: 1px solid var(--border);
-  transform: translateY(-100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transform: translateY(-12px) scale(0.95);
+  transform-origin: top right;
   opacity: 0;
   pointer-events: none;
-  transition: all .3s ease;
-  z-index: 10000;
-  height: 100vh;
-  width: 100vw;
+  transition: opacity .24s ease, transform .24s ease;
+  z-index: 90;
+  max-height: min(420px, calc(100vh - 120px));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 1rem 0 2rem;
-  padding-top: 80px; /* Account for navbar height */
+  padding: 1rem 0 1.5rem;
+  box-shadow: 0 18px 38px rgba(5, 12, 28, 0.35);
 }
 .mobile-menu.open {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   opacity: 1;
   pointer-events: auto;
-}
-
-/* Ensure mobile menu covers entire viewport regardless of page content */
-.mobile-menu {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  height: 100vh !important;
-  width: 100vw !important;
-  z-index: 10000 !important;
 }
 .mobile-nav-links {
   display: flex;
@@ -311,7 +267,6 @@ html[data-theme='light'] .mobile-logout {
   cursor: pointer;
 }
 .mobile-nav-links .as-link:hover { background: var(--glass); color: var(--text); }
-.mobile-nav-links .as-link.active { background: rgba(91,192,190,.18); color: var(--text); }
 .mobile-actions {
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -347,12 +302,67 @@ html[data-theme='light'] .mobile-logout {
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, rgba(5,8,20,0.55), rgba(5,8,20,0.28) 60%, rgba(5,8,20,0));
+  background: transparent;
   backdrop-filter: none;
   border-bottom: none;
 }
+.navbar.landing .desktop-nav a,
+.navbar.landing .desktop-nav .as-link,
+.navbar.landing .nav-login-btn,
+.navbar.landing .brand-text {
+  color: rgba(244, 247, 255, 0.92);
+}
+.navbar.landing .desktop-nav a:hover,
+.navbar.landing .desktop-nav .as-link:hover {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+.navbar.landing .nav-login-btn {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.35);
+  color: #f8fafc;
+}
+.navbar.landing .nav-login-btn:hover {
+  background: rgba(255,255,255,0.24);
+  color: #fff;
+}
+.navbar.landing .brand-logo {
+  filter: drop-shadow(0 4px 14px rgba(5, 12, 28, 0.45));
+}
+.navbar.landing .mobile-menu {
+  background: rgba(5,8,20,0.95);
+}
 .navbar.landing .desktop-nav a:hover { background: rgba(255,255,255,.08); }
 .navbar.landing .desktop-nav .as-link:hover { background: rgba(255,255,255,.08); }
+
+html[data-theme='light'] .navbar.landing {
+  background: transparent;
+  border-bottom: none;
+  color: #f1f5ff;
+}
+html[data-theme='light'] .navbar.landing .desktop-nav a,
+html[data-theme='light'] .navbar.landing .desktop-nav .as-link,
+html[data-theme='light'] .navbar.landing .nav-login-btn,
+html[data-theme='light'] .navbar.landing .brand-text {
+  color: rgba(240, 248, 255, 0.95);
+}
+html[data-theme='light'] .navbar.landing .desktop-nav a:hover,
+html[data-theme='light'] .navbar.landing .desktop-nav .as-link:hover {
+  background: rgba(255,255,255,0.18);
+  color: #061026;
+}
+html[data-theme='light'] .navbar.landing .nav-login-btn {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
+  color: #051225;
+}
+html[data-theme='light'] .navbar.landing .nav-login-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+html[data-theme='light'] .navbar.landing .mobile-menu {
+  background: rgba(6,14,32,0.94);
+  border: 1px solid rgba(255,255,255,0.18);
+}
 
 
 /* Profile dropdown styles (theme-aware) */
@@ -371,7 +381,7 @@ html[data-theme="light"] .profile-trigger:hover { background: rgba(0,0,0,0.04); 
 .profile-dropdown {
   position: absolute; top: 100%; right: 0; margin-top: 8px; width: 240px;
   background: var(--bg-elev); border: 1px solid var(--border);
-  border-radius: 14px; box-shadow: var(--shadow); z-index: 75; overflow: hidden;
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 1000; overflow: hidden;
   animation: scale-in .25s ease both; color: var(--text);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   transition: background-color .45s ease, border-color .45s ease, color .45s ease;
@@ -406,40 +416,26 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   padding: 16px;
 }
 
-.mobile-profile-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 8px;
-}
-
-.mobile-profile-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.mobile-profile-text {
-  flex: 1;
-}
-
 .mobile-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  margin-bottom: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.mobile-profile-info {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .mobile-profile-name {
   margin: 0 0 4px 0;
   font-weight: 600;
   color: white;
-  font-size: 16px;
 }
 
 .mobile-profile-email {
@@ -448,23 +444,8 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   color: rgba(255, 255, 255, 0.8);
 }
 
-.mobile-profile-chevron {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  transition: transform 0.2s ease;
-}
-
-.mobile-profile-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 8px;
-}
-
 .mobile-profile-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
   width: 100%;
   padding: 12px 0;
   background: none;
@@ -473,22 +454,10 @@ html[data-theme="light"] .profile-menu-item:hover { background: rgba(0,0,0,0.06)
   color: white;
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 15px;
-  transition: background-color 0.2s ease;
-}
-
-.mobile-profile-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.mobile-menu-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.9;
 }
 
 .mobile-logout {
-  margin-top: 8px;
-  padding-top: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }

@@ -1,9 +1,74 @@
-import React from 'react';
-import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/mapbox';
+import React, { useMemo } from 'react';
+import Map, { Marker, Source, Layer } from 'react-map-gl/mapbox';
 import "mapbox-gl/dist/mapbox-gl.css";
 import { getDifficultyColor, getDifficultyIcon } from './TrailUtils';
 import { Edit3, X, MapPin } from 'lucide-react';
 import './TrailMap.css';
+
+const normalizePoint = (point) => {
+  if (!point) return null;
+
+  if (Array.isArray(point)) {
+    if (point.length < 2) return null;
+    const lng = Number(point[0]);
+    const lat = Number(point[1]);
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return null;
+    return [lng, lat];
+  }
+
+  if (typeof point === 'object') {
+    if (Array.isArray(point.coordinates)) {
+      return normalizePoint(point.coordinates);
+    }
+
+    const lngCandidate = point.lng ?? point.longitude;
+    const latCandidate = point.lat ?? point.latitude;
+    if (lngCandidate == null || latCandidate == null) return null;
+
+    const lng = Number(lngCandidate);
+    const lat = Number(latCandidate);
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return null;
+    return [lng, lat];
+  }
+
+  return null;
+};
+
+const sanitizeCoordinates = (coords) => {
+  if (!coords) return [];
+
+  if (Array.isArray(coords)) {
+    return coords.map(normalizePoint).filter(Boolean);
+  }
+
+  if (typeof coords === 'object' && Array.isArray(coords.coordinates)) {
+    return sanitizeCoordinates(coords.coordinates);
+  }
+
+  return [];
+};
+
+const prepareTrails = (trails) => {
+  if (!Array.isArray(trails)) return [];
+
+  return trails
+    .map((trail) => {
+      const normalized = normalizePoint([trail?.longitude, trail?.latitude]);
+      if (!normalized) return null;
+
+      const sanitizedRoute = sanitizeCoordinates(trail?.route);
+
+      return {
+        ...trail,
+        longitude: normalized[0],
+        latitude: normalized[1],
+        sanitizedRoute: sanitizedRoute.length >= 2 ? sanitizedRoute : null,
+      };
+    })
+    .filter(Boolean);
+};
 
 const TrailMap = ({
   viewport,
@@ -29,6 +94,15 @@ const TrailMap = ({
   onCloseSubmission,
   isLoading
 }) => {
+  const sanitizedSubmissionRoute = useMemo(
+    () => sanitizeCoordinates(submissionRoute),
+    [submissionRoute]
+  );
+
+  const preparedTrails = useMemo(() => prepareTrails(trails), [trails]);
+
+  const hasSubmissionRoute = showSubmissionPanel && sanitizedSubmissionRoute.length > 1;
+
   const handleMapLoad = () => {
     if (mapRef.current) {
       const map = mapRef.current.getMap();
@@ -131,13 +205,13 @@ const TrailMap = ({
         )}
 
         {/* Submission route */}
-        {submissionRoute && submissionRoute.length > 1 && showSubmissionPanel && (
+        {hasSubmissionRoute && (
           <Source
             id="submission-route"
             type="geojson"
             data={{
               type: "Feature",
-              geometry: { type: "LineString", coordinates: submissionRoute },
+              geometry: { type: "LineString", coordinates: sanitizedSubmissionRoute },
             }}
           >
             <Layer
@@ -153,136 +227,94 @@ const TrailMap = ({
         )}
 
         {/* Submission route points */}
-        {submissionRoute && submissionRoute.length > 0 && showSubmissionPanel && (
-          submissionRoute
-            .filter(point => 
-              Array.isArray(point) && 
-              point.length === 2 && 
-              !isNaN(point[0]) && 
-              !isNaN(point[1]) &&
-              point[0] >= -180 && point[0] <= 180 &&
-              point[1] >= -90 && point[1] <= 90
-            )
-            .map((point, index) => (
-              <Marker
-                key={`route-point-${index}`}
-                longitude={point[0]}
-                latitude={point[1]}
-                anchor="center"
-              >
-                <div className="route-point-marker">
-                  <span className="route-point-number">{index + 1}</span>
-                </div>
-              </Marker>
-            ))
+        {showSubmissionPanel && sanitizedSubmissionRoute.length > 0 && (
+          sanitizedSubmissionRoute.map((point, index) => (
+            <Marker
+              key={`route-point-${index}`}
+              longitude={point[0]}
+              latitude={point[1]}
+              anchor="center"
+            >
+              <div className="route-point-marker">
+                <span className="route-point-number">{index + 1}</span>
+              </div>
+            </Marker>
+          ))
         )}
 
         {/* Trail markers */}
-        {trails
-          .filter(trail => 
-            trail.longitude && 
-            trail.latitude && 
-            !isNaN(trail.longitude) && 
-            !isNaN(trail.latitude) &&
-            typeof trail.longitude === 'number' &&
-            typeof trail.latitude === 'number' &&
-            trail.longitude >= -180 && trail.longitude <= 180 &&
-            trail.latitude >= -90 && trail.latitude <= 90
-          )
-          .map(trail => (
-            <Marker
-              key={trail.id}
-              longitude={trail.longitude}
-              latitude={trail.latitude}
-              anchor="bottom"
-              onClick={() => {
-                // If clicking on the same trail that's already selected, unselect it
-                if (selectedTrail && selectedTrail.id === trail.id) {
-                  setSelectedTrail(null);
-                  setHoveredTrail(null);
-                } else {
-                  // Otherwise, select the trail and zoom to it
-                  if (onTrailClick) {
-                    onTrailClick(trail);
-                  }
-                }
-              }}
+        {preparedTrails.map((trail) => (
+          <Marker
+            key={trail.id}
+            longitude={trail.longitude}
+            latitude={trail.latitude}
+            anchor="bottom"
+            onClick={() => {
+              if (selectedTrail && selectedTrail.id === trail.id) {
+                setSelectedTrail(null);
+                setHoveredTrail(null);
+              } else if (onTrailClick) {
+                onTrailClick(trail);
+              }
+            }}
+          >
+            <div
+              className="trail-marker-wrapper"
+              data-testid="trail-marker-wrapper"
+              onMouseEnter={() => setHoveredTrail(trail)}
+              onMouseLeave={() => setHoveredTrail(null)}
             >
-              <div 
-                className="trail-marker-wrapper"
-                onMouseEnter={() => {
-                  console.log('Mouse enter on trail:', trail.name);
-                  setHoveredTrail(trail);
-                }}
-                onMouseLeave={() => {
-                  console.log('Mouse leave on trail:', trail.name);
-                  setHoveredTrail(null);
+              <div
+                className="trail-marker"
+                style={{
+                  backgroundColor: getDifficultyColor(trail.difficulty),
+                  borderColor: getDifficultyColor(trail.difficulty)
                 }}
               >
-                <div 
-                  className="trail-marker"
-                  style={{
-                    backgroundColor: getDifficultyColor(trail.difficulty),
-                    borderColor: getDifficultyColor(trail.difficulty)
-                  }}
-                >
-                  {getDifficultyIcon(trail.difficulty)}
-                </div>
+                {getDifficultyIcon(trail.difficulty)}
               </div>
-            </Marker>
-          ))}
+            </div>
+          </Marker>
+        ))}
 
         {/* Trail routes */}
-        {trails
-          .filter(trail => {
-            const hasValidRoute = trail.route && 
-              Array.isArray(trail.route) && 
-              trail.route.length > 0 &&
-              trail.longitude && 
-              trail.latitude && 
-              !isNaN(trail.longitude) && 
-              !isNaN(trail.latitude) &&
-              // Validate that all route coordinates are valid
-              trail.route.every(point => 
-                Array.isArray(point) && 
-                point.length === 2 && 
-                !isNaN(point[0]) && 
-                !isNaN(point[1]) &&
-                point[0] >= -180 && point[0] <= 180 &&
-                point[1] >= -90 && point[1] <= 90
-              );
-            
-            
-            return hasValidRoute;
+        {preparedTrails
+          .map((trail) => {
+            if (!trail.sanitizedRoute) return null;
+
+            return (
+              <Source key={`route-${trail.id}`} id={`route-${trail.id}`} type="geojson" data={{
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: trail.sanitizedRoute
+                }
+              }}>
+                <Layer
+                  id={`route-${trail.id}`}
+                  type="line"
+                  paint={{
+                    'line-color': getDifficultyColor(trail.difficulty),
+                    'line-width': 3,
+                    'line-opacity': 0.8
+                  }}
+                />
+              </Source>
+            );
           })
-          .map(trail => (
-            <Source key={`route-${trail.id}`} id={`route-${trail.id}`} type="geojson" data={{
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: trail.route
-              }
-            }}>
-              <Layer
-                id={`route-${trail.id}`}
-                type="line"
-                paint={{
-                  'line-color': getDifficultyColor(trail.difficulty),
-                  'line-width': 3,
-                  'line-opacity': 0.8
-                }}
-              />
-            </Source>
-          ))}
+          .filter(Boolean)}
 
         {/* Trail hover card */}
         {hoveredTrail && (() => {
-          console.log('Rendering hover card for:', hoveredTrail.name);
+          const hoverPoint = normalizePoint([hoveredTrail.longitude, hoveredTrail.latitude]);
+          if (!hoverPoint) return null;
+          const [hoverLng, hoverLat] = hoverPoint;
+
           return (
             <Marker
-              longitude={hoveredTrail.longitude}
-              latitude={hoveredTrail.latitude}
+              longitude={hoverLng}
+              latitude={hoverLat}
               anchor="bottom"
               offset={[0, -50]}
             >

@@ -26,6 +26,113 @@ const HERO_IMAGES = [
   },
 ];
 
+const ABOUT_HIGHLIGHTS = [
+  {
+    title: 'Community powered data',
+    copy: 'Realtime trail alerts, recent reviews, and photos curated by thousands of local explorers so you always know what to expect.',
+  },
+  {
+    title: 'Sustainable adventures',
+    copy: 'We partner with parks and conservancies to champion Leave No Trace principles and protect the places we roam.',
+  },
+  {
+    title: 'Designed for every device',
+    copy: 'Plan from your desktop, then enjoy quick trail access, offline downloads, and safety tools on mobile when you head outside.',
+  },
+];
+
+const SHOWCASE_SECTIONS = [
+  {
+    id: 'explorer',
+    eyebrow: 'Trail Explorer',
+    title: 'Plan smarter adventures with precision filters',
+    description:
+      'Dial in the perfect route using difficulty, elevation, distance, tags, and crowd-sourced insights. Preview weather overlays and terrain in a single glance.',
+    bullets: ['Smart filtering & saved searches', 'Live weather + topo previews', 'Trail health and seasonal alerts'],
+    action: { label: 'Jump into Explorer', to: '/trails' },
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=60',
+  },
+  {
+    id: 'submit',
+    eyebrow: 'Trail Submission',
+    title: 'Share discoveries and build the collective map',
+    description:
+      'Upload GPS recordings, photos, and rich notes in minutes. Orion cleans the data, flags hazards, and notifies your community instantly.',
+    bullets: ['Guided submission workflow', 'Automatic geo-cleanup & QA', 'Instant visibility to followers'],
+    action: { label: 'Start a submission', to: '/trails#submit' },
+    image: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=60',
+  },
+  {
+    id: 'reviews',
+    eyebrow: 'Reviews & Media',
+    title: 'Relive the story with immersive media hubs',
+    description:
+      'Scroll cinematic trip reports, drone flyovers, and bite-sized video recaps — all organized per trail so you can scout conditions before you arrive.',
+    bullets: ['High-res galleries & reels', 'Verified condition updates', 'AI summaries for quick reads'],
+    action: { label: 'Browse community stories', to: '/reviews' },
+    image: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?auto=format&fit=crop&w=1400&q=60',
+  },
+];
+
+const ACTIVITY_CARDS = [
+  {
+    name: 'Hiking',
+    img: 'https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGlraW5nfGVufDB8fDB8fHww',
+    message: 'Plan summit pushes or mellow valley strolls, then download offline maps so every ridge line stays on track.',
+  },
+  {
+    name: 'Mountain biking',
+    img: 'https://images.unsplash.com/photo-1594942939850-d8da299577f3?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Filter by gradient and trail conditions to hit hero dirt hours and keep the stoke high on every switchback.',
+  },
+  {
+    name: 'Trail running',
+    img: 'https://plus.unsplash.com/premium_photo-1664301432574-9b4e85c2b2d3?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Lightweight GPX overlays and live elevation profile previews keep your cadence locked for peak performance.',
+  },
+  {
+    name: 'Bird watching',
+    img: 'https://plus.unsplash.com/premium_photo-1723478690606-f953ea1dab3a?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Track sightings with precise waypoints and timestamps so your checklist fills up faster than your memory card.',
+  },
+  {
+    name: 'Camping',
+    img: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Discover backcountry pads with permit intel, safe water sources, and sunrise predictions for next-level campouts.',
+  },
+  {
+    name: 'Rock climbing',
+    img: 'https://images.unsplash.com/photo-1507034589631-9433cc6bc453?q=80&w=684&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Sync rack beta, approach times, and partner notes so projecting that line feels as smooth as your send.',
+  },
+  {
+    name: 'Kayaking',
+    img: 'https://images.unsplash.com/photo-1480480565647-1c4385c7c0bf?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Monitor flow rates, wind direction, and launch logistics before you paddle into new blue horizons.',
+  },
+  {
+    name: 'Skiing',
+    img: 'https://images.unsplash.com/photo-1565992441121-4367c2967103?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2tpaW5nfGVufDB8fDB8fHww',
+    message: 'Dial in avy forecasts, gradient filters, and skin tracks so every tour links pow and safety in one view.',
+  },
+  {
+    name: 'Backpacking',
+    img: 'https://plus.unsplash.com/premium_photo-1679691282638-733300daccd4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmFja3BhY2tpbmd8ZW58MHx8MHx8fDA%3D',
+    message: 'Stage multi-day mileage, resupply notes, and hazard alerts to keep your crew thriving from trailhead to tailgate.',
+  },
+  {
+    name: 'Surfing',
+    img: 'https://images.unsplash.com/photo-1530870110042-98b2cb110834?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    message: 'Line up swell windows, spot access beta, and post-session notes right alongside your mountain adventures.',
+  },
+];
+
+const clearTimeoutQueue = (queueRef) => {
+  if (!queueRef?.current) return;
+  queueRef.current.forEach((id) => window.clearTimeout(id));
+  queueRef.current = [];
+};
+
 export default function Welcome() {
   const [idx, setIdx] = useState(0);
   const statsRef = useRef(null);
@@ -79,7 +186,7 @@ export default function Welcome() {
 
   return (
     <div className={styles['welcome-page']}>
-      <section className={styles['welcome-hero']} aria-labelledby="welcome-heading">
+      <section id="home" className={`${styles['welcome-hero']} ${styles['anchor-target']}`} aria-labelledby="welcome-heading">
         {/* Background slides */}
         {HERO_IMAGES.map((img, i) => (
           <picture key={i} className={`${styles['welcome-slide']} ${idx === i ? styles['active'] : ''}`}>
@@ -90,7 +197,7 @@ export default function Welcome() {
         <div className={styles['welcome-hero-gradient']} aria-hidden="true"></div>
 
         {/* Content */}
-        <div className={styles['welcome-content']}>
+        <div className={`${styles['welcome-content']} reveal`} style={{ '--delay': '120ms' }}>
           <h1 id="welcome-heading" className={styles['welcome-title']}>
             <span className={styles['typewriter']}>{typedTitle}</span>
           </h1>
@@ -109,8 +216,43 @@ export default function Welcome() {
         </div>
       </section>
 
+      {SHOWCASE_SECTIONS.map(({ id, eyebrow, title, description, bullets, action, image }, index) => (
+        <section
+          key={id}
+          id={id}
+          className={`${styles['highlight-section']} ${styles['anchor-target']} ${index % 2 ? styles['is-reversed'] : ''} reveal`}
+          style={{ '--delay': `${180 + index * 90}ms` }}
+          aria-labelledby={`${id}-heading`}
+        >
+          <div className={styles['highlight-inner']}>
+            <div className={styles['highlight-copy']}>
+              <p className={styles['section-eyebrow']}>{eyebrow}</p>
+              <h2 id={`${id}-heading`}>{title}</h2>
+              <p>{description}</p>
+              <ul className={styles['highlight-points']}>
+                {bullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <Link to={action.to} className={styles['cta-link']}>
+                {action.label}
+              </Link>
+            </div>
+            <div className={styles['highlight-media']}>
+              <div className={styles['highlight-media-frame']} style={{ '--bg-image': `url(${image})` }}></div>
+            </div>
+          </div>
+        </section>
+      ))}
+
       {/* Stats Section */}
-      <section ref={statsRef} className={styles['stats-section']} aria-label="Orion hiking stats">
+      <section
+        ref={statsRef}
+        id="stats"
+        className={`${styles['stats-section']} ${styles['anchor-target']} reveal`}
+        style={{ '--delay': '220ms' }}
+        aria-label="Orion hiking stats"
+      >
         <div className={styles['stats-inner']}>
           <div className={styles['stats-grid']}>
             <StatCard
@@ -144,35 +286,40 @@ export default function Welcome() {
       </section>
 
       {/* Browse by Activity Section */}
-      <section className={styles['activities-section']} aria-labelledby="browse-activity-heading">
-        <div className={styles['activities-inner']}>
-          <h2 id="browse-activity-heading" className={styles['section-title']}>Browse by activity</h2>
-          <div className={styles['activity-grid']}>
-            {[
-              { name: 'Hiking', img: 'https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGlraW5nfGVufDB8fDB8fHww' },
-              { name: 'Mountain biking', img: 'https://images.unsplash.com/photo-1594942939850-d8da299577f3?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Trail running', img: 'https://plus.unsplash.com/premium_photo-1664301432574-9b4e85c2b2d3?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Bird watching', img: 'https://plus.unsplash.com/premium_photo-1723478690606-f953ea1dab3a?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Camping', img: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Rock climbing', img: 'https://images.unsplash.com/photo-1507034589631-9433cc6bc453?q=80&w=684&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Kayaking', img: 'https://images.unsplash.com/photo-1480480565647-1c4385c7c0bf?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-              { name: 'Skiing', img: 'https://images.unsplash.com/photo-1565992441121-4367c2967103?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2tpaW5nfGVufDB8fDB8fHww' },
-              { name: 'Backpacking', img: 'https://plus.unsplash.com/premium_photo-1679691282638-733300daccd4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmFja3BhY2tpbmd8ZW58MHx8MHx8fDA%3D' },
-            ].map((act, i, arr) => (
-              <TiltCard
-                key={act.name}
-                className={styles['activity-card']}
-                style={{ '--img': `url(${act.img})`, animationDelay: `${0.05 + i * 0.08}s` }}
-                name={act.name}
-              />
+      <ActivitySection />
+
+      <section
+        id="about"
+        className={`${styles['about-section']} ${styles['anchor-target']} reveal`}
+        style={{ '--delay': '280ms' }}
+        aria-labelledby="about-heading"
+      >
+        <div className={styles['about-inner']}>
+          <div className={styles['about-copy']}>
+            <p className={styles['section-eyebrow']}>About Orion</p>
+            <h2 id="about-heading">Charting new paths with the trail community</h2>
+            <p>
+              Orion helps millions of outdoor lovers find the right trail, navigate safely, and share their story — all while
+              stewarding the environments we explore. Every dataset, alert, and review you see is refined through our hybrid of
+              verified partners and passionate hikers like you.
+            </p>
+            <div className={styles['about-cta']}>
+              <Link to="/signup" className={styles['cta-link']}>
+                Join the community
+              </Link>
+              <Link to="/feedback" className={styles['cta-link-secondary']}>
+                See what&apos;s new
+              </Link>
+            </div>
+          </div>
+
+          <div className={styles['about-grid']}>
+            {ABOUT_HIGHLIGHTS.map(({ title, copy }, i) => (
+              <article key={title} className={`${styles['about-card']} reveal`} style={{ '--delay': `${340 + i * 80}ms` }}>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
             ))}
-            {/* Last image card */}
-            <TiltCard
-              key="Surfing"
-              className={styles['activity-card']}
-              style={{ '--img': 'url(https://images.unsplash.com/photo-1530870110042-98b2cb110834?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)', animationDelay: `${0.05 + 10 * 0.08}s` }}
-              name="Surfing"
-            />
           </div>
         </div>
       </section>
@@ -180,40 +327,124 @@ export default function Welcome() {
   );
 }
 
-// TiltCard: adds mousemove tilt effect and hover intensity
-function TiltCard({ className, style, name }) {
-  const ref = useRef();
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handle = (e) => {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const midX = rect.width / 2;
-      const midY = rect.height / 2;
-      const rotateY = ((x - midX) / midX) * 10;
-      const rotateX = -((y - midY) / midY) * 10;
-      el.style.transform = `translateY(6px) scale(1.04) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      el.style.boxShadow = '0 32px 72px rgba(0,221,235,0.22), 0 24px 52px rgba(91,66,243,0.28)';
-    };
-    const reset = () => {
-      el.style.transform = '';
-      el.style.boxShadow = '';
-    };
-    el.addEventListener('mousemove', handle);
-    el.addEventListener('mouseleave', reset);
-    return () => {
-      el.removeEventListener('mousemove', handle);
-      el.removeEventListener('mouseleave', reset);
-    };
-  }, []);
+function ActivitySection() {
   return (
-    <div ref={ref} className={className} style={style}>
-      <div className={styles['activity-card-inner']}>
-        <div className={styles['activity-name']}>{name}</div>
+    <section
+      id="activities"
+      className={`${styles['activities-section']} ${styles['anchor-target']} reveal`}
+      style={{ '--delay': '260ms' }}
+      aria-labelledby="browse-activity-heading"
+    >
+      <div className={styles['activities-inner']}>
+        <h2 id="browse-activity-heading" className={styles['section-title']}>
+          Browse by activity
+        </h2>
+        <div className={styles['activity-grid']}>
+          {ACTIVITY_CARDS.map((card, index) => (
+            <InteractiveActivityCard
+              key={card.name}
+              name={card.name}
+              image={card.img}
+              message={card.message}
+              index={index}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function InteractiveActivityCard({ name, image, message, index }) {
+  const [isActive, setIsActive] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const timeoutsRef = useRef([]);
+  const textRef = useRef(name);
+
+  useEffect(() => {
+    textRef.current = name;
+  }, [name]);
+
+  useEffect(() => () => clearTimeoutQueue(timeoutsRef), []);
+
+  useEffect(() => {
+    if (!isActive) {
+      clearTimeoutQueue(timeoutsRef);
+      setTypedText('');
+      return;
+    }
+
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion) {
+      setTypedText(textRef.current);
+      return () => clearTimeoutQueue(timeoutsRef);
+    }
+
+    let charIndex = 0;
+
+    function schedule(nextDelay) {
+      const id = window.setTimeout(step, nextDelay);
+      timeoutsRef.current.push(id);
+    }
+
+    function step() {
+      const full = textRef.current;
+      if (charIndex >= full.length) return;
+
+      charIndex += 1;
+      setTypedText(full.slice(0, charIndex));
+
+      if (charIndex < full.length) {
+        schedule(charIndex === 1 ? 120 : 55);
+      }
+    }
+
+    schedule(90);
+
+    return () => clearTimeoutQueue(timeoutsRef);
+  }, [isActive, name]);
+
+  const showCursor = isActive && typedText.length < name.length;
+
+  return (
+    <article
+      className={`${styles['activity-card']} reveal`}
+      style={{ '--delay': `${240 + index * 70}ms` }}
+      onMouseEnter={() => setIsActive(true)}
+      onMouseLeave={() => setIsActive(false)}
+      onFocus={() => setIsActive(true)}
+      onBlur={() => setIsActive(false)}
+      onTouchStart={() => setIsActive(true)}
+      onTouchEnd={() => setIsActive(false)}
+      onTouchCancel={() => setIsActive(false)}
+      tabIndex={0}
+  aria-label={`${name} activity highlight. ${message}`}
+      title={message}
+    >
+      <img src={image} alt={`${name} terrain`} className={styles['activity-image']} loading="lazy" />
+      <div
+        className={`${styles['activity-overlay']} ${isActive ? styles['visible'] : ''}`}
+        aria-live={isActive ? 'polite' : 'off'}
+      >
+        <p className={styles['activity-typing']}>
+          {typedText}
+          {showCursor && (
+            <span className={styles['typing-cursor']} aria-hidden="true">
+              |
+            </span>
+          )}
+        </p>
+        <p
+          className={`${styles['activity-message']} ${typedText === name ? styles['message-visible'] : ''}`}
+        >
+          {message}
+        </p>
+      </div>
+    </article>
   );
 }
 

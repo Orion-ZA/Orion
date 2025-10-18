@@ -18,12 +18,21 @@ jest.mock('firebase/storage', () => ({
 jest.mock('firebase/auth', () => ({
   onAuthStateChanged: jest.fn(),
   signOut: jest.fn(),
+  getAuth: jest.fn(() => ({})),
 }));
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
   storage: {},
   auth: {},
+}));
+
+// Mock useTrailUserActions hook
+jest.mock('../hooks/useTrailUserActions', () => ({
+  useTrailUserActions: () => ({
+    userSaved: { favourites: [] },
+    handleTrailAction: jest.fn(),
+  }),
 }));
 
 // Mock uuid
@@ -67,16 +76,46 @@ describe('ReviewsMedia Component', () => {
       id: 'trail-1',
       name: 'Test Trail 1',
       photos: ['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg'],
+      processedPhotos: true,
+      hasReviews: true,
+      hasAlerts: true,
+      rating: 4.5,
+      reviews: 10,
+      difficulty: 'moderate',
+      tags: ['scenic', 'family-friendly'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'A beautiful test trail with great views'
     },
     {
       id: 'trail-2',
       name: 'Test Trail 2',
       photos: [],
+      processedPhotos: true,
+      hasReviews: false,
+      hasAlerts: false,
+      rating: 3.0,
+      reviews: 0,
+      difficulty: 'easy',
+      tags: ['beginner'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'An easy test trail for beginners'
     },
     {
       id: 'trail-3',
       name: 'Test Trail 3',
       photos: ['firebase-storage-path/photo3.jpg'],
+      processedPhotos: true,
+      hasReviews: true,
+      hasAlerts: true,
+      rating: 5.0,
+      reviews: 5,
+      difficulty: 'hard',
+      tags: ['challenging', 'views'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'A challenging test trail with amazing views'
     },
   ];
 
@@ -124,10 +163,8 @@ describe('ReviewsMedia Component', () => {
 
     // Mock Firebase Auth - simulate no user initially
     onAuthStateChanged.mockImplementation((auth, callback) => {
-      // Simulate auth loading delay
-      setTimeout(() => {
-        callback(null); // No user logged in
-      }, 100);
+      // Call immediately to avoid loading delay
+      callback(null); // No user logged in
       return jest.fn(); // Return unsubscribe function
     });
     signOut.mockResolvedValue();
@@ -186,10 +223,10 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      // Check if action buttons are rendered
-      expect(screen.getAllByText('Review')).toHaveLength(3);
-      expect(screen.getAllByText('Images')).toHaveLength(3);
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      // Check if action buttons are rendered (now icon-only)
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('renders trail images correctly', async () => {
@@ -584,7 +621,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -618,7 +655,7 @@ describe('ReviewsMedia Component', () => {
       fetch.mockRejectedValueOnce(new Error('Alert submission failed'));
       window.alert = jest.fn();
 
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -634,7 +671,7 @@ describe('ReviewsMedia Component', () => {
     });
 
     test('does not submit empty alert', async () => {
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -679,10 +716,10 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      // Buttons should be visible on mobile without hover
-      expect(screen.getAllByText('Review')).toHaveLength(3);       
-      expect(screen.getAllByText('Images')).toHaveLength(3);       
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      // Buttons should be visible on mobile without hover (now icon-only)
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('shows buttons on desktop (always visible)', async () => {
@@ -714,9 +751,9 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Buttons should be visible on desktop (current implementation shows them always)
-      expect(screen.getAllByText('Review')).toHaveLength(3);       
-      expect(screen.getAllByText('Images')).toHaveLength(3);       
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('handles window resize events', async () => {
@@ -759,7 +796,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Buttons should be visible on mobile
-      expect(screen.getAllByText('Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
     });
   });
 
@@ -808,7 +845,7 @@ describe('ReviewsMedia Component', () => {
       });
     });
 
-    test('displays "No reviews yet" when no reviews', async () => {
+    test('displays "No reviews available" when no reviews', async () => {
       // Mock empty reviews for all trails
       fetch
         .mockResolvedValueOnce({
@@ -843,8 +880,8 @@ describe('ReviewsMedia Component', () => {
       render(<ReviewsMedia />);
 
       await waitFor(() => {
-        // Wait for trails to load and show "No reviews yet" text
-        expect(screen.getAllByText('No reviews yet')).toHaveLength(3);
+        // Wait for trails to load and show "No reviews available" text
+        expect(screen.getAllByText('No reviews available')).toHaveLength(3);
       }, { timeout: 5000 });
     });
 
@@ -993,7 +1030,7 @@ describe('ReviewsMedia Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
-        expect(screen.getAllByText('No reviews yet')).toHaveLength(3);
+        expect(screen.getAllByText('No reviews available')).toHaveLength(3);
       });
     });
 
@@ -1035,7 +1072,7 @@ describe('ReviewsMedia Component', () => {
 
     test('resets alert form state when opening modal', async () => {
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -1059,7 +1096,7 @@ describe('ReviewsMedia Component', () => {
 
     test('resets image form state when opening modal', async () => {
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       const imagesButton = imagesButtons[0];
       fireEvent.click(imagesButton);
 
@@ -1127,9 +1164,9 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Review buttons should be disabled when user is not logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).toBeDisabled();
+        expect(button).toBeDisabled();
       });
     });
 
@@ -1167,9 +1204,9 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Review buttons should be enabled when user is logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).not.toBeDisabled();
+        expect(button).not.toBeDisabled();
       });
     });
 
@@ -1204,9 +1241,9 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Review buttons should be disabled when user is not logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).toBeDisabled();
+        expect(button).toBeDisabled();
       });
       
       // Try to click review button (should not trigger modal since it's disabled)
@@ -1236,10 +1273,8 @@ describe('ReviewsMedia Component', () => {
     test('handles fetchTrails API failure', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -1262,10 +1297,8 @@ describe('ReviewsMedia Component', () => {
     test('handles fetchTrails non-ok response', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -1436,7 +1469,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1483,7 +1516,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open review modal
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       fireEvent.click(reviewButtons[0]);
 
       expect(screen.getByText(/Add Review.*Test User/)).toBeInTheDocument();
@@ -1519,7 +1552,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       expect(screen.getByText('Add Images')).toBeInTheDocument();
@@ -1555,7 +1588,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1599,7 +1632,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1850,7 +1883,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open review modal
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       fireEvent.click(reviewButtons[0]);
 
       // Check for anonymous checkbox
@@ -1882,10 +1915,8 @@ describe('ReviewsMedia Component', () => {
     test('handles image upload successfully', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -1943,7 +1974,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Find the file input by its type attribute
@@ -1990,10 +2021,8 @@ describe('ReviewsMedia Component', () => {
     test('handles image upload failure', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -2043,7 +2072,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Find the file input by its type attribute
@@ -2098,7 +2127,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Submit without selecting files
@@ -2173,7 +2202,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2266,7 +2295,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2357,7 +2386,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2440,7 +2469,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2495,7 +2524,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2576,7 +2605,7 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 

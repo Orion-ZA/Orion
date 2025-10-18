@@ -6,6 +6,12 @@
   backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
+
+/* Light mode navbar styling */
+html[data-theme='light'] .navbar {
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
 .nav-inner { 
   display: flex; 
   align-items: center; 
@@ -151,9 +157,11 @@ html[data-theme='light'] .nav-login-btn:hover {
   background: rgba(13,110,109,0.18);
 }
 html[data-theme='light'] .mobile-menu {
-  background: rgba(255,255,255,0.96);
+  background: rgba(255,255,255,0.98);
   border-bottom: 1px solid var(--border);
   color: var(--text);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 html[data-theme='light'] .mobile-actions {
   border-top: 1px solid var(--border);
@@ -229,12 +237,25 @@ html[data-theme='light'] .mobile-logout {
 .toggle:hover {
   background: rgba(0, 0, 0, 0.2);
 }
+
+/* Light mode burger menu styling */
+html[data-theme='light'] .toggle {
+  background: rgba(0, 0, 0, 0.05);
+}
+html[data-theme='light'] .toggle:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
 .bars { 
   width: 100%; 
   height: 4px; 
   background-color: rgb(253, 255, 243); 
   border-radius: 4px; 
   transition: all .5s ease; 
+}
+
+/* Light mode burger bars */
+html[data-theme='light'] .bars {
+  background-color: rgb(30, 30, 30);
 }
 #bar2 { transition-duration: .8s; }
 #bar1, #bar3 { width: 70%; }
@@ -351,8 +372,21 @@ html[data-theme='light'] .mobile-logout {
   backdrop-filter: none;
   border-bottom: none;
 }
+
+/* Light mode landing navbar */
+html[data-theme='light'] .navbar.landing {
+  background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65) 60%, rgba(255,255,255,0.3));
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
 .navbar.landing .desktop-nav a:hover { background: rgba(255,255,255,.08); }
 .navbar.landing .desktop-nav .as-link:hover { background: rgba(255,255,255,.08); }
+
+/* Light mode landing navbar hover states */
+html[data-theme='light'] .navbar.landing .desktop-nav a:hover,
+html[data-theme='light'] .navbar.landing .desktop-nav .as-link:hover {
+  background: rgba(0,0,0,.08);
+}
 
 
 /* Profile dropdown styles (theme-aware) */

@@ -14,6 +14,11 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* Light mode trail panel button positioning */
+html[data-theme='light'] .trails-panel-toggle {
+  top: 6rem; /* Slightly more space in light mode */
+}
+
 /* Toggle Button */
 .trails-toggle-btn {
   width: 40px;
@@ -218,6 +223,27 @@
   z-index: 1;
 }
 
+/* Light mode sorting dropdown styling */
+html[data-theme='light'] .sort-select {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+html[data-theme='light'] .sort-select:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme='light'] .sort-select:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.2);
+}
+
 .sort-select:focus {
   outline: none;
   border-color: rgba(91, 192, 190, 0.6);
@@ -268,6 +294,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Light mode sort order button styling */
+html[data-theme='light'] .sort-order-btn {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme='light'] .sort-order-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -340,6 +380,31 @@
 
 .action-button.secondary::after {
   background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.2) 50%, rgba(255,255,255,0) 100%);
+}
+
+/* Light mode action button styling */
+html[data-theme='light'] .action-button.primary {
+  background: var(--primary);
+  color: #052b2b;
+  box-shadow: 0 4px 12px rgba(91,192,190,0.3);
+}
+
+html[data-theme='light'] .action-button.primary:hover {
+  background: #4db3b1;
+  box-shadow: 0 6px 16px rgba(91,192,190,0.4);
+}
+
+html[data-theme='light'] .action-button.secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme='light'] .action-button.secondary:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Trail List */
@@ -747,6 +812,11 @@
   .trails-panel-toggle {
     top: 7.5rem; /* Position below search bar: 4.5rem (navbar) + 2.25rem (search bar) + 0.75rem (margin) */
     left: 0.5rem;
+  }
+  
+  /* Light mode mobile trail panel positioning */
+  html[data-theme='light'] .trails-panel-toggle {
+    top: 8.5rem; /* More space in light mode on mobile */
   }
   
   .trails-panel-toggle.open {

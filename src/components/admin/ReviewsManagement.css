@@ -151,28 +151,39 @@
 .admin-review-rating {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .admin-star {
-  width: 1rem;
-  height: 1rem;
-  transition: color 0.2s;
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .admin-star.filled {
   color: #ffd700;
-  fill: #ffd700;
+  fill: currentColor;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
 }
 
 .admin-star.empty {
-  color: #a0a0a0;
+  color: #666666;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.admin-star:hover {
+  transform: scale(1.1);
 }
 
 .admin-rating-text {
   color: #a0a0a0;
   font-size: 0.85rem;
   font-weight: 500;
+  margin-left: 0.5rem;
+  white-space: nowrap;
 }
 
 .admin-delete-button {

@@ -346,8 +346,13 @@ describe('trailUtils', () => {
       const { container } = render(<div>{renderStars(3)}</div>);
       const stars = container.querySelectorAll('.trail-card-star');
       
+      expect(stars).toHaveLength(5);
+      
       stars.forEach((star, index) => {
-        expect(star.textContent).toBe('★');
+        // Check that it's an SVG element (Lucide React Star component)
+        expect(star.tagName).toBe('svg');
+        // Check that it has the correct class names
+        expect(star.classList.contains('trail-card-star')).toBe(true);
         // React keys are not rendered as HTML attributes in testing environment
       });
     });

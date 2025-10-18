@@ -1,4 +1,5 @@
 // Utility functions for TrailsManagement
+import { Star } from 'lucide-react';
 
 export const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
@@ -77,9 +78,11 @@ export const renderStars = (rating) => {
   const numericRating = typeof rating === 'number' ? rating : 0;
   
   return Array.from({ length: 5 }, (_, i) => (
-    <span key={i} className={`trail-card-star ${i < numericRating ? 'filled' : ''}`}>
-      ★
-    </span>
+    <Star
+      key={i}
+      className={`trail-card-star ${i < numericRating ? 'filled' : 'empty'}`}
+      size={16}
+    />
   ));
 };
 

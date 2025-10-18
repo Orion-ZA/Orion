@@ -436,14 +436,23 @@
 }
 
 .trail-card-star {
-  color: #ffd700;
-  font-size: 1.125rem;
+  width: 16px;
+  height: 16px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .trail-card-star.filled {
   color: #ffd700;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  fill: currentColor;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+}
+
+.trail-card-star.empty {
+  color: #666666;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
 .trail-card-rating-text {

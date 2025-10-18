@@ -788,7 +788,58 @@ describe('AlertsUpdates Component', () => {
       });
     });
 
-    it('handles duplicate alerts', async () => {
+    it('handles duplicate trails across categories by deduplicating them', async () => {
+      // Test case where the same trail appears in multiple categories
+      global.fetch.mockImplementation((url) => {
+        if (url.includes('getsavedtrails')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+              wishlist: [{ id: 'trail-1', name: 'Test Trail 1' }], // Same trail in wishlist
+              completed: [{ id: 'trail-1', name: 'Test Trail 1' }] // Same trail in completed
+            })
+          });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+
+      mockGetDocs.mockImplementation((query) => {
+        const mockQuerySnapshot = {
+          docs: [{
+            id: 'alert-1',
+            data: () => ({
+              trailId: 'trail-1',
+              type: 'authority',
+              message: 'Trail closed',
+              isActive: true,
+              isTimed: false,
+              timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
+              date: '2024-01-01T00:00:00Z'
+            })
+          }]
+        };
+        return Promise.resolve(mockQuerySnapshot);
+      });
+
+      await act(async () => {
+        render(<AlertsUpdates />);
+      });
+
+      await waitFor(() => {
+        // Should display only one alert even though trail appears in 3 categories
+        const alertElements = screen.getAllByText('Trail closed');
+        expect(alertElements).toHaveLength(1);
+        
+        // Should show count of unique trails (1) not total (3)
+        const trackingElements = screen.getAllByText((content, element) => {
+          return element?.textContent === 'Tracking alerts for 1 saved trails, with 1 active alerts';
+        });
+        expect(trackingElements.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('handles duplicate alerts by deduplicating them', async () => {
       const duplicateAlerts = [
         {
           id: 'alert-1',
@@ -849,9 +900,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        // Should display both alerts even if they're duplicates
+        // Should display only one alert after deduplication
         const alertElements = screen.getAllByText('Trail closed');
-        expect(alertElements).toHaveLength(2);
+        expect(alertElements).toHaveLength(1);
       });
     });
 

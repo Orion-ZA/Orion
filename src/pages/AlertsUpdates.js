@@ -32,14 +32,19 @@ export default function AlertsUpdates() {
         const trailsRes = await fetch(`${SAVED_TRAILS_API_URL}?uid=${userId}`);
         const trailsData = await trailsRes.json();
         
-        // Combine all saved trails from different categories
+        // Combine all saved trails from different categories and remove duplicates
         const allSavedTrails = [
           ...(trailsData.favourites || []),
           ...(trailsData.wishlist || []),
           ...(trailsData.completed || [])
         ];
         
-        setSavedTrails(allSavedTrails);
+        // Remove duplicate trails based on trail ID
+        const uniqueSavedTrails = allSavedTrails.filter((trail, index, self) => 
+          index === self.findIndex(t => t.id === trail.id)
+        );
+        
+        setSavedTrails(uniqueSavedTrails);
       } catch (err) {
         console.error('Failed to fetch saved trails:', err);
       } finally {
@@ -86,7 +91,13 @@ export default function AlertsUpdates() {
         const alertsArrays = await Promise.all(alertPromises);
         // Flatten the array of arrays and remove duplicates if any
         const allAlerts = alertsArrays.flat();
-        setAlerts(allAlerts);
+        
+        // Remove duplicate alerts based on alert ID to ensure uniqueness
+        const uniqueAlerts = allAlerts.filter((alert, index, self) => 
+          index === self.findIndex(a => a.id === alert.id)
+        );
+        
+        setAlerts(uniqueAlerts);
       } catch (err) {
         console.error('Failed to fetch alerts:', err);
       } finally {

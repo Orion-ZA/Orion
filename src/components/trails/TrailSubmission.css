@@ -25,6 +25,11 @@
   margin-right: 60px; /* Add margin to avoid map controls */
 }
 
+/* Light mode submission panel positioning */
+html[data-theme='light'] .submission-panel-side {
+  top: 6rem; /* Slightly more space in light mode */
+}
+
 @keyframes slideInFromRight {
   from {
     transform: translateX(100%);
@@ -295,6 +300,7 @@
 
 .distance-input-container input.auto-calculated::-webkit-outer-spin-button,
 .distance-input-container input.auto-calculated::-webkit-inner-spin-button {
+  appearance: none;
   -webkit-appearance: none;
   margin: 0;
 }
@@ -754,6 +760,11 @@
       rgba(28, 37, 65, 0.75) 0%, 
       rgba(28, 37, 65, 0.65) 50%, 
       rgba(28, 37, 65, 0.75) 100%);
+  }
+  
+  /* Light mode mobile submission panel positioning */
+  html[data-theme='light'] .submission-panel-side {
+    top: 5rem; /* More space in light mode on mobile */
   }
   
   .form-row {

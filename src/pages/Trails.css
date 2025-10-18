@@ -25,6 +25,11 @@
   pointer-events: auto;
 }
 
+/* Light mode search container positioning */
+html[data-theme='light'] .trails-search-container {
+  top: 6rem; /* Slightly more space in light mode */
+}
+
 
 .trails-main {
   flex: 1;
@@ -57,6 +62,11 @@
   animation: slideInFromRight 0.3s ease-out;
   pointer-events: auto;
   margin-right: 60px; /* Add margin to avoid map controls */
+}
+
+/* Light mode filter overlay positioning */
+html[data-theme='light'] .filter-overlay {
+  top: 6rem; /* Slightly more space in light mode */
 }
 
 @keyframes slideInFromRight {
@@ -182,5 +192,14 @@
     left: 0.5rem;
     width: auto;
     max-height: calc(100vh - 5rem);
+  }
+  
+  /* Light mode mobile positioning */
+  html[data-theme='light'] .trails-search-container {
+    top: 5.5rem; /* More space in light mode on mobile */
+  }
+  
+  html[data-theme='light'] .filter-overlay {
+    top: 5rem; /* More space in light mode on mobile */
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { auth, db } from "../firebaseConfig";
@@ -19,10 +19,10 @@ const API_BASE_URL = 'https://us-central1-orion-sdp.cloudfunctions.net';
 
 export default function TrailsPage() {
   const mapRef = useRef(null);
-  const handledNavStateRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { searchQuery, setSearchQuery, updateTrailsData, getLocationCoordinates, getLocationNameFromCoordinates } = useSearch();
+  const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showSubmissionPanel, setShowSubmissionPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -163,10 +163,11 @@ export default function TrailsPage() {
 
   // Auth state listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      if (authUser) {
-        setCurrentUserId(authUser.uid);
-        loadUserSavedTrails(authUser.uid);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user) {
+        setCurrentUserId(user.uid);
+        loadUserSavedTrails(user.uid);
       } else {
         setCurrentUserId(null);
         setUserSaved({ favourites: [], wishlist: [], completed: [] });
@@ -222,15 +223,12 @@ export default function TrailsPage() {
         console.error('Error getting location:', error);
         let errorMessage = 'Failed to get location';
         
-        switch (error.code) {
+        switch(error.code) {
           case error.PERMISSION_DENIED:
             errorMessage = 'Location access denied. Please enable location permissions.';
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = 'Location information unavailable.';
-            break;
-          default:
-            errorMessage = 'Failed to get location';
             break;
         }
         
@@ -321,19 +319,15 @@ export default function TrailsPage() {
       trail.name && trail.name.toLowerCase().includes(query.toLowerCase())
     ) : null;
 
-    if (matchingTrail) {
-      const trailLng = Number(matchingTrail.longitude);
-      const trailLat = Number(matchingTrail.latitude);
-
-      if (Number.isFinite(trailLng) && Number.isFinite(trailLat)) {
-        setSearchLocation({
-          latitude: trailLat,
-          longitude: trailLng,
-        });
-        setIsSearchMode(true);
-        handleTrailClick({ ...matchingTrail, longitude: trailLng, latitude: trailLat });
-        return;
-      }
+    if (matchingTrail && matchingTrail.longitude && matchingTrail.latitude) {
+      // Found a matching trail - zoom to it and set search location
+      setSearchLocation({
+        latitude: matchingTrail.latitude,
+        longitude: matchingTrail.longitude
+      });
+      setIsSearchMode(true);
+      handleTrailClick(matchingTrail);
+      return;
     }
 
     // If no trail found, try to get coordinates from geocoding
@@ -365,39 +359,6 @@ export default function TrailsPage() {
       console.warn('Failed to geocode search query:', error);
     }
   }, [trails, getLocationCoordinates, handleTrailClick]);
-
-  // Handle search query from Welcome page or search bar
-  useEffect(() => {
-    if (!location.state || handledNavStateRef.current === location.state) {
-      return;
-    }
-
-    handledNavStateRef.current = location.state;
-
-    const { searchQuery: incomingQuery, action, openSubmission } = location.state;
-    let shouldClearState = false;
-
-    if (incomingQuery) {
-      setSearchQuery(incomingQuery);
-
-      if (action === 'zoom') {
-        handleSearchZoom(incomingQuery);
-      } else {
-        handleFilterChange('searchQuery', incomingQuery);
-      }
-
-      shouldClearState = true;
-    }
-
-    if (openSubmission) {
-      setShowSubmissionPanel(true);
-      shouldClearState = true;
-    }
-
-    if (shouldClearState) {
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state, setSearchQuery, handleFilterChange, handleSearchZoom, setShowSubmissionPanel]);
 
   // Check if map needs recentering
   const needsRecenter = trailsUserLocation && mapCenter && 

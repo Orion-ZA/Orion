@@ -10,6 +10,11 @@
   pointer-events: auto;
 }
 
+/* Light mode map controls positioning */
+html[data-theme='light'] .trails-map-controls {
+  top: 6rem; /* Slightly more space in light mode */
+}
+
 .map-control-btn {
   width: 40px;
   height: 40px;
@@ -85,5 +90,10 @@
   .trails-map-controls {
     top: 7.5rem; /* Position below search bar: 4.5rem (navbar) + 2.25rem (search bar) + 0.75rem (margin) */
     right: 1rem;
+  }
+  
+  /* Light mode mobile map controls positioning */
+  html[data-theme='light'] .trails-map-controls {
+    top: 8.5rem; /* More space in light mode on mobile */
   }
 }

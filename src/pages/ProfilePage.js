@@ -10,6 +10,7 @@ import SubmittedIcon from "../components/SubmittedIcon";
 import CompletedIcon from "../components/CompletedIcon";
 import { useNavigate } from 'react-router-dom';
 import { Edit } from "lucide-react";
+import BadgesSection from '../components/BadgesSection';
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
@@ -133,6 +134,9 @@ export default function Profile() {
           <p>Wishlist</p>
         </div>
       </div>
+
+      {/* Badges Section */}
+      <BadgesSection onViewAllClick={() => navigate('/achievements')} />
 
       {/* Trails Sections */}
       <div className="trail-sections">

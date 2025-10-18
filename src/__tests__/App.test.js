@@ -35,6 +35,10 @@ jest.mock('../pages/ProfilePage', () => () => <div>Profile Page</div>);
 jest.mock('../pages/Settings', () => () => <div>Settings Page</div>);
 jest.mock('../pages/Feedback', () => () => <div>Feedback Page</div>);
 jest.mock('../pages/HelpCenter', () => () => <div>HelpCenter Page</div>);
+jest.mock('../pages/AchievementsPage', () => () => <div>Achievements Page</div>);
+jest.mock('../pages/TrailDetail', () => () => <div>TrailDetail Page</div>);
+jest.mock('../pages/admin/AdminDashboard', () => () => <div>AdminDashboard Page</div>);
+jest.mock('../components/admin/AdminRoute', () => ({ children }) => <>{children}</>);
 
 describe('App', () => {
   it('renders Welcome page and shows Navbar/Footer', () => {
@@ -82,6 +86,7 @@ describe('App', () => {
       ['/mytrails', 'MyTrails Page'],
       ['/alerts', 'AlertsUpdates Page'],
       ['/profile', 'Profile Page'],
+      ['/achievements', 'Achievements Page'],
       ['/settings', 'Settings Page'],
       ['/feedback', 'Feedback Page'],
       ['/help', 'HelpCenter Page'],
@@ -91,6 +96,24 @@ describe('App', () => {
       render(<App />);
       expect(screen.getByText(text)).toBeInTheDocument();
     }
+  });
+
+  it('renders TrailDetail page for trail ID route', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/trails/123'];
+    render(<App />);
+    expect(screen.getByText('TrailDetail Page')).toBeInTheDocument();
+  });
+
+  it('renders Achievements page', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/achievements'];
+    render(<App />);
+    expect(screen.getByText('Achievements Page')).toBeInTheDocument();
+  });
+
+  it('renders AdminDashboard page inside AdminRoute', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/admin'];
+    render(<App />);
+    expect(screen.getByText('AdminDashboard Page')).toBeInTheDocument();
   });
 
   it('renders Welcome page for unknown route', () => {
@@ -160,7 +183,7 @@ describe('App', () => {
       
       expect(mockIntersectionObserver).toHaveBeenCalledWith(
         expect.any(Function),
-        { rootMargin: '0px 0px -10% 0px', threshold: 0.05 }
+        { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }
       );
       expect(observeSpy).toHaveBeenCalledTimes(2);
       expect(observeSpy).toHaveBeenCalledWith(mockElement1);

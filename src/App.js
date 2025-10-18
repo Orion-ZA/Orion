@@ -27,6 +27,7 @@ import Feedback from './pages/Feedback';
 import ProfilePage from './pages/ProfilePage';
 import Settings from './pages/Settings';
 import HelpCenter from './pages/HelpCenter';
+import AchievementsPage from './pages/AchievementsPage';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRoute from './components/admin/AdminRoute';
@@ -118,6 +119,7 @@ function AppContent() {
           <Route path="/mytrails" element={<MyTrails />} />
           <Route path="/alerts" element={<AlertsUpdates />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/help" element={<HelpCenter />} />

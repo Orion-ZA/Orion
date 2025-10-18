@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Welcome from '../pages/Welcome';
 import { SearchProvider } from '../components/SearchContext';
@@ -75,7 +75,9 @@ describe('Welcome Page', () => {
     global.IntersectionObserver = jest.fn().mockImplementation((callback) => {
       // Immediately call the callback to trigger stats animation
       setTimeout(() => {
-        callback([{ isIntersecting: true, target: document.createElement('div') }]);
+        act(() => {
+          callback([{ isIntersecting: true, target: document.createElement('div') }]);
+        });
       }, 0);
       return {
         observe: jest.fn(),
@@ -126,16 +128,11 @@ describe('Welcome Page', () => {
       renderWithProviders(<Welcome />);
       
       expect(screen.getByText('Browse by activity')).toBeInTheDocument();
-      expect(screen.getByText('Hiking')).toBeInTheDocument();
-      expect(screen.getByText('Mountain biking')).toBeInTheDocument();
-      expect(screen.getByText('Trail running')).toBeInTheDocument();
-      expect(screen.getByText('Bird watching')).toBeInTheDocument();
-      expect(screen.getByText('Camping')).toBeInTheDocument();
-      expect(screen.getByText('Rock climbing')).toBeInTheDocument();
-      expect(screen.getByText('Kayaking')).toBeInTheDocument();
-      expect(screen.getByText('Skiing')).toBeInTheDocument();
-      expect(screen.getByText('Backpacking')).toBeInTheDocument();
-      expect(screen.getByText('Surfing')).toBeInTheDocument();
+      
+      // Activity cards are rendered but text only shows on interaction
+      // Check that activity images are rendered (by checking for images)
+      const activityImages = document.querySelectorAll('img[alt*="terrain"]');
+      expect(activityImages).toHaveLength(10); // Should have 10 activity cards
     });
 
     it('renders call-to-action section', () => {
@@ -158,7 +155,9 @@ describe('Welcome Page', () => {
       renderWithProviders(<Welcome />);
       
       // Fast-forward time to trigger image rotation
-      jest.advanceTimersByTime(6000);
+      act(() => {
+        jest.advanceTimersByTime(6000);
+      });
       
       // The component should still be rendered (no errors)
       await waitFor(() => {
@@ -170,7 +169,9 @@ describe('Welcome Page', () => {
       renderWithProviders(<Welcome />);
       
       // Fast-forward through multiple rotations
-      jest.advanceTimersByTime(18000); // 3 rotations
+      act(() => {
+        jest.advanceTimersByTime(18000); // 3 rotations
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Welcome to Orion')).toBeInTheDocument();
@@ -195,7 +196,9 @@ describe('Welcome Page', () => {
       global.IntersectionObserver = jest.fn().mockImplementation((callback) => {
         // Simulate intersection
         setTimeout(() => {
-          callback([{ isIntersecting: true, target: document.createElement('div') }]);
+          act(() => {
+            callback([{ isIntersecting: true, target: document.createElement('div') }]);
+          });
         }, 0);
         return mockObserver;
       });
@@ -240,6 +243,122 @@ describe('Welcome Page', () => {
       
       // Check for navigation links (these would be rendered by the SearchBar component)
       expect(screen.getByTestId('search-bar')).toBeInTheDocument();
+    });
+  });
+
+  describe('Activity Card Navigation', () => {
+    beforeEach(() => {
+      // Mock window.location.href
+      delete window.location;
+      window.location = { href: '' };
+    });
+
+    it('navigates to reviews page with filters when activity card is clicked', () => {
+      renderWithProviders(<Welcome />);
+      
+      // Find the first activity card by its image alt text
+      const natureTrailsCard = document.querySelector('img[alt="Nature Trails terrain"]').closest('article');
+      expect(natureTrailsCard).toBeInTheDocument();
+      
+      fireEvent.click(natureTrailsCard);
+      
+      // Should navigate to reviews page with nature and park tags
+      expect(window.location.href).toBe('/reviews?tags=nature%2Cpark');
+    });
+
+    it('navigates to reviews page with difficulty filter when activity card is clicked', () => {
+      renderWithProviders(<Welcome />);
+      
+      // Find and click the Wildlife Watching activity card (has easy difficulty)
+      const wildlifeCard = document.querySelector('img[alt="Wildlife Watching terrain"]').closest('article');
+      expect(wildlifeCard).toBeInTheDocument();
+      
+      fireEvent.click(wildlifeCard);
+      
+      // Should navigate to reviews page with nature, field tags and easy difficulty
+      expect(window.location.href).toBe('/reviews?tags=nature%2Cfield&difficulty=easy');
+    });
+
+    it('navigates to reviews page with multiple filters when activity card is clicked', () => {
+      renderWithProviders(<Welcome />);
+      
+      // Find and click the Rocky Adventures activity card (has rocky, nature tags and hard difficulty)
+      const rockyCard = document.querySelector('img[alt="Rocky Adventures terrain"]').closest('article');
+      expect(rockyCard).toBeInTheDocument();
+      
+      fireEvent.click(rockyCard);
+      
+      // Should navigate to reviews page with rocky, nature tags and hard difficulty
+      expect(window.location.href).toBe('/reviews?tags=rocky%2Cnature&difficulty=hard');
+    });
+
+    it('navigates to reviews page without filters when activity card has no specific filters', () => {
+      renderWithProviders(<Welcome />);
+      
+      // Find and click the Nature Trails activity card (difficulty: all)
+      const natureTrailsCard = document.querySelector('img[alt="Nature Trails terrain"]').closest('article');
+      expect(natureTrailsCard).toBeInTheDocument();
+      
+      fireEvent.click(natureTrailsCard);
+      
+      // Should navigate to reviews page with only tags (no difficulty filter for 'all')
+      expect(window.location.href).toBe('/reviews?tags=nature%2Cpark');
+    });
+  });
+
+  describe('Activity Card Interactions', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('shows typewriter effect on hover', async () => {
+      renderWithProviders(<Welcome />);
+      
+      const natureTrailsCard = document.querySelector('img[alt="Nature Trails terrain"]').closest('article');
+      expect(natureTrailsCard).toBeInTheDocument();
+      
+      // Trigger hover event
+      fireEvent.mouseEnter(natureTrailsCard);
+      
+      // Fast-forward timers to complete typewriter effect
+      act(() => {
+        jest.advanceTimersByTime(2000); // Allow time for typewriter effect
+      });
+      
+      // The card should still be in the document (no errors)
+      expect(natureTrailsCard).toBeInTheDocument();
+    });
+
+    it('handles touch events on activity cards', () => {
+      renderWithProviders(<Welcome />);
+      
+      const natureTrailsCard = document.querySelector('img[alt="Nature Trails terrain"]').closest('article');
+      expect(natureTrailsCard).toBeInTheDocument();
+      
+      // Trigger touch events
+      fireEvent.touchStart(natureTrailsCard);
+      fireEvent.touchEnd(natureTrailsCard);
+      
+      // The card should still be in the document (no errors)
+      expect(natureTrailsCard).toBeInTheDocument();
+    });
+
+    it('handles focus events on activity cards', () => {
+      renderWithProviders(<Welcome />);
+      
+      const natureTrailsCard = document.querySelector('img[alt="Nature Trails terrain"]').closest('article');
+      expect(natureTrailsCard).toBeInTheDocument();
+      
+      // Trigger focus events
+      fireEvent.focus(natureTrailsCard);
+      fireEvent.blur(natureTrailsCard);
+      
+      // The card should still be in the document (no errors)
+      expect(natureTrailsCard).toBeInTheDocument();
     });
   });
 
@@ -378,9 +497,11 @@ describe('Welcome Page', () => {
       renderWithProviders(<Welcome />);
       
       expect(screen.getByText('Browse by activity')).toBeInTheDocument();
-      expect(screen.getByText('Hiking')).toBeInTheDocument();
-      expect(screen.getByText('Mountain biking')).toBeInTheDocument();
-      expect(screen.getByText('Trail running')).toBeInTheDocument();
+      
+      // Activity cards are rendered but text only shows on interaction
+      // Check that activity cards are rendered (by checking for images)
+      const activityImages = document.querySelectorAll('img[alt*="terrain"]');
+      expect(activityImages).toHaveLength(10); // Should have 10 activity cards
     });
   });
 

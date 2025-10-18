@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -255,6 +255,24 @@ function calculateAverageRating(reviews) {
 // =========================
 export default function ReviewsMedia() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize filters from URL parameters
+  const getInitialFilters = () => {
+    const difficulty = searchParams.get('difficulty') || 'all';
+    const tags = searchParams.get('tags') ? searchParams.get('tags').split(',') : [];
+    const minRating = parseFloat(searchParams.get('minRating')) || 0;
+    const searchQuery = searchParams.get('search') || '';
+    
+    return {
+      minRating,
+      maxRating: 5,
+      difficulty,
+      features: [],
+      tags
+    };
+  };
+
   const [trails, setTrails] = useState([]);
   const [reviews, setReviews] = useState({});
   const [loading, setLoading] = useState(true);
@@ -290,17 +308,11 @@ export default function ReviewsMedia() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // Search, sort, and filter state
-  const [searchQuery, setSearchQuery] = useState("");
+  // Search, sort, and filter state - initialize from URL params
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({
-    minRating: 0,
-    maxRating: 5,
-    difficulty: "all",
-    features: [],
-    tags: []
-  });
+  const [filters, setFilters] = useState(getInitialFilters());
   const [showAllTags, setShowAllTags] = useState(false);
 
   // Use the useTrailAlerts hook
@@ -443,8 +455,33 @@ export default function ReviewsMedia() {
   };
 
   // Search, sort, and filter handlers
+  // Function to update URL parameters
+  const updateURLParams = (newFilters, newSearchQuery) => {
+    const params = new URLSearchParams();
+    
+    if (newSearchQuery) {
+      params.set('search', newSearchQuery);
+    }
+    
+    if (newFilters.difficulty && newFilters.difficulty !== 'all') {
+      params.set('difficulty', newFilters.difficulty);
+    }
+    
+    if (newFilters.minRating && newFilters.minRating > 0) {
+      params.set('minRating', newFilters.minRating.toString());
+    }
+    
+    if (newFilters.tags && newFilters.tags.length > 0) {
+      params.set('tags', newFilters.tags.join(','));
+    }
+    
+    setSearchParams(params);
+  };
+
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    const newSearchQuery = e.target.value;
+    setSearchQuery(newSearchQuery);
+    updateURLParams(filters, newSearchQuery);
   };
 
   const handleSortChange = (e) => {
@@ -456,41 +493,49 @@ export default function ReviewsMedia() {
   };
 
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       [filterType]: value
-    }));
+    };
+    setFilters(newFilters);
+    updateURLParams(newFilters, searchQuery);
   };
 
   const handleFeatureToggle = (feature) => {
-    setFilters(prev => ({
-      ...prev,
-      features: prev.features.includes(feature)
-        ? prev.features.filter(f => f !== feature)
-        : [...prev.features, feature]
-    }));
+    const newFilters = {
+      ...filters,
+      features: filters.features.includes(feature)
+        ? filters.features.filter(f => f !== feature)
+        : [...filters.features, feature]
+    };
+    setFilters(newFilters);
+    updateURLParams(newFilters, searchQuery);
   };
 
   const handleTagToggle = (tag) => {
-    setFilters(prev => ({
-      ...prev,
-      tags: prev.tags.includes(tag)
-        ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
-    }));
+    const newFilters = {
+      ...filters,
+      tags: filters.tags.includes(tag)
+        ? filters.tags.filter(t => t !== tag)
+        : [...filters.tags, tag]
+    };
+    setFilters(newFilters);
+    updateURLParams(newFilters, searchQuery);
   };
 
   const clearAllFilters = () => {
-    setSearchQuery("");
-    setSortBy("name");
-    setSortOrder("asc");
-    setFilters({
+    const newFilters = {
       minRating: 0,
       maxRating: 5,
       difficulty: "all",
       features: [],
       tags: []
-    });
+    };
+    setSearchQuery("");
+    setSortBy("name");
+    setSortOrder("asc");
+    setFilters(newFilters);
+    setSearchParams(new URLSearchParams()); // Clear all URL params
   };
 
   const handleOpenTrailDetail = (trail) => {

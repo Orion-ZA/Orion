@@ -164,6 +164,32 @@
   text-transform: capitalize;
 }
 
+.admin-alert-timed-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007aff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.admin-alert-permanent-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(160, 160, 160, 0.1);
+  color: #a0a0a0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(160, 160, 160, 0.3);
+}
+
 .admin-alert-status {
   display: flex;
   align-items: center;

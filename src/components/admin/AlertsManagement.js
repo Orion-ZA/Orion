@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { Trash2, AlertTriangle, Calendar, MapPin, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { Trash2, AlertTriangle, Calendar, MapPin, MessageSquare, Eye, EyeOff, Clock, AlertCircle } from 'lucide-react';
 import './AlertsManagement.css';
 
 export default function AlertsManagement() {
@@ -9,10 +9,60 @@ export default function AlertsManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState({});
 
   useEffect(() => {
     fetchAlerts();
   }, []);
+
+  // Helper function to check if an alert is expired
+  const isAlertExpired = (alert) => {
+    if (!alert || !alert.isTimed || !alert.expiresAt) return false;
+    
+    try {
+      const now = new Date();
+      const expiresAt = alert.expiresAt.toDate ? alert.expiresAt.toDate() : new Date(alert.expiresAt);
+      return now >= expiresAt;
+    } catch (error) {
+      console.warn('Error checking alert expiration:', error);
+      return false;
+    }
+  };
+
+  // Update countdown timers for timed alerts
+  useEffect(() => {
+    if (!alerts || alerts.length === 0) return;
+
+    const interval = setInterval(() => {
+      const newTimeRemaining = {};
+      
+      alerts.forEach((alert) => {
+        if (alert && alert.isTimed && alert.expiresAt && alert.isActive && !isAlertExpired(alert)) {
+          try {
+            const now = new Date();
+            const expiresAt = alert.expiresAt.toDate ? alert.expiresAt.toDate() : new Date(alert.expiresAt);
+            const timeLeft = expiresAt.getTime() - now.getTime();
+            
+            if (timeLeft > 0) {
+              const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+              const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+              newTimeRemaining[alert.id] = { hours, minutes, seconds };
+            } else {
+              newTimeRemaining[alert.id] = null;
+            }
+          } catch (error) {
+            console.warn('Error calculating time remaining:', error);
+            newTimeRemaining[alert.id] = null;
+          }
+        }
+      });
+      
+      setTimeRemaining(newTimeRemaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [alerts]);
 
   const fetchAlerts = async () => {
     try {
@@ -40,6 +90,7 @@ export default function AlertsManagement() {
       setAlerts(alerts.filter(alert => alert.id !== alertId));
       setDeleteConfirm(null);
     } catch (err) {
+      console.warn('Error deleting alert:', err);
       setError('Failed to delete alert: ' + err.message);
     }
   };
@@ -133,6 +184,17 @@ export default function AlertsManagement() {
                   >
                     {alert.type || 'Unknown'}
                   </span>
+                  {alert.isTimed ? (
+                    <span className="admin-alert-timed-badge">
+                      <Clock size={12} />
+                      Timed
+                    </span>
+                  ) : (
+                    <span className="admin-alert-permanent-badge">
+                      <AlertCircle size={12} />
+                      Permanent
+                    </span>
+                  )}
                 </div>
                 <div className="admin-alert-status">
                   {alert.isActive ? (
@@ -167,6 +229,26 @@ export default function AlertsManagement() {
                   <span className="admin-detail-label">Created:</span>
                   <span className="admin-detail-value">{formatDate(alert.timestamp)}</span>
                 </div>
+
+                {alert.isTimed && (
+                  <div className="admin-detail-row">
+                    <span className="admin-detail-label">
+                      <Clock className="admin-detail-icon" />
+                      Timer:
+                    </span>
+                    <span className="admin-detail-value">
+                      {isAlertExpired(alert) ? (
+                        <span className="admin-timer-expired">Expired</span>
+                      ) : timeRemaining[alert.id] ? (
+                        <span className="admin-timer-active">
+                          {timeRemaining[alert.id].hours}h {timeRemaining[alert.id].minutes}m {timeRemaining[alert.id].seconds}s remaining
+                        </span>
+                      ) : (
+                        <span className="admin-timer-expired">Expired</span>
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           ))

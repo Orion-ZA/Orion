@@ -89,9 +89,48 @@ export default function TrailsPage() {
     }
   }, [location.state, setSearchQuery, handleFilterChange]);
 
-  // Auto-detect user location on component mount
+  // Handle trail centering from MyTrails page
   useEffect(() => {
-    getTrailsUserLocation();
+    if (location.state?.action === 'centerTrail' && location.state?.trailToCenter) {
+      const trailToCenter = location.state.trailToCenter;
+      // Open the trails panel
+      setIsPanelOpen(true);
+      
+      // Center the map on the trail with a delay to ensure map is ready
+      const centerMapOnTrail = () => {
+        if (trailToCenter.longitude && trailToCenter.latitude && mapRef.current) {
+          const map = mapRef.current.getMap();
+          
+          // Use smooth transition with easeTo
+          map.easeTo({
+            center: [trailToCenter.longitude, trailToCenter.latitude],
+            zoom: 15, // Zoom in closer for individual trail view
+            duration: 1500, // 1.5 second smooth transition
+            essential: true
+          });
+          
+          // Set as selected trail for panel highlighting
+          setSelectedTrail(trailToCenter);
+        }
+      };
+      
+      // Add a small delay to ensure map is ready
+      setTimeout(centerMapOnTrail, 500);
+      
+      // Clear the state to prevent re-applying on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Auto-detect user location on component mount (only if not centering to a trail)
+  useEffect(() => {
+    // Only get user location if we're not centering to a specific trail
+    if (location.state?.action !== 'centerTrail') {
+      getTrailsUserLocation(true); // Allow centering to user location
+    } else {
+      // Still get user location but don't center the map
+      getTrailsUserLocation(false);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load user's saved trails
@@ -139,7 +178,7 @@ export default function TrailsPage() {
   }, []);
 
   // Get user location for trails
-  const getTrailsUserLocation = () => {
+  const getTrailsUserLocation = (shouldCenterMap = true) => {
     setTrailsIsLoadingLocation(true);
     setTrailsLocationError(null);
     
@@ -158,23 +197,26 @@ export default function TrailsPage() {
         setTrailsUserLocation(location);
         setTrailsIsLoadingLocation(false);
         
-        // Smooth transition to user location using map.easeTo
-        if (mapRef.current) {
-          const map = mapRef.current.getMap();
-          map.easeTo({
-            center: [location.longitude, location.latitude],
-            zoom: 14,
-            duration: 2000, // 2 second smooth transition
-            essential: true
-          });
-        } else {
-          // Fallback to viewport update if map not ready
-          setViewport(prev => ({
-            ...prev,
-            longitude: location.longitude,
-            latitude: location.latitude,
-            zoom: 14
-          }));
+        // Only center map if shouldCenterMap is true
+        if (shouldCenterMap) {
+          // Smooth transition to user location using map.easeTo
+          if (mapRef.current) {
+            const map = mapRef.current.getMap();
+            map.easeTo({
+              center: [location.longitude, location.latitude],
+              zoom: 14,
+              duration: 2000, // 2 second smooth transition
+              essential: true
+            });
+          } else {
+            // Fallback to viewport update if map not ready
+            setViewport(prev => ({
+              ...prev,
+              longitude: location.longitude,
+              latitude: location.latitude,
+              zoom: 14
+            }));
+          }
         }
       },
       (error) => {
@@ -650,7 +692,7 @@ export default function TrailsPage() {
           onZoomOut={handleZoomOut}
           onResetNorth={handleResetNorth}
           onRecenter={handleRecenter}
-          onFindLocation={getTrailsUserLocation}
+          onFindLocation={() => getTrailsUserLocation(true)}
           mapBearing={mapBearing}
           mapPitch={mapPitch}
           mapCenter={mapCenter}
@@ -741,7 +783,7 @@ export default function TrailsPage() {
       {trailsLocationError && (
         <div className="error-overlay">
           <p>{trailsLocationError}</p>
-          <button onClick={getTrailsUserLocation} className="button secondary">
+          <button onClick={() => getTrailsUserLocation(true)} className="button secondary">
             Try Again
           </button>
         </div>

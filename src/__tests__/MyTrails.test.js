@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import MyTrails from '../pages/MyTrails';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useTrailAlerts } from '../hooks/useTrailAlerts';
 
 // Mock Firebase modules
 jest.mock('firebase/auth', () => ({
@@ -15,6 +16,11 @@ jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   getDoc: jest.fn(),
   updateDoc: jest.fn()
+}));
+
+// Mock the useTrailAlerts hook
+jest.mock('../hooks/useTrailAlerts', () => ({
+  useTrailAlerts: jest.fn()
 }));
 
 // Mock Firebase config
@@ -86,17 +92,19 @@ jest.mock('../components/AlertsPopup', () => {
 jest.mock('../components/trails/TrailCard', () => {
   return function MockTrailCard({ trail, activeTab, alerts, loadingStates, onShowAlertsPopup, onHideAlertsPopup, onOpenStatusConfirmModal, onOpenReviewModal }) {
     const trailAlerts = alerts[trail.id] || [];
+    const activeAlerts = trailAlerts.filter(alert => !alert.isExpired);
+    
     return (
       <li data-testid={`trail-card-${trail.id}`} className="trail-card">
         <div className="trail-header">
           <h3>{trail.name}</h3>
-          {trailAlerts.length > 0 && (
+          {activeAlerts.length > 0 && (
             <div 
               className="trail-alerts-count-header"
-              onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
+              onMouseEnter={(e) => onShowAlertsPopup(e, activeAlerts)}
               onMouseLeave={onHideAlertsPopup}
             >
-              <span className="trail-alert-count">{trailAlerts.length}</span>
+              <span className="trail-alert-count">{activeAlerts.length}</span>
             </div>
           )}
         </div>
@@ -411,6 +419,16 @@ describe('MyTrails Component', () => {
     // Mock getAuth to return user
     getAuth.mockReturnValue({
       currentUser: mockUser
+    });
+
+    // Mock useTrailAlerts hook
+    useTrailAlerts.mockReturnValue({
+      trailAlerts: mockAlerts,
+      loadingStates: {},
+      fetchTrailAlerts: jest.fn(),
+      fetchMultipleTrailAlerts: jest.fn(),
+      isAlertExpired: jest.fn((alert) => false),
+      getTimeRemaining: jest.fn()
     });
 
     // Mock Firestore functions
@@ -896,30 +914,15 @@ describe('MyTrails Component', () => {
 
 
     it('tries batch alerts API first, then falls back to individual calls', async () => {
-      // Mock batch API to fail
-      global.fetch.mockImplementation((url) => {
-        if (url.includes('getsavedtrails')) {
-          return Promise.resolve({
-            ok: true,
-        json: () => Promise.resolve({
-          favourites: mockSavedTrails.favourites,
-          completed: mockSavedTrails.completed,
-          wishlist: mockSavedTrails.wishlist,
-          submitted: mockSavedTrails.submitted
-        })
-          });
-        }
-        if (url.includes('getAlerts') && url.includes('trailIds=')) {
-          return Promise.reject(new Error('Batch API not available'));
-        }
-        if (url.includes('getAlerts')) {
-          const trailId = url.split('trailId=')[1];
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ alerts: mockAlerts[trailId] || [] })
-          });
-        }
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      // Mock the hook to simulate batch loading
+      const mockFetchMultipleTrailAlerts = jest.fn();
+      useTrailAlerts.mockReturnValue({
+        trailAlerts: mockAlerts,
+        loadingStates: {},
+        fetchTrailAlerts: jest.fn(),
+        fetchMultipleTrailAlerts: mockFetchMultipleTrailAlerts,
+        isAlertExpired: jest.fn((alert) => false),
+        getTimeRemaining: jest.fn()
       });
 
       await act(async () => {
@@ -927,26 +930,28 @@ describe('MyTrails Component', () => {
       });
 
       await waitFor(() => {
-        // Should try batch API first
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('getAlerts?trailIds=')
-        );
-        // Then fall back to individual calls
-        expect(global.fetch).toHaveBeenCalledWith(
-          'https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=trail-1'
-        );
+        // Should call the batch function
+        expect(mockFetchMultipleTrailAlerts).toHaveBeenCalledWith(['trail-1', 'trail-2', 'trail-3', 'trail-4', 'trail-5', 'trail-6', 'trail-7']);
       });
     });
 
     it('uses batch alerts API when available', async () => {
+      const mockFetchMultipleTrailAlerts = jest.fn();
+      useTrailAlerts.mockReturnValue({
+        trailAlerts: mockAlerts,
+        loadingStates: {},
+        fetchTrailAlerts: jest.fn(),
+        fetchMultipleTrailAlerts: mockFetchMultipleTrailAlerts,
+        isAlertExpired: jest.fn((alert) => false),
+        getTimeRemaining: jest.fn()
+      });
+
       await act(async () => {
         render(<MyTrails />);
       });
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('getAlerts?trailIds=')
-        );
+        expect(mockFetchMultipleTrailAlerts).toHaveBeenCalled();
       });
     });
 

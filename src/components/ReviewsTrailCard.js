@@ -14,7 +14,23 @@ const ReviewsTrailCard = ({
   onOpenModal,
   onOpenTrailDetail
 }) => {
+  // Helper function to check if an alert is expired
+  const isAlertExpired = (alert) => {
+    if (!alert || !alert.isTimed || !alert.expiresAt) return false;
+    
+    try {
+      const now = new Date();
+      const expiresAt = alert.expiresAt.toDate ? alert.expiresAt.toDate() : new Date(alert.expiresAt);
+      return now >= expiresAt;
+    } catch (error) {
+      console.warn('Error checking alert expiration:', error);
+      return false;
+    }
+  };
+
   const trailAlerts = alerts[trail.id];
+  // Filter out expired alerts
+  const activeAlerts = trailAlerts ? trailAlerts.filter(alert => !isAlertExpired(alert)) : [];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showReviewsPopup, setShowReviewsPopup] = useState(false);
@@ -42,14 +58,14 @@ const ReviewsTrailCard = ({
       {/* Trail Header with Alerts */}
       <div className="trail-header">
         <h4>{trail.name}</h4>
-        {trailAlerts && trailAlerts.length > 0 && (
+        {activeAlerts && activeAlerts.length > 0 && (
           <div 
             className="alerts-count-header"
-            onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
+            onMouseEnter={(e) => onShowAlertsPopup(e, activeAlerts)}
             onMouseLeave={onHideAlertsPopup}
           >
             <AlertTriangle size={16} />
-            <span className="alert-count">{trailAlerts.length}</span>
+            <span className="alert-count">{activeAlerts.length}</span>
           </div>
         )}
       </div>

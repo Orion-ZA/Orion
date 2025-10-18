@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2, Map } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import { v4 as uuidv4 } from 'uuid';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -17,6 +17,7 @@ import WeatherSection from '../components/trails/WeatherSection';
 import UserActions from '../components/trails/UserActions';
 import TabSection from '../components/trails/TabSection';
 import ContributionModal from '../components/trails/ContributionModal';
+import AlertModal from '../components/modals/AlertModal';
 import { estimateDuration } from '../components/trails/TrailUtils';
 
 const TrailDetail = () => {
@@ -45,9 +46,10 @@ const TrailDetail = () => {
   const [newRating, setNewRating] = useState(5);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [newImages, setNewImages] = useState([]);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('general');
   const [uploading, setUploading] = useState(false);
+
+  // Alert modal states
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Sort reviews based on selected criteria
   const getSortedReviews = () => {
@@ -448,12 +450,71 @@ const TrailDetail = () => {
     window.open(googleMapsUrl, '_blank');
   };
 
+  const handleShowOnMap = () => {
+    if (!trail?.location) {
+      showToast('Location not available for this trail', 'error');
+      return;
+    }
+
+    // Extract coordinates using the same logic as handleDirections
+    let latitude, longitude;
+    
+    if (typeof trail.location === 'object' && trail.location !== null) {
+      if (trail.location.latitude && trail.location.longitude) {
+        latitude = trail.location.latitude;
+        longitude = trail.location.longitude;
+      } else if (trail.location._latitude && trail.location._longitude) {
+        latitude = trail.location._latitude;
+        longitude = trail.location._longitude;
+      } else {
+        showToast('Invalid location data', 'error');
+        return;
+      }
+    } else {
+      showToast('Location not available for this trail', 'error');
+      return;
+    }
+
+    // Create a clean, serializable trail object for navigation
+    const cleanTrail = {
+      id: trail.id,
+      name: trail.name,
+      description: trail.description,
+      latitude: latitude,
+      longitude: longitude,
+      distance: trail.distance,
+      difficulty: trail.difficulty,
+      elevationGain: trail.elevationGain,
+      status: trail.status,
+      createdAt: trail.createdAt,
+      lastUpdated: trail.lastUpdated,
+      tags: trail.tags,
+      photos: trail.photos,
+      gpsRoute: trail.gpsRoute,
+      location: trail.location
+    };
+
+    // Navigate to Trails page with trail data to center and highlight
+    navigate('/trails', {
+      state: {
+        trailToCenter: cleanTrail,
+        action: 'centerTrail'
+      }
+    });
+  };
+
   // Contribution functions
   const openContributionModal = (type) => {
     if (!user) {
       showToast('Please log in to contribute', 'error');
       return;
     }
+    
+    if (type === 'alert') {
+      setShowAlertModal(true);
+      return;
+    }
+    
     setContributionType(type);
     setShowContributionModal(true);
   };
@@ -465,8 +526,6 @@ const TrailDetail = () => {
     setNewRating(5);
     setIsAnonymous(false);
     setNewImages([]);
-    setAlertMessage('');
-    setAlertType('general');
     setUploading(false);
   };
 
@@ -571,25 +630,29 @@ const TrailDetail = () => {
     }
   };
 
-  const handleAddAlert = async () => {
-    if (!alertMessage.trim()) {
-      showToast('Please enter an alert message', 'error');
-      return;
-    }
-
+  const handleAddAlert = async (alertData) => {
     setUploading(true);
     try {
-      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/addAlert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          trailId: trailId,
-          message: alertMessage,
-          type: alertType,
-        }),
-      });
+      const firestoreAlertData = {
+        trailId: trailId,
+        message: alertData.message,
+        type: alertData.type,
+        isActive: true,
+        timestamp: serverTimestamp(),
+      };
 
-      closeContributionModal();
+      // Add expiration time if it's a timed alert
+      if (alertData.isTimed && alertData.duration) {
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + (alertData.duration * 60 * 1000));
+        firestoreAlertData.expiresAt = expiresAt;
+        firestoreAlertData.isTimed = true;
+      }
+
+      // Create alert directly in Firestore
+      await addDoc(collection(db, 'Alerts'), firestoreAlertData);
+
+      setShowAlertModal(false);
       showToast('Your alert has been submitted successfully!', 'success');
     } catch (err) {
       console.error('Failed to add alert:', err);
@@ -640,6 +703,10 @@ const TrailDetail = () => {
         </button>
         
         <div className="header-actions">
+          <button onClick={handleShowOnMap} className="show-map-button">
+            <Map size={16} />
+            Show on Map
+          </button>
           <button onClick={handleShare} className="share-button">
             <Share2 size={16} />
             Share
@@ -706,16 +773,21 @@ const TrailDetail = () => {
         isAnonymous={isAnonymous}
         setIsAnonymous={setIsAnonymous}
         newImages={newImages}
-        alertMessage={alertMessage}
-        setAlertMessage={setAlertMessage}
-        alertType={alertType}
-        setAlertType={setAlertType}
         uploading={uploading}
         onCloseContributionModal={closeContributionModal}
         onAddReview={handleAddReview}
         onAddImages={handleAddImages}
-        onAddAlert={handleAddAlert}
         onImageUpload={handleImageUpload}
+      />
+
+      {/* Alert Modal */}
+      <AlertModal
+        isVisible={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        onSubmit={handleAddAlert}
+        trailId={trailId}
+        trailName={trail?.name}
+        loading={uploading}
       />
     </div>
   );

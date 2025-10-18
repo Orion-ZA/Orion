@@ -76,54 +76,64 @@ const SHOWCASE_SECTIONS = [
 
 const ACTIVITY_CARDS = [
   {
-    name: 'Hiking',
-    img: 'https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGlraW5nfGVufDB8fDB8fHww',
-    message: 'Plan summit pushes or mellow valley strolls, then download offline maps so every ridge line stays on track.',
+    name: 'Nature Trails',
+    img: 'https://images.unsplash.com/photo-1456613820599-bfe244172af5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1000',
+    message: 'Explore beautiful natural trails through forests, meadows, and scenic landscapes perfect for hiking and walking.',
+    filters: { tags: ['nature', 'park'], difficulty: 'all' }
   },
   {
-    name: 'Mountain biking',
-    img: 'https://images.unsplash.com/photo-1594942939850-d8da299577f3?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Filter by gradient and trail conditions to hit hero dirt hours and keep the stoke high on every switchback.',
+    name: 'Adventure Roads',
+    img: 'https://images.unsplash.com/photo-1534474601473-7a9798e26582?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687',
+    message: 'Challenge yourself on rocky terrain and accessible road trails perfect for mountain biking and cycling adventures.',
+    filters: { tags: ['road', 'rocky'], difficulty: 'all' }
   },
   {
-    name: 'Trail running',
-    img: 'https://plus.unsplash.com/premium_photo-1664301432574-9b4e85c2b2d3?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Lightweight GPX overlays and live elevation profile previews keep your cadence locked for peak performance.',
+    name: 'Park Running',
+    img: 'https://images.unsplash.com/photo-1487956382158-bb926046304a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1471',
+    message: 'Hit the trails in beautiful parks with well-maintained paths ideal for trail running and jogging.',
+    filters: { tags: ['nature', 'park'], difficulty: 'all' }
   },
   {
-    name: 'Bird watching',
-    img: 'https://plus.unsplash.com/premium_photo-1723478690606-f953ea1dab3a?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Track sightings with precise waypoints and timestamps so your checklist fills up faster than your memory card.',
+    name: 'Wildlife Watching',
+    img: 'https://plus.unsplash.com/premium_photo-1723629720325-de28508c996d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470',
+    message: 'Discover peaceful field trails and natural areas perfect for bird watching and wildlife photography.',
+    filters: { tags: ['nature', 'field'], difficulty: 'easy' }
   },
   {
-    name: 'Camping',
-    img: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Discover backcountry pads with permit intel, safe water sources, and sunrise predictions for next-level campouts.',
+    name: 'Park Camping',
+    img: 'https://plus.unsplash.com/premium_photo-1682094788204-c2f060ad3fb0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cGFyayUyMGNhbXBpbmd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=500',
+    message: 'Find the perfect camping spots in parks and natural areas with beautiful scenery and great amenities.',
+    filters: { tags: ['park', 'nature'], difficulty: 'all' }
   },
   {
-    name: 'Rock climbing',
-    img: 'https://images.unsplash.com/photo-1507034589631-9433cc6bc453?q=80&w=684&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Sync rack beta, approach times, and partner notes so projecting that line feels as smooth as your send.',
+    name: 'Rocky Adventures',
+    img: 'https://plus.unsplash.com/premium_photo-1664476477451-299966d55b33?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Um9ja3klMjBBZHZlbnR1cmVzfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=500',
+    message: 'Conquer challenging rocky terrain and natural rock formations perfect for climbing and technical hiking.',
+    filters: { tags: ['rocky', 'nature'], difficulty: 'hard' }
   },
   {
-    name: 'Kayaking',
-    img: 'https://images.unsplash.com/photo-1480480565647-1c4385c7c0bf?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Monitor flow rates, wind direction, and launch logistics before you paddle into new blue horizons.',
+    name: 'Lake Trails',
+    img: 'https://plus.unsplash.com/premium_photo-1663021824165-4256f8381934?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469',
+    message: 'Explore scenic trails around lakes and water bodies perfect for kayaking, fishing, and water activities.',
+    filters: { tags: ['lake', 'nature'], difficulty: 'all' }
   },
   {
-    name: 'Skiing',
-    img: 'https://images.unsplash.com/photo-1565992441121-4367c2967103?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2tpaW5nfGVufDB8fDB8fHww',
-    message: 'Dial in avy forecasts, gradient filters, and skin tracks so every tour links pow and safety in one view.',
+    name: 'Mountain Terrain',
+    img: 'https://images.unsplash.com/photo-1465513670158-c3ac6c8d1a87?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470',
+    message: 'Navigate rocky mountain trails and natural terrain perfect for skiing, snowshoeing, and alpine adventures.',
+    filters: { tags: ['rocky', 'nature'], difficulty: 'all' }
   },
   {
-    name: 'Backpacking',
-    img: 'https://plus.unsplash.com/premium_photo-1679691282638-733300daccd4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmFja3BhY2tpbmd8ZW58MHx8MHx8fDA%3D',
-    message: 'Stage multi-day mileage, resupply notes, and hazard alerts to keep your crew thriving from trailhead to tailgate.',
+    name: 'Backcountry Parks',
+    img: 'https://images.unsplash.com/photo-1583146200984-f2dfc3d1e27c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cGFya3N8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=500',
+    message: 'Embark on multi-day adventures through park backcountry with moderate trails and stunning natural beauty.',
+    filters: { tags: ['nature', 'park'], difficulty: 'moderate' }
   },
   {
-    name: 'Surfing',
-    img: 'https://images.unsplash.com/photo-1530870110042-98b2cb110834?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    message: 'Line up swell windows, spot access beta, and post-session notes right alongside your mountain adventures.',
+    name: 'Family Picnics',
+    img: 'https://images.unsplash.com/photo-1592753054398-9fa298d40e85?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=765',
+    message: 'Discover easy trails with picnic areas and family-friendly amenities perfect for all ages and abilities.',
+    filters: { tags: ['picnic', 'park'], difficulty: 'easy' }
   },
 ];
 
@@ -346,6 +356,7 @@ function ActivitySection() {
               name={card.name}
               image={card.img}
               message={card.message}
+              filters={card.filters}
               index={index}
             />
           ))}
@@ -355,7 +366,7 @@ function ActivitySection() {
   );
 }
 
-function InteractiveActivityCard({ name, image, message, index }) {
+function InteractiveActivityCard({ name, image, message, filters, index }) {
   const [isActive, setIsActive] = useState(false);
   const [typedText, setTypedText] = useState('');
   const timeoutsRef = useRef([]);
@@ -410,10 +421,27 @@ function InteractiveActivityCard({ name, image, message, index }) {
 
   const showCursor = isActive && typedText.length < name.length;
 
+  // Function to handle card click and navigate to reviews with filters
+  const handleCardClick = () => {
+    const params = new URLSearchParams();
+    
+    if (filters.tags && filters.tags.length > 0) {
+      params.set('tags', filters.tags.join(','));
+    }
+    
+    if (filters.difficulty && filters.difficulty !== 'all') {
+      params.set('difficulty', filters.difficulty);
+    }
+    
+    const queryString = params.toString();
+    const url = queryString ? `/reviews?${queryString}` : '/reviews';
+    
+    window.location.href = url;
+  };
+
   return (
     <article
       className={`${styles['activity-card']} reveal`}
-      style={{ '--delay': `${240 + index * 70}ms` }}
       onMouseEnter={() => setIsActive(true)}
       onMouseLeave={() => setIsActive(false)}
       onFocus={() => setIsActive(true)}
@@ -421,9 +449,14 @@ function InteractiveActivityCard({ name, image, message, index }) {
       onTouchStart={() => setIsActive(true)}
       onTouchEnd={() => setIsActive(false)}
       onTouchCancel={() => setIsActive(false)}
+      onClick={handleCardClick}
       tabIndex={0}
   aria-label={`${name} activity highlight. ${message}`}
-      title={message}
+      title={`Click to view ${name} trails and reviews`}
+      style={{ 
+        '--delay': `${240 + index * 70}ms`,
+        cursor: 'pointer'
+      }}
     >
       <img src={image} alt={`${name} terrain`} className={styles['activity-image']} loading="lazy" />
       <div

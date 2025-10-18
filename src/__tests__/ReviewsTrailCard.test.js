@@ -14,13 +14,73 @@ jest.mock('../components/ReviewsPopup', () => {
   };
 });
 
+// Mock the ReviewsCarousel component
+jest.mock('../components/ReviewsCarousel', () => {
+  return function MockReviewsCarousel({ reviews, trailName }) {
+    return (
+      <div data-testid="reviews-carousel">
+        <h5>Recent Reviews</h5>
+        {reviews && reviews.length > 0 ? (
+          <div>
+            {reviews.slice(0, 2).map((review, index) => (
+              <div key={review.id || index}>
+                <span>{review.userName || 'Anonymous'}</span>
+                <span>{review.message}</span>
+                {review.rating && (
+                  <div data-testid="star-rating">
+                    {'★'.repeat(review.rating)}
+                  </div>
+                )}
+              </div>
+            ))}
+            {reviews.length > 2 && (
+              <button onClick={() => {}}>+{reviews.length - 2} more reviews</button>
+            )}
+          </div>
+        ) : (
+          <span>No reviews available</span>
+        )}
+      </div>
+    );
+  };
+});
+
+// Mock TrailUtils
+jest.mock('../components/trails/TrailUtils', () => ({
+  getDifficultyColor: jest.fn((difficulty) => {
+    const colors = {
+      easy: '#4ade80',
+      moderate: '#fbbf24',
+      hard: '#f87171',
+      difficult: '#dc2626',
+      expert: '#7c2d12'
+    };
+    return colors[difficulty] || '#6b7280';
+  }),
+  getDifficultyIcon: jest.fn((difficulty) => {
+    const icons = {
+      easy: '🟢',
+      moderate: '🟡',
+      hard: '🟠',
+      difficult: '🔴',
+      expert: '⚫'
+    };
+    return icons[difficulty] || '⚪';
+  })
+}));
+
 describe('ReviewsTrailCard Component', () => {
   const mockTrail = {
     id: 'trail-1',
     name: 'Test Trail',
     photos: ['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg'],
     averageRating: 4.5,
-    reviewCount: 10
+    reviewCount: 10,
+    difficulty: 'moderate',
+    tags: ['scenic', 'family-friendly', 'views'],
+    city: 'Test City',
+    state: 'Test State',
+    description: 'A beautiful test trail with great views'
   };
 
   const mockAlerts = {
@@ -66,11 +126,14 @@ describe('ReviewsTrailCard Component', () => {
     alerts: mockAlerts,
     reviews: mockReviews,
     user: mockUser,
+    userSaved: { favourites: [] },
+    handleTrailAction: jest.fn(),
     loadedImages: new Set(),
     setLoadedImages: jest.fn(),
     onShowAlertsPopup: jest.fn(),
     onHideAlertsPopup: jest.fn(),
-    onOpenModal: jest.fn()
+    onOpenModal: jest.fn(),
+    onOpenTrailDetail: jest.fn()
   };
 
   beforeEach(() => {
@@ -313,32 +376,34 @@ describe('ReviewsTrailCard Component', () => {
   });
 
   describe('Action Buttons', () => {
-    test('renders all action buttons', () => {
+    test('renders all action buttons with correct titles', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      expect(screen.getByText('Review')).toBeInTheDocument();
-      expect(screen.getByText('Images')).toBeInTheDocument();
-      expect(screen.getByText('Alert')).toBeInTheDocument();
+      expect(screen.getByTitle('Add Review')).toBeInTheDocument();
+      expect(screen.getByTitle('Add Images')).toBeInTheDocument();
+      expect(screen.getByTitle('Add Alert')).toBeInTheDocument();
+      expect(screen.getByTitle('View Trail Details')).toBeInTheDocument();
+      expect(screen.getByTitle('Add to Favorites')).toBeInTheDocument();
     });
 
     test('enables review button when user is logged in', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const reviewButton = screen.getByText('Review').closest('button');
+      const reviewButton = screen.getByTitle('Add Review');
       expect(reviewButton).not.toBeDisabled();
     });
 
     test('disables review button when user is not logged in', () => {
       render(<ReviewsTrailCard {...defaultProps} user={null} />);
       
-      const reviewButton = screen.getByText('Review').closest('button');
+      const reviewButton = screen.getByTitle('Please log in to review');
       expect(reviewButton).toBeDisabled();
     });
 
     test('calls onOpenModal with correct parameters for review', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const reviewButton = screen.getByText('Review');
+      const reviewButton = screen.getByTitle('Add Review');
       fireEvent.click(reviewButton);
       
       expect(defaultProps.onOpenModal).toHaveBeenCalledWith('trail-1', 'review');
@@ -347,7 +412,7 @@ describe('ReviewsTrailCard Component', () => {
     test('calls onOpenModal with correct parameters for images', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const imagesButton = screen.getByText('Images');
+      const imagesButton = screen.getByTitle('Add Images');
       fireEvent.click(imagesButton);
       
       expect(defaultProps.onOpenModal).toHaveBeenCalledWith('trail-1', 'images');
@@ -356,10 +421,45 @@ describe('ReviewsTrailCard Component', () => {
     test('calls onOpenModal with correct parameters for alert', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const alertButton = screen.getByText('Alert');
+      const alertButton = screen.getByTitle('Add Alert');
       fireEvent.click(alertButton);
       
       expect(defaultProps.onOpenModal).toHaveBeenCalledWith('trail-1', 'alert');
+    });
+
+    test('calls onOpenTrailDetail when details button is clicked', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
+      
+      const detailsButton = screen.getByTitle('View Trail Details');
+      fireEvent.click(detailsButton);
+      
+      expect(defaultProps.onOpenTrailDetail).toHaveBeenCalledWith(mockTrail);
+    });
+
+    test('calls handleTrailAction when favorite button is clicked', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
+      
+      const favoriteButton = screen.getByTitle('Add to Favorites');
+      fireEvent.click(favoriteButton);
+      
+      expect(defaultProps.handleTrailAction).toHaveBeenCalledWith('favourites', 'trail-1');
+    });
+
+    test('shows correct favorite button state when trail is favorited', () => {
+      const favoritedUserSaved = { favourites: ['trail-1'] };
+      render(<ReviewsTrailCard {...defaultProps} userSaved={favoritedUserSaved} />);
+      
+      const favoriteButton = screen.getByTitle('Remove from Favorites');
+      expect(favoriteButton).toBeInTheDocument();
+    });
+
+    test('does not call handleTrailAction when user is not logged in', () => {
+      render(<ReviewsTrailCard {...defaultProps} user={null} />);
+      
+      const favoriteButton = screen.getByTitle('Add to Favorites');
+      fireEvent.click(favoriteButton);
+      
+      expect(defaultProps.handleTrailAction).not.toHaveBeenCalled();
     });
   });
 
@@ -370,33 +470,31 @@ describe('ReviewsTrailCard Component', () => {
       expect(screen.getByText('Recent Reviews')).toBeInTheDocument();
     });
 
-    test('displays first two reviews', () => {
+    test('renders ReviewsCarousel component', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
+      
+      expect(screen.getByTestId('reviews-carousel')).toBeInTheDocument();
+    });
+
+    test('displays reviews in carousel', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
       expect(screen.getByText('Great trail!')).toBeInTheDocument();
       expect(screen.getByText('Beautiful views')).toBeInTheDocument();
-      expect(screen.queryByText('Challenging but rewarding')).not.toBeInTheDocument();
     });
 
-    test('shows "more reviews" link when more than 2 reviews', () => {
-      render(<ReviewsTrailCard {...defaultProps} />);
-      
-      expect(screen.getByText('+1 more reviews')).toBeInTheDocument();
-    });
-
-    test('shows "No reviews yet" when no reviews', () => {
+    test('shows "No reviews available" when no reviews', () => {
       const noReviews = { 'trail-1': [] };
       render(<ReviewsTrailCard {...defaultProps} reviews={noReviews} />);
       
-      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+      expect(screen.getByText('No reviews available')).toBeInTheDocument();
     });
 
     test('displays review ratings as stars', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      // Should have stars for the reviews (5 stars for first review, 4 for second)
-      const stars = screen.getAllByTestId('star');
-      expect(stars.length).toBeGreaterThan(0);
+      const starRatings = screen.getAllByTestId('star-rating');
+      expect(starRatings.length).toBeGreaterThan(0);
     });
 
     test('shows anonymous for reviews without userName', () => {
@@ -417,25 +515,69 @@ describe('ReviewsTrailCard Component', () => {
       expect(screen.getByText('Anonymous')).toBeInTheDocument();
     });
 
-    test('opens reviews popup when clicking more reviews', () => {
+    test('shows more reviews button when more than 2 reviews', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const moreReviewsLink = screen.getByText('+1 more reviews');
-      fireEvent.click(moreReviewsLink);
+      expect(screen.getByText('+1 more reviews')).toBeInTheDocument();
+    });
+  });
+
+  describe('Difficulty and Tags Display', () => {
+    test('displays difficulty badge when difficulty is provided', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
       
-      expect(screen.getByTestId('reviews-popup')).toBeInTheDocument();
+      expect(screen.getByText('moderate')).toBeInTheDocument();
     });
 
-    test('closes reviews popup when clicking close', () => {
+    test('does not display difficulty badge when difficulty is not provided', () => {
+      const trailWithoutDifficulty = { ...mockTrail, difficulty: undefined };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithoutDifficulty} />);
+      
+      expect(screen.queryByText('moderate')).not.toBeInTheDocument();
+    });
+
+    test('displays tags when tags are provided', () => {
       render(<ReviewsTrailCard {...defaultProps} />);
       
-      const moreReviewsLink = screen.getByText('+1 more reviews');
-      fireEvent.click(moreReviewsLink);
+      expect(screen.getByText('scenic')).toBeInTheDocument();
+      expect(screen.getByText('family-friendly')).toBeInTheDocument();
+      expect(screen.getByText('views')).toBeInTheDocument();
+    });
+
+    test('shows tag count when more than 3 tags', () => {
+      render(<ReviewsTrailCard {...defaultProps} />);
       
-      const closeButton = screen.getByText('Close');
-      fireEvent.click(closeButton);
+      expect(screen.getByText('+0')).toBeInTheDocument(); // 3 tags shown, 0 more
+    });
+
+    test('shows "No tags" when no tags are provided', () => {
+      const trailWithoutTags = { ...mockTrail, tags: [] };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithoutTags} />);
       
-      expect(screen.queryByTestId('reviews-popup')).not.toBeInTheDocument();
+      expect(screen.getByText('No tags')).toBeInTheDocument();
+    });
+
+    test('shows "No tags" when tags is null', () => {
+      const trailWithNullTags = { ...mockTrail, tags: null };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithNullTags} />);
+      
+      expect(screen.getByText('No tags')).toBeInTheDocument();
+    });
+
+    test('shows "No tags" when tags is undefined', () => {
+      const trailWithUndefinedTags = { ...mockTrail, tags: undefined };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithUndefinedTags} />);
+      
+      expect(screen.getByText('No tags')).toBeInTheDocument();
+    });
+
+    test('handles non-string tags by converting to string', () => {
+      const trailWithNonStringTags = { ...mockTrail, tags: [123, true, { toString: () => 'object-tag' }] };
+      render(<ReviewsTrailCard {...defaultProps} trail={trailWithNonStringTags} />);
+      
+      expect(screen.getByText('123')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
+      expect(screen.getByText('object-tag')).toBeInTheDocument();
     });
   });
 
@@ -562,42 +704,6 @@ describe('ReviewsTrailCard Component', () => {
     });
   });
 
-  describe('Trail Detail Button', () => {
-    test('calls onOpenTrailDetail when provided', () => {
-      const mockOnOpenTrailDetail = jest.fn();
-      render(<ReviewsTrailCard {...defaultProps} onOpenTrailDetail={mockOnOpenTrailDetail} />);
-      
-      const detailsButton = screen.getByText('Details');
-      fireEvent.click(detailsButton);
-      
-      expect(mockOnOpenTrailDetail).toHaveBeenCalledWith(mockTrail);
-    });
-
-    test('does not call onOpenTrailDetail when not provided', () => {
-      render(<ReviewsTrailCard {...defaultProps} />);
-      
-      const detailsButton = screen.getByText('Details');
-      fireEvent.click(detailsButton);
-      
-      // Should not throw an error
-      expect(detailsButton).toBeInTheDocument();
-    });
-
-    test('prevents event propagation when clicking details button', () => {
-      const mockOnOpenTrailDetail = jest.fn();
-      
-      render(<ReviewsTrailCard {...defaultProps} onOpenTrailDetail={mockOnOpenTrailDetail} />);
-      
-      const detailsButton = screen.getByText('Details');
-      
-      // Simulate the click event
-      fireEvent.click(detailsButton);
-      
-      // Should call the onOpenTrailDetail function
-      expect(mockOnOpenTrailDetail).toHaveBeenCalledWith(mockTrail);
-    });
-  });
-
   describe('Edge Cases', () => {
     test('handles trail with undefined photos', () => {
       const trailWithUndefinedPhotos = { ...mockTrail, photos: undefined };
@@ -616,7 +722,7 @@ describe('ReviewsTrailCard Component', () => {
     test('handles missing reviews data', () => {
       render(<ReviewsTrailCard {...defaultProps} reviews={{}} />);
       
-      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+      expect(screen.getByText('No reviews available')).toBeInTheDocument();
     });
 
     test('handles missing alerts data', () => {
@@ -661,6 +767,58 @@ describe('ReviewsTrailCard Component', () => {
       render(<ReviewsTrailCard {...defaultProps} trail={trailWithNullReviewCount} />);
       
       expect(screen.getByText('4.5')).toBeInTheDocument();
+    });
+
+    test('handles missing userSaved prop', () => {
+      const propsWithoutUserSaved = { ...defaultProps };
+      delete propsWithoutUserSaved.userSaved;
+      
+      render(<ReviewsTrailCard {...propsWithoutUserSaved} />);
+      
+      // Should not crash and should show favorite button
+      expect(screen.getByTitle('Add to Favorites')).toBeInTheDocument();
+    });
+
+    test('handles missing handleTrailAction prop', () => {
+      const propsWithoutHandleTrailAction = { ...defaultProps };
+      delete propsWithoutHandleTrailAction.handleTrailAction;
+      
+      render(<ReviewsTrailCard {...propsWithoutHandleTrailAction} />);
+      
+      // Should not crash when clicking favorite button
+      const favoriteButton = screen.getByTitle('Add to Favorites');
+      fireEvent.click(favoriteButton);
+      
+      // Should not throw an error
+      expect(favoriteButton).toBeInTheDocument();
+    });
+
+    test('handles missing onOpenTrailDetail prop', () => {
+      const propsWithoutOnOpenTrailDetail = { ...defaultProps };
+      delete propsWithoutOnOpenTrailDetail.onOpenTrailDetail;
+      
+      render(<ReviewsTrailCard {...propsWithoutOnOpenTrailDetail} />);
+      
+      // Should not crash when clicking details button
+      const detailsButton = screen.getByTitle('View Trail Details');
+      fireEvent.click(detailsButton);
+      
+      // Should not throw an error
+      expect(detailsButton).toBeInTheDocument();
+    });
+
+    test('handles empty userSaved.favourites array', () => {
+      const userSavedWithEmptyFavourites = { favourites: [] };
+      render(<ReviewsTrailCard {...defaultProps} userSaved={userSavedWithEmptyFavourites} />);
+      
+      expect(screen.getByTitle('Add to Favorites')).toBeInTheDocument();
+    });
+
+    test('handles undefined userSaved.favourites', () => {
+      const userSavedWithUndefinedFavourites = { favourites: undefined };
+      render(<ReviewsTrailCard {...defaultProps} userSaved={userSavedWithUndefinedFavourites} />);
+      
+      expect(screen.getByTitle('Add to Favorites')).toBeInTheDocument();
     });
   });
 });

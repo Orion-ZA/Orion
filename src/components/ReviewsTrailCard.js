@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { Star, AlertTriangle, MessageSquare, Image, Loader2, ChevronLeft, ChevronRight, ExternalLink, Tag, Heart } from 'lucide-react';
 import ReviewsPopup from './ReviewsPopup';
+import ReviewsCarousel from './ReviewsCarousel';
+import { getDifficultyColor, getDifficultyIcon } from './trails/TrailUtils';
 
 const ReviewsTrailCard = ({ 
   trail, 
   alerts, 
   reviews, 
   user, 
+  userSaved,
+  handleTrailAction,
   loadedImages, 
   setLoadedImages,
   onShowAlertsPopup,
@@ -34,6 +38,17 @@ const ReviewsTrailCard = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showReviewsPopup, setShowReviewsPopup] = useState(false);
+
+  // Check if trail is favorited using userSaved data
+  const isFavorited = userSaved?.favourites?.includes(trail.id) || false;
+
+  // Toggle favorite status using database
+  const toggleFavorite = (e) => {
+    e.stopPropagation();
+    if (!user || !handleTrailAction) return;
+    
+    handleTrailAction('favourites', trail.id);
+  };
 
   const nextImage = () => {
     if (isTransitioning) return;
@@ -142,90 +157,93 @@ const ReviewsTrailCard = ({
             {trail.reviewCount > 0 && ` (${trail.reviewCount})`}
           </span>
         </div>
+        
+        {/* Difficulty Badge */}
+        {trail.difficulty && (
+          <div className="trail-difficulty-badge" style={{ backgroundColor: getDifficultyColor(trail.difficulty) }}>
+            <span className="difficulty-icon">
+              {getDifficultyIcon(trail.difficulty)}
+            </span>
+            <span className="difficulty-text">{trail.difficulty}</span>
+          </div>
+        )}
+        
+        
+        {/* Tags */}
+        <div className="trail-tags">
+          <Tag size={14} />
+          <div className="tags-list">
+            {trail.tags && Array.isArray(trail.tags) && trail.tags.length > 0 ? (
+              <>
+                {trail.tags.slice(0, 3).map((tag, index) => (
+                  <span key={index} className="tag-item">
+                    {typeof tag === 'string' ? tag : String(tag)}
+                  </span>
+                ))}
+                {trail.tags.length > 3 && (
+                  <span className="tag-more">+{trail.tags.length - 3}</span>
+                )}
+              </>
+            ) : (
+              <span className="tag-item no-tags">No tags</span>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Divider */}
+      <div className="trail-divider"></div>
 
       {/* Trail Actions */}
       <div className="trail-actions">
-        <h5 className="actions-heading">Contribute</h5>
-        <div className="actions-buttons">
+        <div className="reviews-trail-contribution-buttons">
           <button 
-            className={`reviews-media-action-btn reviews-media-review-btn ${!user ? 'disabled' : ''}`}
+            className={`reviews-trail-contribution-btn reviews-trail-review-btn ${!user ? 'disabled' : ''}`}
             onClick={() => onOpenModal(trail.id, "review")}
             title={user ? "Add Review" : "Please log in to review"}
             disabled={!user}
           >
-            <MessageSquare size={16} />
-            <span>Review</span>
+            <MessageSquare size={18} />
           </button>
           <button 
-            className="reviews-media-action-btn reviews-media-image-btn"
+            className="reviews-trail-contribution-btn reviews-trail-image-btn"
             onClick={() => onOpenModal(trail.id, "images")}
+            title="Add Images"
           >
-            <Image size={16} />
-            <span>Images</span>
+            <Image size={18} />
           </button>
           <button 
-            className="reviews-media-action-btn reviews-media-alert-btn"
+            className="reviews-trail-contribution-btn reviews-trail-alert-btn"
             onClick={() => onOpenModal(trail.id, "alert")}
+            title="Add Alert"
           >
-            <AlertTriangle size={16} />
-            <span>Alert</span>
+            <AlertTriangle size={18} />
           </button>
           <button 
-            className="reviews-media-action-btn reviews-media-detail-btn"
+            className="reviews-trail-contribution-btn reviews-trail-details-btn"
             onClick={(e) => {
               e.stopPropagation();
               onOpenTrailDetail && onOpenTrailDetail(trail);
             }}
             title="View Trail Details"
           >
-            <ExternalLink size={16} />
-            <span>Details</span>
+            <ExternalLink size={18} />
+          </button>
+          <button 
+            className={`reviews-trail-contribution-btn reviews-trail-favorite-btn ${isFavorited ? 'favorited' : ''}`}
+            onClick={toggleFavorite}
+            title={isFavorited ? "Remove from Favorites" : "Add to Favorites"}
+          >
+            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
           </button>
         </div>
       </div>
 
       {/* Recent Reviews */}
-      <div className="recent-reviews">
-        <h5>Recent Reviews</h5>
-        {reviews[trail.id] && reviews[trail.id].length > 0 ? (
-          <div className="reviews-list">
-            {reviews[trail.id].slice(0, 2).map((rev) => (
-              <div key={rev.id} className="review-item">
-                <div className="review-content">
-                  <span className="review-author">{rev.userName || "Anonymous"}</span>
-                  {rev.rating && (
-                    <div className="review-stars">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star 
-                          key={star} 
-                          size={14} 
-                          fill={star <= rev.rating ? "currentColor" : "none"} 
-                          color={star <= rev.rating ? "#fbbf24" : "#6b7280"}
-                          data-testid="star"
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <p className="review-text">{rev.message}</p>
-                </div>
-              </div>
-            ))}
-            {reviews[trail.id].length > 2 && (
-              <div 
-                className="more-reviews clickable"
-                onClick={() => setShowReviewsPopup(true)}
-              >
-                +{reviews[trail.id].length - 2} more reviews
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="no-reviews">
-            <span>No reviews yet</span>
-          </div>
-        )}
-      </div>
+      <ReviewsCarousel 
+        reviews={reviews[trail.id] || []} 
+        trailName={trail.name}
+      />
 
       {/* Reviews Popup */}
       <ReviewsPopup

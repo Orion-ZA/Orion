@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { BrowserRouter } from 'react-router-dom';
 import ReviewsMedia from '../pages/ReviewsMedia';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -18,12 +19,32 @@ jest.mock('firebase/storage', () => ({
 jest.mock('firebase/auth', () => ({
   onAuthStateChanged: jest.fn(),
   signOut: jest.fn(),
+  getAuth: jest.fn(() => ({})),
 }));
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
   storage: {},
   auth: {},
+}));
+
+// Mock useTrailUserActions hook
+jest.mock('../hooks/useTrailUserActions', () => ({
+  useTrailUserActions: () => ({
+    userSaved: { favourites: [] },
+    handleTrailAction: jest.fn(),
+  }),
+}));
+
+// Mock useTrailAlerts hook
+jest.mock('../hooks/useTrailAlerts', () => ({
+  useTrailAlerts: () => ({
+    trailAlerts: {},
+    loadingStates: {},
+    fetchTrailAlerts: jest.fn(),
+    isAlertExpired: jest.fn(() => false),
+    getTimeRemaining: jest.fn(() => ''),
+  }),
 }));
 
 // Mock uuid
@@ -61,22 +82,64 @@ afterAll(() => {
   console.warn = originalConsoleWarn;
 });
 
+// Helper function to render component with Router context
+const renderWithRouter = (component) => {
+  return render(
+    <BrowserRouter>
+      {component}
+    </BrowserRouter>
+  );
+};
+
 describe('ReviewsMedia Component', () => {
   const mockTrails = [
     {
       id: 'trail-1',
       name: 'Test Trail 1',
       photos: ['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg'],
+      processedPhotos: true,
+      hasReviews: true,
+      hasAlerts: true,
+      averageRating: 4.5,
+      reviewCount: 10,
+      difficulty: 'moderate',
+      tags: ['scenic', 'family-friendly'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'A beautiful test trail with great views',
+      location: 'Test City, Test State'
     },
     {
       id: 'trail-2',
       name: 'Test Trail 2',
       photos: [],
+      processedPhotos: true,
+      hasReviews: false,
+      hasAlerts: false,
+      averageRating: 3.0,
+      reviewCount: 0,
+      difficulty: 'easy',
+      tags: ['beginner'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'An easy test trail for beginners',
+      location: 'Test City, Test State'
     },
     {
       id: 'trail-3',
       name: 'Test Trail 3',
       photos: ['firebase-storage-path/photo3.jpg'],
+      processedPhotos: true,
+      hasReviews: true,
+      hasAlerts: true,
+      averageRating: 5.0,
+      reviewCount: 5,
+      difficulty: 'hard',
+      tags: ['challenging', 'views'],
+      city: 'Test City',
+      state: 'Test State',
+      description: 'A challenging test trail with amazing views',
+      location: 'Test City, Test State'
     },
   ];
 
@@ -124,10 +187,8 @@ describe('ReviewsMedia Component', () => {
 
     // Mock Firebase Auth - simulate no user initially
     onAuthStateChanged.mockImplementation((auth, callback) => {
-      // Simulate auth loading delay
-      setTimeout(() => {
-        callback(null); // No user logged in
-      }, 100);
+      // Call immediately to avoid loading delay
+      callback(null); // No user logged in
       return jest.fn(); // Return unsubscribe function
     });
     signOut.mockResolvedValue();
@@ -152,9 +213,211 @@ describe('ReviewsMedia Component', () => {
     jest.clearAllMocks();
   });
 
+  describe('Search and Filter Functionality', () => {
+    test('renders search input and filter controls', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
+      });
+
+      // Check for search input
+      expect(screen.getByPlaceholderText('Search trails by name, location, or description...')).toBeInTheDocument();
+      
+      // Check for filter controls
+      expect(screen.getByText('Filters:')).toBeInTheDocument();
+      expect(screen.getByText('Difficulty:')).toBeInTheDocument();
+      expect(screen.getByText('Min Rating:')).toBeInTheDocument();
+    });
+
+    test('handles search input changes', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      const searchInput = screen.getByPlaceholderText('Search trails by name, location, or description...');
+      fireEvent.change(searchInput, { target: { value: 'Test Trail 1' } });
+
+      expect(searchInput.value).toBe('Test Trail 1');
+    });
+
+    test('handles difficulty filter changes', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      const difficultySelect = screen.getByDisplayValue('All Difficulties');
+      fireEvent.change(difficultySelect, { target: { value: 'moderate' } });
+
+      expect(difficultySelect.value).toBe('moderate');
+    });
+
+    test('handles rating filter changes', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      const ratingSlider = screen.getByRole('slider');
+      fireEvent.change(ratingSlider, { target: { value: '4' } });
+
+      expect(ratingSlider.value).toBe('4');
+    });
+
+    test('shows clear all filters button when filters are active', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      // Initially no clear button should be visible
+      expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
+
+      // Set a filter
+      const difficultySelect = screen.getByDisplayValue('All Difficulties');
+      fireEvent.change(difficultySelect, { target: { value: 'moderate' } });
+
+      // Now clear button should be visible
+      expect(screen.getByText('Clear All')).toBeInTheDocument();
+    });
+
+    test('handles tag filter functionality', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      // Check if tags section is rendered
+      expect(screen.getByText('Tags:')).toBeInTheDocument();
+      
+      // Check if tag buttons are rendered (scenic, family-friendly, beginner, challenging, views)
+      expect(screen.getByText('scenic')).toBeInTheDocument();
+      expect(screen.getByText('family-friendly')).toBeInTheDocument();
+      expect(screen.getByText('beginner')).toBeInTheDocument();
+      expect(screen.getByText('challenging')).toBeInTheDocument();
+      expect(screen.getByText('views')).toBeInTheDocument();
+    });
+
+    test('shows results info with trail count', async () => {
+      fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTrails,
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ reviews: [] }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({ alerts: [] }),
+        });
+
+      renderWithRouter(<ReviewsMedia />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
+      });
+
+      // Check for results info
+      expect(screen.getByText('Showing 3 of 3 trails')).toBeInTheDocument();
+    });
+  });
+
   describe('Component Rendering', () => {
     test('renders loading state initially', async () => {
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
       // The component shows "Authenticating..." when auth is loading
       expect(screen.getByText('Authenticating...')).toBeInTheDocument();
       
@@ -180,16 +443,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      // Check if action buttons are rendered
-      expect(screen.getAllByText('Review')).toHaveLength(3);
-      expect(screen.getAllByText('Images')).toHaveLength(3);
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      // Check if action buttons are rendered (now icon-only)
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('renders trail images correctly', async () => {
@@ -207,7 +470,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         const images = screen.getAllByAltText(/Trail Test Trail 1/);
@@ -232,7 +495,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('No images available')).toBeInTheDocument();
@@ -254,7 +517,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         const images = screen.getAllByAltText(/Trail Test Trail 1/);
@@ -271,7 +534,7 @@ describe('ReviewsMedia Component', () => {
         json: async () => mockTrails,
       });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith('https://us-central1-orion-sdp.cloudfunctions.net/getTrails');
@@ -294,7 +557,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith(
@@ -331,7 +594,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         // Component should still show trails even if some reviews fail to load
@@ -356,7 +619,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: mockAlerts['trail-1'] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith(
@@ -393,7 +656,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         // Component should still show trails even if some alerts fail to load
@@ -418,7 +681,7 @@ describe('ReviewsMedia Component', () => {
           status: 500,
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -442,7 +705,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(getDownloadURL).toHaveBeenCalled();
@@ -466,7 +729,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 3')).toBeInTheDocument();
@@ -488,7 +751,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         // Should not call getDownloadURL for HTTPS URLs
@@ -526,7 +789,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -578,13 +841,13 @@ describe('ReviewsMedia Component', () => {
 
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -618,7 +881,7 @@ describe('ReviewsMedia Component', () => {
       fetch.mockRejectedValueOnce(new Error('Alert submission failed'));
       window.alert = jest.fn();
 
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -634,7 +897,7 @@ describe('ReviewsMedia Component', () => {
     });
 
     test('does not submit empty alert', async () => {
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -673,16 +936,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      // Buttons should be visible on mobile without hover
-      expect(screen.getAllByText('Review')).toHaveLength(3);       
-      expect(screen.getAllByText('Images')).toHaveLength(3);       
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      // Buttons should be visible on mobile without hover (now icon-only)
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('shows buttons on desktop (always visible)', async () => {
@@ -707,16 +970,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Buttons should be visible on desktop (current implementation shows them always)
-      expect(screen.getAllByText('Review')).toHaveLength(3);       
-      expect(screen.getAllByText('Images')).toHaveLength(3);       
-      expect(screen.getAllByText('Alert')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
     test('handles window resize events', async () => {
@@ -734,7 +997,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -759,7 +1022,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Buttons should be visible on mobile
-      expect(screen.getAllByText('Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
     });
   });
 
@@ -801,14 +1064,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Challenging but rewarding')).toBeInTheDocument();
       });
     });
 
-    test('displays "No reviews yet" when no reviews', async () => {
+    test('displays "No reviews available" when no reviews', async () => {
       // Mock empty reviews for all trails
       fetch
         .mockResolvedValueOnce({
@@ -840,11 +1103,11 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
-        // Wait for trails to load and show "No reviews yet" text
-        expect(screen.getAllByText('No reviews yet')).toHaveLength(3);
+        // Wait for trails to load and show "No reviews available" text
+        expect(screen.getAllByText('No reviews available')).toHaveLength(3);
       }, { timeout: 5000 });
     });
 
@@ -880,7 +1143,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: mockAlerts['trail-3'] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 3')).toBeInTheDocument();
@@ -935,7 +1198,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -966,7 +1229,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -989,16 +1252,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({}), // Missing alerts field
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
-        expect(screen.getAllByText('No reviews yet')).toHaveLength(3);
+        expect(screen.getAllByText('No reviews available')).toHaveLength(3);
       });
     });
 
     test('handles component unmounting during async operations', async () => {
-      const { unmount } = render(<ReviewsMedia />);
+      const { unmount } = renderWithRouter(<ReviewsMedia />);
 
       // Unmount component before API calls complete
       unmount();
@@ -1025,7 +1288,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1035,7 +1298,7 @@ describe('ReviewsMedia Component', () => {
 
     test('resets alert form state when opening modal', async () => {
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
@@ -1059,7 +1322,7 @@ describe('ReviewsMedia Component', () => {
 
     test('resets image form state when opening modal', async () => {
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       const imagesButton = imagesButtons[0];
       fireEvent.click(imagesButton);
 
@@ -1090,7 +1353,7 @@ describe('ReviewsMedia Component', () => {
 
   describe('Component Cleanup', () => {
     test('removes event listeners on unmount', () => {
-      const { unmount } = render(<ReviewsMedia />);
+      const { unmount } = renderWithRouter(<ReviewsMedia />);
       
       unmount();
       
@@ -1120,16 +1383,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Review buttons should be disabled when user is not logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).toBeDisabled();
+        expect(button).toBeDisabled();
       });
     });
 
@@ -1160,16 +1423,16 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Review buttons should be enabled when user is logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).not.toBeDisabled();
+        expect(button).not.toBeDisabled();
       });
     });
 
@@ -1197,16 +1460,16 @@ describe('ReviewsMedia Component', () => {
       // Mock alert
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Review buttons should be disabled when user is not logged in
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       reviewButtons.forEach(button => {
-        expect(button.closest('button')).toBeDisabled();
+        expect(button).toBeDisabled();
       });
       
       // Try to click review button (should not trigger modal since it's disabled)
@@ -1236,17 +1499,15 @@ describe('ReviewsMedia Component', () => {
     test('handles fetchTrails API failure', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
       // Mock fetch to reject - this should be the ONLY fetch call
       fetch.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for auth to complete first
       await waitFor(() => {
@@ -1262,10 +1523,8 @@ describe('ReviewsMedia Component', () => {
     test('handles fetchTrails non-ok response', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -1274,7 +1533,7 @@ describe('ReviewsMedia Component', () => {
         status: 500,
       });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for auth to complete first
       await waitFor(() => {
@@ -1313,7 +1572,7 @@ describe('ReviewsMedia Component', () => {
         new Promise((resolve) => setTimeout(resolve, 15000))
       );
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
       await waitFor(() => {
@@ -1344,7 +1603,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
       await waitFor(() => {
@@ -1374,7 +1633,7 @@ describe('ReviewsMedia Component', () => {
           new Promise((resolve) => setTimeout(resolve, 15000))
         );
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
       await waitFor(() => {
@@ -1405,7 +1664,7 @@ describe('ReviewsMedia Component', () => {
       // Mock getDownloadURL to throw error
       getDownloadURL.mockRejectedValueOnce(new Error('Storage error'));
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1429,14 +1688,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1476,14 +1735,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open review modal
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       fireEvent.click(reviewButtons[0]);
 
       expect(screen.getByText(/Add Review.*Test User/)).toBeInTheDocument();
@@ -1512,14 +1771,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       expect(screen.getByText('Add Images')).toBeInTheDocument();
@@ -1548,14 +1807,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1592,14 +1851,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open alert modal
-      const alertButtons = screen.getAllByText('Alert');
+      const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
       expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
@@ -1629,7 +1888,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: mockAlerts['trail-1'] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1670,7 +1929,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: mockAlerts['trail-1'] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1719,7 +1978,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1768,7 +2027,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1807,7 +2066,7 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
@@ -1843,14 +2102,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open review modal
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       fireEvent.click(reviewButtons[0]);
 
       // Check for anonymous checkbox
@@ -1882,10 +2141,8 @@ describe('ReviewsMedia Component', () => {
     test('handles image upload successfully', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -1931,7 +2188,7 @@ describe('ReviewsMedia Component', () => {
 
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for auth to complete first
       await waitFor(() => {
@@ -1943,7 +2200,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Find the file input by its type attribute
@@ -1990,10 +2247,8 @@ describe('ReviewsMedia Component', () => {
     test('handles image upload failure', async () => {
       // Mock auth to complete first
       onAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate auth loading delay
-        setTimeout(() => {
-          callback(null); // No user logged in
-        }, 100);
+        // Call immediately to avoid loading delay
+        callback(null); // No user logged in
         return jest.fn(); // Return unsubscribe function
       });
 
@@ -2031,7 +2286,7 @@ describe('ReviewsMedia Component', () => {
 
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       // Wait for auth to complete first
       await waitFor(() => {
@@ -2043,7 +2298,7 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Find the file input by its type attribute
@@ -2091,14 +2346,14 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
       // Open images modal
-      const imagesButtons = screen.getAllByText('Images');
+      const imagesButtons = screen.getAllByTitle('Add Images');
       fireEvent.click(imagesButtons[0]);
 
       // Submit without selecting files
@@ -2167,13 +2422,13 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ reviews: [{ id: 'new-review', message: 'Anonymous review', rating: 5 }] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2260,13 +2515,13 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ reviews: [{ id: 'new-review', message: 'User review', rating: 3 }] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2351,13 +2606,13 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ reviews: [{ id: 'new-review', message: 'Email review', rating: 2 }] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2434,13 +2689,13 @@ describe('ReviewsMedia Component', () => {
 
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2489,13 +2744,13 @@ describe('ReviewsMedia Component', () => {
           json: async () => ({ alerts: [] }),
         });
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 
@@ -2570,13 +2825,13 @@ describe('ReviewsMedia Component', () => {
 
       window.alert = jest.fn();
 
-      render(<ReviewsMedia />);
+      renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const reviewButtons = screen.getAllByText('Review');
+      const reviewButtons = screen.getAllByTitle('Add Review');
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 
@@ -19,12 +19,34 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Mock fetch API
+global.fetch = jest.fn();
+
 describe('AdminHeader', () => {
   const mockSetActiveTab = jest.fn();
 
   beforeEach(() => {
     mockSetActiveTab.mockClear();
     mockNavigate.mockClear();
+    fetch.mockClear();
+    
+    // Mock AbortSignal.timeout
+    global.AbortSignal = {
+      timeout: jest.fn(() => new AbortController().signal)
+    };
+    
+    // Reset console.error to avoid noise in tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Default mock for fetch - resolves with successful response
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('renders admin dashboard title', () => {
@@ -127,11 +149,26 @@ describe('AdminHeader', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 
-  it('renders online status indicator', () => {
+  it('renders API status indicator', async () => {
+    // Mock successful API response
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+    });
+
     render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
     
-    expect(screen.getByText('You are online')).toBeInTheDocument();
-    expect(screen.getByText('You are online').closest('div').querySelector('.admin-header-status-indicator')).toBeInTheDocument();
+    // Initially shows checking status
+    expect(screen.getByText('API Checking...')).toBeInTheDocument();
+    
+    // Wait for API call to complete
+    await waitFor(() => {
+      expect(screen.getByText('API Online')).toBeInTheDocument();
+    });
+    
+    const statusIndicator = screen.getByText('API Online').closest('div').querySelector('.admin-header-status-indicator');
+    expect(statusIndicator).toBeInTheDocument();
+    expect(statusIndicator).toHaveClass('online');
   });
 
   it('has correct CSS classes applied', () => {
@@ -252,5 +289,167 @@ describe('AdminHeader', () => {
     expect(trailsTab).not.toHaveClass('active');
     expect(usersTab).not.toHaveClass('active');
     expect(reportsTab).toHaveClass('active');
+  });
+
+  // API Health Check Tests
+  describe('API Health Check', () => {
+    it('calls health API on component mount', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      });
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith(
+          'https://orion-api-qeyv.onrender.com/health',
+          expect.objectContaining({
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: expect.any(Object)
+          })
+        );
+      });
+    });
+
+    it('shows offline status when API call fails', async () => {
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('API Offline')).toBeInTheDocument();
+      });
+
+      const statusIndicator = screen.getByText('API Offline').closest('div').querySelector('.admin-header-status-indicator');
+      expect(statusIndicator).toHaveClass('offline');
+    });
+
+    it('shows offline status when API returns non-ok response', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500
+      });
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('API Offline')).toBeInTheDocument();
+      });
+
+      const statusIndicator = screen.getByText('API Offline').closest('div').querySelector('.admin-header-status-indicator');
+      expect(statusIndicator).toHaveClass('offline');
+    });
+
+    it('shows checking status initially', () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      });
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      expect(screen.getByText('API Checking...')).toBeInTheDocument();
+      const statusIndicator = screen.getByText('API Checking...').closest('div').querySelector('.admin-header-status-indicator');
+      expect(statusIndicator).toHaveClass('checking');
+    });
+
+    it('handles API timeout gracefully', async () => {
+      // Mock AbortSignal.timeout to throw an error
+      global.AbortSignal.timeout = jest.fn(() => {
+        throw new Error('Timeout');
+      });
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('API Offline')).toBeInTheDocument();
+      });
+    });
+
+    it('sets up periodic health checks', async () => {
+      jest.useFakeTimers();
+      
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      });
+
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      // Wait for initial call
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fast-forward 30 seconds
+      act(() => {
+        jest.advanceTimersByTime(30000);
+      });
+
+      // Should have made another call
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledTimes(2);
+      });
+
+      jest.useRealTimers();
+    });
+
+    it('cleans up interval on component unmount', () => {
+      jest.useFakeTimers();
+      
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      });
+
+      const { unmount } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      
+      unmount();
+
+      // Fast-forward time
+      act(() => {
+        jest.advanceTimersByTime(30000);
+      });
+
+      // Should not make additional calls after unmount
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      jest.useRealTimers();
+    });
+
+    it('displays correct status text for all states', async () => {
+      // Test checking state - mock a promise that never resolves
+      fetch.mockImplementationOnce(() => new Promise(() => {}));
+      
+      const { rerender } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      expect(screen.getByText('API Checking...')).toBeInTheDocument();
+
+      // Test online state - create a new component instance
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      });
+
+      const { unmount } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('API Online')).toBeInTheDocument();
+      });
+
+      unmount();
+
+      // Test offline state - create another new component instance
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+      
+      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('API Offline')).toBeInTheDocument();
+      });
+    });
   });
 });

@@ -19,18 +19,33 @@
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin {
@@ -61,7 +76,9 @@
   border: 2px solid transparent;
   border-radius: 16px;
   background: linear-gradient(135deg, var(--accent), var(--success), var(--warning)) border-box;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -146,7 +163,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .trail-image.transitioning img {
@@ -196,7 +215,6 @@
   right: 8px;
 }
 
-
 .image-loading {
   display: flex;
   flex-direction: column;
@@ -228,7 +246,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
   pointer-events: none;
@@ -786,26 +804,25 @@
   .trail-card {
     padding: 1rem;
   }
-  
+
   .trail-header h4 {
     font-size: 1.125rem;
   }
-  
+
   .trail-actions {
     gap: 0.5rem;
   }
-  
-  
+
   .reviews-trail-contribution-buttons {
     gap: 0.5rem;
     padding: 0 0.25rem;
   }
-  
+
   .reviews-trail-contribution-btn {
     width: 40px;
     height: 40px;
   }
-  
+
   /* Carousel is responsive by default */
 }
 
@@ -814,11 +831,11 @@
     width: 28px;
     height: 28px;
   }
-  
+
   .carousel-arrow-left {
     left: 4px;
   }
-  
+
   .carousel-arrow-right {
     right: 4px;
   }

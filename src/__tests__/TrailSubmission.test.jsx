@@ -10,20 +10,27 @@ jest.mock('../components/trails/TrailSubmission.css', () => ({}), { virtual: tru
 jest.mock('./TrailSubmission.css', () => ({}), { virtual: true });
 
 // Mock icon library to avoid SVG noise and focus on behavior
-jest.mock('lucide-react', () => new Proxy({}, {
-  get: () => () => null
-}));
+jest.mock(
+  'lucide-react',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: () => () => null,
+      }
+    )
+);
 
 // Mock Firebase storage APIs used in the component
 jest.mock('firebase/storage', () => ({
   ref: jest.fn(() => ({})),
   uploadBytes: jest.fn(() => Promise.resolve()),
-  getDownloadURL: jest.fn(() => Promise.resolve('https://example.com/image.jpg'))
+  getDownloadURL: jest.fn(() => Promise.resolve('https://example.com/image.jpg')),
 }));
 
 // Mock the storage export so ref() call receives something
 jest.mock('../firebaseConfig', () => ({
-  storage: {}
+  storage: {},
 }));
 
 // JSDOM URL API shims
@@ -41,7 +48,7 @@ const renderComponent = (props = {}) => {
     submitStatus: {},
     selectedLocation: { latitude: -33.9249, longitude: 18.4241, name: 'Cape Town' },
     onLocationSelect: jest.fn(),
-    onRouteUpdate: jest.fn()
+    onRouteUpdate: jest.fn(),
   };
   return render(React.createElement(TrailSubmission, { ...defaultProps, ...props }));
 };
@@ -64,7 +71,7 @@ describe('TrailSubmission', () => {
     const submitBtn = screen.getByRole('button', { name: /submit trail/i });
     expect(submitBtn).toBeDisabled();
 
-    await userEvent.type(screen.getByLabelText(/Trail Name/i), 'Lion\'s Head');
+    await userEvent.type(screen.getByLabelText(/Trail Name/i), "Lion's Head");
     await userEvent.selectOptions(screen.getByLabelText(/Difficulty/i), 'Moderate');
     await userEvent.clear(screen.getByLabelText(/Distance \(km\)/i));
     await userEvent.type(screen.getByLabelText(/Distance \(km\)/i), '5.5');
@@ -143,7 +150,7 @@ describe('TrailSubmission', () => {
       latestRouteApi.addRoutePoint(18.4241, -33.9249);
     });
     await act(async () => {
-      latestRouteApi.addRoutePoint(18.4250, -33.9255);
+      latestRouteApi.addRoutePoint(18.425, -33.9255);
     });
 
     // distance input becomes readOnly and shows a value
@@ -159,7 +166,12 @@ describe('TrailSubmission', () => {
   test('submits includes gpsRoute when points drawn', async () => {
     const onSubmit = jest.fn(() => Promise.resolve());
     let api = null;
-    renderComponent({ onSubmit, onRouteUpdate: (pts, a) => { api = a; } });
+    renderComponent({
+      onSubmit,
+      onRouteUpdate: (pts, a) => {
+        api = a;
+      },
+    });
 
     await userEvent.type(screen.getByLabelText(/Trail Name/i), 'Route Trail');
     await userEvent.selectOptions(screen.getByLabelText(/Difficulty/i), 'Easy');
@@ -170,8 +182,12 @@ describe('TrailSubmission', () => {
     // start drawing to enable point additions
     await userEvent.click(screen.getByRole('button', { name: /start drawing/i }));
     expect(api).toBeTruthy();
-    await act(async () => { api.addRoutePoint(18.1, -33.1); });
-    await act(async () => { api.addRoutePoint(18.2, -33.2); });
+    await act(async () => {
+      api.addRoutePoint(18.1, -33.1);
+    });
+    await act(async () => {
+      api.addRoutePoint(18.2, -33.2);
+    });
 
     await userEvent.click(screen.getByRole('button', { name: /submit trail/i }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -185,12 +201,23 @@ describe('TrailSubmission', () => {
   test('clear, undo, and redo route update points and notify parent', async () => {
     const onRouteUpdate = jest.fn();
     let latestApi = null;
-    renderComponent({ onRouteUpdate: (pts, api) => { latestApi = api; onRouteUpdate(pts, api); } });
+    renderComponent({
+      onRouteUpdate: (pts, api) => {
+        latestApi = api;
+        onRouteUpdate(pts, api);
+      },
+    });
 
     await userEvent.click(screen.getByRole('button', { name: /start drawing/i }));
-    await act(async () => { latestApi.addRoutePoint(1, 1); });
-    await act(async () => { latestApi.addRoutePoint(2, 2); });
-    await act(async () => { latestApi.addRoutePoint(3, 3); });
+    await act(async () => {
+      latestApi.addRoutePoint(1, 1);
+    });
+    await act(async () => {
+      latestApi.addRoutePoint(2, 2);
+    });
+    await act(async () => {
+      latestApi.addRoutePoint(3, 3);
+    });
 
     // wait for undo to appear (buttons render when there are points)
     const undoBtn = await screen.findByTitle('Undo last point');
@@ -242,7 +269,7 @@ describe('TrailSubmission', () => {
       photos: ['https://example.com/image.jpg'],
       status: 'open',
       location: { lat: -33.9249, lng: 18.4241 },
-      gpsRoute: []
+      gpsRoute: [],
     });
   });
 
@@ -286,20 +313,20 @@ describe('TrailSubmission', () => {
     await userEvent.type(nameInput, 'To Reset');
     expect(nameInput).toHaveValue('To Reset');
 
-    rerender(React.createElement(TrailSubmission, {
-      isOpen: false,
-      onClose: jest.fn(),
-      onSubmit: jest.fn(() => Promise.resolve()),
-      isSubmitting: false,
-      submitStatus: {},
-      selectedLocation: { latitude: -33.9, longitude: 18.4 },
-      onLocationSelect: jest.fn(),
-      onRouteUpdate: jest.fn()
-    }));
+    rerender(
+      React.createElement(TrailSubmission, {
+        isOpen: false,
+        onClose: jest.fn(),
+        onSubmit: jest.fn(() => Promise.resolve()),
+        isSubmitting: false,
+        submitStatus: {},
+        selectedLocation: { latitude: -33.9, longitude: 18.4 },
+        onLocationSelect: jest.fn(),
+        onRouteUpdate: jest.fn(),
+      })
+    );
 
     // component unmounts when closed, so inputs disappear
     await waitFor(() => expect(screen.queryByLabelText(/Trail Name/i)).not.toBeInTheDocument());
   });
 });
-
-

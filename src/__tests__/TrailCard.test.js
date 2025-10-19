@@ -5,85 +5,85 @@ import TrailCard from '../components/admin/TrailCard';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  ChevronDown: () => <div data-testid="chevron-down-icon" />,
-  ChevronRight: () => <div data-testid="chevron-right-icon" />,
-  MapPin: () => <div data-testid="map-pin-icon" />,
-  Calendar: () => <div data-testid="calendar-icon" />,
-  User: () => <div data-testid="user-icon" />,
-  Star: () => <div data-testid="star-icon" />,
-  AlertCircle: () => <div data-testid="alert-circle-icon" />,
-  Edit: () => <div data-testid="edit-icon" />,
-  Trash2: () => <div data-testid="trash-icon" />,
-  MessageSquare: () => <div data-testid="message-square-icon" />,
-  AlertTriangle: () => <div data-testid="alert-triangle-icon" />,
-  Ruler: () => <div data-testid="ruler-icon" />,
-  Mountain: () => <div data-testid="mountain-icon" />,
-  Target: () => <div data-testid="target-icon" />,
-  Tag: () => <div data-testid="tag-icon" />,
-  XCircle: () => <div data-testid="x-circle-icon" />,
-  Wrench: () => <div data-testid="wrench-icon" />,
-  CloudRain: () => <div data-testid="cloud-rain-icon" />,
-  Info: () => <div data-testid="info-icon" />,
+  ChevronDown: () => <div data-testid='chevron-down-icon' />,
+  ChevronRight: () => <div data-testid='chevron-right-icon' />,
+  MapPin: () => <div data-testid='map-pin-icon' />,
+  Calendar: () => <div data-testid='calendar-icon' />,
+  User: () => <div data-testid='user-icon' />,
+  Star: () => <div data-testid='star-icon' />,
+  AlertCircle: () => <div data-testid='alert-circle-icon' />,
+  Edit: () => <div data-testid='edit-icon' />,
+  Trash2: () => <div data-testid='trash-icon' />,
+  MessageSquare: () => <div data-testid='message-square-icon' />,
+  AlertTriangle: () => <div data-testid='alert-triangle-icon' />,
+  Ruler: () => <div data-testid='ruler-icon' />,
+  Mountain: () => <div data-testid='mountain-icon' />,
+  Target: () => <div data-testid='target-icon' />,
+  Tag: () => <div data-testid='tag-icon' />,
+  XCircle: () => <div data-testid='x-circle-icon' />,
+  Wrench: () => <div data-testid='wrench-icon' />,
+  CloudRain: () => <div data-testid='cloud-rain-icon' />,
+  Info: () => <div data-testid='info-icon' />,
 }));
 
 // Mock trailUtils functions
 jest.mock('../utils/trailUtils', () => ({
-  formatDate: jest.fn((date) => {
+  formatDate: jest.fn(date => {
     if (!date) return 'Unknown';
     return new Date(date).toLocaleDateString('en-US');
   }),
-  formatLocation: jest.fn((location) => {
+  formatLocation: jest.fn(location => {
     if (!location) return 'Unknown';
     if (typeof location === 'object' && location.lat && location.lng) {
       return `${location.lat}, ${location.lng}`;
     }
     return String(location);
   }),
-  renderStars: jest.fn((rating) => {
+  renderStars: jest.fn(rating => {
     const stars = [];
     for (let i = 0; i < 5; i++) {
-      stars.push(<span key={i} data-testid="star-icon" />);
+      stars.push(<span key={i} data-testid='star-icon' />);
     }
     return stars;
   }),
-  getAlertTypeColor: jest.fn((type) => {
+  getAlertTypeColor: jest.fn(type => {
     const colors = {
       emergency: '#ef4444',
       maintenance: '#f59e0b',
       weather: '#3b82f6',
       community: '#10b981',
-      default: '#6b7280'
+      default: '#6b7280',
     };
     return colors[type] || colors.default;
   }),
-  truncateUserId: jest.fn((userId) => {
+  truncateUserId: jest.fn(userId => {
     if (!userId) return 'Unknown';
     return userId.length > 10 ? `${userId.substring(0, 10)}...` : userId;
   }),
-  getAlertTypeIcon: jest.fn((type) => {
+  getAlertTypeIcon: jest.fn(type => {
     const iconMap = {
-      'hazard': 'AlertTriangle',
-      'emergency': 'AlertTriangle',
-      'closure': 'XCircle',
-      'XCircle': 'XCircle',
-      'maintenance': 'Wrench',
-      'Wrench': 'Wrench',
-      'weather': 'CloudRain',
-      'CloudRain': 'CloudRain',
-      'general': 'Info',
-      'community': 'Info'
+      hazard: 'AlertTriangle',
+      emergency: 'AlertTriangle',
+      closure: 'XCircle',
+      XCircle: 'XCircle',
+      maintenance: 'Wrench',
+      Wrench: 'Wrench',
+      weather: 'CloudRain',
+      CloudRain: 'CloudRain',
+      general: 'Info',
+      community: 'Info',
     };
     return iconMap[type?.toLowerCase()] || 'Info';
   }),
-  getDifficultyColor: jest.fn((difficulty) => {
+  getDifficultyColor: jest.fn(difficulty => {
     const colors = {
       Easy: '#10b981',
       Moderate: '#f59e0b',
       Hard: '#ef4444',
-      default: '#6b7280'
+      default: '#6b7280',
     };
     return colors[difficulty] || colors.default;
-  })
+  }),
 }));
 
 describe('TrailCard', () => {
@@ -96,14 +96,14 @@ describe('TrailCard', () => {
   const mockTrail = {
     id: 'trail1',
     name: 'Mountain Peak Trail',
-    location: { lat: 40.7128, lng: -74.0060 },
+    location: { lat: 40.7128, lng: -74.006 },
     createdAt: new Date('2024-01-15'),
     createdBy: 'user123',
     distance: 5.2,
     elevationGain: 300,
     difficulty: 'Moderate',
     status: 'open',
-    tags: ['scenic', 'forest', 'waterfall']
+    tags: ['scenic', 'forest', 'waterfall'],
   };
 
   const mockReviews = {
@@ -113,16 +113,16 @@ describe('TrailCard', () => {
         rating: 4,
         comment: 'Great trail with beautiful views!',
         userId: 'user456',
-        timestamp: new Date('2024-01-16')
+        timestamp: new Date('2024-01-16'),
       },
       {
         id: 'review2',
         rating: 5,
         message: 'Amazing experience!',
         userId: 'user789',
-        timestamp: new Date('2024-01-17')
-      }
-    ]
+        timestamp: new Date('2024-01-17'),
+      },
+    ],
   };
 
   const mockAlerts = {
@@ -132,43 +132,43 @@ describe('TrailCard', () => {
         type: 'emergency',
         message: 'Trail closed due to weather',
         isActive: true,
-        timestamp: new Date('2024-01-18')
+        timestamp: new Date('2024-01-18'),
       },
       {
         id: 'alert2',
         type: 'maintenance',
         comment: 'Scheduled maintenance',
         isActive: false,
-        timestamp: new Date('2024-01-19')
-      }
-    ]
+        timestamp: new Date('2024-01-19'),
+      },
+    ],
   };
 
   const mockTrailCounts = {
-    trail1: { reviews: 2, alerts: 2 }
+    trail1: { reviews: 2, alerts: 2 },
   };
 
   const mockLoadingStates = {
     reviews: { trail1: false },
-    alerts: { trail1: false }
+    alerts: { trail1: false },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset the mock implementations
     const { getAlertTypeIcon } = require('../utils/trailUtils');
-    getAlertTypeIcon.mockImplementation((type) => {
+    getAlertTypeIcon.mockImplementation(type => {
       const iconMap = {
-        'hazard': 'AlertTriangle',
-        'emergency': 'AlertTriangle',
-        'closure': 'XCircle',
-        'XCircle': 'XCircle',
-        'maintenance': 'Wrench',
-        'Wrench': 'Wrench',
-        'weather': 'CloudRain',
-        'CloudRain': 'CloudRain',
-        'general': 'Info',
-        'community': 'Info'
+        hazard: 'AlertTriangle',
+        emergency: 'AlertTriangle',
+        closure: 'XCircle',
+        XCircle: 'XCircle',
+        maintenance: 'Wrench',
+        Wrench: 'Wrench',
+        weather: 'CloudRain',
+        CloudRain: 'CloudRain',
+        general: 'Info',
+        community: 'Info',
       };
       return iconMap[type?.toLowerCase()] || 'Info';
     });
@@ -252,7 +252,7 @@ describe('TrailCard', () => {
 
     it('handles missing trail name', () => {
       const trailWithoutName = { ...mockTrail, name: null };
-      
+
       render(
         <TrailCard
           trail={trailWithoutName}
@@ -282,7 +282,7 @@ describe('TrailCard', () => {
 
     it('does not display distance when not available', () => {
       const trailWithoutDistance = { ...mockTrail, distance: null };
-      
+
       render(
         <TrailCard
           trail={trailWithoutDistance}
@@ -355,7 +355,7 @@ describe('TrailCard', () => {
 
     it('does not display tags when not available', () => {
       const trailWithoutTags = { ...mockTrail, tags: null };
-      
+
       render(
         <TrailCard
           trail={trailWithoutTags}
@@ -371,7 +371,7 @@ describe('TrailCard', () => {
 
     it('handles empty tags array', () => {
       const trailWithEmptyTags = { ...mockTrail, tags: [] };
-      
+
       render(
         <TrailCard
           trail={trailWithEmptyTags}
@@ -506,7 +506,7 @@ describe('TrailCard', () => {
     it('displays loading spinners when loading', () => {
       const loadingStates = {
         reviews: { trail1: true },
-        alerts: { trail1: true }
+        alerts: { trail1: true },
       };
 
       render(
@@ -618,9 +618,9 @@ describe('TrailCard', () => {
             id: 'review3',
             rating: 3,
             userId: 'user999',
-            timestamp: new Date('2024-01-20')
-          }
-        ]
+            timestamp: new Date('2024-01-20'),
+          },
+        ],
       };
 
       render(
@@ -640,7 +640,7 @@ describe('TrailCard', () => {
 
     it('displays loading state for reviews', () => {
       const loadingStates = {
-        reviews: { trail1: true }
+        reviews: { trail1: true },
       };
 
       render(
@@ -734,9 +734,9 @@ describe('TrailCard', () => {
             id: 'alert3',
             type: 'community',
             isActive: true,
-            timestamp: new Date('2024-01-21')
-          }
-        ]
+            timestamp: new Date('2024-01-21'),
+          },
+        ],
       };
 
       render(
@@ -756,7 +756,7 @@ describe('TrailCard', () => {
 
     it('displays loading state for alerts', () => {
       const loadingStates = {
-        alerts: { trail1: true }
+        alerts: { trail1: true },
       };
 
       render(
@@ -795,7 +795,7 @@ describe('TrailCard', () => {
     it('applies correct CSS classes for active/inactive alerts', () => {
       const activeAlert = document.querySelector('.trail-card-alert-item.active');
       const inactiveAlert = document.querySelector('.trail-card-alert-item.inactive');
-      
+
       expect(activeAlert).toBeInTheDocument();
       expect(inactiveAlert).toBeInTheDocument();
     });
@@ -810,9 +810,9 @@ describe('TrailCard', () => {
             type: 'emergency',
             message: 'Emergency alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       render(
@@ -838,9 +838,9 @@ describe('TrailCard', () => {
             type: 'maintenance',
             message: 'Maintenance alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       render(
@@ -866,9 +866,9 @@ describe('TrailCard', () => {
             type: 'unknown',
             message: 'Unknown alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       render(
@@ -891,7 +891,7 @@ describe('TrailCard', () => {
     it('handles trail with minimal data', () => {
       const minimalTrail = {
         id: 'trail2',
-        name: 'Minimal Trail'
+        name: 'Minimal Trail',
       };
 
       render(
@@ -919,7 +919,7 @@ describe('TrailCard', () => {
         elevationGain: null,
         difficulty: null,
         status: null,
-        tags: null
+        tags: null,
       };
 
       render(
@@ -967,8 +967,8 @@ describe('TrailCard', () => {
       );
 
       expect(screen.getByText('Mountain Peak Trail')).toBeInTheDocument();
-      });
     });
+  });
 
   describe('Accessibility', () => {
     beforeEach(() => {
@@ -1019,15 +1019,15 @@ describe('TrailCard', () => {
       expect(headings).toHaveLength(2);
       expect(headings[0]).toHaveTextContent('Reviews (2)');
       expect(headings[1]).toHaveTextContent('Alerts (2)');
+    });
   });
-});
 
   // Utility Function Integration tests removed due to mock issues
 
   describe('Alert Type Icon Rendering - Uncovered Lines', () => {
     it('calls getAlertTypeIcon with different alert types to cover switch cases', () => {
       const { getAlertTypeIcon } = require('../utils/trailUtils');
-      
+
       // Test different alert types to trigger different switch cases
       const alertsWithMultipleTypes = {
         trail1: [
@@ -1036,30 +1036,30 @@ describe('TrailCard', () => {
             type: 'closure',
             message: 'Closure alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
+            timestamp: new Date('2024-01-18'),
           },
           {
             id: 'alert2',
             type: 'maintenance',
             message: 'Maintenance alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
+            timestamp: new Date('2024-01-18'),
           },
           {
             id: 'alert3',
             type: 'weather',
             message: 'Weather alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
+            timestamp: new Date('2024-01-18'),
           },
           {
             id: 'alert4',
             type: 'unknown',
             message: 'Unknown alert',
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       render(
@@ -1093,8 +1093,8 @@ describe('TrailCard', () => {
         'https://example.com/photo5.jpg',
         'https://example.com/photo6.jpg',
         'https://example.com/photo7.jpg',
-        'https://example.com/photo8.jpg'
-      ]
+        'https://example.com/photo8.jpg',
+      ],
     };
 
     beforeEach(() => {
@@ -1162,8 +1162,8 @@ describe('TrailCard', () => {
         photos: [
           'https://example.com/photo1.jpg',
           'https://example.com/photo2.jpg',
-          'https://example.com/photo3.jpg'
-        ]
+          'https://example.com/photo3.jpg',
+        ],
       };
 
       render(
@@ -1251,7 +1251,7 @@ describe('TrailCard', () => {
     it('calculates correct "more" count for different photo counts', () => {
       const trailWithManyPhotos = {
         ...mockTrail,
-        photos: Array.from({ length: 15 }, (_, i) => `https://example.com/photo${i + 1}.jpg`)
+        photos: Array.from({ length: 15 }, (_, i) => `https://example.com/photo${i + 1}.jpg`),
       };
 
       render(

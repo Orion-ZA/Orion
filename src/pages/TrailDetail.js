@@ -23,32 +23,32 @@ const TrailDetail = () => {
     loading,
     error,
     authorName,
-    
+
     // User data
     user,
     userSaved,
-    
+
     // Reviews data
     reviews,
     loadingReviews,
     reviewSortBy,
     setReviewSortBy,
     getSortedReviews,
-    
+
     // Weather data
     weatherData,
     loadingWeather,
-    
+
     // Alerts data
     alerts,
     loadingAlerts,
-    
+
     // UI state
     currentImageIndex,
     setCurrentImageIndex,
     activeTab,
     setActiveTab,
-    
+
     // Modal states
     showContributionModal,
     contributionType,
@@ -71,7 +71,7 @@ const TrailDetail = () => {
     showSuccessPopup,
     successMessage,
     setShowSuccessPopup,
-    
+
     // Actions
     handleTrailAction,
     handleShare,
@@ -85,14 +85,14 @@ const TrailDetail = () => {
     handleAddAlert,
     openReportModal,
     handleSubmitReport,
-    goToImage
+    goToImage,
   } = useTrailDetail();
 
   if (loading) {
     return (
-      <div className="trail-detail-page">
-        <div className="trail-detail-loading">
-          <div className="loading-spinner"></div>
+      <div className='trail-detail-page'>
+        <div className='trail-detail-loading'>
+          <div className='loading-spinner'></div>
           <p>Loading trail details...</p>
         </div>
       </div>
@@ -101,11 +101,11 @@ const TrailDetail = () => {
 
   if (error || !trail) {
     return (
-      <div className="trail-detail-page">
-        <div className="trail-detail-error">
+      <div className='trail-detail-page'>
+        <div className='trail-detail-error'>
           <h2>Trail Not Found</h2>
-          <p>{error || 'The trail you\'re looking for doesn\'t exist.'}</p>
-          <button onClick={() => navigate('/trails')} className="btn-primary">
+          <p>{error || "The trail you're looking for doesn't exist."}</p>
+          <button onClick={() => navigate('/trails')} className='btn-primary'>
             <ArrowLeft size={16} />
             Back to Trails
           </button>
@@ -115,9 +115,9 @@ const TrailDetail = () => {
   }
 
   return (
-    <div className="trail-detail-page">
+    <div className='trail-detail-page'>
       {/* Header */}
-      <TrailDetailHeader 
+      <TrailDetailHeader
         onBack={() => navigate(-1)}
         onShowOnMap={() => handleShowOnMap(navigate)}
         onShare={handleShare}
@@ -125,9 +125,9 @@ const TrailDetail = () => {
       />
 
       {/* Main Content */}
-      <div className="trail-detail-content">
+      <div className='trail-detail-content'>
         {/* Image Gallery */}
-        <TrailImageGallery 
+        <TrailImageGallery
           images={trail.images}
           currentImageIndex={currentImageIndex}
           onImageChange={setCurrentImageIndex}
@@ -135,45 +135,42 @@ const TrailDetail = () => {
         />
 
         {/* Trail Info */}
-        <TrailInfo 
+        <TrailInfo
           trail={trail}
           authorName={authorName}
           onDirections={handleDirections}
           estimateDuration={estimateDuration}
         />
 
-          {/* Weather Forecast */}
-          <WeatherSection 
-            weatherData={weatherData}
-            loadingWeather={loadingWeather}
-          />
+        {/* Weather Forecast */}
+        <WeatherSection weatherData={weatherData} loadingWeather={loadingWeather} />
 
-          {/* User Actions */}
-        <TrailDetailActions 
-            user={user}
-            trail={trail}
-            userSaved={userSaved}
-            onTrailAction={handleTrailAction}
-          />
+        {/* User Actions */}
+        <TrailDetailActions
+          user={user}
+          trail={trail}
+          userSaved={userSaved}
+          onTrailAction={handleTrailAction}
+        />
 
-          {/* Tab Section */}
-          <TabSection 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            reviews={reviews}
-            trail={trail}
-            reviewSortBy={reviewSortBy}
-            setReviewSortBy={setReviewSortBy}
-            loadingReviews={loadingReviews}
-            getSortedReviews={getSortedReviews}
-            onOpenContributionModal={openContributionModal}
-            currentImageIndex={currentImageIndex}
-            setCurrentImageIndex={setCurrentImageIndex}
+        {/* Tab Section */}
+        <TabSection
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          reviews={reviews}
+          trail={trail}
+          reviewSortBy={reviewSortBy}
+          setReviewSortBy={setReviewSortBy}
+          loadingReviews={loadingReviews}
+          getSortedReviews={getSortedReviews}
+          onOpenContributionModal={openContributionModal}
+          currentImageIndex={currentImageIndex}
+          setCurrentImageIndex={setCurrentImageIndex}
           alerts={alerts}
           loadingAlerts={loadingAlerts}
           onReport={openReportModal}
-          />
-        </div>
+        />
+      </div>
 
       {/* Modals */}
       <TrailDetailModals
@@ -192,14 +189,12 @@ const TrailDetail = () => {
         onAddReview={handleAddReview}
         onAddImages={handleAddImages}
         onImageUpload={handleImageUpload}
-        
         // Alert Modal Props
         showAlertModal={showAlertModal}
         onCloseAlertModal={() => setShowAlertModal(false)}
         onAddAlert={handleAddAlert}
         trailId={trail.id}
         trailName={trail.name}
-        
         // Report Modal Props
         showReportModal={showReportModal}
         onCloseReportModal={() => setShowReportModal(false)}

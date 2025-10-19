@@ -5,8 +5,8 @@ import DeleteConfirmationModal from '../components/admin/DeleteConfirmationModal
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  AlertTriangle: () => <div data-testid="alert-triangle-icon" />,
-  Trash2: () => <div data-testid="trash-icon" />,
+  AlertTriangle: () => <div data-testid='alert-triangle-icon' />,
+  Trash2: () => <div data-testid='trash-icon' />,
 }));
 
 // Mock console.log to avoid test output noise
@@ -31,7 +31,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders nothing when isVisible is false', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -75,7 +75,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders modal when both isVisible and deleteConfirm are provided', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -94,7 +94,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders with correct CSS classes', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -118,7 +118,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders trail deletion confirmation with trail name', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Mountain Peak Trail'
+        name: 'Mountain Peak Trail',
       };
 
       render(
@@ -130,14 +130,20 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Mountain Peak Trail"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will also delete all associated reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Mountain Peak Trail"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will also delete all associated reviews.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('handles trail with null name', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: null
+        name: null,
       };
 
       render(
@@ -149,13 +155,15 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
     });
 
     it('handles trail with undefined name', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: undefined
+        name: undefined,
       };
 
       render(
@@ -167,13 +175,15 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
     });
 
     it('handles trail with empty string name', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: ''
+        name: '',
       };
 
       render(
@@ -185,13 +195,15 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
     });
 
     it('handles trail with non-string name', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 123
+        name: 123,
       };
 
       render(
@@ -203,7 +215,9 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "123"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "123"?')
+      ).toBeInTheDocument();
     });
   });
 
@@ -213,7 +227,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Forest Trail',
         rating: 4,
-        comment: 'Great trail with beautiful views!'
+        comment: 'Great trail with beautiful views!',
       };
 
       render(
@@ -236,7 +250,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Mountain Trail',
         rating: 3,
-        message: 'Decent trail but could be better maintained'
+        message: 'Decent trail but could be better maintained',
       };
 
       render(
@@ -259,7 +273,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: null,
         rating: 5,
-        comment: 'Amazing!'
+        comment: 'Amazing!',
       };
 
       render(
@@ -279,7 +293,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: undefined,
         rating: 2,
-        comment: 'Not great'
+        comment: 'Not great',
       };
 
       render(
@@ -299,7 +313,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 'five',
-        comment: 'Good trail'
+        comment: 'Good trail',
       };
 
       render(
@@ -319,7 +333,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: null,
-        comment: 'Good trail'
+        comment: 'Good trail',
       };
 
       render(
@@ -339,7 +353,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: undefined,
-        comment: 'Good trail'
+        comment: 'Good trail',
       };
 
       render(
@@ -359,7 +373,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 4,
-        comment: 123
+        comment: 123,
       };
 
       render(
@@ -379,7 +393,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 4,
-        comment: null
+        comment: null,
       };
 
       render(
@@ -399,7 +413,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 4,
-        comment: undefined
+        comment: undefined,
       };
 
       render(
@@ -419,7 +433,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 4,
-        comment: ''
+        comment: '',
       };
 
       render(
@@ -440,7 +454,7 @@ describe('DeleteConfirmationModal', () => {
         type: 'review',
         trailName: 'Test Trail',
         rating: 4,
-        message: 456
+        message: 456,
       };
 
       render(
@@ -460,7 +474,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders alert deletion confirmation with message', () => {
       const deleteConfirm = {
         type: 'alert',
-        message: 'Trail closed due to weather conditions'
+        message: 'Trail closed due to weather conditions',
       };
 
       render(
@@ -480,7 +494,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders alert deletion with comment instead of message', () => {
       const deleteConfirm = {
         type: 'alert',
-        comment: 'Maintenance scheduled for next week'
+        comment: 'Maintenance scheduled for next week',
       };
 
       render(
@@ -501,7 +515,7 @@ describe('DeleteConfirmationModal', () => {
       const deleteConfirm = {
         type: 'alert',
         message: null,
-        comment: null
+        comment: null,
       };
 
       render(
@@ -520,7 +534,7 @@ describe('DeleteConfirmationModal', () => {
       const deleteConfirm = {
         type: 'alert',
         message: undefined,
-        comment: undefined
+        comment: undefined,
       };
 
       render(
@@ -538,7 +552,7 @@ describe('DeleteConfirmationModal', () => {
     it('handles alert with non-string message', () => {
       const deleteConfirm = {
         type: 'alert',
-        message: 789
+        message: 789,
       };
 
       render(
@@ -556,7 +570,7 @@ describe('DeleteConfirmationModal', () => {
     it('handles alert with null type', () => {
       const deleteConfirm = {
         type: null,
-        message: 'Test alert'
+        message: 'Test alert',
       };
 
       render(
@@ -569,14 +583,20 @@ describe('DeleteConfirmationModal', () => {
       );
 
       // When type is null, it falls back to trail deletion case
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will also delete all associated reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will also delete all associated reviews.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('handles alert with undefined type', () => {
       const deleteConfirm = {
         type: undefined,
-        message: 'Test alert'
+        message: 'Test alert',
       };
 
       render(
@@ -589,14 +609,20 @@ describe('DeleteConfirmationModal', () => {
       );
 
       // When type is undefined, it falls back to trail deletion case
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will also delete all associated reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will also delete all associated reviews.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('handles alert with non-string type', () => {
       const deleteConfirm = {
         type: 123,
-        message: 'Test alert'
+        message: 'Test alert',
       };
 
       render(
@@ -609,8 +635,14 @@ describe('DeleteConfirmationModal', () => {
       );
 
       // When type is not 'review' or 'alert', it falls back to trail deletion case
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will also delete all associated reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will also delete all associated reviews.'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -618,7 +650,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders trail deletion for unknown type', () => {
       const deleteConfirm = {
         type: 'unknown',
-        name: 'Test Item'
+        name: 'Test Item',
       };
 
       render(
@@ -630,14 +662,20 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Test Item"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will also delete all associated reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Test Item"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will also delete all associated reviews.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('renders trail deletion for empty type', () => {
       const deleteConfirm = {
         type: '',
-        name: 'Test Item'
+        name: 'Test Item',
       };
 
       render(
@@ -649,13 +687,15 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Test Item"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Test Item"?')
+      ).toBeInTheDocument();
     });
 
     it('renders trail deletion for null type', () => {
       const deleteConfirm = {
         type: null,
-        name: 'Test Item'
+        name: 'Test Item',
       };
 
       render(
@@ -667,13 +707,15 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Test Item"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Test Item"?')
+      ).toBeInTheDocument();
     });
 
     it('renders trail deletion for undefined type', () => {
       const deleteConfirm = {
         type: undefined,
-        name: 'Test Item'
+        name: 'Test Item',
       };
 
       render(
@@ -685,7 +727,9 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Test Item"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Test Item"?')
+      ).toBeInTheDocument();
     });
   });
 
@@ -693,7 +737,7 @@ describe('DeleteConfirmationModal', () => {
     it('calls onCancel when cancel button is clicked', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -714,7 +758,7 @@ describe('DeleteConfirmationModal', () => {
     it('calls onConfirm when delete button is clicked', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -735,7 +779,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders delete button with trash icon', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -755,7 +799,7 @@ describe('DeleteConfirmationModal', () => {
     it('renders buttons with correct CSS classes', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -779,7 +823,7 @@ describe('DeleteConfirmationModal', () => {
     it('logs render information when component renders', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -802,7 +846,7 @@ describe('DeleteConfirmationModal', () => {
     it('logs render information when component does not render', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -836,12 +880,14 @@ describe('DeleteConfirmationModal', () => {
         />
       );
 
-      expect(screen.getByText('Are you sure you want to delete the trail "Unknown"?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the trail "Unknown"?')
+      ).toBeInTheDocument();
     });
 
     it('handles deleteConfirm with only type property', () => {
       const deleteConfirm = {
-        type: 'review'
+        type: 'review',
       };
 
       render(
@@ -861,7 +907,7 @@ describe('DeleteConfirmationModal', () => {
     it('handles rapid state changes', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       const { rerender } = render(
@@ -903,7 +949,7 @@ describe('DeleteConfirmationModal', () => {
     it('has proper heading structure', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -922,7 +968,7 @@ describe('DeleteConfirmationModal', () => {
     it('has clickable buttons', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(
@@ -944,7 +990,7 @@ describe('DeleteConfirmationModal', () => {
     it('has proper modal structure', () => {
       const deleteConfirm = {
         type: 'trail',
-        name: 'Test Trail'
+        name: 'Test Trail',
       };
 
       render(

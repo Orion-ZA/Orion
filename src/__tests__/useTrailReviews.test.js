@@ -22,7 +22,7 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock console methods
@@ -56,7 +56,7 @@ describe('useTrailReviews', () => {
 
       const initialState = result.current;
       rerender();
-      
+
       expect(result.current.trailReviews).toBe(initialState.trailReviews);
       expect(result.current.loadingStates).toBe(initialState.loadingStates);
     });
@@ -73,7 +73,7 @@ describe('useTrailReviews', () => {
           rating: 4,
           comment: 'Great trail!',
           message: '',
-          timestamp: new Date('2024-01-15')
+          timestamp: new Date('2024-01-15'),
         },
         {
           id: 'review2',
@@ -83,8 +83,8 @@ describe('useTrailReviews', () => {
           rating: 5,
           comment: 'Amazing views',
           message: 'Highly recommended',
-          timestamp: new Date('2024-01-16')
-        }
+          timestamp: new Date('2024-01-16'),
+        },
       ];
 
       const mockQuerySnapshot = {
@@ -96,9 +96,9 @@ describe('useTrailReviews', () => {
             rating: review.rating,
             comment: review.comment,
             message: review.message,
-            timestamp: review.timestamp
-          })
-        }))
+            timestamp: review.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -122,7 +122,7 @@ describe('useTrailReviews', () => {
             userName: 'John Doe',
             rating: 4,
             comment: 'Great trail!',
-            message: ''
+            message: '',
           }),
           expect.objectContaining({
             id: 'review2',
@@ -131,9 +131,9 @@ describe('useTrailReviews', () => {
             userName: 'Jane Smith',
             rating: 5,
             comment: 'Amazing views',
-            message: 'Highly recommended'
-          })
-        ])
+            message: 'Highly recommended',
+          }),
+        ]),
       });
     });
 
@@ -203,8 +203,8 @@ describe('useTrailReviews', () => {
           rating: 4,
           comment: 'Cached review',
           message: '',
-          timestamp: new Date('2024-01-15')
-        }
+          timestamp: new Date('2024-01-15'),
+        },
       ];
 
       const { result } = renderHook(() => useTrailReviews());
@@ -219,9 +219,9 @@ describe('useTrailReviews', () => {
             rating: review.rating,
             comment: review.comment,
             message: review.message,
-            timestamp: review.timestamp
-          })
-        }))
+            timestamp: review.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -256,10 +256,10 @@ describe('useTrailReviews', () => {
               rating: null,
               comment: null,
               message: undefined,
-              timestamp: null
-            })
-          }
-        ]
+              timestamp: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -279,8 +279,8 @@ describe('useTrailReviews', () => {
           userName: 'Unknown', // Should fallback to 'Unknown'
           rating: 0, // Should fallback to 0
           comment: '', // Should fallback to empty string
-          message: '' // Should fallback to empty string
-        })
+          message: '', // Should fallback to empty string
+        }),
       ]);
     });
 
@@ -294,7 +294,7 @@ describe('useTrailReviews', () => {
           rating: 4,
           comment: 'Older review',
           message: '',
-          timestamp: new Date('2024-01-15')
+          timestamp: new Date('2024-01-15'),
         },
         {
           id: 'review2',
@@ -304,8 +304,8 @@ describe('useTrailReviews', () => {
           rating: 5,
           comment: 'Newer review',
           message: '',
-          timestamp: new Date('2024-01-16')
-        }
+          timestamp: new Date('2024-01-16'),
+        },
       ];
 
       const mockQuerySnapshot = {
@@ -317,9 +317,9 @@ describe('useTrailReviews', () => {
             rating: review.rating,
             comment: review.comment,
             message: review.message,
-            timestamp: review.timestamp
-          })
-        }))
+            timestamp: review.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -338,7 +338,7 @@ describe('useTrailReviews', () => {
 
     it('handles Firestore Timestamp objects', async () => {
       const mockTimestamp = {
-        toDate: () => new Date('2024-01-15')
+        toDate: () => new Date('2024-01-15'),
       };
 
       const mockQuerySnapshot = {
@@ -351,10 +351,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Review with Firestore timestamp',
               message: '',
-              timestamp: mockTimestamp
-            })
-          }
-        ]
+              timestamp: mockTimestamp,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -380,10 +380,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Review with string timestamp',
               message: '',
-              timestamp: '2024-01-15T00:00:00Z'
-            })
-          }
-        ]
+              timestamp: '2024-01-15T00:00:00Z',
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -409,10 +409,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Review without timestamp',
               message: '',
-              timestamp: null
-            })
-          }
-        ]
+              timestamp: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -438,10 +438,10 @@ describe('useTrailReviews', () => {
               rating: 'not a number',
               comment: 'Review with invalid rating',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -472,10 +472,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Review to delete',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -530,10 +530,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Review to delete',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -622,19 +622,19 @@ describe('useTrailReviews', () => {
 
       expect(result.current.loadingStates).toEqual({
         trail1: true,
-        trail2: true
+        trail2: true,
       });
 
       await act(async () => {
         await Promise.all([
           result.current.fetchTrailReviews('trail1'),
-          result.current.fetchTrailReviews('trail2')
+          result.current.fetchTrailReviews('trail2'),
         ]);
       });
 
       expect(result.current.loadingStates).toEqual({
         trail1: false,
-        trail2: false
+        trail2: false,
       });
     });
 
@@ -651,10 +651,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Trail 1 review',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       const mockQuerySnapshot2 = {
@@ -667,10 +667,10 @@ describe('useTrailReviews', () => {
               rating: 5,
               comment: 'Trail 2 review',
               message: '',
-              timestamp: new Date('2024-01-16')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-16'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -702,10 +702,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Trail 1 review',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       const mockQuerySnapshot2 = {
@@ -718,10 +718,10 @@ describe('useTrailReviews', () => {
               rating: 5,
               comment: 'Trail 2 review',
               message: '',
-              timestamp: new Date('2024-01-16')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-16'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -758,10 +758,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Concurrent review',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -772,7 +772,7 @@ describe('useTrailReviews', () => {
         await Promise.all([
           result.current.fetchTrailReviews('trail1'),
           result.current.fetchTrailReviews('trail1'),
-          result.current.fetchTrailReviews('trail1')
+          result.current.fetchTrailReviews('trail1'),
         ]);
       });
 
@@ -791,8 +791,8 @@ describe('useTrailReviews', () => {
           rating: (i % 5) + 1,
           comment: `Review ${i}`,
           message: '',
-          timestamp: new Date(`2024-01-${String(i % 30 + 1).padStart(2, '0')}`)
-        })
+          timestamp: new Date(`2024-01-${String((i % 30) + 1).padStart(2, '0')}`),
+        }),
       }));
 
       const mockQuerySnapshot = { docs: largeDataset };
@@ -815,9 +815,9 @@ describe('useTrailReviews', () => {
             id: 'review1',
             data: () => {
               throw new Error('Malformed data');
-            }
-          }
-        ]
+            },
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -844,10 +844,10 @@ describe('useTrailReviews', () => {
               rating: 0,
               comment: '',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -863,7 +863,7 @@ describe('useTrailReviews', () => {
           userName: 'Unknown', // Empty string gets converted to 'Unknown'
           rating: 0,
           comment: '',
-          message: ''
+          message: '',
         })
       );
     });
@@ -897,10 +897,10 @@ describe('useTrailReviews', () => {
               rating: 4,
               comment: 'Test review',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -929,10 +929,10 @@ describe('useTrailReviews', () => {
               rating: 3.5,
               comment: 'Half star rating',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -958,10 +958,10 @@ describe('useTrailReviews', () => {
               rating: true, // Boolean instead of number
               comment: 'Boolean rating',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');
@@ -987,10 +987,10 @@ describe('useTrailReviews', () => {
               rating: { value: 5 }, // Object instead of number
               comment: 'Object rating',
               message: '',
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('reviewsRef');

@@ -4,9 +4,7 @@ import styled from 'styled-components';
 const GlassCard = ({ children, onClick }) => {
   return (
     <StyledWrapper onClick={onClick}>
-      <div className="card">
-        {children ?? 'Click me'}
-      </div>
+      <div className='card'>{children ?? 'Click me'}</div>
     </StyledWrapper>
   );
 };

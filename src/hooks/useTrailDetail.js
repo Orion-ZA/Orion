@@ -11,36 +11,39 @@ export const useTrailDetail = () => {
 
   // Core trail data
   const { trail, loading, error, authorName, setTrail } = useTrailData();
-  
+
   // User actions
   const { user, userSaved, handleTrailAction } = useTrailUserActions();
-  
+
   // Content (reviews, weather, alerts)
-  const { 
-    reviews, 
-    setReviews, 
-    loadingReviews, 
-    reviewSortBy, 
-    setReviewSortBy, 
+  const {
+    reviews,
+    setReviews,
+    loadingReviews,
+    reviewSortBy,
+    setReviewSortBy,
     getSortedReviews,
-    weatherData, 
+    weatherData,
     loadingWeather,
     fetchReviews,
     alerts,
-    loadingAlerts
+    loadingAlerts,
   } = useTrailContent(trail);
-  
+
   // Modals
   const modalActions = useTrailModals(user, trail?.id, trail?.name, setTrail, fetchReviews);
-  
+
   // Navigation actions
-  const { handleShare, handleDirections, handleShowOnMap } = createTrailNavigationActions(null, showToast);
-  
+  const { handleShare, handleDirections, handleShowOnMap } = createTrailNavigationActions(
+    null,
+    showToast
+  );
+
   // UI state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('reviews');
 
-  const goToImage = (index) => {
+  const goToImage = index => {
     setCurrentImageIndex(index);
   };
 
@@ -50,40 +53,40 @@ export const useTrailDetail = () => {
     loading,
     error,
     authorName,
-    
+
     // User data
     user,
     userSaved,
-    
+
     // Reviews data
     reviews,
     loadingReviews,
     reviewSortBy,
     setReviewSortBy,
     getSortedReviews,
-    
+
     // Weather data
     weatherData,
     loadingWeather,
-    
+
     // Alerts data
     alerts,
     loadingAlerts,
-    
+
     // UI state
     currentImageIndex,
     setCurrentImageIndex,
     activeTab,
     setActiveTab,
-    
+
     // Actions
     handleTrailAction,
     handleShare: () => handleShare(trail?.name),
     handleDirections: () => handleDirections(trail),
-    handleShowOnMap: (navigate) => handleShowOnMap(trail, navigate),
+    handleShowOnMap: navigate => handleShowOnMap(trail, navigate),
     goToImage,
-    
+
     // Modal actions
-    ...modalActions
+    ...modalActions,
   };
 };

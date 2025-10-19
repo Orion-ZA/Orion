@@ -3,27 +3,27 @@ import { useTrailDetail } from '../hooks/useTrailDetail';
 
 // Mock all the hooks and utilities
 jest.mock('../hooks/useTrailData', () => ({
-  useTrailData: jest.fn()
+  useTrailData: jest.fn(),
 }));
 
 jest.mock('../hooks/useTrailUserActions', () => ({
-  useTrailUserActions: jest.fn()
+  useTrailUserActions: jest.fn(),
 }));
 
 jest.mock('../hooks/useTrailModals', () => ({
-  useTrailModals: jest.fn()
+  useTrailModals: jest.fn(),
 }));
 
 jest.mock('../hooks/useTrailContent', () => ({
-  useTrailContent: jest.fn()
+  useTrailContent: jest.fn(),
 }));
 
 jest.mock('../components/ToastContext', () => ({
-  useToast: jest.fn()
+  useToast: jest.fn(),
 }));
 
 jest.mock('../utils/trailNavigation', () => ({
-  createTrailNavigationActions: jest.fn()
+  createTrailNavigationActions: jest.fn(),
 }));
 
 import { useTrailData } from '../hooks/useTrailData';
@@ -38,12 +38,12 @@ describe('useTrailDetail', () => {
     id: 'trail-123',
     name: 'Test Trail',
     description: 'A beautiful trail',
-    location: { latitude: 40.7128, longitude: -74.0060 }
+    location: { latitude: 40.7128, longitude: -74.006 },
   };
 
   const mockUser = {
     uid: 'user-123',
-    displayName: 'Test User'
+    displayName: 'Test User',
   };
 
   const mockTrailData = {
@@ -51,13 +51,13 @@ describe('useTrailDetail', () => {
     loading: false,
     error: null,
     authorName: 'John Doe',
-    setTrail: jest.fn()
+    setTrail: jest.fn(),
   };
 
   const mockUserActions = {
     user: mockUser,
     userSaved: { favourites: ['trail-123'], wishlist: [], completed: [] },
-    handleTrailAction: jest.fn()
+    handleTrailAction: jest.fn(),
   };
 
   const mockContent = {
@@ -70,7 +70,7 @@ describe('useTrailDetail', () => {
     loadingWeather: false,
     fetchReviews: jest.fn(),
     alerts: [{ id: '1', message: 'Trail closed' }],
-    loadingAlerts: false
+    loadingAlerts: false,
   };
 
   const mockModals = {
@@ -100,13 +100,13 @@ describe('useTrailDetail', () => {
     openReportModal: jest.fn(),
     handleSubmitReport: jest.fn(),
     setShowAlertModal: jest.fn(),
-    setShowReportModal: jest.fn()
+    setShowReportModal: jest.fn(),
   };
 
   const mockNavigationActions = {
     handleShare: jest.fn(),
     handleDirections: jest.fn(),
-    handleShowOnMap: jest.fn()
+    handleShowOnMap: jest.fn(),
   };
 
   const mockShowToast = jest.fn();
@@ -128,7 +128,13 @@ describe('useTrailDetail', () => {
       expect(useTrailData).toHaveBeenCalled();
       expect(useTrailUserActions).toHaveBeenCalled();
       expect(useTrailContent).toHaveBeenCalledWith(mockTrail);
-      expect(useTrailModals).toHaveBeenCalledWith(mockUser, 'trail-123', 'Test Trail', mockTrailData.setTrail, mockContent.fetchReviews);
+      expect(useTrailModals).toHaveBeenCalledWith(
+        mockUser,
+        'trail-123',
+        'Test Trail',
+        mockTrailData.setTrail,
+        mockContent.fetchReviews
+      );
       expect(createTrailNavigationActions).toHaveBeenCalledWith(null, mockShowToast);
     });
 
@@ -143,7 +149,11 @@ describe('useTrailDetail', () => {
 
       // User data
       expect(result.current.user).toEqual(mockUser);
-      expect(result.current.userSaved).toEqual({ favourites: ['trail-123'], wishlist: [], completed: [] });
+      expect(result.current.userSaved).toEqual({
+        favourites: ['trail-123'],
+        wishlist: [],
+        completed: [],
+      });
 
       // Reviews data
       expect(result.current.reviews).toEqual(mockContent.reviews);
@@ -270,7 +280,7 @@ describe('useTrailDetail', () => {
     it('handles null trail data', () => {
       useTrailData.mockReturnValue({
         ...mockTrailData,
-        trail: null
+        trail: null,
       });
 
       const { result } = renderHook(() => useTrailDetail());
@@ -283,7 +293,7 @@ describe('useTrailDetail', () => {
     it('handles null user', () => {
       useTrailUserActions.mockReturnValue({
         ...mockUserActions,
-        user: null
+        user: null,
       });
 
       const { result } = renderHook(() => useTrailDetail());
@@ -294,14 +304,14 @@ describe('useTrailDetail', () => {
     it('handles loading states', () => {
       useTrailData.mockReturnValue({
         ...mockTrailData,
-        loading: true
+        loading: true,
       });
 
       useTrailContent.mockReturnValue({
         ...mockContent,
         loadingReviews: true,
         loadingWeather: true,
-        loadingAlerts: true
+        loadingAlerts: true,
       });
 
       const { result } = renderHook(() => useTrailDetail());
@@ -315,7 +325,7 @@ describe('useTrailDetail', () => {
     it('handles error states', () => {
       useTrailData.mockReturnValue({
         ...mockTrailData,
-        error: 'Failed to load trail'
+        error: 'Failed to load trail',
       });
 
       const { result } = renderHook(() => useTrailDetail());
@@ -334,7 +344,7 @@ describe('useTrailDetail', () => {
     it('handles navigation actions when trail is null', () => {
       useTrailData.mockReturnValue({
         ...mockTrailData,
-        trail: null
+        trail: null,
       });
 
       const { result } = renderHook(() => useTrailDetail());
@@ -352,7 +362,7 @@ describe('useTrailDetail', () => {
       const customTrail = { id: 'custom-trail', name: 'Custom Trail' };
       useTrailData.mockReturnValue({
         ...mockTrailData,
-        trail: customTrail
+        trail: customTrail,
       });
 
       renderHook(() => useTrailDetail());
@@ -365,7 +375,7 @@ describe('useTrailDetail', () => {
         ...mockContent,
         loadingReviews: true,
         loadingWeather: true,
-        loadingAlerts: true
+        loadingAlerts: true,
       });
 
       const { result } = renderHook(() => useTrailDetail());

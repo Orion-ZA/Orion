@@ -347,55 +347,53 @@
   background: var(--bg-alt);
 }
 
-
-
 /* Light Theme Styles */
 html[data-theme='light'] .mytrails-filter-container {
   background: #ffffff;
-  border-color: rgba(13,110,109,0.2);
+  border-color: rgba(13, 110, 109, 0.2);
 }
 
 html[data-theme='light'] .mytrails-search-input {
-  background: rgba(13,110,109,0.05);
-  border-color: rgba(13,110,109,0.2);
+  background: rgba(13, 110, 109, 0.05);
+  border-color: rgba(13, 110, 109, 0.2);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
 }
 
 html[data-theme='light'] .mytrails-filter-select {
-  background: rgba(255,255,255,0.8);
-  border-color: rgba(13,110,109,0.2);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(13, 110, 109, 0.2);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-filter-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
 }
 
 html[data-theme='light'] .mytrails-sort-button {
-  background: rgba(255,255,255,0.8);
-  border-color: rgba(13,110,109,0.2);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(13, 110, 109, 0.2);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-sort-button:hover {
-  background: rgba(13,110,109,0.1);
+  background: rgba(13, 110, 109, 0.1);
   border-color: var(--primary);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-sort-button:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(13,110,109,0.1);
+  box-shadow: 0 0 0 3px rgba(13, 110, 109, 0.1);
 }
 
 html[data-theme='light'] .distance-slider-container::before {
-  background: rgba(13,110,109,0.2);
+  background: rgba(13, 110, 109, 0.2);
 }
 
 html[data-theme='light'] .distance-slider-progress {
@@ -403,22 +401,21 @@ html[data-theme='light'] .distance-slider-progress {
 }
 
 html[data-theme='light'] .mytrails-clear-button {
-  background: rgba(13,110,109,0.1);
-  border-color: rgba(13,110,109,0.2);
+  background: rgba(13, 110, 109, 0.1);
+  border-color: rgba(13, 110, 109, 0.2);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-clear-button.visible {
-  background: rgba(13,110,109,0.1);
-  border-color: rgba(13,110,109,0.2);
+  background: rgba(13, 110, 109, 0.1);
+  border-color: rgba(13, 110, 109, 0.2);
   color: var(--text);
 }
 
 html[data-theme='light'] .mytrails-clear-button.visible:hover {
-  background: rgba(13,110,109,0.15);
+  background: rgba(13, 110, 109, 0.15);
   border-color: var(--primary);
 }
-
 
 html[data-theme='light'] .mytrails-show-all-label {
   color: var(--text);
@@ -434,12 +431,12 @@ html[data-theme='light'] .mytrails-show-all-label:hover {
     flex-wrap: wrap;
     gap: 0.75rem;
   }
-  
+
   .mytrails-search-wrapper {
     min-width: 200px;
     max-width: 300px;
   }
-  
+
   .mytrails-filter-controls {
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -453,34 +450,34 @@ html[data-theme='light'] .mytrails-show-all-label:hover {
     align-items: stretch;
     padding: 1rem;
   }
-  
+
   .mytrails-search-wrapper {
     min-width: auto;
     max-width: none;
   }
-  
+
   .mytrails-filter-controls {
     justify-content: center;
     flex-wrap: wrap;
   }
-  
+
   .mytrails-filter-select {
     min-width: 120px;
     max-width: none;
   }
-  
+
   /* Sort dropdowns on mobile */
   .mytrails-filter-select:last-of-type,
   .mytrails-filter-select:nth-last-of-type(2) {
     min-width: 100px;
     max-width: none;
   }
-  
+
   .mytrails-sort-button {
     min-width: 44px;
     height: 44px;
   }
-  
+
   .mytrails-range-slider {
     min-width: 180px;
     max-width: none;
@@ -491,31 +488,30 @@ html[data-theme='light'] .mytrails-show-all-label:hover {
   .mytrails-filter-row {
     padding: 0.75rem;
   }
-  
+
   .mytrails-filter-controls {
     flex-direction: column;
     gap: 0.5rem;
     align-items: stretch;
   }
-  
+
   .mytrails-filter-select {
     min-width: auto;
     max-width: none;
     width: 100%;
   }
-  
+
   .mytrails-range-slider {
     min-width: auto;
     max-width: none;
     width: 100%;
   }
-  
+
   .mytrails-clear-button {
     width: 100%;
   }
-  
+
   .mytrails-show-all-wrapper {
     min-width: auto;
   }
 }
-

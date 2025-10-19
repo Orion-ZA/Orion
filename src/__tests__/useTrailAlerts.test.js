@@ -20,7 +20,7 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock console methods
@@ -54,7 +54,7 @@ describe('useTrailAlerts', () => {
 
       const initialState = result.current;
       rerender();
-      
+
       expect(result.current.trailAlerts).toBe(initialState.trailAlerts);
       expect(result.current.loadingStates).toBe(initialState.loadingStates);
     });
@@ -70,7 +70,7 @@ describe('useTrailAlerts', () => {
           message: 'Trail maintenance scheduled',
           comment: '',
           isActive: true,
-          timestamp: new Date('2024-01-15')
+          timestamp: new Date('2024-01-15'),
         },
         {
           id: 'alert2',
@@ -79,8 +79,8 @@ describe('useTrailAlerts', () => {
           message: 'Weather warning',
           comment: 'Heavy rain expected',
           isActive: true,
-          timestamp: new Date('2024-01-16')
-        }
+          timestamp: new Date('2024-01-16'),
+        },
       ];
 
       const mockQuerySnapshot = {
@@ -92,9 +92,9 @@ describe('useTrailAlerts', () => {
             message: alert.message,
             comment: alert.comment,
             isActive: alert.isActive,
-            timestamp: alert.timestamp
-          })
-        }))
+            timestamp: alert.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -121,7 +121,7 @@ describe('useTrailAlerts', () => {
             type: 'maintenance',
             message: 'Trail maintenance scheduled',
             comment: '',
-            isActive: true
+            isActive: true,
           }),
           expect.objectContaining({
             id: 'alert2',
@@ -129,9 +129,9 @@ describe('useTrailAlerts', () => {
             type: 'weather',
             message: 'Weather warning',
             comment: 'Heavy rain expected',
-            isActive: true
-          })
-        ])
+            isActive: true,
+          }),
+        ]),
       });
     });
 
@@ -206,8 +206,8 @@ describe('useTrailAlerts', () => {
           message: 'Cached alert',
           comment: '',
           isActive: true,
-          timestamp: new Date('2024-01-15')
-        }
+          timestamp: new Date('2024-01-15'),
+        },
       ];
 
       const { result } = renderHook(() => useTrailAlerts());
@@ -222,9 +222,9 @@ describe('useTrailAlerts', () => {
             message: alert.message,
             comment: alert.comment,
             isActive: alert.isActive,
-            timestamp: alert.timestamp
-          })
-        }))
+            timestamp: alert.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -261,10 +261,10 @@ describe('useTrailAlerts', () => {
               message: null,
               comment: undefined,
               isActive: null,
-              timestamp: null
-            })
-          }
-        ]
+              timestamp: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -285,8 +285,8 @@ describe('useTrailAlerts', () => {
           type: 'general', // Should fallback to 'general'
           message: '', // Should fallback to empty string
           comment: '', // Should fallback to empty string
-          isActive: false // Should fallback to false
-        })
+          isActive: false, // Should fallback to false
+        }),
       ]);
     });
 
@@ -297,15 +297,15 @@ describe('useTrailAlerts', () => {
           trailId: 'trail1',
           type: 'maintenance',
           message: 'Older alert',
-          timestamp: new Date('2024-01-15')
+          timestamp: new Date('2024-01-15'),
         },
         {
           id: 'alert2',
           trailId: 'trail1',
           type: 'weather',
           message: 'Newer alert',
-          timestamp: new Date('2024-01-16')
-        }
+          timestamp: new Date('2024-01-16'),
+        },
       ];
 
       const mockQuerySnapshot = {
@@ -317,9 +317,9 @@ describe('useTrailAlerts', () => {
             message: alert.message,
             comment: '',
             isActive: true,
-            timestamp: alert.timestamp
-          })
-        }))
+            timestamp: alert.timestamp,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -340,7 +340,7 @@ describe('useTrailAlerts', () => {
 
     it('handles Firestore Timestamp objects', async () => {
       const mockTimestamp = {
-        toDate: () => new Date('2024-01-15')
+        toDate: () => new Date('2024-01-15'),
       };
 
       const mockQuerySnapshot = {
@@ -353,10 +353,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert with Firestore timestamp',
               comment: '',
               isActive: true,
-              timestamp: mockTimestamp
-            })
-          }
-        ]
+              timestamp: mockTimestamp,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -384,10 +384,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert with string timestamp',
               comment: '',
               isActive: true,
-              timestamp: '2024-01-15T00:00:00Z'
-            })
-          }
-        ]
+              timestamp: '2024-01-15T00:00:00Z',
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -415,10 +415,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert without timestamp',
               comment: '',
               isActive: true,
-              timestamp: null
-            })
-          }
-        ]
+              timestamp: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -451,10 +451,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert to delete',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -511,10 +511,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert to delete',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -573,10 +573,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert in trail1',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       const mockQuerySnapshot2 = {
@@ -589,10 +589,10 @@ describe('useTrailAlerts', () => {
               message: 'Alert in trail2',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-16')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-16'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -617,7 +617,7 @@ describe('useTrailAlerts', () => {
 
       expect(result.current.trailAlerts.trail1).toEqual([]);
       expect(result.current.trailAlerts.trail2).toEqual([
-        expect.objectContaining({ id: 'alert2' })
+        expect.objectContaining({ id: 'alert2' }),
       ]);
     });
   });
@@ -640,19 +640,19 @@ describe('useTrailAlerts', () => {
 
       expect(result.current.loadingStates).toEqual({
         trail1: true,
-        trail2: true
+        trail2: true,
       });
 
       await act(async () => {
         await Promise.all([
           result.current.fetchTrailAlerts('trail1'),
-          result.current.fetchTrailAlerts('trail2')
+          result.current.fetchTrailAlerts('trail2'),
         ]);
       });
 
       expect(result.current.loadingStates).toEqual({
         trail1: false,
-        trail2: false
+        trail2: false,
       });
     });
 
@@ -669,10 +669,10 @@ describe('useTrailAlerts', () => {
               message: 'Trail 1 alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       const mockQuerySnapshot2 = {
@@ -685,10 +685,10 @@ describe('useTrailAlerts', () => {
               message: 'Trail 2 alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-16')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-16'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -722,10 +722,10 @@ describe('useTrailAlerts', () => {
               message: 'Trail 1 alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       const mockQuerySnapshot2 = {
@@ -738,10 +738,10 @@ describe('useTrailAlerts', () => {
               message: 'Trail 2 alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-16')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-16'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -780,10 +780,10 @@ describe('useTrailAlerts', () => {
               message: 'Concurrent alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -796,7 +796,7 @@ describe('useTrailAlerts', () => {
         await Promise.all([
           result.current.fetchTrailAlerts('trail1'),
           result.current.fetchTrailAlerts('trail1'),
-          result.current.fetchTrailAlerts('trail1')
+          result.current.fetchTrailAlerts('trail1'),
         ]);
       });
 
@@ -815,8 +815,8 @@ describe('useTrailAlerts', () => {
           message: `Alert ${i}`,
           comment: '',
           isActive: true,
-          timestamp: new Date(`2024-01-${String(i % 30 + 1).padStart(2, '0')}`)
-        })
+          timestamp: new Date(`2024-01-${String((i % 30) + 1).padStart(2, '0')}`),
+        }),
       }));
 
       const mockQuerySnapshot = { docs: largeDataset };
@@ -841,9 +841,9 @@ describe('useTrailAlerts', () => {
             id: 'alert1',
             data: () => {
               throw new Error('Malformed data');
-            }
-          }
-        ]
+            },
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -864,69 +864,69 @@ describe('useTrailAlerts', () => {
     describe('isAlertExpired', () => {
       it('returns false for non-timed alerts', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const alert = {
           id: 'alert1',
           isTimed: false,
-          message: 'Non-timed alert'
+          message: 'Non-timed alert',
         };
-        
+
         expect(result.current.isAlertExpired(alert)).toBe(false);
       });
 
       it('returns false for alerts without expiresAt', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const alert = {
           id: 'alert1',
           isTimed: true,
-          message: 'Timed alert without expiration'
+          message: 'Timed alert without expiration',
         };
-        
+
         expect(result.current.isAlertExpired(alert)).toBe(false);
       });
 
       it('returns false for non-expired alerts', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const futureDate = new Date(Date.now() + 3600000); // 1 hour from now
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: futureDate,
-          message: 'Future alert'
+          message: 'Future alert',
         };
-        
+
         expect(result.current.isAlertExpired(alert)).toBe(false);
       });
 
       it('returns true for expired alerts', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const pastDate = new Date(Date.now() - 3600000); // 1 hour ago
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: pastDate,
-          message: 'Expired alert'
+          message: 'Expired alert',
         };
-        
+
         expect(result.current.isAlertExpired(alert)).toBe(true);
       });
 
       it('handles Firestore timestamp objects', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const pastDate = new Date(Date.now() - 3600000);
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: {
-            toDate: () => pastDate
+            toDate: () => pastDate,
           },
-          message: 'Alert with Firestore timestamp'
+          message: 'Alert with Firestore timestamp',
         };
-        
+
         expect(result.current.isAlertExpired(alert)).toBe(true);
       });
     });
@@ -934,60 +934,60 @@ describe('useTrailAlerts', () => {
     describe('getTimeRemaining', () => {
       it('returns null for non-timed alerts', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const alert = {
           id: 'alert1',
           isTimed: false,
-          message: 'Non-timed alert'
+          message: 'Non-timed alert',
         };
-        
+
         expect(result.current.getTimeRemaining(alert)).toBe(null);
       });
 
       it('returns null for alerts without expiresAt', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const alert = {
           id: 'alert1',
           isTimed: true,
-          message: 'Timed alert without expiration'
+          message: 'Timed alert without expiration',
         };
-        
+
         expect(result.current.getTimeRemaining(alert)).toBe(null);
       });
 
       it('returns null for expired alerts', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const pastDate = new Date(Date.now() - 3600000); // 1 hour ago
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: pastDate,
-          message: 'Expired alert'
+          message: 'Expired alert',
         };
-        
+
         expect(result.current.getTimeRemaining(alert)).toBe(null);
       });
 
       it('calculates time remaining correctly', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const futureDate = new Date(Date.now() + 3661000); // 1 hour, 1 minute, 1 second from now
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: futureDate,
-          message: 'Future alert'
+          message: 'Future alert',
         };
-        
+
         const timeRemaining = result.current.getTimeRemaining(alert);
-        
+
         expect(timeRemaining).toEqual({
           hours: 1,
           minutes: 1,
           seconds: 1,
-          totalMs: expect.any(Number)
+          totalMs: expect.any(Number),
         });
         expect(timeRemaining.totalMs).toBeGreaterThan(3660000);
         expect(timeRemaining.totalMs).toBeLessThan(3662000);
@@ -995,24 +995,24 @@ describe('useTrailAlerts', () => {
 
       it('handles Firestore timestamp objects', () => {
         const { result } = renderHook(() => useTrailAlerts());
-        
+
         const futureDate = new Date(Date.now() + 3600000); // 1 hour from now
         const alert = {
           id: 'alert1',
           isTimed: true,
           expiresAt: {
-            toDate: () => futureDate
+            toDate: () => futureDate,
           },
-          message: 'Alert with Firestore timestamp'
+          message: 'Alert with Firestore timestamp',
         };
-        
+
         const timeRemaining = result.current.getTimeRemaining(alert);
-        
+
         expect(timeRemaining).toEqual({
           hours: 1,
           minutes: 0,
           seconds: 0,
-          totalMs: expect.any(Number)
+          totalMs: expect.any(Number),
         });
       });
     });
@@ -1021,10 +1021,10 @@ describe('useTrailAlerts', () => {
   describe('Alert Expiration Filtering', () => {
     it('filters out expired alerts during fetch', async () => {
       const { result } = renderHook(() => useTrailAlerts());
-      
+
       const pastDate = new Date(Date.now() - 3600000); // 1 hour ago
       const futureDate = new Date(Date.now() + 3600000); // 1 hour from now
-      
+
       const mockQuerySnapshot = {
         docs: [
           {
@@ -1037,8 +1037,8 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-15'),
               isTimed: true,
-              expiresAt: pastDate
-            })
+              expiresAt: pastDate,
+            }),
           },
           {
             id: 'alert2',
@@ -1050,10 +1050,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-16'),
               isTimed: true,
-              expiresAt: futureDate
-            })
-          }
-        ]
+              expiresAt: futureDate,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1072,10 +1072,10 @@ describe('useTrailAlerts', () => {
 
     it('handles alerts with Firestore timestamp expiration', async () => {
       const { result } = renderHook(() => useTrailAlerts());
-      
+
       const pastDate = new Date(Date.now() - 3600000);
       const futureDate = new Date(Date.now() + 3600000);
-      
+
       const mockQuerySnapshot = {
         docs: [
           {
@@ -1089,9 +1089,9 @@ describe('useTrailAlerts', () => {
               timestamp: new Date('2024-01-15'),
               isTimed: true,
               expiresAt: {
-                toDate: () => pastDate
-              }
-            })
+                toDate: () => pastDate,
+              },
+            }),
           },
           {
             id: 'alert2',
@@ -1104,11 +1104,11 @@ describe('useTrailAlerts', () => {
               timestamp: new Date('2024-01-16'),
               isTimed: true,
               expiresAt: {
-                toDate: () => futureDate
-              }
-            })
-          }
-        ]
+                toDate: () => futureDate,
+              },
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1164,8 +1164,8 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-15'),
               isTimed: false,
-              expiresAt: null
-            })
+              expiresAt: null,
+            }),
           },
           {
             id: 'alert2',
@@ -1177,10 +1177,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-16'),
               isTimed: false,
-              expiresAt: null
-            })
-          }
-        ]
+              expiresAt: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1216,7 +1216,7 @@ describe('useTrailAlerts', () => {
       expect(result.current.loadingStates).toEqual({
         trail1: true,
         trail2: true,
-        trail3: true
+        trail3: true,
       });
 
       // Wait for completion
@@ -1228,7 +1228,7 @@ describe('useTrailAlerts', () => {
       expect(result.current.loadingStates).toEqual({
         trail1: false,
         trail2: false,
-        trail3: false
+        trail3: false,
       });
     });
 
@@ -1248,10 +1248,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-15'),
               isTimed: false,
-              expiresAt: null
-            })
-          }
-        ]
+              expiresAt: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1279,10 +1279,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-16'),
               isTimed: false,
-              expiresAt: null
-            })
-          }
-        ]
+              expiresAt: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1304,7 +1304,7 @@ describe('useTrailAlerts', () => {
       const { result } = renderHook(() => useTrailAlerts());
 
       const trailIds = Array.from({ length: 15 }, (_, i) => `trail${i + 1}`);
-      
+
       const mockQuerySnapshot = { docs: [] };
       mockCollection.mockReturnValue('alertsRef');
       mockWhere.mockReturnValue('whereClause');
@@ -1339,7 +1339,7 @@ describe('useTrailAlerts', () => {
       // Loading states should be cleared even on error
       expect(result.current.loadingStates).toEqual({
         trail1: false,
-        trail2: false
+        trail2: false,
       });
     });
 
@@ -1347,7 +1347,7 @@ describe('useTrailAlerts', () => {
       const { result } = renderHook(() => useTrailAlerts());
 
       const trailIds = Array.from({ length: 15 }, (_, i) => `trail${i + 1}`);
-      
+
       const mockQuerySnapshot = {
         docs: [
           {
@@ -1360,10 +1360,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-15'),
               isTimed: false,
-              expiresAt: null
-            })
-          }
-        ]
+              expiresAt: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1382,7 +1382,7 @@ describe('useTrailAlerts', () => {
       expect(result.current.loadingStates).toEqual(
         expect.objectContaining({
           trail1: false,
-          trail2: false
+          trail2: false,
         })
       );
     });
@@ -1405,8 +1405,8 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-15'),
               isTimed: true,
-              expiresAt: futureDate
-            })
+              expiresAt: futureDate,
+            }),
           },
           {
             id: 'alert2',
@@ -1418,8 +1418,8 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-16'),
               isTimed: true,
-              expiresAt: futureDate
-            })
+              expiresAt: futureDate,
+            }),
           },
           {
             id: 'alert3',
@@ -1431,10 +1431,10 @@ describe('useTrailAlerts', () => {
               isActive: true,
               timestamp: new Date('2024-01-14'),
               isTimed: true,
-              expiresAt: pastDate
-            })
-          }
-        ]
+              expiresAt: pastDate,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');
@@ -1481,10 +1481,10 @@ describe('useTrailAlerts', () => {
               message: 'Test alert',
               comment: '',
               isActive: true,
-              timestamp: new Date('2024-01-15')
-            })
-          }
-        ]
+              timestamp: new Date('2024-01-15'),
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('alertsRef');

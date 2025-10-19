@@ -13,21 +13,21 @@ describe('Badges API', () => {
       success: true,
       data: [
         {
-          name: "First Steps",
-          description: "Completed your very first hike",
-          category: "achievement",
-          difficulty: "standard"
+          name: 'First Steps',
+          description: 'Completed your very first hike',
+          category: 'achievement',
+          difficulty: 'standard',
         },
         {
-          name: "Distance Walker",
-          description: "Hiked a total distance of 100 km",
-          category: "achievement",
-          difficulty: "standard"
-        }
+          name: 'Distance Walker',
+          description: 'Hiked a total distance of 100 km',
+          category: 'achievement',
+          difficulty: 'standard',
+        },
       ],
       totalBadges: 2,
-      categories: ["achievement"],
-      note: "Badges are awarded automatically based on hiking activity"
+      categories: ['achievement'],
+      note: 'Badges are awarded automatically based on hiking activity',
     };
 
     fetch.mockResolvedValueOnce({
@@ -41,7 +41,7 @@ describe('Badges API', () => {
       badges: mockResponse.data,
       totalBadges: mockResponse.totalBadges,
       categories: mockResponse.categories,
-      note: mockResponse.note
+      note: mockResponse.note,
     });
   });
 
@@ -62,7 +62,7 @@ describe('Badges API', () => {
   test('fetchBadges handles unsuccessful response', async () => {
     const mockResponse = {
       success: false,
-      data: []
+      data: [],
     };
 
     fetch.mockResolvedValueOnce({
@@ -93,23 +93,23 @@ describe('Badges API', () => {
 
   test('getBadgesByCategory filters correctly', () => {
     const badges = [
-      { name: "First Steps", category: "achievement" },
-      { name: "Some Other Badge", category: "milestone" }
+      { name: 'First Steps', category: 'achievement' },
+      { name: 'Some Other Badge', category: 'milestone' },
     ];
 
     const achievementBadges = getBadgesByCategory(badges, 'achievement');
     expect(achievementBadges).toHaveLength(1);
-    expect(achievementBadges[0].name).toBe("First Steps");
+    expect(achievementBadges[0].name).toBe('First Steps');
   });
 
   test('getBadgesByDifficulty filters correctly', () => {
     const badges = [
-      { name: "First Steps", difficulty: "standard" },
-      { name: "Hard Badge", difficulty: "advanced" }
+      { name: 'First Steps', difficulty: 'standard' },
+      { name: 'Hard Badge', difficulty: 'advanced' },
     ];
 
     const standardBadges = getBadgesByDifficulty(badges, 'standard');
     expect(standardBadges).toHaveLength(1);
-    expect(standardBadges[0].name).toBe("First Steps");
+    expect(standardBadges[0].name).toBe('First Steps');
   });
 });

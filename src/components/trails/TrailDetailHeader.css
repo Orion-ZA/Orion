@@ -58,13 +58,13 @@
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 6px 16px rgba(91,192,190,0.25);
+  box-shadow: 0 6px 16px rgba(91, 192, 190, 0.25);
 }
 
 .share-button:hover {
   background: #4db3b1;
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(91,192,190,0.35);
+  box-shadow: 0 10px 22px rgba(91, 192, 190, 0.35);
 }
 
 .show-map-button {

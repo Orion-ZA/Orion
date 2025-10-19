@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAuth } from "firebase/auth";
+import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { Heart, CheckCircle, Bookmark, Upload, Mountain } from 'lucide-react';
@@ -11,9 +11,13 @@ import MyTrailsFilter from '../components/MyTrailsFilter';
 import { useTrailAlerts } from '../hooks/useTrailAlerts';
 import './MyTrails.css';
 
-
 export default function MyTrails() {
-  const [trails, setTrails] = useState({ favourites: [], completed: [], wishlist: [], submitted: [] });
+  const [trails, setTrails] = useState({
+    favourites: [],
+    completed: [],
+    wishlist: [],
+    submitted: [],
+  });
   const [modalState, setModalState] = useState({
     isOpen: false,
     trailId: null,
@@ -29,24 +33,24 @@ export default function MyTrails() {
   const [loading, setLoading] = useState(true);
   const [loadingStates, setLoadingStates] = useState({
     savedTrails: true,
-    submittedTrails: true
+    submittedTrails: true,
   });
   const [cache, setCache] = useState({});
   const [alertsPopup, setAlertsPopup] = useState({
     isVisible: false,
     position: { x: 0, y: 0 },
-    alerts: []
+    alerts: [],
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     difficulty: 'all',
     minDistance: 0,
     maxDistance: 50, // Set to max range to show all trails by default
-    status: 'all'
+    status: 'all',
   });
   const [sorting, setSorting] = useState({
     sortBy: 'name', // name, distance, difficulty, date
-    sortOrder: 'asc' // asc, desc
+    sortOrder: 'asc', // asc, desc
   });
   const [expandedTrails, setExpandedTrails] = useState(new Set());
   const auth = getAuth();
@@ -54,12 +58,19 @@ export default function MyTrails() {
   const userId = user ? user.uid : null;
 
   // Use the useTrailAlerts hook
-  const { trailAlerts, loadingStates: alertsLoadingStates, fetchTrailAlerts, fetchMultipleTrailAlerts, isAlertExpired, getTimeRemaining } = useTrailAlerts();
+  const {
+    trailAlerts,
+    loadingStates: alertsLoadingStates,
+    fetchTrailAlerts,
+    fetchMultipleTrailAlerts,
+    isAlertExpired,
+    getTimeRemaining,
+  } = useTrailAlerts();
 
   useEffect(() => {
     async function fetchSavedTrails() {
       if (!userId) return;
-      
+
       // Check cache first (5 minute cache)
       const cacheKey = `trails_${userId}`;
       const cachedData = cache[cacheKey];
@@ -69,30 +80,30 @@ export default function MyTrails() {
         setLoadingStates({ savedTrails: false, submittedTrails: false });
         return;
       }
-      
+
       try {
         setLoading(true);
         setLoadingStates({ savedTrails: true, submittedTrails: true, alerts: true });
-        
+
         // Fetch saved trails from the API
         const res = await fetch(`https://getsavedtrails-fqtduxc7ua-uc.a.run.app?uid=${userId}`);
         const data = await res.json();
-        
+
         setLoadingStates(prev => ({ ...prev, savedTrails: false }));
-        
+
         // Fetch submitted trails from Firestore
         const userRef = doc(db, 'Users', userId);
         const userSnap = await getDoc(userRef);
         let submittedTrails = [];
-        
+
         if (userSnap.exists()) {
           const userData = userSnap.data();
-          
+
           if (userData.submittedTrails && userData.submittedTrails.length > 0) {
-            const fetchTrailDetails = async (references) => {
+            const fetchTrailDetails = async references => {
               const details = [];
               const trailIds = [];
-              
+
               // Extract trail IDs from references
               for (const ref of references) {
                 if (typeof ref === 'string' && ref.startsWith('/Trails/')) {
@@ -106,81 +117,82 @@ export default function MyTrails() {
                   }
                 }
               }
-              
+
               // Batch fetch trails
-              const trailPromises = trailIds.map(trailId => 
-                getDoc(doc(db, 'Trails', trailId))
-              );
-              
+              const trailPromises = trailIds.map(trailId => getDoc(doc(db, 'Trails', trailId)));
+
               const trailDocs = await Promise.all(trailPromises);
-              
+
               trailDocs.forEach((trailDoc, index) => {
                 if (trailDoc.exists()) {
                   const trailData = trailDoc.data();
-                  details.push({ 
-                    id: trailDoc.id, 
+                  details.push({
+                    id: trailDoc.id,
                     ...trailData,
                     name: trailData.name || 'Unnamed Trail',
                     difficulty: trailData.difficulty || 'Unknown',
                     distance: trailData.distance || 0,
                     elevationGain: trailData.elevationGain || 0,
                     status: trailData.status || 'open',
-                    createdAt: trailData.createdAt || trailData.lastUpdated
+                    createdAt: trailData.createdAt || trailData.lastUpdated,
                   });
                 }
               });
-              
+
               return details;
             };
-            
+
             submittedTrails = await fetchTrailDetails(userData.submittedTrails);
           }
         }
-        
+
         setLoadingStates(prev => ({ ...prev, submittedTrails: false }));
-        
+
         const trailsData = { ...data, submitted: submittedTrails };
         setTrails(trailsData);
 
         // Load alerts in background after main content is shown
-        const allTrailsForAlerts = [...data.favourites, ...data.completed, ...data.wishlist, ...submittedTrails];
+        const allTrailsForAlerts = [
+          ...data.favourites,
+          ...data.completed,
+          ...data.wishlist,
+          ...submittedTrails,
+        ];
         console.log('Loading alerts for trails:', allTrailsForAlerts.length, 'trails');
         loadAlertsForTrails(allTrailsForAlerts);
-        
+
         // Cache the results
         setCache(prev => ({
           ...prev,
           [cacheKey]: {
             data: trailsData,
-            timestamp: Date.now()
-          }
+            timestamp: Date.now(),
+          },
         }));
-        
       } catch (err) {
         console.error('Error fetching saved trails:', err);
       } finally {
         setLoading(false);
       }
     }
-    
+
     fetchSavedTrails();
   }, [userId]);
 
   // Load alerts for all trails using the hook
-  const loadAlertsForTrails = async (allTrails) => {
+  const loadAlertsForTrails = async allTrails => {
     if (allTrails.length === 0) return;
-    
+
     console.log(`Starting batch alert loading for ${allTrails.length} trails`);
-    
+
     // Extract trail IDs for batch loading
     const trailIds = allTrails.map(trail => trail.id);
-    
+
     // Use the new batch function for maximum efficiency
     await fetchMultipleTrailAlerts(trailIds);
-    
+
     console.log('All alerts loaded successfully');
   };
-
 
   const openReviewModal = (trailId, trailName) => {
     setModalState({
@@ -218,19 +230,19 @@ export default function MyTrails() {
 
   const showAlertsPopup = (event, trailAlerts) => {
     if (!trailAlerts || trailAlerts.length === 0) return;
-    
+
     // Filter out expired alerts
     const activeAlerts = trailAlerts.filter(alert => !isAlertExpired(alert));
     if (activeAlerts.length === 0) return;
-    
+
     const rect = event.target.getBoundingClientRect();
     setAlertsPopup({
       isVisible: true,
       position: {
         x: rect.left + rect.width / 2,
-        y: rect.bottom + 8
+        y: rect.bottom + 8,
       },
-      alerts: activeAlerts
+      alerts: activeAlerts,
     });
   };
 
@@ -238,19 +250,19 @@ export default function MyTrails() {
     setAlertsPopup({
       isVisible: false,
       position: { x: 0, y: 0 },
-      alerts: []
+      alerts: [],
     });
   };
 
   // Filter management functions
-  const handleSearchChange = (query) => {
+  const handleSearchChange = query => {
     setSearchQuery(query);
   };
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
   };
 
@@ -259,7 +271,7 @@ export default function MyTrails() {
       difficulty: 'all',
       minDistance: 0,
       maxDistance: 50, // Set to max range to show all trails
-      status: 'all'
+      status: 'all',
     });
   };
 
@@ -267,7 +279,7 @@ export default function MyTrails() {
     setSorting({ sortBy, sortOrder });
   };
 
-  const toggleTrailExpansion = (trailId) => {
+  const toggleTrailExpansion = trailId => {
     setExpandedTrails(prev => {
       const newSet = new Set(prev);
       if (newSet.has(trailId)) {
@@ -280,7 +292,7 @@ export default function MyTrails() {
   };
 
   // Filter and sort trails based on search query, filters, and sorting options
-  const filterTrails = (trailArray) => {
+  const filterTrails = trailArray => {
     const filtered = trailArray.filter(trail => {
       // Search filter
       if (searchQuery) {
@@ -301,7 +313,11 @@ export default function MyTrails() {
       }
 
       // Status filter (only for submitted trails)
-      if (activeTab === 'submitted' && filters.status !== 'all' && trail.status !== filters.status) {
+      if (
+        activeTab === 'submitted' &&
+        filters.status !== 'all' &&
+        trail.status !== filters.status
+      ) {
         return false;
       }
 
@@ -322,7 +338,7 @@ export default function MyTrails() {
           bValue = parseFloat(b.distance) || 0;
           break;
         case 'difficulty':
-          const difficultyOrder = { 'Easy': 1, 'Moderate': 2, 'Hard': 3 };
+          const difficultyOrder = { Easy: 1, Moderate: 2, Hard: 3 };
           aValue = difficultyOrder[a.difficulty] || 0;
           bValue = difficultyOrder[b.difficulty] || 0;
           break;
@@ -356,13 +372,13 @@ export default function MyTrails() {
       const trailRef = doc(db, 'Trails', trailId);
       await updateDoc(trailRef, {
         status: newStatus,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
 
       // Update local state
-      setTrails((prev) => ({
+      setTrails(prev => ({
         ...prev,
-        submitted: prev.submitted.map((trail) =>
+        submitted: prev.submitted.map(trail =>
           trail.id === trailId ? { ...trail, status: newStatus } : trail
         ),
       }));
@@ -385,18 +401,18 @@ export default function MyTrails() {
       };
 
       // Mark trail as completed
-      await fetch("https://us-central1-orion-sdp.cloudfunctions.net/markCompleted", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await fetch('https://us-central1-orion-sdp.cloudfunctions.net/markCompleted', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid: userId, trailId }),
       });
 
       // Add review to the trail
       const reviewResponse = await fetch(
-        "https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview",
+        'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview',
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             trailId: trailId,
             review: {
@@ -405,8 +421,8 @@ export default function MyTrails() {
               comment: comment,
               timestamp: new Date().toISOString(),
               userId: userId,
-              userName: user?.displayName || "Anonymous User"
-            }
+              userName: user?.displayName || 'Anonymous User',
+            },
           }),
         }
       );
@@ -418,27 +434,25 @@ export default function MyTrails() {
       }
 
       // Update local state
-      setTrails((prev) => {
+      setTrails(prev => {
         const trail =
-          prev.favourites.find((t) => t.id === trailId) ||
-          prev.wishlist.find((t) => t.id === trailId);
+          prev.favourites.find(t => t.id === trailId) || prev.wishlist.find(t => t.id === trailId);
 
         if (!trail) return prev;
 
         return {
           ...prev,
-          favourites: prev.favourites.filter((t) => t.id !== trailId),
-          wishlist: prev.wishlist.filter((t) => t.id !== trailId),
+          favourites: prev.favourites.filter(t => t.id !== trailId),
+          wishlist: prev.wishlist.filter(t => t.id !== trailId),
           completed: [...prev.completed, trail],
         };
       });
 
       closeReviewModal();
-      alert("Trail marked as completed and review submitted!");
-
+      alert('Trail marked as completed and review submitted!');
     } catch (err) {
-      console.error("Failed to mark trail as completed and add review:", err);
-      alert("Something went wrong. Please try again.");
+      console.error('Failed to mark trail as completed and add review:', err);
+      alert('Something went wrong. Please try again.');
     }
   };
 
@@ -446,23 +460,24 @@ export default function MyTrails() {
   const renderTrailList = () => {
     const trailArray = trails[activeTab] || [];
     const filteredTrails = filterTrails(trailArray);
-    
+
     if (trailArray.length === 0) {
       return (
-        <div className="my-trails-empty-state">
-          <div className="my-trails-empty-icon">
+        <div className='my-trails-empty-state'>
+          <div className='my-trails-empty-icon'>
             {activeTab === 'favourites' && <Heart size={48} />}
             {activeTab === 'completed' && <CheckCircle size={48} />}
             {activeTab === 'wishlist' && <Bookmark size={48} />}
             {activeTab === 'submitted' && <Upload size={48} />}
-            {!['favourites', 'completed', 'wishlist', 'submitted'].includes(activeTab) && <Mountain size={48} />}
+            {!['favourites', 'completed', 'wishlist', 'submitted'].includes(activeTab) && (
+              <Mountain size={48} />
+            )}
           </div>
           <p>No trails in your {activeTab} yet.</p>
-          <p className="my-trails-empty-subtext">
-            {activeTab === 'submitted' 
-              ? 'Submit your first trail to see it here!' 
-              : 'Start exploring to add trails to your collection!'
-            }
+          <p className='my-trails-empty-subtext'>
+            {activeTab === 'submitted'
+              ? 'Submit your first trail to see it here!'
+              : 'Start exploring to add trails to your collection!'}
           </p>
         </div>
       );
@@ -470,87 +485,95 @@ export default function MyTrails() {
 
     if (filteredTrails.length === 0) {
       return (
-        <div className="my-trails-empty-state">
-          <div className="my-trails-empty-icon">
+        <div className='my-trails-empty-state'>
+          <div className='my-trails-empty-icon'>
             <Mountain size={48} />
           </div>
           <p>No trails match your current filters.</p>
-          <p className="my-trails-empty-subtext">
-            Try adjusting your search or filter criteria.
-          </p>
+          <p className='my-trails-empty-subtext'>Try adjusting your search or filter criteria.</p>
         </div>
       );
     }
-    
-    return filteredTrails.map((trail) => (
-        <TrailCard
-          key={trail.id}
-          trail={trail}
-          activeTab={activeTab}
-          alerts={trailAlerts}
-          loadingStates={alertsLoadingStates}
-          trails={trails}
-          expandedTrails={expandedTrails}
-          onToggleExpansion={toggleTrailExpansion}
-          onShowAlertsPopup={showAlertsPopup}
-          onHideAlertsPopup={hideAlertsPopup}
-          onOpenStatusConfirmModal={openStatusConfirmModal}
-          onOpenReviewModal={openReviewModal}
-        />
+
+    return filteredTrails.map(trail => (
+      <TrailCard
+        key={trail.id}
+        trail={trail}
+        activeTab={activeTab}
+        alerts={trailAlerts}
+        loadingStates={alertsLoadingStates}
+        trails={trails}
+        expandedTrails={expandedTrails}
+        onToggleExpansion={toggleTrailExpansion}
+        onShowAlertsPopup={showAlertsPopup}
+        onHideAlertsPopup={hideAlertsPopup}
+        onOpenStatusConfirmModal={openStatusConfirmModal}
+        onOpenReviewModal={openReviewModal}
+      />
     ));
   };
 
   return (
-    <div className="my-trails-container">
-      <header className="my-trails-page-header">
+    <div className='my-trails-container'>
+      <header className='my-trails-page-header'>
         <h1>My Trails</h1>
       </header>
 
       {loading ? (
-        <div className="my-trails-loading-state">
-          <div className="my-trails-spinner"></div>
+        <div className='my-trails-loading-state'>
+          <div className='my-trails-spinner'></div>
           <p>Loading your trails...</p>
-          <div className="my-trails-loading-progress">
+          <div className='my-trails-loading-progress'>
             {loadingStates.savedTrails && <span>Loading saved trails...</span>}
             {loadingStates.submittedTrails && <span>Loading submitted trails...</span>}
-            {Object.values(alertsLoadingStates).some(loading => loading) && <span>Loading alerts...</span>}
+            {Object.values(alertsLoadingStates).some(loading => loading) && (
+              <span>Loading alerts...</span>
+            )}
           </div>
         </div>
       ) : (
         <>
-          <div className="my-trails-tabs-scroll-container">
-            <div className="my-trails-tabs-container">
-              <button 
+          <div className='my-trails-tabs-scroll-container'>
+            <div className='my-trails-tabs-container'>
+              <button
                 className={`my-trails-tab ${activeTab === 'favourites' ? 'active' : ''}`}
                 onClick={() => setActiveTab('favourites')}
               >
-                <span className="my-trails-tab-icon"><Heart size={18} /></span>
-                <span className="my-trails-tab-text">Favourites</span>
-                <span className="my-trails-tab-count">{trails.favourites?.length || 0}</span>
+                <span className='my-trails-tab-icon'>
+                  <Heart size={18} />
+                </span>
+                <span className='my-trails-tab-text'>Favourites</span>
+                <span className='my-trails-tab-count'>{trails.favourites?.length || 0}</span>
               </button>
-              <button 
+              <button
                 className={`my-trails-tab ${activeTab === 'completed' ? 'active' : ''}`}
                 onClick={() => setActiveTab('completed')}
               >
-                <span className="my-trails-tab-icon"><CheckCircle size={18} /></span>
-                <span className="my-trails-tab-text">Completed</span>
-                <span className="my-trails-tab-count">{trails.completed?.length || 0}</span>
+                <span className='my-trails-tab-icon'>
+                  <CheckCircle size={18} />
+                </span>
+                <span className='my-trails-tab-text'>Completed</span>
+                <span className='my-trails-tab-count'>{trails.completed?.length || 0}</span>
               </button>
-              <button 
+              <button
                 className={`my-trails-tab ${activeTab === 'wishlist' ? 'active' : ''}`}
                 onClick={() => setActiveTab('wishlist')}
               >
-                <span className="my-trails-tab-icon"><Bookmark size={18} /></span>
-                <span className="my-trails-tab-text">Wishlist</span>
-                <span className="my-trails-tab-count">{trails.wishlist?.length || 0}</span>
+                <span className='my-trails-tab-icon'>
+                  <Bookmark size={18} />
+                </span>
+                <span className='my-trails-tab-text'>Wishlist</span>
+                <span className='my-trails-tab-count'>{trails.wishlist?.length || 0}</span>
               </button>
-              <button 
+              <button
                 className={`my-trails-tab ${activeTab === 'submitted' ? 'active' : ''}`}
                 onClick={() => setActiveTab('submitted')}
               >
-                <span className="my-trails-tab-icon"><Upload size={18} /></span>
-                <span className="my-trails-tab-text">Submitted</span>
-                <span className="my-trails-tab-count">{trails.submitted?.length || 0}</span>
+                <span className='my-trails-tab-icon'>
+                  <Upload size={18} />
+                </span>
+                <span className='my-trails-tab-text'>Submitted</span>
+                <span className='my-trails-tab-count'>{trails.submitted?.length || 0}</span>
               </button>
             </div>
           </div>
@@ -567,8 +590,8 @@ export default function MyTrails() {
             activeTab={activeTab}
           />
 
-          <div className="my-trails-content">
-            <div className="my-trails-active-tab-header">
+          <div className='my-trails-content'>
+            <div className='my-trails-active-tab-header'>
               <h2>
                 {activeTab === 'favourites' && (
                   <>
@@ -578,7 +601,10 @@ export default function MyTrails() {
                 )}
                 {activeTab === 'completed' && (
                   <>
-                    <CheckCircle size={20} style={{ marginRight: '8px', display: 'inline-block' }} />
+                    <CheckCircle
+                      size={20}
+                      style={{ marginRight: '8px', display: 'inline-block' }}
+                    />
                     Completed Trails
                   </>
                 )}
@@ -595,18 +621,17 @@ export default function MyTrails() {
                   </>
                 )}
               </h2>
-              <span className="my-trails-trail-count">
+              <span className='my-trails-trail-count'>
                 {(() => {
                   const trailArray = trails[activeTab] || [];
                   const filteredTrails = filterTrails(trailArray);
                   return filteredTrails.length;
-                })()} trails
+                })()}{' '}
+                trails
               </span>
             </div>
-            
-            <ul className="my-trails-list">
-              {renderTrailList()}
-            </ul>
+
+            <ul className='my-trails-list'>{renderTrailList()}</ul>
           </div>
         </>
       )}

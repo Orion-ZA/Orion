@@ -11,7 +11,7 @@ import { useToast } from '../components/ToastContext';
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
   addDoc: jest.fn(),
-  serverTimestamp: jest.fn(() => 'mock-timestamp')
+  serverTimestamp: jest.fn(() => 'mock-timestamp'),
 }));
 
 jest.mock('../firebaseConfig', () => ({
@@ -20,37 +20,37 @@ jest.mock('../firebaseConfig', () => ({
     currentUser: {
       uid: 'test-user-id',
       email: 'test@example.com',
-      displayName: 'Test User'
-    }
-  }
+      displayName: 'Test User',
+    },
+  },
 }));
 
 // Mock ToastContext
 jest.mock('../components/ToastContext', () => ({
-  useToast: jest.fn()
+  useToast: jest.fn(),
 }));
 
 // Mock window.history.back
 const mockHistoryBack = jest.fn();
 Object.defineProperty(window, 'history', {
   value: {
-    back: mockHistoryBack
+    back: mockHistoryBack,
   },
-  writable: true
+  writable: true,
 });
 
 // Mock window.location.pathname
 Object.defineProperty(window, 'location', {
   value: {
-    pathname: '/feedback'
+    pathname: '/feedback',
   },
-  writable: true
+  writable: true,
 });
 
 // Mock navigator.userAgent
 Object.defineProperty(navigator, 'userAgent', {
   value: 'Mozilla/5.0 (Test Browser)',
-  writable: true
+  writable: true,
 });
 
 describe('Feedback Component', () => {
@@ -72,7 +72,9 @@ describe('Feedback Component', () => {
       render(<Feedback />);
 
       expect(screen.getByText('Share Your Feedback')).toBeInTheDocument();
-      expect(screen.getByText('We\'re all ears! Tell us about your experience with Orion')).toBeInTheDocument();
+      expect(
+        screen.getByText("We're all ears! Tell us about your experience with Orion")
+      ).toBeInTheDocument();
       expect(screen.getByText('What type of feedback are you sharing?')).toBeInTheDocument();
       expect(screen.getByText('How would you rate your experience?')).toBeInTheDocument();
     });
@@ -102,7 +104,9 @@ describe('Feedback Component', () => {
     it('renders contact permission checkbox', () => {
       render(<Feedback />);
 
-      expect(screen.getByLabelText(/It's okay to contact me about this feedback/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/It's okay to contact me about this feedback/)
+      ).toBeInTheDocument();
     });
 
     it('renders submit button', () => {
@@ -244,7 +248,7 @@ describe('Feedback Component', () => {
           userId: 'test-user-id',
           email: 'test@example.com',
           userAgent: 'Mozilla/5.0 (Test Browser)',
-          page: '/feedback'
+          page: '/feedback',
         });
       });
 
@@ -268,7 +272,9 @@ describe('Feedback Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument();
-        expect(screen.getByText('Your input helps us improve the app for everyone.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your input helps us improve the app for everyone.')
+        ).toBeInTheDocument();
         expect(screen.getByText('Send another feedback')).toBeInTheDocument();
         expect(screen.getByText('Go back')).toBeInTheDocument();
       });
@@ -311,13 +317,15 @@ describe('Feedback Component', () => {
       // The submit button should be disabled when form is invalid
       const submitButton = screen.getByRole('button', { name: /Submit Feedback/ });
       expect(submitButton).toBeDisabled();
-      
+
       // Try to submit the form directly to test validation
       const form = submitButton.closest('form');
       fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(mockShow).toHaveBeenCalledWith('Please provide both a rating and a message.', { type: 'error' });
+        expect(mockShow).toHaveBeenCalledWith('Please provide both a rating and a message.', {
+          type: 'error',
+        });
       });
       expect(mockAddDoc).not.toHaveBeenCalled();
     });
@@ -334,13 +342,15 @@ describe('Feedback Component', () => {
       // The submit button should be disabled when message is only whitespace
       const submitButton = screen.getByRole('button', { name: /Submit Feedback/ });
       expect(submitButton).toBeDisabled();
-      
+
       // Try to submit the form directly to test validation
       const form = submitButton.closest('form');
       fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(mockShow).toHaveBeenCalledWith('Please provide both a rating and a message.', { type: 'error' });
+        expect(mockShow).toHaveBeenCalledWith('Please provide both a rating and a message.', {
+          type: 'error',
+        });
       });
       expect(mockAddDoc).not.toHaveBeenCalled();
     });
@@ -444,9 +454,12 @@ describe('Feedback Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockAddDoc).toHaveBeenCalledWith('feedback-collection', expect.objectContaining({
-          contactAllowed: false
-        }));
+        expect(mockAddDoc).toHaveBeenCalledWith(
+          'feedback-collection',
+          expect.objectContaining({
+            contactAllowed: false,
+          })
+        );
       });
     });
   });
@@ -467,7 +480,9 @@ describe('Feedback Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockShow).toHaveBeenCalledWith('Something went wrong. Please try again.', { type: 'error' });
+        expect(mockShow).toHaveBeenCalledWith('Something went wrong. Please try again.', {
+          type: 'error',
+        });
       });
     });
 
@@ -552,10 +567,13 @@ describe('Feedback Component', () => {
       const submitButton = screen.getByRole('button', { name: /Submit Feedback/ });
       fireEvent.click(submitButton);
 
-      expect(mockAddDoc).toHaveBeenCalledWith('feedback-collection', expect.objectContaining({
-        userId: null,
-        email: 'Anonymous'
-      }));
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        'feedback-collection',
+        expect.objectContaining({
+          userId: null,
+          email: 'Anonymous',
+        })
+      );
     });
 
     it('handles very long messages', async () => {
@@ -574,9 +592,12 @@ describe('Feedback Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockAddDoc).toHaveBeenCalledWith('feedback-collection', expect.objectContaining({
-          message: longMessage
-        }));
+        expect(mockAddDoc).toHaveBeenCalledWith(
+          'feedback-collection',
+          expect.objectContaining({
+            message: longMessage,
+          })
+        );
       });
     });
 
@@ -595,9 +616,12 @@ describe('Feedback Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockAddDoc).toHaveBeenCalledWith('feedback-collection', expect.objectContaining({
-          message: specialMessage
-        }));
+        expect(mockAddDoc).toHaveBeenCalledWith(
+          'feedback-collection',
+          expect.objectContaining({
+            message: specialMessage,
+          })
+        );
       });
     });
   });

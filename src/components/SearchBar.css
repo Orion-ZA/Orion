@@ -26,7 +26,9 @@
 
 .search-bar-container .search-input-wrapper:focus-within {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 2px rgba(91, 192, 190, 0.3), 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  box-shadow:
+    0 0 0 2px rgba(91, 192, 190, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.15) !important;
   background: rgba(255, 255, 255, 0.25) !important;
 }
 
@@ -97,16 +99,18 @@
   top: 100% !important;
   left: 0 !important;
   right: 0 !important;
-  background: linear-gradient(135deg, 
-    rgba(28, 37, 65, 0.85) 0%, 
-    rgba(28, 37, 65, 0.75) 50%, 
-    rgba(28, 37, 65, 0.85) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(28, 37, 65, 0.85) 0%,
+    rgba(28, 37, 65, 0.75) 50%,
+    rgba(28, 37, 65, 0.85) 100%
+  ) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 16px !important;
   margin-top: 8px !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
@@ -120,7 +124,7 @@
   transform: translateY(-10px) scaleY(0.8) !important;
   animation-fill-mode: forwards !important;
   will-change: transform, opacity !important;
-  
+
   /* Custom scrollbar styling */
   scrollbar-width: thin !important;
   scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;
@@ -139,10 +143,12 @@
 }
 
 .search-bar-container .search-suggestions::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    rgba(255, 255, 255, 0.2) 50%, 
-    rgba(255, 255, 255, 0.3) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.3) 100%
+  ) !important;
   border-radius: 10px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(10px) !important;
@@ -151,19 +157,23 @@
 }
 
 .search-bar-container .search-suggestions::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.4) 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.4) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  ) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   transform: scale(1.1) !important;
 }
 
 .search-bar-container .search-suggestions::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.5) 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    rgba(255, 255, 255, 0.5) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  ) !important;
 }
 
 /* Additional scrollbar enhancements */
@@ -253,7 +263,7 @@
 .search-bar-container .suggestion-item:focus {
   background: rgba(91, 192, 190, 0.15) !important;
   border-color: rgba(91, 192, 190, 0.4) !important;
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.2),
     0 0 0 2px rgba(91, 192, 190, 0.3) !important;
   transform: translateY(-2px) !important;
@@ -439,31 +449,31 @@
   .search-bar-container .search-input-wrapper {
     border-radius: 6px !important;
   }
-  
+
   .search-bar-container .search-input {
     padding: 6px 16px 6px 48px !important;
     font-size: 15px !important; /* Prevent zoom on iOS */
     height: 36px !important;
     border-radius: 6px 0 0 6px !important;
   }
-  
+
   .search-bar-container .search-icon {
     left: 14px;
     width: 18px;
     height: 18px;
   }
-  
+
   .search-bar-container .search-button {
     padding: 6px 12px !important;
     font-size: 13px !important;
     min-width: 50px !important;
     height: 36px !important;
   }
-  
+
   .suggestion-item {
     padding: 10px 14px;
   }
-  
+
   .suggestion-text {
     font-size: 14px;
   }
@@ -474,11 +484,11 @@
     padding: 12px 16px !important;
     font-size: 14px !important;
   }
-  
+
   .search-bar-container .search-input {
     padding: 12px 14px 12px 44px !important;
   }
-  
+
   .search-bar-container .search-icon {
     left: 12px;
     width: 16px;
@@ -514,7 +524,7 @@
   display: block !important;
   visibility: visible !important;
   padding: 8px !important;
-  
+
   /* Custom scrollbar styling */
   scrollbar-width: thin !important;
   scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;

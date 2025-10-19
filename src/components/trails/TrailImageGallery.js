@@ -5,39 +5,36 @@ const TrailImageGallery = ({ images, currentImageIndex, onImageChange, onGoToIma
   if (!images || images.length === 0) return null;
 
   const nextImage = () => {
-    onImageChange((prev) => (prev + 1) % images.length);
+    onImageChange(prev => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
-    onImageChange((prev) => (prev - 1 + images.length) % images.length);
+    onImageChange(prev => (prev - 1 + images.length) % images.length);
   };
 
   return (
-    <div className="trail-detail-image-gallery">
-      <div className="trail-detail-main-image">
-        <img 
-          src={images[currentImageIndex]} 
-          alt={`Trail - Image ${currentImageIndex + 1}`}
-        />
-        
+    <div className='trail-detail-image-gallery'>
+      <div className='trail-detail-main-image'>
+        <img src={images[currentImageIndex]} alt={`Trail - Image ${currentImageIndex + 1}`} />
+
         {images.length > 1 && (
           <>
-            <button 
-              className="trail-detail-image-nav-btn prev" 
+            <button
+              className='trail-detail-image-nav-btn prev'
               onClick={prevImage}
-              aria-label="Previous image"
+              aria-label='Previous image'
             >
               <ChevronLeft size={20} />
             </button>
-            <button 
-              className="trail-detail-image-nav-btn next" 
+            <button
+              className='trail-detail-image-nav-btn next'
               onClick={nextImage}
-              aria-label="Next image"
+              aria-label='Next image'
             >
               <ChevronRight size={20} />
             </button>
-            
-            <div className="trail-detail-image-counter">
+
+            <div className='trail-detail-image-counter'>
               {currentImageIndex + 1} / {images.length}
             </div>
           </>
@@ -45,7 +42,7 @@ const TrailImageGallery = ({ images, currentImageIndex, onImageChange, onGoToIma
       </div>
 
       {images.length > 1 && (
-        <div className="trail-detail-thumbnails">
+        <div className='trail-detail-thumbnails'>
           {images.map((image, index) => (
             <div
               key={index}

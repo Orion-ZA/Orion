@@ -160,7 +160,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -211,33 +212,33 @@
     padding: 1rem;
     max-width: 100%;
   }
-  
+
   .admin-header-left {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .admin-header-title {
     font-size: 1.25rem;
     text-align: center;
     flex: 1;
   }
-  
+
   .admin-back-button {
     padding: 0.4rem 0.6rem;
     font-size: 0.8rem;
   }
-  
+
   .admin-back-text {
     display: none; /* Hide text on mobile, keep only icon */
   }
-  
+
   .admin-header-tabs {
     order: 2;
     width: 100%;
     justify-content: center;
   }
-  
+
   .admin-header-status {
     order: 3;
     justify-content: center;
@@ -249,21 +250,21 @@
     padding: 0.4rem 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .admin-header-tab-icon {
     width: 0.8rem;
     height: 0.8rem;
   }
-  
+
   .admin-header-tabs {
     flex-wrap: wrap;
     gap: 0.25rem;
   }
-  
+
   .admin-back-button {
     padding: 0.3rem 0.5rem;
   }
-  
+
   .admin-back-icon {
     width: 0.875rem;
     height: 0.875rem;

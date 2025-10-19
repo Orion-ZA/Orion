@@ -5,7 +5,7 @@ import EditTrailModal from '../components/admin/EditTrailModal';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  X: () => <div data-testid="close-icon" />,
+  X: () => <div data-testid='close-icon' />,
 }));
 
 // Mock console.log to avoid test output noise
@@ -31,7 +31,7 @@ describe('EditTrailModal', () => {
     distance: 5.2,
     elevationGain: 300,
     tags: 'scenic, forest, waterfall',
-    status: 'open'
+    status: 'open',
   };
 
   const mockEditForm = {
@@ -41,7 +41,7 @@ describe('EditTrailModal', () => {
     distance: 5.2,
     elevationGain: 300,
     tags: 'scenic, forest, waterfall',
-    status: 'open'
+    status: 'open',
   };
 
   beforeEach(() => {
@@ -160,7 +160,7 @@ describe('EditTrailModal', () => {
       expect(screen.getByDisplayValue('5.2')).toBeInTheDocument();
       expect(screen.getByDisplayValue('300')).toBeInTheDocument();
       expect(screen.getByDisplayValue('scenic, forest, waterfall')).toBeInTheDocument();
-      
+
       // Check status select value by checking the selected option
       const statusSelect = screen.getByLabelText('Status');
       expect(statusSelect).toHaveValue('open');
@@ -216,7 +216,7 @@ describe('EditTrailModal', () => {
     it('renders difficulty select with correct options', () => {
       const difficultySelect = screen.getByLabelText('Difficulty');
       expect(difficultySelect).toBeInTheDocument();
-      
+
       expect(screen.getByRole('option', { name: 'Easy' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Moderate' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Hard' })).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe('EditTrailModal', () => {
     it('renders status select with correct options', () => {
       const statusSelect = screen.getByLabelText('Status');
       expect(statusSelect).toBeInTheDocument();
-      
+
       expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Closed' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Under Maintenance' })).toBeInTheDocument();
@@ -421,7 +421,7 @@ describe('EditTrailModal', () => {
         distance: undefined,
         elevationGain: undefined,
         tags: undefined,
-        status: undefined
+        status: undefined,
       };
 
       render(
@@ -447,7 +447,7 @@ describe('EditTrailModal', () => {
         distance: null,
         elevationGain: null,
         tags: null,
-        status: null
+        status: null,
       };
 
       render(
@@ -674,11 +674,11 @@ describe('EditTrailModal', () => {
     it('prevents default form submission', () => {
       const form = document.querySelector('.edit-form');
       const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-      
+
       const preventDefaultSpy = jest.spyOn(submitEvent, 'preventDefault');
-      
+
       fireEvent(form, submitEvent);
-      
+
       expect(preventDefaultSpy).toHaveBeenCalled();
       expect(mockOnSave).toHaveBeenCalled();
     });
@@ -700,10 +700,10 @@ describe('EditTrailModal', () => {
 
     it('does not call onFormChange for disabled distance field', () => {
       const distanceInput = screen.getByLabelText(/Distance \(km\)/);
-      
+
       // Even if we try to change it, it shouldn't call onFormChange because it's disabled
       fireEvent.change(distanceInput, { target: { value: '10' } });
-      
+
       // The change event might still fire, but the input is disabled so it shouldn't affect the form
       expect(distanceInput).toBeDisabled();
     });

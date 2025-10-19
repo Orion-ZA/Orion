@@ -1,13 +1,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { 
+import {
   formatDate,
   formatLocation,
   getAlertTypeColor,
   getAlertTypeIcon,
   renderStars,
-  getDifficultyColor, 
-  truncateUserId
+  getDifficultyColor,
+  truncateUserId,
 } from '../utils/trailUtils';
 
 describe('trailUtils', () => {
@@ -26,7 +26,7 @@ describe('trailUtils', () => {
 
     it('handles Firestore Timestamp objects', () => {
       const mockTimestamp = {
-        toDate: () => new Date('2024-01-15T10:30:00Z')
+        toDate: () => new Date('2024-01-15T10:30:00Z'),
       };
       const result = formatDate(mockTimestamp);
       expect(result).toBe('2024/01/15'); // Format depends on locale
@@ -60,14 +60,14 @@ describe('trailUtils', () => {
 
     it('handles Firestore Timestamp with invalid toDate', () => {
       const mockTimestamp = {
-        toDate: () => new Date('invalid')
+        toDate: () => new Date('invalid'),
       };
       expect(formatDate(mockTimestamp)).toBe('N/A');
     });
 
     it('handles Firestore Timestamp with non-function toDate', () => {
       const mockTimestamp = {
-        toDate: 'not a function'
+        toDate: 'not a function',
       };
       const result = formatDate(mockTimestamp);
       expect(result).toBe('N/A');
@@ -90,7 +90,7 @@ describe('trailUtils', () => {
     it('handles Firestore GeoPoint format (latitude/longitude)', () => {
       const location = {
         latitude: 40.7128,
-        longitude: -74.0060
+        longitude: -74.006,
       };
       expect(formatLocation(location)).toBe('40.7128, -74.0060');
     });
@@ -98,35 +98,35 @@ describe('trailUtils', () => {
     it('handles lat/lng format', () => {
       const location = {
         lat: 40.7128,
-        lng: -74.0060
+        lng: -74.006,
       };
       expect(formatLocation(location)).toBe('40.7128, -74.0060');
     });
 
     it('handles coordinates array format', () => {
       const location = {
-        coordinates: [-74.0060, 40.7128] // [lng, lat] format
+        coordinates: [-74.006, 40.7128], // [lng, lat] format
       };
       expect(formatLocation(location)).toBe('40.7128, -74.0060');
     });
 
     it('handles coordinates array with more than 2 elements', () => {
       const location = {
-        coordinates: [-74.0060, 40.7128, 100] // [lng, lat, elevation]
+        coordinates: [-74.006, 40.7128, 100], // [lng, lat, elevation]
       };
       expect(formatLocation(location)).toBe('40.7128, -74.0060');
     });
 
     it('handles empty coordinates array', () => {
       const location = {
-        coordinates: []
+        coordinates: [],
       };
       expect(formatLocation(location)).toBe('[object Object]');
     });
 
     it('handles coordinates array with insufficient elements', () => {
       const location = {
-        coordinates: [-74.0060] // Only longitude
+        coordinates: [-74.006], // Only longitude
       };
       expect(formatLocation(location)).toBe('[object Object]');
     });
@@ -138,7 +138,7 @@ describe('trailUtils', () => {
     it('handles object with no recognizable format', () => {
       const location = {
         name: 'Central Park',
-        address: 'New York, NY'
+        address: 'New York, NY',
       };
       expect(formatLocation(location)).toBe('[object Object]');
     });
@@ -154,7 +154,7 @@ describe('trailUtils', () => {
     it('handles undefined latitude/longitude', () => {
       const location = {
         latitude: undefined,
-        longitude: undefined
+        longitude: undefined,
       };
       expect(formatLocation(location)).toBe('[object Object]');
     });
@@ -162,7 +162,7 @@ describe('trailUtils', () => {
     it('handles null latitude/longitude', () => {
       const location = {
         latitude: null,
-        longitude: null
+        longitude: null,
       };
       expect(formatLocation(location)).toBe('undefined, undefined');
     });
@@ -170,7 +170,7 @@ describe('trailUtils', () => {
     it('handles mixed coordinate formats', () => {
       const location = {
         lat: 40.7128,
-        longitude: -74.0060 // Mixed lat/lng and latitude/longitude
+        longitude: -74.006, // Mixed lat/lng and latitude/longitude
       };
       expect(formatLocation(location)).toBe('[object Object]');
     });
@@ -289,7 +289,7 @@ describe('trailUtils', () => {
       const { container } = render(<div>{renderStars(3)}</div>);
       const stars = container.querySelectorAll('.trail-card-star');
       expect(stars).toHaveLength(5);
-      
+
       const filledStars = container.querySelectorAll('.trail-card-star.filled');
       expect(filledStars).toHaveLength(3);
     });
@@ -345,9 +345,9 @@ describe('trailUtils', () => {
     it('renders all stars with correct keys', () => {
       const { container } = render(<div>{renderStars(3)}</div>);
       const stars = container.querySelectorAll('.trail-card-star');
-      
+
       expect(stars).toHaveLength(5);
-      
+
       stars.forEach((star, index) => {
         // Check that it's an SVG element (Lucide React Star component)
         expect(star.tagName).toBe('svg');
@@ -367,7 +367,7 @@ describe('trailUtils', () => {
       const { container } = render(<div>{renderStars({ rating: 3 })}</div>);
       const filledStars = container.querySelectorAll('.trail-card-star.filled');
       expect(filledStars).toHaveLength(0);
-  });
+    });
   });
 
   describe('getDifficultyColor', () => {
@@ -526,7 +526,9 @@ describe('trailUtils', () => {
 
     it('handles functions with special characters', () => {
       expect(truncateUserId('user@#$%^&*()')).toBe('user@#$%^...');
-      expect(formatLocation('Location with special chars: @#$%')).toBe('Location with special chars: @#$%');
+      expect(formatLocation('Location with special chars: @#$%')).toBe(
+        'Location with special chars: @#$%'
+      );
     });
 
     it('handles functions with unicode characters', () => {

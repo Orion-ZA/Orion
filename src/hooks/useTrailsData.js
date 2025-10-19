@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, where } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  query,
+  orderBy,
+  where,
+} from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export const useTrailsData = () => {
@@ -13,7 +22,7 @@ export const useTrailsData = () => {
       const trailsRef = collection(db, 'Trails');
       const q = query(trailsRef, orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
-      
+
       const trailsData = querySnapshot.docs.map(doc => ({
         id: String(doc.id),
         name: String(doc.data().name || 'Unnamed Trail'),
@@ -23,14 +32,18 @@ export const useTrailsData = () => {
         elevationGain: typeof doc.data().elevationGain === 'number' ? doc.data().elevationGain : 0,
         tags: Array.isArray(doc.data().tags) ? doc.data().tags.map(tag => String(tag)) : [],
         status: String(doc.data().status || 'open'),
-        photos: Array.isArray(doc.data().photos) ? doc.data().photos.map(photo => String(photo)) : [],
-        createdBy: doc.data().createdBy?.id ? String(doc.data().createdBy.id) : String(doc.data().createdBy || 'Unknown'),
+        photos: Array.isArray(doc.data().photos)
+          ? doc.data().photos.map(photo => String(photo))
+          : [],
+        createdBy: doc.data().createdBy?.id
+          ? String(doc.data().createdBy.id)
+          : String(doc.data().createdBy || 'Unknown'),
         location: doc.data().location,
         gpsRoute: doc.data().gpsRoute,
         createdAt: doc.data().createdAt,
-        lastUpdated: doc.data().lastUpdated
+        lastUpdated: doc.data().lastUpdated,
       }));
-      
+
       setTrails(trailsData);
     } catch (err) {
       setError('Failed to fetch trails: ' + err.message);
@@ -39,7 +52,7 @@ export const useTrailsData = () => {
     }
   };
 
-  const deleteTrail = async (trailId) => {
+  const deleteTrail = async trailId => {
     try {
       await deleteDoc(doc(db, 'Trails', trailId));
       setTrails(prev => prev.filter(trail => trail.id !== trailId));
@@ -53,9 +66,9 @@ export const useTrailsData = () => {
   const updateTrail = async (trailId, updates) => {
     try {
       await updateDoc(doc(db, 'Trails', trailId), updates);
-      setTrails(prev => prev.map(trail => 
-        trail.id === trailId ? { ...trail, ...updates } : trail
-      ));
+      setTrails(prev =>
+        prev.map(trail => (trail.id === trailId ? { ...trail, ...updates } : trail))
+      );
       return true;
     } catch (err) {
       setError('Failed to update trail: ' + err.message);
@@ -74,6 +87,6 @@ export const useTrailsData = () => {
     fetchTrails,
     deleteTrail,
     updateTrail,
-    setError
+    setError,
   };
 };

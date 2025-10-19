@@ -4,23 +4,23 @@ import { useTrailData } from '../hooks/useTrailData';
 // Mock react-router-dom
 jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
-  useLocation: jest.fn()
+  useLocation: jest.fn(),
 }));
 
 // Mock Firebase
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
-  getDoc: jest.fn()
+  getDoc: jest.fn(),
 }));
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock trail API
 jest.mock('../utils/trailApi', () => ({
-  fetchTrailData: jest.fn()
+  fetchTrailData: jest.fn(),
 }));
 
 import { useParams, useLocation } from 'react-router-dom';
@@ -32,14 +32,14 @@ describe('useTrailData', () => {
     id: 'test-trail-id',
     name: 'Test Trail',
     description: 'A beautiful trail',
-    createdBy: 'user-123'
+    createdBy: 'user-123',
   };
 
   const mockUserDoc = {
     exists: () => true,
     data: () => ({
-      profileInfo: { displayName: 'John Doe' }
-    })
+      profileInfo: { displayName: 'John Doe' },
+    }),
   };
 
   beforeEach(() => {
@@ -174,10 +174,10 @@ describe('useTrailData', () => {
         createdBy: {
           _key: {
             path: {
-              segments: ['Users', 'user-789']
-            }
-          }
-        }
+              segments: ['Users', 'user-789'],
+            },
+          },
+        },
       };
       fetchTrailData.mockResolvedValue(trailWithPathAuthor);
 
@@ -199,9 +199,9 @@ describe('useTrailData', () => {
         ...mockTrail,
         createdBy: {
           _path: {
-            segments: ['Users', 'user-path']
-          }
-        }
+            segments: ['Users', 'user-path'],
+          },
+        },
       };
       fetchTrailData.mockResolvedValue(trailWithPathAuthor);
 
@@ -221,7 +221,7 @@ describe('useTrailData', () => {
     it('handles createdBy with id field', async () => {
       const trailWithIdAuthor = {
         ...mockTrail,
-        createdBy: { id: 'user-id-field' }
+        createdBy: { id: 'user-id-field' },
       };
       fetchTrailData.mockResolvedValue(trailWithIdAuthor);
 
@@ -275,8 +275,8 @@ describe('useTrailData', () => {
       const userDocWithDisplayName = {
         exists: () => true,
         data: () => ({
-          displayName: 'Display Name User'
-        })
+          displayName: 'Display Name User',
+        }),
       };
       getDoc.mockResolvedValue(userDocWithDisplayName);
 
@@ -297,8 +297,8 @@ describe('useTrailData', () => {
       const userDocWithName = {
         exists: () => true,
         data: () => ({
-          name: 'Name Field User'
-        })
+          name: 'Name Field User',
+        }),
       };
       getDoc.mockResolvedValue(userDocWithName);
 
@@ -389,7 +389,7 @@ describe('useTrailData', () => {
     it('handles createdBy with unknown object format', async () => {
       const trailWithUnknownFormat = {
         ...mockTrail,
-        createdBy: { unknown: 'format' }
+        createdBy: { unknown: 'format' },
       };
       fetchTrailData.mockResolvedValue(trailWithUnknownFormat);
 
@@ -409,7 +409,7 @@ describe('useTrailData', () => {
     it('handles createdBy with invalid uid', async () => {
       const trailWithInvalidUid = {
         ...mockTrail,
-        createdBy: { id: 123 } // Not a string
+        createdBy: { id: 123 }, // Not a string
       };
       fetchTrailData.mockResolvedValue(trailWithInvalidUid);
 

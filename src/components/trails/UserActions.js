@@ -8,13 +8,15 @@ const UserActions = ({ user, trail, userSaved, onTrailAction }) => {
   if (!user) return null;
 
   return (
-    <div className="trail-detail-user-actions">
+    <div className='trail-detail-user-actions'>
       <h3>My Actions</h3>
-      <div className="trail-detail-action-buttons">
+      <div className='trail-detail-action-buttons'>
         <button
           className={`trail-detail-action-btn favourites ${userSaved.favourites.includes(trail.id) ? 'active' : ''}`}
           onClick={() => onTrailAction('favourites', trail.id)}
-          title={userSaved.favourites.includes(trail.id) ? 'Remove from favourites' : 'Add to favourites'}
+          title={
+            userSaved.favourites.includes(trail.id) ? 'Remove from favourites' : 'Add to favourites'
+          }
         >
           <Heart size={16} />
           {userSaved.favourites.includes(trail.id) ? 'Favourited' : 'Favourite'}
@@ -32,7 +34,9 @@ const UserActions = ({ user, trail, userSaved, onTrailAction }) => {
         <button
           className={`trail-detail-action-btn completed ${userSaved.completed.includes(trail.id) ? 'active' : ''}`}
           onClick={() => onTrailAction('completed', trail.id)}
-          title={userSaved.completed.includes(trail.id) ? 'Mark as not completed' : 'Mark as completed'}
+          title={
+            userSaved.completed.includes(trail.id) ? 'Mark as not completed' : 'Mark as completed'
+          }
         >
           <Check size={16} />
           {userSaved.completed.includes(trail.id) ? 'Completed' : 'Mark Complete'}
@@ -40,9 +44,9 @@ const UserActions = ({ user, trail, userSaved, onTrailAction }) => {
 
         {user.uid === trail.authorId && (
           <button
-            className="trail-detail-action-btn edit"
+            className='trail-detail-action-btn edit'
             onClick={() => navigate(`/trails/${trail.id}/edit`)}
-            title="Edit trail"
+            title='Edit trail'
           >
             <Edit3 size={16} />
             Edit Trail

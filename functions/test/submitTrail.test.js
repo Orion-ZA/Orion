@@ -7,8 +7,8 @@ jest.mock('firebase-admin', () => ({
     collection: jest.fn(() => ({
       add: jest.fn().mockResolvedValue({ id: 'test-trail-id' }),
       doc: jest.fn(() => ({
-        get: jest.fn().mockResolvedValue({ data: () => ({ name: 'Test User' }) })
-      }))
+        get: jest.fn().mockResolvedValue({ data: () => ({ name: 'Test User' }) }),
+      })),
     })),
     GeoPoint: class MockGeoPoint {
       constructor(lat, lng) {
@@ -17,21 +17,21 @@ jest.mock('firebase-admin', () => ({
       }
     },
     Timestamp: {
-      now: jest.fn(() => ({ _seconds: 1234567890, _nanoseconds: 123000000 }))
-    }
+      now: jest.fn(() => ({ _seconds: 1234567890, _nanoseconds: 123000000 })),
+    },
   })),
   auth: jest.fn(() => ({
-    verifyIdToken: jest.fn()
-  }))
+    verifyIdToken: jest.fn(),
+  })),
 }));
 
 // Mock firebase-functions
 jest.mock('firebase-functions', () => ({
   https: {
-    onRequest: jest.fn((handler) => handler),
-    onCall: jest.fn((handler) => handler),
-    HttpsError: jest.fn((code, message) => ({ code, message }))
-  }
+    onRequest: jest.fn(handler => handler),
+    onCall: jest.fn(handler => handler),
+    HttpsError: jest.fn((code, message) => ({ code, message })),
+  },
 }));
 
 // Mock cors
@@ -48,14 +48,14 @@ const { submitTrail } = require('../index');
 describe('submitTrail Function Tests', () => {
   const validTrailData = {
     name: 'Test Trail',
-    location: { lat: 37.2695, lng: -112.9470 },
+    location: { lat: 37.2695, lng: -112.947 },
     distance: 3.2,
     elevationGain: 500,
     difficulty: 'Moderate',
     tags: ['scenic', 'forest'],
     description: 'A beautiful test trail',
     photos: ['https://example.com/photo1.jpg'],
-    status: 'open'
+    status: 'open',
   };
 
   beforeEach(() => {
@@ -68,14 +68,14 @@ describe('submitTrail Function Tests', () => {
       const req = {
         method: 'GET',
         body: validTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -89,18 +89,18 @@ describe('submitTrail Function Tests', () => {
         name: 'Test Trail',
         // Missing location, distance, elevationGain, difficulty, status
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -108,142 +108,148 @@ describe('submitTrail Function Tests', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Missing required fields',
-        missingFields: expect.arrayContaining(['location', 'distance', 'elevationGain', 'difficulty', 'status'])
+        missingFields: expect.arrayContaining([
+          'location',
+          'distance',
+          'elevationGain',
+          'difficulty',
+          'status',
+        ]),
       });
     });
 
     it('should return 400 when location format is invalid', async () => {
       const invalidTrailData = {
         ...validTrailData,
-        location: { lat: 37.2695 } // Missing lng
+        location: { lat: 37.2695 }, // Missing lng
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Location must include lat and lng coordinates'
+        error: 'Location must include lat and lng coordinates',
       });
     });
 
     it('should return 400 when difficulty is invalid', async () => {
       const invalidTrailData = {
         ...validTrailData,
-        difficulty: 'Very Hard' // Invalid difficulty
+        difficulty: 'Very Hard', // Invalid difficulty
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Difficulty must be one of: Easy, Moderate, Hard'
+        error: 'Difficulty must be one of: Easy, Moderate, Hard',
       });
     });
 
     it('should return 400 when status is invalid', async () => {
       const invalidTrailData = {
         ...validTrailData,
-        status: 'maintenance' // Invalid status
+        status: 'maintenance', // Invalid status
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Status must be either "open" or "closed"'
+        error: 'Status must be either "open" or "closed"',
       });
     });
 
     it('should return 400 when distance is not a positive number', async () => {
       const invalidTrailData = {
         ...validTrailData,
-        distance: -1 // Invalid distance
+        distance: -1, // Invalid distance
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Distance must be a positive number'
+        error: 'Distance must be a positive number',
       });
     });
 
     it('should return 400 when elevationGain is negative', async () => {
       const invalidTrailData = {
         ...validTrailData,
-        elevationGain: -100 // Invalid elevation gain
+        elevationGain: -100, // Invalid elevation gain
       };
-      
+
       const req = {
         method: 'POST',
         body: invalidTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Elevation gain must be a non-negative number'
+        error: 'Elevation gain must be a non-negative number',
       });
     });
   });
@@ -253,14 +259,14 @@ describe('submitTrail Function Tests', () => {
       const req = {
         method: 'POST',
         body: validTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -280,8 +286,8 @@ describe('submitTrail Function Tests', () => {
             tags: ['scenic', 'forest'],
             description: 'A beautiful test trail',
             photos: ['https://example.com/photo1.jpg'],
-            createdBy: null
-          })
+            createdBy: null,
+          }),
         })
       );
     });
@@ -289,25 +295,25 @@ describe('submitTrail Function Tests', () => {
     it('should handle optional fields with default values', async () => {
       const minimalTrailData = {
         name: 'Minimal Trail',
-        location: { lat: 37.2695, lng: -112.9470 },
+        location: { lat: 37.2695, lng: -112.947 },
         distance: 2.0,
         elevationGain: 200,
         difficulty: 'Easy',
-        status: 'open'
+        status: 'open',
         // No optional fields provided
       };
-      
+
       const req = {
         method: 'POST',
         body: minimalTrailData,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -319,8 +325,8 @@ describe('submitTrail Function Tests', () => {
             tags: [],
             description: '',
             photos: [],
-            gpsRoute: []
-          })
+            gpsRoute: [],
+          }),
         })
       );
     });
@@ -329,22 +335,22 @@ describe('submitTrail Function Tests', () => {
       const trailWithGPSRoute = {
         ...validTrailData,
         gpsRoute: [
-          { lat: 37.2695, lng: -112.9470 },
-          { lat: 37.2700, lng: -112.9465 }
-        ]
+          { lat: 37.2695, lng: -112.947 },
+          { lat: 37.27, lng: -112.9465 },
+        ],
       };
-      
+
       const req = {
         method: 'POST',
         body: trailWithGPSRoute,
-        headers: { origin: 'http://localhost:3000' }
+        headers: { origin: 'http://localhost:3000' },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -356,14 +362,14 @@ describe('submitTrail Function Tests', () => {
             gpsRoute: expect.arrayContaining([
               expect.objectContaining({
                 _latitude: 37.2695,
-                _longitude: -112.9470
+                _longitude: -112.947,
               }),
               expect.objectContaining({
-                _latitude: 37.2700,
-                _longitude: -112.9465
-              })
-            ])
-          })
+                _latitude: 37.27,
+                _longitude: -112.9465,
+              }),
+            ]),
+          }),
         })
       );
     });
@@ -378,17 +384,17 @@ describe('submitTrail Function Tests', () => {
       const req = {
         method: 'POST',
         body: validTrailData,
-        headers: { 
+        headers: {
           origin: 'http://localhost:3000',
-          authorization: 'Bearer valid-token-123'
-        }
+          authorization: 'Bearer valid-token-123',
+        },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -405,17 +411,17 @@ describe('submitTrail Function Tests', () => {
       const req = {
         method: 'POST',
         body: validTrailData,
-        headers: { 
+        headers: {
           origin: 'http://localhost:3000',
-          authorization: 'Bearer invalid-token'
-        }
+          authorization: 'Bearer invalid-token',
+        },
       };
-      
+
       const res = {
         setHeader: jest.fn(),
         set: jest.fn(),
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await submitTrail(req, res);
@@ -424,8 +430,8 @@ describe('submitTrail Function Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           trail: expect.objectContaining({
-            createdBy: null // Should remain null when auth fails
-          })
+            createdBy: null, // Should remain null when auth fails
+          }),
         })
       );
     });

@@ -25,7 +25,21 @@
     "start": "react-scripts start",
     "build": "set CI=false && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "semantic-check": "node semantic-html-checker.js",
+    "semantic-check:verbose": "node semantic-html-checker.js --verbose --fix-suggestions",
+    "semantic-check:components": "node semantic-html-checker.js --path src/components --verbose --fix-suggestions",
+    "semantic-check:pages": "node semantic-html-checker.js --path src/pages --verbose --fix-suggestions",
+    "lint": "node linter.js",
+    "lint:verbose": "node linter.js --verbose --fix-suggestions",
+    "lint:accessibility": "node linter.js --accessibility --verbose --fix-suggestions",
+    "lint:performance": "node linter.js --performance --verbose --fix-suggestions",
+    "lint:security": "node linter.js --security --verbose --fix-suggestions",
+    "lint:file": "node linter.js --file",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write --ignore-unknown",
+    "prepare": "husky"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +63,17 @@
     ]
   },
   "devDependencies": {
-    "@svgr/webpack": "^8.1.0"
+    "@svgr/webpack": "^8.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.4",
+    "prettier": "^3.6.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

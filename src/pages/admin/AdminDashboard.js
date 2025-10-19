@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import AdminHeader from "../../components/admin/AdminHeader";
-import AdminMainPanel from "../../components/admin/AdminMainPanel";
-import "./AdminDashboard.css";
+import React, { useState, useEffect } from 'react';
+import AdminHeader from '../../components/admin/AdminHeader';
+import AdminMainPanel from '../../components/admin/AdminMainPanel';
+import './AdminDashboard.css';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     // Add class to body when admin dashboard mounts
@@ -17,7 +17,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="admin-dashboard">
+    <div className='admin-dashboard'>
       <AdminHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       <AdminMainPanel activeTab={activeTab} />
     </div>

@@ -2,25 +2,21 @@ import { useState, useEffect } from 'react';
 import { fetchTrailReviews, fetchWeatherData } from '../utils/trailApi';
 import { useTrailAlerts } from './useTrailAlerts';
 
-export const useTrailContent = (trail) => {
+export const useTrailContent = trail => {
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [reviewSortBy, setReviewSortBy] = useState('newest');
-  
+
   const [weatherData, setWeatherData] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
   // Use the existing trail alerts hook
-  const { 
-    trailAlerts, 
-    loadingStates: alertLoadingStates, 
-    fetchTrailAlerts 
-  } = useTrailAlerts();
+  const { trailAlerts, loadingStates: alertLoadingStates, fetchTrailAlerts } = useTrailAlerts();
 
   // Fetch reviews
   const fetchReviews = async () => {
     if (!trail?.id) return;
-    
+
     setLoadingReviews(true);
     try {
       const reviewsData = await fetchTrailReviews(trail.id);
@@ -36,11 +32,11 @@ export const useTrailContent = (trail) => {
   // Fetch weather data
   const fetchWeather = async () => {
     if (!trail?.location) return;
-    
+
     setLoadingWeather(true);
     try {
       let latitude, longitude;
-      
+
       if (typeof trail.location === 'object' && trail.location !== null) {
         if (trail.location.latitude && trail.location.longitude) {
           latitude = trail.location.latitude;
@@ -72,7 +68,7 @@ export const useTrailContent = (trail) => {
   // Sort reviews
   const getSortedReviews = () => {
     if (!reviews || reviews.length === 0) return [];
-    
+
     const sortedReviews = [...reviews].sort((a, b) => {
       switch (reviewSortBy) {
         case 'newest':
@@ -87,7 +83,7 @@ export const useTrailContent = (trail) => {
           return new Date(b.timestamp) - new Date(a.timestamp);
       }
     });
-    
+
     return sortedReviews;
   };
 
@@ -117,6 +113,6 @@ export const useTrailContent = (trail) => {
     fetchReviews,
     // Alerts data
     alerts: trailAlerts[trail?.id] || [],
-    loadingAlerts: alertLoadingStates[trail?.id] || false
+    loadingAlerts: alertLoadingStates[trail?.id] || false,
   };
 };

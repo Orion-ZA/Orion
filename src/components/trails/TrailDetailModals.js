@@ -19,25 +19,25 @@ const TrailDetailModals = ({
   onAddReview,
   onAddImages,
   onImageUpload,
-  
+
   // Alert Modal Props
   showAlertModal,
   onCloseAlertModal,
   onAddAlert,
   trailId,
   trailName,
-  
+
   // Report Modal Props
   showReportModal,
   onCloseReportModal,
   onSubmitReport,
   reportType,
-  reportTargetId
+  reportTargetId,
 }) => {
   return (
     <>
       {/* Contribution Modal */}
-      <ContributionModal 
+      <ContributionModal
         showContributionModal={showContributionModal}
         contributionType={contributionType}
         newReview={newReview}

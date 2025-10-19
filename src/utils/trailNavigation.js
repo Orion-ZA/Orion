@@ -1,13 +1,13 @@
 import { useToast } from '../components/ToastContext';
 
 export const createTrailNavigationActions = (navigate, showToast) => {
-  const handleShare = async (trailName) => {
+  const handleShare = async trailName => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: trailName || 'Trail Details',
           text: `Check out this trail: ${trailName}`,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch (error) {
         console.error('Error sharing:', error);
@@ -18,14 +18,14 @@ export const createTrailNavigationActions = (navigate, showToast) => {
     }
   };
 
-  const handleDirections = (trail) => {
+  const handleDirections = trail => {
     if (!trail?.location) {
       showToast('Location not available for this trail', 'error');
       return;
     }
 
     let latitude, longitude;
-    
+
     if (typeof trail.location === 'object' && trail.location !== null) {
       if (trail.location.latitude && trail.location.longitude) {
         latitude = trail.location.latitude;
@@ -53,7 +53,7 @@ export const createTrailNavigationActions = (navigate, showToast) => {
     }
 
     let latitude, longitude;
-    
+
     if (typeof trail.location === 'object' && trail.location !== null) {
       if (trail.location.latitude && trail.location.longitude) {
         latitude = trail.location.latitude;
@@ -85,20 +85,20 @@ export const createTrailNavigationActions = (navigate, showToast) => {
       tags: trail.tags,
       photos: trail.photos,
       gpsRoute: trail.gpsRoute,
-      location: trail.location
+      location: trail.location,
     };
 
     navigate('/trails', {
       state: {
         trailToCenter: cleanTrail,
-        action: 'centerTrail'
-      }
+        action: 'centerTrail',
+      },
     });
   };
 
   return {
     handleShare,
     handleDirections,
-    handleShowOnMap
+    handleShowOnMap,
   };
 };

@@ -23,18 +23,18 @@ Object.defineProperty(window, 'localStorage', {
 // Test component that uses the theme context
 const TestComponent = () => {
   const { mode, resolved, setMode } = useTheme();
-  
+
   return (
     <div>
-      <div data-testid="mode">{mode}</div>
-      <div data-testid="resolved">{resolved}</div>
-      <button data-testid="set-light" onClick={() => setMode('light')}>
+      <div data-testid='mode'>{mode}</div>
+      <div data-testid='resolved'>{resolved}</div>
+      <button data-testid='set-light' onClick={() => setMode('light')}>
         Set Light
       </button>
-      <button data-testid="set-dark" onClick={() => setMode('dark')}>
+      <button data-testid='set-dark' onClick={() => setMode('dark')}>
         Set Dark
       </button>
-      <button data-testid="set-auto" onClick={() => setMode('auto')}>
+      <button data-testid='set-auto' onClick={() => setMode('auto')}>
         Set Auto
       </button>
     </div>
@@ -49,17 +49,17 @@ describe('ThemeProvider', () => {
   beforeEach(() => {
     mockAddEventListener = jest.fn();
     mockRemoveEventListener = jest.fn();
-    
+
     mockMediaQuery = {
       matches: false,
       addEventListener: mockAddEventListener,
       removeEventListener: mockRemoveEventListener,
     };
-    
+
     mockMatchMedia.mockReturnValue(mockMediaQuery);
     mockLocalStorage.getItem.mockReturnValue(null);
     mockLocalStorage.setItem.mockClear();
-    
+
     // Reset document.documentElement
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.style.colorScheme = '';
@@ -75,22 +75,22 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
-  expect(screen.getByTestId('mode')).toHaveTextContent('dark');
-  expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
-  expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-  expect(document.documentElement.style.colorScheme).toBe('dark');
+
+    expect(screen.getByTestId('mode')).toHaveTextContent('dark');
+    expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(document.documentElement.style.colorScheme).toBe('dark');
   });
 
   it('loads saved mode from localStorage', () => {
     mockLocalStorage.getItem.mockReturnValue('dark');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByTestId('mode')).toHaveTextContent('dark');
     expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
   });
@@ -101,13 +101,13 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setLightButton = screen.getByTestId('set-light');
-    
+
     act(() => {
       setLightButton.click();
     });
-    
+
     expect(screen.getByTestId('mode')).toHaveTextContent('light');
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
@@ -120,13 +120,13 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setDarkButton = screen.getByTestId('set-dark');
-    
+
     act(() => {
       setDarkButton.click();
     });
-    
+
     expect(screen.getByTestId('mode')).toHaveTextContent('dark');
     expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
@@ -181,13 +181,13 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setDarkButton = screen.getByTestId('set-dark');
-    
+
     act(() => {
       setDarkButton.click();
     });
-    
+
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('orion-theme', 'dark');
   });
 
@@ -195,15 +195,15 @@ describe('ThemeProvider', () => {
     mockLocalStorage.setItem.mockImplementation(() => {
       throw new Error('Storage quota exceeded');
     });
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setDarkButton = screen.getByTestId('set-dark');
-    
+
     // Should not throw error
     expect(() => {
       act(() => {
@@ -218,7 +218,7 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setAutoButton = screen.getByTestId('set-auto');
 
     act(() => {
@@ -235,26 +235,26 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setLightButton = screen.getByTestId('set-light');
-    
+
     act(() => {
       setLightButton.click();
     });
-    
+
     // Should not add event listener for non-auto modes
     expect(mockAddEventListener).not.toHaveBeenCalled();
   });
 
   it('updates theme when system preference changes in auto mode', () => {
     mockMediaQuery.matches = false; // Initially light
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setAutoButton = screen.getByTestId('set-auto');
 
     act(() => {
@@ -262,15 +262,15 @@ describe('ThemeProvider', () => {
     });
 
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
-    
+
     // Simulate system preference change to dark
     mockMediaQuery.matches = true;
     const changeHandler = mockAddEventListener.mock.calls[0][1];
-    
+
     act(() => {
       changeHandler();
     });
-    
+
     expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
   });
@@ -287,9 +287,9 @@ describe('ThemeProvider', () => {
     act(() => {
       setAutoButton.click();
     });
-    
+
     unmount();
-    
+
     expect(mockRemoveEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
@@ -297,13 +297,13 @@ describe('ThemeProvider', () => {
     // Mock window.matchMedia as undefined
     const originalMatchMedia = window.matchMedia;
     delete window.matchMedia;
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
-    
+
     const setAutoButton = screen.getByTestId('set-auto');
 
     act(() => {
@@ -312,22 +312,22 @@ describe('ThemeProvider', () => {
 
     expect(screen.getByTestId('mode')).toHaveTextContent('auto');
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
-    
+
     // Restore matchMedia
     window.matchMedia = originalMatchMedia;
   });
 
   it('provides stable function references', () => {
     let renderCount = 0;
-    
+
     const TestComponentWithRenderCount = () => {
       const { setMode } = useTheme();
       renderCount++;
-      
+
       return (
         <div>
-          <div data-testid="render-count">{renderCount}</div>
-          <button data-testid="set-mode" onClick={() => setMode('light')}>
+          <div data-testid='render-count'>{renderCount}</div>
+          <button data-testid='set-mode' onClick={() => setMode('light')}>
             Set Mode
           </button>
         </div>
@@ -341,7 +341,7 @@ describe('ThemeProvider', () => {
     );
 
     expect(screen.getByTestId('render-count')).toHaveTextContent('1');
-    
+
     // Rerender should not cause unnecessary re-renders due to stable function reference
     rerender(
       <ThemeProvider>

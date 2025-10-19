@@ -6,7 +6,7 @@ import { getAuth } from 'firebase/auth';
 
 // Mock Firebase Auth
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn()
+  getAuth: jest.fn(),
 }));
 
 // Mock Firebase Firestore
@@ -26,13 +26,13 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  Clock: () => <div data-testid="clock-icon" />,
-  AlertCircle: () => <div data-testid="alert-circle-icon" />,
+  Clock: () => <div data-testid='clock-icon' />,
+  AlertCircle: () => <div data-testid='alert-circle-icon' />,
 }));
 
 // Mock fetch globally
@@ -55,20 +55,16 @@ afterAll(() => {
 describe('AlertsUpdates Component', () => {
   const mockUser = {
     uid: 'test-user-id',
-    email: 'test@example.com'
+    email: 'test@example.com',
   };
 
   const mockSavedTrails = {
     favourites: [
       { id: 'trail-1', name: 'Test Trail 1' },
-      { id: 'trail-2', name: 'Test Trail 2' }
+      { id: 'trail-2', name: 'Test Trail 2' },
     ],
-    wishlist: [
-      { id: 'trail-3', name: 'Test Trail 3' }
-    ],
-    completed: [
-      { id: 'trail-4', name: 'Test Trail 4' }
-    ]
+    wishlist: [{ id: 'trail-3', name: 'Test Trail 3' }],
+    completed: [{ id: 'trail-4', name: 'Test Trail 4' }],
   };
 
   const mockAlerts = [
@@ -80,7 +76,7 @@ describe('AlertsUpdates Component', () => {
       isActive: true,
       isTimed: false,
       timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-      date: '2024-01-01T00:00:00Z'
+      date: '2024-01-01T00:00:00Z',
     },
     {
       id: 'alert-2',
@@ -91,7 +87,7 @@ describe('AlertsUpdates Component', () => {
       isTimed: true,
       expiresAt: { toDate: () => new Date(Date.now() + 3600000) }, // 1 hour from now
       timestamp: { toDate: () => new Date('2024-01-02T00:00:00Z') },
-      date: '2024-01-02T00:00:00Z'
+      date: '2024-01-02T00:00:00Z',
     },
     {
       id: 'alert-3',
@@ -101,24 +97,24 @@ describe('AlertsUpdates Component', () => {
       isActive: true,
       isTimed: false,
       timestamp: { toDate: () => new Date('2024-01-03T00:00:00Z') },
-      date: '2024-01-03T00:00:00Z'
-    }
+      date: '2024-01-03T00:00:00Z',
+    },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock getAuth to return user
     getAuth.mockReturnValue({
-      currentUser: mockUser
+      currentUser: mockUser,
     });
 
     // Mock successful fetch responses for saved trails
-    global.fetch.mockImplementation((url) => {
+    global.fetch.mockImplementation(url => {
       if (url.includes('getsavedtrails')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(mockSavedTrails)
+          json: () => Promise.resolve(mockSavedTrails),
         });
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -129,13 +125,13 @@ describe('AlertsUpdates Component', () => {
     mockWhere.mockReturnValue('whereClause');
     mockOrderBy.mockReturnValue('orderByClause');
     mockQuery.mockReturnValue('query');
-    
+
     // Mock getDocs to return alerts based on trailId
-    mockGetDocs.mockImplementation((query) => {
+    mockGetDocs.mockImplementation(query => {
       // Return empty array for all trails except trail-1 to avoid duplicates
       // This simulates the real behavior where different trails have different alerts
       const alerts = [];
-      
+
       const mockQuerySnapshot = {
         docs: alerts.map(alert => ({
           id: alert.id,
@@ -147,9 +143,9 @@ describe('AlertsUpdates Component', () => {
             isTimed: alert.isTimed,
             expiresAt: alert.expiresAt,
             timestamp: alert.timestamp,
-            date: alert.date
-          })
-        }))
+            date: alert.date,
+          }),
+        })),
       };
       return Promise.resolve(mockQuerySnapshot);
     });
@@ -168,12 +164,16 @@ describe('AlertsUpdates Component', () => {
 
     it('shows loading state initially', async () => {
       // Mock slow fetch to ensure loading state is visible
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         return new Promise(resolve => {
-          setTimeout(() => resolve({
-            ok: true,
-            json: () => Promise.resolve({ favourites: [], wishlist: [], completed: [] })
-          }), 100);
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: () => Promise.resolve({ favourites: [], wishlist: [], completed: [] }),
+              }),
+            100
+          );
         });
       });
 
@@ -190,7 +190,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -200,7 +202,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -210,7 +214,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -220,7 +226,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -228,7 +236,7 @@ describe('AlertsUpdates Component', () => {
   describe('User Authentication', () => {
     it('handles unauthenticated user', async () => {
       getAuth.mockReturnValue({
-        currentUser: null
+        currentUser: null,
       });
 
       await act(async () => {
@@ -236,7 +244,11 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
@@ -268,11 +280,11 @@ describe('AlertsUpdates Component', () => {
     });
 
     it('handles empty saved trails', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ favourites: [], wishlist: [], completed: [] })
+            json: () => Promise.resolve({ favourites: [], wishlist: [], completed: [] }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -283,7 +295,11 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
@@ -295,7 +311,9 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -303,7 +321,7 @@ describe('AlertsUpdates Component', () => {
   describe('Timed Alerts Functionality', () => {
     it('displays timed alert badges', async () => {
       // Override the mock for this specific test
-      mockGetDocs.mockImplementationOnce((query) => {
+      mockGetDocs.mockImplementationOnce(query => {
         const alerts = [
           {
             id: 'alert-timed',
@@ -314,7 +332,7 @@ describe('AlertsUpdates Component', () => {
             isTimed: true,
             expiresAt: { toDate: () => new Date(Date.now() + 3600000) },
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
+            date: '2024-01-01T00:00:00Z',
           },
           {
             id: 'alert-permanent',
@@ -324,10 +342,10 @@ describe('AlertsUpdates Component', () => {
             isActive: true,
             isTimed: false,
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
-          }
+            date: '2024-01-01T00:00:00Z',
+          },
         ];
-        
+
         const mockQuerySnapshot = {
           docs: alerts.map(alert => ({
             id: alert.id,
@@ -339,9 +357,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -358,7 +376,7 @@ describe('AlertsUpdates Component', () => {
 
     it('shows countdown timer for timed alerts', async () => {
       // Override the mock for this specific test
-      mockGetDocs.mockImplementationOnce((query) => {
+      mockGetDocs.mockImplementationOnce(query => {
         const alerts = [
           {
             id: 'alert-timed',
@@ -369,10 +387,10 @@ describe('AlertsUpdates Component', () => {
             isTimed: true,
             expiresAt: { toDate: () => new Date(Date.now() + 3661000) }, // 1 hour, 1 minute, 1 second
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
-          }
+            date: '2024-01-01T00:00:00Z',
+          },
         ];
-        
+
         const mockQuerySnapshot = {
           docs: alerts.map(alert => ({
             id: alert.id,
@@ -384,9 +402,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -406,7 +424,7 @@ describe('AlertsUpdates Component', () => {
 
     it('filters out expired alerts', async () => {
       // Override the mock for this specific test
-      mockGetDocs.mockImplementationOnce((query) => {
+      mockGetDocs.mockImplementationOnce(query => {
         const alerts = [
           {
             id: 'alert-expired',
@@ -417,7 +435,7 @@ describe('AlertsUpdates Component', () => {
             isTimed: true,
             expiresAt: { toDate: () => new Date(Date.now() - 3600000) }, // 1 hour ago
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
+            date: '2024-01-01T00:00:00Z',
           },
           {
             id: 'alert-active',
@@ -427,10 +445,10 @@ describe('AlertsUpdates Component', () => {
             isActive: true,
             isTimed: false,
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
-          }
+            date: '2024-01-01T00:00:00Z',
+          },
         ];
-        
+
         const mockQuerySnapshot = {
           docs: alerts.map(alert => ({
             id: alert.id,
@@ -442,9 +460,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -461,7 +479,7 @@ describe('AlertsUpdates Component', () => {
 
     it('handles Firestore timestamp objects in expiration', async () => {
       // Override the mock for this specific test
-      mockGetDocs.mockImplementationOnce((query) => {
+      mockGetDocs.mockImplementationOnce(query => {
         const alerts = [
           {
             id: 'alert-firestore',
@@ -472,10 +490,10 @@ describe('AlertsUpdates Component', () => {
             isTimed: true,
             expiresAt: { toDate: () => new Date(Date.now() + 7200000) }, // 2 hours from now
             timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-            date: '2024-01-01T00:00:00Z'
-          }
+            date: '2024-01-01T00:00:00Z',
+          },
         ];
-        
+
         const mockQuerySnapshot = {
           docs: alerts.map(alert => ({
             id: alert.id,
@@ -487,9 +505,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -507,7 +525,7 @@ describe('AlertsUpdates Component', () => {
 
   describe('Error Handling', () => {
     it('handles saved trails fetch error', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.reject(new Error('Network error'));
         }
@@ -519,12 +537,16 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
     it('handles individual trail alerts fetch error', async () => {
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         throw new Error('Firestore error');
       });
 
@@ -533,16 +555,18 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
     it('handles malformed saved trails data', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({}) // Missing arrays
+            json: () => Promise.resolve({}), // Missing arrays
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -553,7 +577,11 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No saved trails found. Add trails to your favorites, wishlist, or completed list to see alerts.'
+          )
+        ).toBeInTheDocument();
       });
     });
   });
@@ -618,13 +646,15 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
     it('handles alerts without dates', async () => {
       // Override the mock for this specific test
-      mockGetDocs.mockImplementationOnce((query) => {
+      mockGetDocs.mockImplementationOnce(query => {
         const alerts = [
           {
             id: 'alert-no-date',
@@ -633,10 +663,10 @@ describe('AlertsUpdates Component', () => {
             message: 'Trail closed due to weather',
             isActive: true,
             isTimed: false,
-            timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') }
-          }
+            timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
+          },
         ];
-        
+
         const mockQuerySnapshot = {
           docs: alerts.map(alert => ({
             id: alert.id,
@@ -646,9 +676,9 @@ describe('AlertsUpdates Component', () => {
               message: alert.message,
               isActive: alert.isActive,
               isTimed: alert.isTimed,
-              timestamp: alert.timestamp
-            })
-          }))
+              timestamp: alert.timestamp,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -674,25 +704,26 @@ describe('AlertsUpdates Component', () => {
           isActive: true,
           isTimed: false,
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
-        }
+          date: '2024-01-01T00:00:00Z',
+        },
       ];
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1' }], // No name property
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1' }], // No name property
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
           docs: alertsWithoutTrailNames.map(alert => ({
             id: alert.id,
@@ -703,9 +734,9 @@ describe('AlertsUpdates Component', () => {
               isActive: alert.isActive,
               isTimed: alert.isTimed,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -725,13 +756,17 @@ describe('AlertsUpdates Component', () => {
   describe('Loading States', () => {
     it('shows loading while fetching user data', async () => {
       // Mock slow user data fetch
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return new Promise(resolve => {
-            setTimeout(() => resolve({
-              ok: true,
-              json: () => Promise.resolve(mockSavedTrails)
-            }), 100);
+            setTimeout(
+              () =>
+                resolve({
+                  ok: true,
+                  json: () => Promise.resolve(mockSavedTrails),
+                }),
+              100
+            );
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -746,17 +781,17 @@ describe('AlertsUpdates Component', () => {
 
     it('shows loading while fetching alerts', async () => {
       // Mock slow alerts fetch
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve(mockSavedTrails)
+            json: () => Promise.resolve(mockSavedTrails),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         return new Promise(resolve => {
           setTimeout(() => resolve({ docs: [] }), 100);
         });
@@ -772,9 +807,9 @@ describe('AlertsUpdates Component', () => {
 
   describe('Edge Cases', () => {
     it('handles null or undefined alert arrays', async () => {
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
-          docs: null
+          docs: null,
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -784,40 +819,45 @@ describe('AlertsUpdates Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('No active alerts for your saved trails at this time.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No active alerts for your saved trails at this time.')
+        ).toBeInTheDocument();
       });
     });
 
     it('handles duplicate trails across categories by deduplicating them', async () => {
       // Test case where the same trail appears in multiple categories
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
-              wishlist: [{ id: 'trail-1', name: 'Test Trail 1' }], // Same trail in wishlist
-              completed: [{ id: 'trail-1', name: 'Test Trail 1' }] // Same trail in completed
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+                wishlist: [{ id: 'trail-1', name: 'Test Trail 1' }], // Same trail in wishlist
+                completed: [{ id: 'trail-1', name: 'Test Trail 1' }], // Same trail in completed
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
-          docs: [{
-            id: 'alert-1',
-            data: () => ({
-              trailId: 'trail-1',
-              type: 'authority',
-              message: 'Trail closed',
-              isActive: true,
-              isTimed: false,
-              timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-              date: '2024-01-01T00:00:00Z'
-            })
-          }]
+          docs: [
+            {
+              id: 'alert-1',
+              data: () => ({
+                trailId: 'trail-1',
+                type: 'authority',
+                message: 'Trail closed',
+                isActive: true,
+                isTimed: false,
+                timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
+                date: '2024-01-01T00:00:00Z',
+              }),
+            },
+          ],
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -830,10 +870,12 @@ describe('AlertsUpdates Component', () => {
         // Should display only one alert even though trail appears in 3 categories
         const alertElements = screen.getAllByText('Trail closed');
         expect(alertElements).toHaveLength(1);
-        
+
         // Should show count of unique trails (1) not total (3)
         const trackingElements = screen.getAllByText((content, element) => {
-          return element?.textContent === 'Tracking alerts for 1 saved trails, with 1 active alerts';
+          return (
+            element?.textContent === 'Tracking alerts for 1 saved trails, with 1 active alerts'
+          );
         });
         expect(trackingElements.length).toBeGreaterThan(0);
       });
@@ -849,7 +891,7 @@ describe('AlertsUpdates Component', () => {
           isActive: true,
           isTimed: false,
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
+          date: '2024-01-01T00:00:00Z',
         },
         {
           id: 'alert-1',
@@ -859,25 +901,26 @@ describe('AlertsUpdates Component', () => {
           isActive: true,
           isTimed: false,
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
-        }
+          date: '2024-01-01T00:00:00Z',
+        },
       ];
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
           docs: duplicateAlerts.map(alert => ({
             id: alert.id,
@@ -888,9 +931,9 @@ describe('AlertsUpdates Component', () => {
               isActive: alert.isActive,
               isTimed: alert.isTimed,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -907,8 +950,9 @@ describe('AlertsUpdates Component', () => {
     });
 
     it('handles very long alert messages', async () => {
-      const longMessage = 'This is a very long alert message that should be displayed properly without breaking the layout or causing any issues with the component rendering. It should wrap correctly and maintain readability.';
-      
+      const longMessage =
+        'This is a very long alert message that should be displayed properly without breaking the layout or causing any issues with the component rendering. It should wrap correctly and maintain readability.';
+
       const longAlert = [
         {
           id: 'alert-long',
@@ -918,25 +962,26 @@ describe('AlertsUpdates Component', () => {
           isActive: true,
           isTimed: false,
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
-        }
+          date: '2024-01-01T00:00:00Z',
+        },
       ];
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
           docs: longAlert.map(alert => ({
             id: alert.id,
@@ -947,9 +992,9 @@ describe('AlertsUpdates Component', () => {
               isActive: alert.isActive,
               isTimed: alert.isTimed,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -984,25 +1029,26 @@ describe('AlertsUpdates Component', () => {
           isTimed: true,
           expiresAt: { toDate: () => new Date(Date.now() + 3661000) }, // 1 hour, 1 minute, 1 second
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
-        }
+          date: '2024-01-01T00:00:00Z',
+        },
       ];
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
           docs: timedAlert.map(alert => ({
             id: alert.id,
@@ -1014,9 +1060,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });
@@ -1049,25 +1095,26 @@ describe('AlertsUpdates Component', () => {
           isTimed: true,
           expiresAt: { toDate: () => new Date(Date.now() + 1000) }, // 1 second from now
           timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
-          date: '2024-01-01T00:00:00Z'
-        }
+          date: '2024-01-01T00:00:00Z',
+        },
       ];
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1', name: 'Test Trail 1' }],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       });
 
-      mockGetDocs.mockImplementation((query) => {
+      mockGetDocs.mockImplementation(query => {
         const mockQuerySnapshot = {
           docs: expiringAlert.map(alert => ({
             id: alert.id,
@@ -1079,9 +1126,9 @@ describe('AlertsUpdates Component', () => {
               isTimed: alert.isTimed,
               expiresAt: alert.expiresAt,
               timestamp: alert.timestamp,
-              date: alert.date
-            })
-          }))
+              date: alert.date,
+            }),
+          })),
         };
         return Promise.resolve(mockQuerySnapshot);
       });

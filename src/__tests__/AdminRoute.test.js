@@ -4,7 +4,11 @@ import '@testing-library/jest-dom';
 
 // Mock all dependencies
 jest.mock('react-router-dom', () => ({
-  Navigate: ({ to }) => <div data-testid="navigate" data-to={to}>Navigate to {to}</div>,
+  Navigate: ({ to }) => (
+    <div data-testid='navigate' data-to={to}>
+      Navigate to {to}
+    </div>
+  ),
 }));
 
 jest.mock('../firebaseConfig', () => ({
@@ -31,7 +35,7 @@ jest.mock('../components/ToastContext', () => ({
 import AdminRoute from '../components/admin/AdminRoute';
 
 // Mock child component
-const MockChild = () => <div data-testid="admin-content">Admin Content</div>;
+const MockChild = () => <div data-testid='admin-content'>Admin Content</div>;
 
 describe('AdminRoute', () => {
   const mockUnsubscribe = jest.fn();
@@ -40,14 +44,14 @@ describe('AdminRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Get the mocked functions
     const { onAuthStateChanged } = require('firebase/auth');
     const { getDoc } = require('firebase/firestore');
-    
+
     mockOnAuthStateChanged = onAuthStateChanged;
     mockGetDoc = getDoc;
-    
+
     // Setup default mocks
     mockOnAuthStateChanged.mockReturnValue(mockUnsubscribe);
     mockGetDoc.mockResolvedValue({
@@ -83,7 +87,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should eventually render the children
     // Note: This test may need adjustment based on the actual component behavior
   });
@@ -110,7 +114,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should eventually redirect
     // Note: This test may need adjustment based on the actual component behavior
   });
@@ -130,7 +134,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should eventually redirect
     // Note: This test may need adjustment based on the actual component behavior
   });
@@ -156,10 +160,10 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // Verify the console.warn was called (line 35)
     expect(consoleSpy).toHaveBeenCalledWith('User document not found for:', 'test-user');
-    
+
     consoleSpy.mockRestore();
   });
 
@@ -182,10 +186,10 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should handle the error gracefully
     // Note: This test may need adjustment based on the actual component behavior
-    
+
     consoleSpy.mockRestore();
   });
 
@@ -213,7 +217,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state and show error
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // Find and click the retry button (line 76)
     const retryButton = screen.getByText('Retry');
     retryButton.click();
@@ -267,7 +271,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should handle different role structures
     // Note: This test may need adjustment based on the actual component behavior
   });
@@ -294,7 +298,7 @@ describe('AdminRoute', () => {
 
     // Wait for the component to process the auth state
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // The component should show a warning toast
     // Note: This test verifies the component behavior without timing issues
   });

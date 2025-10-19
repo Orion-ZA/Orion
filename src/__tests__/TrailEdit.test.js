@@ -58,9 +58,7 @@ function setup(overrides = {}) {
 
 describe('TrailEdit', () => {
   it('renders nothing when isOpen is false', () => {
-    const { container } = render(
-      <TrailEdit isOpen={false} editTrailData={baseEditTrailData} />
-    );
+    const { container } = render(<TrailEdit isOpen={false} editTrailData={baseEditTrailData} />);
     expect(container.firstChild).toBeNull();
   });
 
@@ -187,10 +185,14 @@ describe('TrailEdit', () => {
     expect(undoBtn).not.toBeDisabled();
     fireEvent.click(undoBtn);
     fireEvent.click(redoBtn);
-    
+
     // Click clear button - should show custom dialog
     fireEvent.click(clearBtn);
-    expect(screen.getByText('Are you sure you want to clear the entire route? This will remove all GPS points.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Are you sure you want to clear the entire route? This will remove all GPS points.'
+      )
+    ).toBeInTheDocument();
     expect(document.querySelector('.confirm-dialog-title')).toHaveTextContent('Clear Route');
   });
 
@@ -249,16 +251,22 @@ describe('TrailEdit', () => {
 
     const clearBtn = screen.getByText('Clear');
     fireEvent.click(clearBtn);
-    
+
     // Should show custom dialog
-    expect(screen.getByText('Are you sure you want to clear the entire route? This will remove all GPS points.')).toBeInTheDocument();
-    
+    expect(
+      screen.getByText(
+        'Are you sure you want to clear the entire route? This will remove all GPS points.'
+      )
+    ).toBeInTheDocument();
+
     // Click cancel button
     const cancelBtn = document.querySelector('.confirm-btn.cancel');
     fireEvent.click(cancelBtn);
-    
+
     // Dialog should be closed and buttons should still be present since clear was cancelled
-    expect(screen.queryByText('Are you sure you want to clear the entire route')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Are you sure you want to clear the entire route')
+    ).not.toBeInTheDocument();
     expect(screen.getByTitle('Undo last point')).toBeInTheDocument();
   });
 
@@ -267,7 +275,9 @@ describe('TrailEdit', () => {
     setup({ onSubmit });
 
     fireEvent.change(screen.getByLabelText('Trail Name *'), { target: { value: 'Updated Trail' } });
-    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated description' } });
+    fireEvent.change(screen.getByLabelText('Description'), {
+      target: { value: 'Updated description' },
+    });
     fireEvent.change(screen.getByLabelText('Difficulty *'), { target: { value: 'Moderate' } });
     // distance editable because no route points
     fireEvent.change(screen.getByLabelText('Distance (km) *'), { target: { value: '5.4' } });
@@ -310,28 +320,32 @@ describe('TrailEdit', () => {
   it('shows delete button and opens delete confirmation dialog', () => {
     const onDelete = jest.fn();
     setup({ onDelete });
-    
+
     const deleteBtn = screen.getByTitle('Delete this trail');
     expect(deleteBtn).toBeInTheDocument();
-    
+
     fireEvent.click(deleteBtn);
-    
+
     // Should show custom delete dialog
-    expect(screen.getByText(`Are you sure you want to delete "${baseEditTrailData.name}"? This action cannot be undone.`)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `Are you sure you want to delete "${baseEditTrailData.name}"? This action cannot be undone.`
+      )
+    ).toBeInTheDocument();
     expect(document.querySelector('.confirm-dialog-title')).toHaveTextContent('Delete Trail');
   });
 
   it('calls onDelete when delete is confirmed', async () => {
     const onDelete = jest.fn(() => Promise.resolve());
     setup({ onDelete });
-    
+
     const deleteBtn = screen.getByTitle('Delete this trail');
     fireEvent.click(deleteBtn);
-    
+
     // Click confirm in the dialog (the button with danger class)
     const confirmBtn = document.querySelector('.confirm-btn.danger');
     fireEvent.click(confirmBtn);
-    
+
     await waitFor(() => {
       expect(onDelete).toHaveBeenCalledWith(baseEditTrailData.id);
     });
@@ -340,14 +354,14 @@ describe('TrailEdit', () => {
   it('cancels delete when cancel button is clicked', () => {
     const onDelete = jest.fn();
     setup({ onDelete });
-    
+
     const deleteBtn = screen.getByTitle('Delete this trail');
     fireEvent.click(deleteBtn);
-    
+
     // Click cancel in the dialog
     const cancelBtn = document.querySelector('.confirm-btn.cancel');
     fireEvent.click(cancelBtn);
-    
+
     // Dialog should be closed and onDelete should not be called
     expect(screen.queryByText('Are you sure you want to delete')).not.toBeInTheDocument();
     expect(onDelete).not.toHaveBeenCalled();
@@ -356,14 +370,14 @@ describe('TrailEdit', () => {
   it('shows loading state in delete dialog when submitting', () => {
     const onDelete = jest.fn();
     setup({ onDelete });
-    
+
     const deleteBtn = screen.getByTitle('Delete this trail');
     fireEvent.click(deleteBtn);
-    
+
     // Should show loading state in the dialog when isSubmitting is true
     // We need to simulate the loading state by checking if the dialog shows the loading text
     expect(document.querySelector('.confirm-dialog-title')).toHaveTextContent('Delete Trail');
-    
+
     // The dialog should be present and ready to show loading state
     const dialog = document.querySelector('.confirm-dialog');
     expect(dialog).toBeInTheDocument();
@@ -383,16 +397,22 @@ describe('TrailEdit', () => {
 
     const clearBtn = screen.getByText('Clear');
     fireEvent.click(clearBtn);
-    
+
     // Should show custom dialog
-    expect(screen.getByText('Are you sure you want to clear the entire route? This will remove all GPS points.')).toBeInTheDocument();
-    
+    expect(
+      screen.getByText(
+        'Are you sure you want to clear the entire route? This will remove all GPS points.'
+      )
+    ).toBeInTheDocument();
+
     // Click confirm button (the button with warning class)
     const confirmBtn = document.querySelector('.confirm-btn.warning');
     fireEvent.click(confirmBtn);
-    
+
     // Dialog should be closed and route should be cleared
-    expect(screen.queryByText('Are you sure you want to clear the entire route')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Are you sure you want to clear the entire route')
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/1 points/)).not.toBeInTheDocument();
   });
 });
@@ -402,21 +422,21 @@ jest.mock('lucide-react', () => {
   const original = jest.requireActual('lucide-react');
   return {
     ...original,
-    CheckCircle: (props) => <svg data-testid="check-circle" {...props} />,
-    AlertCircle: (props) => <svg data-testid="alert-circle" {...props} />,
-    X: (props) => <svg {...props} />,
-    Upload: (props) => <svg {...props} />,
-    Plus: (props) => <svg {...props} />,
-    Loader2: (props) => <svg {...props} />,
-    MapPin: (props) => <svg {...props} />,
-    Map: (props) => <svg {...props} />,
-    Edit3: (props) => <svg {...props} />,
-    Trash2: (props) => <svg {...props} />,
-    Play: (props) => <svg {...props} />,
-    Square: (props) => <svg {...props} />,
-    Ruler: (props) => <svg {...props} />,
-    Image: (props) => <svg {...props} />,
-    Undo2: (props) => <svg {...props} />,
-    Redo2: (props) => <svg {...props} />,
+    CheckCircle: props => <svg data-testid='check-circle' {...props} />,
+    AlertCircle: props => <svg data-testid='alert-circle' {...props} />,
+    X: props => <svg {...props} />,
+    Upload: props => <svg {...props} />,
+    Plus: props => <svg {...props} />,
+    Loader2: props => <svg {...props} />,
+    MapPin: props => <svg {...props} />,
+    Map: props => <svg {...props} />,
+    Edit3: props => <svg {...props} />,
+    Trash2: props => <svg {...props} />,
+    Play: props => <svg {...props} />,
+    Square: props => <svg {...props} />,
+    Ruler: props => <svg {...props} />,
+    Image: props => <svg {...props} />,
+    Undo2: props => <svg {...props} />,
+    Redo2: props => <svg {...props} />,
   };
 });

@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 
 // Mock Firebase
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock Firestore functions
@@ -16,7 +16,7 @@ jest.mock('firebase/firestore', () => ({
   updateDoc: jest.fn(),
   query: jest.fn(),
   orderBy: jest.fn(),
-  where: jest.fn()
+  where: jest.fn(),
 }));
 
 // Import Firestore functions for mocking
@@ -24,20 +24,27 @@ import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  MapPin: () => <div data-testid="map-pin-icon" />,
-  MessageSquare: () => <div data-testid="message-square-icon" />,
-  AlertTriangle: () => <div data-testid="alert-triangle-icon" />,
-  Flag: () => <div data-testid="flag-icon" />,
-  ChevronDown: () => <div data-testid="chevron-down-icon" />,
-  ChevronUp: () => <div data-testid="chevron-up-icon" />,
-  Edit: () => <div data-testid="edit-icon" />,
-  Trash2: () => <div data-testid="trash-icon" />,
-  X: () => <div data-testid="x-icon" />
+  MapPin: () => <div data-testid='map-pin-icon' />,
+  MessageSquare: () => <div data-testid='message-square-icon' />,
+  AlertTriangle: () => <div data-testid='alert-triangle-icon' />,
+  Flag: () => <div data-testid='flag-icon' />,
+  ChevronDown: () => <div data-testid='chevron-down-icon' />,
+  ChevronUp: () => <div data-testid='chevron-up-icon' />,
+  Edit: () => <div data-testid='edit-icon' />,
+  Trash2: () => <div data-testid='trash-icon' />,
+  X: () => <div data-testid='x-icon' />,
 }));
 
 // Mock child components
 jest.mock('../components/admin/TrailCard', () => {
-  return function MockTrailCard({ trail, onEdit, onDelete, onToggleExpansion, onDeleteReview, onDeleteAlert }) {
+  return function MockTrailCard({
+    trail,
+    onEdit,
+    onDelete,
+    onToggleExpansion,
+    onDeleteReview,
+    onDeleteAlert,
+  }) {
     return (
       <div data-testid={`trail-card-${trail.id}`}>
         <h3>{trail.name}</h3>
@@ -50,7 +57,10 @@ jest.mock('../components/admin/TrailCard', () => {
         <button onClick={() => onToggleExpansion(trail.id)} data-testid={`expand-${trail.id}`}>
           Expand
         </button>
-        <button onClick={() => onDeleteReview('review1', trail.id, trail.name)} data-testid={`delete-review-${trail.id}`}>
+        <button
+          onClick={() => onDeleteReview('review1', trail.id, trail.name)}
+          data-testid={`delete-review-${trail.id}`}
+        >
           Delete Review
         </button>
         <button onClick={() => onDeleteAlert('alert1')} data-testid={`delete-alert-${trail.id}`}>
@@ -65,28 +75,45 @@ jest.mock('../components/admin/DeleteConfirmationModal', () => {
   return function MockDeleteConfirmationModal({ isVisible, deleteConfirm, onConfirm, onCancel }) {
     if (!isVisible) return null;
     return (
-      <div data-testid="delete-confirmation-modal">
-        <p>Delete {deleteConfirm?.type}: {deleteConfirm?.name || deleteConfirm?.id}</p>
-        <button onClick={onConfirm} data-testid="confirm-delete">Confirm</button>
-        <button onClick={onCancel} data-testid="cancel-delete">Cancel</button>
+      <div data-testid='delete-confirmation-modal'>
+        <p>
+          Delete {deleteConfirm?.type}: {deleteConfirm?.name || deleteConfirm?.id}
+        </p>
+        <button onClick={onConfirm} data-testid='confirm-delete'>
+          Confirm
+        </button>
+        <button onClick={onCancel} data-testid='cancel-delete'>
+          Cancel
+        </button>
       </div>
     );
   };
 });
 
 jest.mock('../components/admin/EditTrailModal', () => {
-  return function MockEditTrailModal({ isVisible, editTrail, editForm, onClose, onSave, onFormChange }) {
+  return function MockEditTrailModal({
+    isVisible,
+    editTrail,
+    editForm,
+    onClose,
+    onSave,
+    onFormChange,
+  }) {
     if (!isVisible) return null;
     return (
-      <div data-testid="edit-trail-modal">
+      <div data-testid='edit-trail-modal'>
         <h3>Edit {editTrail?.name}</h3>
         <input
-          data-testid="edit-name"
+          data-testid='edit-name'
           value={editForm.name}
-          onChange={(e) => onFormChange('name', e.target.value)}
+          onChange={e => onFormChange('name', e.target.value)}
         />
-        <button onClick={onSave} data-testid="save-trail">Save</button>
-        <button onClick={onClose} data-testid="close-edit">Close</button>
+        <button onClick={onSave} data-testid='save-trail'>
+          Save
+        </button>
+        <button onClick={onClose} data-testid='close-edit'>
+          Close
+        </button>
       </div>
     );
   };
@@ -95,11 +122,11 @@ jest.mock('../components/admin/EditTrailModal', () => {
 jest.mock('../components/admin/TrailsSearchComponent', () => {
   return function MockTrailsSearchComponent({ onSearch, placeholder }) {
     return (
-      <div data-testid="search-component">
+      <div data-testid='search-component'>
         <input
-          data-testid="search-input"
+          data-testid='search-input'
           placeholder={placeholder}
-          onChange={(e) => onSearch(e.target.value)}
+          onChange={e => onSearch(e.target.value)}
         />
       </div>
     );
@@ -110,9 +137,11 @@ jest.mock('../components/SuccessPopup', () => {
   return function MockSuccessPopup({ isVisible, message, onClose }) {
     if (!isVisible) return null;
     return (
-      <div data-testid="success-popup">
+      <div data-testid='success-popup'>
         <p>{message}</p>
-        <button onClick={onClose} data-testid="close-success">Close</button>
+        <button onClick={onClose} data-testid='close-success'>
+          Close
+        </button>
       </div>
     );
   };
@@ -120,15 +149,15 @@ jest.mock('../components/SuccessPopup', () => {
 
 // Mock the hooks
 jest.mock('../hooks/useTrailsData', () => ({
-  useTrailsData: jest.fn()
+  useTrailsData: jest.fn(),
 }));
 
 jest.mock('../hooks/useTrailReviews', () => ({
-  useTrailReviews: jest.fn()
+  useTrailReviews: jest.fn(),
 }));
 
 jest.mock('../hooks/useTrailAlerts', () => ({
-  useTrailAlerts: jest.fn()
+  useTrailAlerts: jest.fn(),
 }));
 
 // Import the component after mocks are set up
@@ -152,16 +181,16 @@ describe('TrailsManagement', () => {
         status: 'open',
         photos: ['photo1.jpg', 'photo2.jpg'],
         createdBy: 'user1',
-        location: { lat: 40.7128, lng: -74.0060 },
+        location: { lat: 40.7128, lng: -74.006 },
         createdAt: new Date('2024-01-01'),
-        lastUpdated: new Date('2024-01-01')
-      }
+        lastUpdated: new Date('2024-01-01'),
+      },
     ],
     loading: false,
     error: null,
     deleteTrail: jest.fn().mockResolvedValue(true),
     updateTrail: jest.fn().mockResolvedValue(true),
-    setError: jest.fn()
+    setError: jest.fn(),
   };
 
   const defaultReviewsData = {
@@ -172,13 +201,13 @@ describe('TrailsManagement', () => {
           rating: 4,
           comment: 'Great trail!',
           userId: 'user1',
-          timestamp: new Date('2024-01-01')
-        }
-      ]
+          timestamp: new Date('2024-01-01'),
+        },
+      ],
     },
     loadingStates: { reviews: { trail1: false } },
     fetchTrailReviews: jest.fn(),
-    deleteReview: jest.fn().mockResolvedValue(true)
+    deleteReview: jest.fn().mockResolvedValue(true),
   };
 
   const defaultAlertsData = {
@@ -189,35 +218,35 @@ describe('TrailsManagement', () => {
           type: 'maintenance',
           message: 'Trail under maintenance',
           isActive: true,
-          timestamp: new Date('2024-01-01')
-        }
-      ]
+          timestamp: new Date('2024-01-01'),
+        },
+      ],
     },
     loadingStates: { alerts: { trail1: false } },
     fetchTrailAlerts: jest.fn(),
-    deleteAlert: jest.fn().mockResolvedValue({ success: true, trailId: 'trail1' })
+    deleteAlert: jest.fn().mockResolvedValue({ success: true, trailId: 'trail1' }),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock console.log to avoid noise in tests
     jest.spyOn(console, 'log').mockImplementation(() => {});
-    
+
     // Set default mock implementations
     useTrailsData.mockReturnValue({
       ...defaultTrailsData,
       deleteTrail: jest.fn().mockResolvedValue(true),
-      updateTrail: jest.fn().mockResolvedValue(true)
+      updateTrail: jest.fn().mockResolvedValue(true),
     });
     useTrailReviews.mockReturnValue({
       ...defaultReviewsData,
-      deleteReview: jest.fn().mockResolvedValue(true)
+      deleteReview: jest.fn().mockResolvedValue(true),
     });
     useTrailAlerts.mockReturnValue({
       ...defaultAlertsData,
-      deleteAlert: jest.fn().mockResolvedValue({ success: true, trailId: 'trail1' })
+      deleteAlert: jest.fn().mockResolvedValue({ success: true, trailId: 'trail1' }),
     });
-    
+
     // Mock Firestore functions for counts
     collection.mockImplementation((db, collectionName, docId, subCollection) => {
       if (subCollection === 'reviews') {
@@ -231,8 +260,8 @@ describe('TrailsManagement', () => {
       }
       return { path: 'mock-collection' };
     });
-    
-    getDocs.mockImplementation((ref) => {
+
+    getDocs.mockImplementation(ref => {
       // Mock reviews count
       if (ref.path && ref.path.includes('reviews')) {
         return Promise.resolve({ size: 1 });
@@ -243,14 +272,14 @@ describe('TrailsManagement', () => {
       }
       // Mock reports
       if (ref.path && ref.path.includes('Reports')) {
-        return Promise.resolve({ 
+        return Promise.resolve({
           docs: [],
-          size: 0
+          size: 0,
         });
       }
       return Promise.resolve({ size: 0 });
     });
-    
+
     query.mockReturnValue({ path: 'Alerts' });
     orderBy.mockReturnValue({});
     where.mockReturnValue({});
@@ -284,12 +313,12 @@ describe('TrailsManagement', () => {
       render(<TrailsManagement />);
 
       expect(screen.getByText('1 Trails')).toBeInTheDocument();
-      
+
       // Wait for async operations to complete
       await waitFor(() => {
         expect(screen.getByText('1 Reviews')).toBeInTheDocument();
       });
-      
+
       await waitFor(() => {
         expect(screen.getByText('1 Alerts')).toBeInTheDocument();
       });
@@ -306,7 +335,7 @@ describe('TrailsManagement', () => {
     it('shows loading state', () => {
       useTrailsData.mockReturnValue({
         ...defaultTrailsData,
-        loading: true
+        loading: true,
       });
 
       render(<TrailsManagement />);
@@ -318,7 +347,7 @@ describe('TrailsManagement', () => {
       useTrailsData.mockReturnValue({
         ...defaultTrailsData,
         loading: false,
-        error: 'Failed to load trails'
+        error: 'Failed to load trails',
       });
 
       render(<TrailsManagement />);
@@ -368,15 +397,15 @@ describe('TrailsManagement', () => {
     it('toggles trail expansion when expand button is clicked', () => {
       const mockFetchTrailReviews = jest.fn();
       const mockFetchTrailAlerts = jest.fn();
-      
+
       useTrailReviews.mockReturnValue({
         ...defaultReviewsData,
-        fetchTrailReviews: mockFetchTrailReviews
+        fetchTrailReviews: mockFetchTrailReviews,
       });
-      
+
       useTrailAlerts.mockReturnValue({
         ...defaultAlertsData,
-        fetchTrailAlerts: mockFetchTrailAlerts
+        fetchTrailAlerts: mockFetchTrailAlerts,
       });
 
       render(<TrailsManagement />);
@@ -422,7 +451,7 @@ describe('TrailsManagement', () => {
       const mockDeleteTrail = jest.fn().mockResolvedValue(true);
       useTrailsData.mockReturnValue({
         ...defaultTrailsData,
-        deleteTrail: mockDeleteTrail
+        deleteTrail: mockDeleteTrail,
       });
 
       render(<TrailsManagement />);
@@ -460,16 +489,16 @@ describe('TrailsManagement', () => {
       const mockUpdateTrail = jest.fn().mockResolvedValue(true);
       useTrailsData.mockReturnValue({
         ...defaultTrailsData,
-        updateTrail: mockUpdateTrail
+        updateTrail: mockUpdateTrail,
       });
 
       render(<TrailsManagement />);
 
       fireEvent.click(screen.getByTestId('edit-trail1'));
-      
+
       const nameInput = screen.getByTestId('edit-name');
       fireEvent.change(nameInput, { target: { value: 'Updated Trail Name' } });
-      
+
       fireEvent.click(screen.getByTestId('save-trail'));
 
       await waitFor(() => {
@@ -502,7 +531,7 @@ describe('TrailsManagement', () => {
       const mockDeleteReview = jest.fn().mockResolvedValue(true);
       useTrailReviews.mockReturnValue({
         ...defaultReviewsData,
-        deleteReview: mockDeleteReview
+        deleteReview: mockDeleteReview,
       });
 
       render(<TrailsManagement />);
@@ -540,7 +569,7 @@ describe('TrailsManagement', () => {
       const mockDeleteAlert = jest.fn().mockResolvedValue({ success: true, trailId: 'trail1' });
       useTrailAlerts.mockReturnValue({
         ...defaultAlertsData,
-        deleteAlert: mockDeleteAlert
+        deleteAlert: mockDeleteAlert,
       });
 
       render(<TrailsManagement />);
@@ -587,7 +616,7 @@ describe('TrailsManagement', () => {
     it('handles empty trails array', () => {
       useTrailsData.mockReturnValue({
         ...defaultTrailsData,
-        trails: []
+        trails: [],
       });
 
       render(<TrailsManagement />);
@@ -612,9 +641,9 @@ describe('TrailsManagement', () => {
             createdBy: null,
             location: null,
             createdAt: null,
-            lastUpdated: null
-          }
-        ]
+            lastUpdated: null,
+          },
+        ],
       });
 
       render(<TrailsManagement />);
@@ -628,9 +657,9 @@ describe('TrailsManagement', () => {
         trails: [
           {
             ...defaultTrailsData.trails[0],
-            tags: 'scenic,easy'
-          }
-        ]
+            tags: 'scenic,easy',
+          },
+        ],
       });
 
       render(<TrailsManagement />);
@@ -670,7 +699,11 @@ describe('TrailsManagement', () => {
 
       fireEvent.click(screen.getByTestId('delete-trail1'));
 
-      expect(consoleSpy).toHaveBeenCalledWith('Delete trail called with:', 'trail1', 'Test Trail 1');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Delete trail called with:',
+        'trail1',
+        'Test Trail 1'
+      );
     });
   });
 

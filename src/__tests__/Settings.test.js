@@ -20,24 +20,24 @@ jest.mock('firebase/auth', () => ({
   reauthenticateWithCredential: jest.fn(),
   deleteUser: jest.fn(),
   EmailAuthProvider: {
-    credential: jest.fn((email, password) => ({ email, password }))
-  }
+    credential: jest.fn((email, password) => ({ email, password })),
+  },
 }));
 
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(() => ({ id: 'mock-doc' })),
-  updateDoc: jest.fn()
+  updateDoc: jest.fn(),
 }));
 
 jest.mock('../firebaseConfig', () => ({
   auth: {
-    onAuthStateChanged: jest.fn()
+    onAuthStateChanged: jest.fn(),
   },
   db: {
     // Mock Firestore instance
     collection: jest.fn(),
-    doc: jest.fn()
-  }
+    doc: jest.fn(),
+  },
 }));
 
 // Mock react-router-dom
@@ -49,7 +49,13 @@ const { auth } = require('../firebaseConfig');
 const mockOnAuthStateChanged = auth.onAuthStateChanged;
 
 // Get the mocked Firebase functions
-const { updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, deleteUser } = require('firebase/auth');
+const {
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  reauthenticateWithCredential,
+  deleteUser,
+} = require('firebase/auth');
 const { updateDoc } = require('firebase/firestore');
 
 // Assign the mock functions
@@ -65,19 +71,17 @@ const mockConfirm = jest.fn();
 const mockPrompt = jest.fn();
 Object.defineProperty(window, 'confirm', {
   value: mockConfirm,
-  writable: true
+  writable: true,
 });
 Object.defineProperty(window, 'prompt', {
   value: mockPrompt,
-  writable: true
+  writable: true,
 });
 
 // Test wrapper component
 const TestWrapper = ({ children }) => (
   <ThemeProvider>
-    <ToastProvider>
-      {children}
-    </ToastProvider>
+    <ToastProvider>{children}</ToastProvider>
   </ThemeProvider>
 );
 
@@ -85,7 +89,7 @@ describe('SettingsPage', () => {
   const mockUser = {
     uid: 'test-uid',
     email: 'test@example.com',
-    displayName: 'Test User'
+    displayName: 'Test User',
   };
 
   const mockUnsubscribe = jest.fn();
@@ -301,7 +305,7 @@ describe('SettingsPage', () => {
 
     it('updates form fields when user types', async () => {
       const displayNameInput = screen.getByDisplayValue('Test User');
-      
+
       await userEvent.clear(displayNameInput);
       await userEvent.type(displayNameInput, 'New Name');
 
@@ -318,7 +322,7 @@ describe('SettingsPage', () => {
 
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(mockUser, {
-          displayName: 'Updated Name'
+          displayName: 'Updated Name',
         });
         expect(mockUpdateDoc).toHaveBeenCalled();
       });
@@ -421,7 +425,7 @@ describe('SettingsPage', () => {
     it('toggles password visibility', async () => {
       const currentPasswordInput = screen.getByPlaceholderText('Enter your current password');
       const toggleButtons = screen.getAllByRole('button');
-      const toggleButton = toggleButtons.find(button => 
+      const toggleButton = toggleButtons.find(button =>
         button.classList.contains('password-toggle')
       );
 
@@ -437,16 +441,18 @@ describe('SettingsPage', () => {
     it('toggles new password visibility independently', async () => {
       const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
       const confirmPasswordInput = screen.getByPlaceholderText('Confirm your new password');
-      
+
       // Find all password toggle buttons
       const toggleButtons = screen.getAllByRole('button');
-      const newPasswordToggle = toggleButtons.find(button => 
-        button.classList.contains('password-toggle') && 
-        button.closest('.form-group').querySelector('input[placeholder*="new password"]')
+      const newPasswordToggle = toggleButtons.find(
+        button =>
+          button.classList.contains('password-toggle') &&
+          button.closest('.form-group').querySelector('input[placeholder*="new password"]')
       );
-      const confirmPasswordToggle = toggleButtons.find(button => 
-        button.classList.contains('password-toggle') && 
-        button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
+      const confirmPasswordToggle = toggleButtons.find(
+        button =>
+          button.classList.contains('password-toggle') &&
+          button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
       );
 
       // Initially all password inputs should be type="password"
@@ -471,7 +477,7 @@ describe('SettingsPage', () => {
 
     it('shows correct eye icons for password visibility toggles', async () => {
       const toggleButtons = screen.getAllByRole('button');
-      const passwordToggles = toggleButtons.filter(button => 
+      const passwordToggles = toggleButtons.filter(button =>
         button.classList.contains('password-toggle')
       );
 
@@ -493,19 +499,22 @@ describe('SettingsPage', () => {
       const currentPasswordInput = screen.getByPlaceholderText('Enter your current password');
       const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
       const confirmPasswordInput = screen.getByPlaceholderText('Confirm your new password');
-      
+
       const toggleButtons = screen.getAllByRole('button');
-      const currentToggle = toggleButtons.find(button => 
-        button.classList.contains('password-toggle') && 
-        button.closest('.form-group').querySelector('input[placeholder*="current password"]')
+      const currentToggle = toggleButtons.find(
+        button =>
+          button.classList.contains('password-toggle') &&
+          button.closest('.form-group').querySelector('input[placeholder*="current password"]')
       );
-      const newToggle = toggleButtons.find(button => 
-        button.classList.contains('password-toggle') && 
-        button.closest('.form-group').querySelector('input[placeholder*="new password"]')
+      const newToggle = toggleButtons.find(
+        button =>
+          button.classList.contains('password-toggle') &&
+          button.closest('.form-group').querySelector('input[placeholder*="new password"]')
       );
-      const confirmToggle = toggleButtons.find(button => 
-        button.classList.contains('password-toggle') && 
-        button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
+      const confirmToggle = toggleButtons.find(
+        button =>
+          button.classList.contains('password-toggle') &&
+          button.closest('.form-group').querySelector('input[placeholder*="Confirm"]')
       );
 
       // Toggle current password
@@ -620,8 +629,12 @@ describe('SettingsPage', () => {
       await userEvent.click(deleteButton);
 
       await waitFor(() => {
-        expect(mockConfirm).toHaveBeenCalledWith('Are you sure you want to delete your account? This action cannot be undone.');
-        expect(mockPrompt).toHaveBeenCalledWith('Please enter your password to confirm account deletion:');
+        expect(mockConfirm).toHaveBeenCalledWith(
+          'Are you sure you want to delete your account? This action cannot be undone.'
+        );
+        expect(mockPrompt).toHaveBeenCalledWith(
+          'Please enter your password to confirm account deletion:'
+        );
         expect(mockReauthenticateWithCredential).toHaveBeenCalled();
         expect(mockDeleteUser).toHaveBeenCalledWith(mockUser);
         expect(mockNavigate).toHaveBeenCalledWith('/');
@@ -887,45 +900,45 @@ describe('SettingsPage', () => {
 
     it('toggles email notifications', async () => {
       const emailNotificationsToggle = screen.getByLabelText(/trail recommendations and updates/i);
-      
+
       expect(emailNotificationsToggle).toBeChecked();
-      
+
       await userEvent.click(emailNotificationsToggle);
       expect(emailNotificationsToggle).not.toBeChecked();
     });
 
     it('toggles activity updates', async () => {
       const activityUpdatesToggle = screen.getByLabelText(/activity updates/i);
-      
+
       expect(activityUpdatesToggle).toBeChecked();
-      
+
       await userEvent.click(activityUpdatesToggle);
       expect(activityUpdatesToggle).not.toBeChecked();
     });
 
     it('toggles newsletter subscription', async () => {
       const newsletterToggle = screen.getByLabelText(/newsletter/i);
-      
+
       expect(newsletterToggle).not.toBeChecked();
-      
+
       await userEvent.click(newsletterToggle);
       expect(newsletterToggle).toBeChecked();
     });
 
     it('toggles public profile', async () => {
       const publicProfileToggle = screen.getByLabelText(/public profile/i);
-      
+
       expect(publicProfileToggle).toBeChecked();
-      
+
       await userEvent.click(publicProfileToggle);
       expect(publicProfileToggle).not.toBeChecked();
     });
 
     it('toggles activity status', async () => {
       const activityStatusToggle = screen.getByLabelText(/show activity status/i);
-      
+
       expect(activityStatusToggle).toBeChecked();
-      
+
       await userEvent.click(activityStatusToggle);
       expect(activityStatusToggle).not.toBeChecked();
     });
@@ -1081,7 +1094,9 @@ describe('SettingsPage', () => {
 
     it('has proper heading structure', () => {
       expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 2, name: 'Profile Information' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Profile Information' })
+      ).toBeInTheDocument();
     });
   });
 

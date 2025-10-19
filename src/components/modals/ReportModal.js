@@ -10,7 +10,7 @@ const ReportModal = ({
   trailName,
   reportType = 'general', // 'trail', 'review', 'image', 'alert', 'general'
   targetId = null, // ID of specific item being reported (review, image, alert).
-  loading = false
+  loading = false,
 }) => {
   const [reportCategory, setReportCategory] = useState('');
   const [reportDescription, setReportDescription] = useState('');
@@ -27,7 +27,7 @@ const ReportModal = ({
           { value: 'maintenance', label: 'Maintenance Needed', icon: Flag },
           { value: 'inappropriate_content', label: 'Inappropriate Content', icon: Flag },
           { value: 'duplicate', label: 'Duplicate Trail', icon: Flag },
-          { value: 'other', label: 'Other', icon: Flag }
+          { value: 'other', label: 'Other', icon: Flag },
         ];
       case 'review':
         return [
@@ -36,7 +36,7 @@ const ReportModal = ({
           { value: 'harassment', label: 'Harassment', icon: Shield },
           { value: 'false_information', label: 'False Information', icon: Info },
           { value: 'off_topic', label: 'Off Topic', icon: MessageSquare },
-          { value: 'other', label: 'Other', icon: Flag }
+          { value: 'other', label: 'Other', icon: Flag },
         ];
       case 'image':
         return [
@@ -45,7 +45,7 @@ const ReportModal = ({
           { value: 'poor_quality', label: 'Poor Quality', icon: Image },
           { value: 'duplicate', label: 'Duplicate Image', icon: Image },
           { value: 'copyright_violation', label: 'Copyright Violation', icon: Shield },
-          { value: 'other', label: 'Other', icon: Flag }
+          { value: 'other', label: 'Other', icon: Flag },
         ];
       case 'alert':
         return [
@@ -53,7 +53,7 @@ const ReportModal = ({
           { value: 'outdated', label: 'Outdated Alert', icon: AlertTriangle },
           { value: 'inappropriate', label: 'Inappropriate Content', icon: Flag },
           { value: 'spam', label: 'Spam', icon: Flag },
-          { value: 'other', label: 'Other', icon: Flag }
+          { value: 'other', label: 'Other', icon: Flag },
         ];
       default:
         return [
@@ -61,18 +61,23 @@ const ReportModal = ({
           { value: 'feature_request', label: 'Feature Request', icon: Info },
           { value: 'inappropriate_content', label: 'Inappropriate Content', icon: Flag },
           { value: 'spam', label: 'Spam', icon: Flag },
-          { value: 'other', label: 'Other', icon: Flag }
+          { value: 'other', label: 'Other', icon: Flag },
         ];
     }
   };
 
   const getReportTypeLabel = () => {
     switch (reportType) {
-      case 'trail': return 'Trail';
-      case 'review': return 'Review';
-      case 'image': return 'Image';
-      case 'alert': return 'Alert';
-      default: return 'General';
+      case 'trail':
+        return 'Trail';
+      case 'review':
+        return 'Review';
+      case 'image':
+        return 'Image';
+      case 'alert':
+        return 'Alert';
+      default:
+        return 'General';
     }
   };
 
@@ -89,7 +94,7 @@ const ReportModal = ({
       additionalDetails: additionalDetails,
       targetId: targetId,
       trailId: trailId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     onSubmit(reportData);
@@ -109,35 +114,35 @@ const ReportModal = ({
   const categories = getReportCategories();
 
   return (
-    <div className="report-modal-overlay" onClick={handleClose}>
-      <div className="report-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="report-modal-header">
-          <div className="report-modal-title">
+    <div className='report-modal-overlay' onClick={handleClose}>
+      <div className='report-modal-content' onClick={e => e.stopPropagation()}>
+        <div className='report-modal-header'>
+          <div className='report-modal-title'>
             <Flag size={20} />
             <h3>Report {getReportTypeLabel()}</h3>
           </div>
-          <button className="report-modal-close" onClick={handleClose}>
+          <button className='report-modal-close' onClick={handleClose}>
             <X size={20} />
           </button>
         </div>
 
         {trailName && (
-          <div className="report-modal-trail-info">
-            <span className="report-modal-trail-label">Trail:</span>
-            <span className="report-modal-trail-name">{trailName}</span>
+          <div className='report-modal-trail-info'>
+            <span className='report-modal-trail-label'>Trail:</span>
+            <span className='report-modal-trail-name'>{trailName}</span>
           </div>
         )}
 
-        <div className="report-modal-body">
-          <div className="report-form-group">
-            <label htmlFor="report-category">Report Category *</label>
-            <div className="report-category-grid">
-              {categories.map((category) => {
+        <div className='report-modal-body'>
+          <div className='report-form-group'>
+            <label htmlFor='report-category'>Report Category *</label>
+            <div className='report-category-grid'>
+              {categories.map(category => {
                 const IconComponent = category.icon;
                 return (
                   <button
                     key={category.value}
-                    type="button"
+                    type='button'
                     className={`report-category-btn ${reportCategory === category.value ? 'active' : ''}`}
                     onClick={() => setReportCategory(category.value)}
                   >
@@ -149,72 +154,68 @@ const ReportModal = ({
             </div>
           </div>
 
-          <div className="report-form-group">
-            <label htmlFor="report-description">Description *</label>
+          <div className='report-form-group'>
+            <label htmlFor='report-description'>Description *</label>
             <textarea
-              id="report-description"
+              id='report-description'
               value={reportDescription}
-              onChange={(e) => setReportDescription(e.target.value)}
-              placeholder="Please provide a detailed description of the issue..."
-              className="report-form-textarea"
+              onChange={e => setReportDescription(e.target.value)}
+              placeholder='Please provide a detailed description of the issue...'
+              className='report-form-textarea'
               rows={4}
               maxLength={1000}
             />
-            <div className="report-form-char-count">
-              {reportDescription.length}/1000 characters
-            </div>
+            <div className='report-form-char-count'>{reportDescription.length}/1000 characters</div>
           </div>
 
-          <div className="report-form-group">
-            <label htmlFor="report-priority">Priority Level</label>
+          <div className='report-form-group'>
+            <label htmlFor='report-priority'>Priority Level</label>
             <select
-              id="report-priority"
+              id='report-priority'
               value={reportPriority}
-              onChange={(e) => setReportPriority(e.target.value)}
-              className="report-form-select"
+              onChange={e => setReportPriority(e.target.value)}
+              className='report-form-select'
             >
-              <option value="low">Low - Minor issue</option>
-              <option value="medium">Medium - Moderate concern</option>
-              <option value="high">High - Serious issue</option>
-              <option value="urgent">Urgent - Safety concern</option>
+              <option value='low'>Low - Minor issue</option>
+              <option value='medium'>Medium - Moderate concern</option>
+              <option value='high'>High - Serious issue</option>
+              <option value='urgent'>Urgent - Safety concern</option>
             </select>
           </div>
 
-          <div className="report-form-group">
-            <label htmlFor="report-additional">Additional Information</label>
+          <div className='report-form-group'>
+            <label htmlFor='report-additional'>Additional Information</label>
             <textarea
-              id="report-additional"
+              id='report-additional'
               value={additionalDetails}
-              onChange={(e) => setAdditionalDetails(e.target.value)}
-              placeholder="Any additional information that might be helpful..."
-              className="report-form-textarea"
+              onChange={e => setAdditionalDetails(e.target.value)}
+              placeholder='Any additional information that might be helpful...'
+              className='report-form-textarea'
               rows={3}
               maxLength={500}
             />
-            <div className="report-form-char-count">
-              {additionalDetails.length}/500 characters
-            </div>
+            <div className='report-form-char-count'>{additionalDetails.length}/500 characters</div>
           </div>
 
-          <div className="report-form-notice">
+          <div className='report-form-notice'>
             <Info size={16} />
             <p>
-              Your report will be reviewed by our moderation team. We take all reports seriously 
-              and will investigate the issue promptly. False reports may result in account restrictions.
+              Your report will be reviewed by our moderation team. We take all reports seriously and
+              will investigate the issue promptly. False reports may result in account restrictions.
             </p>
           </div>
         </div>
 
-        <div className="report-modal-footer">
+        <div className='report-modal-footer'>
           <button
-            className="report-btn report-btn-secondary"
+            className='report-btn report-btn-secondary'
             onClick={handleClose}
             disabled={loading}
           >
             Cancel
           </button>
           <button
-            className="report-btn report-btn-primary"
+            className='report-btn report-btn-primary'
             onClick={handleSubmit}
             disabled={loading || !reportCategory || !reportDescription.trim()}
           >

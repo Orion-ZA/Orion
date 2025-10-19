@@ -10,9 +10,9 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 const STORAGE_KEY = 'orion-theme';
 
 const ThemeContext = createContext({
-  mode: 'dark',               // explicit user choice
-  resolved: 'dark',           // actual theme applied (light or dark)
-  setMode: () => {},          // function to change mode
+  mode: 'dark', // explicit user choice
+  resolved: 'dark', // actual theme applied (light or dark)
+  setMode: () => {}, // function to change mode
 });
 
 export function ThemeProvider({ children }) {
@@ -24,10 +24,11 @@ export function ThemeProvider({ children }) {
   const [resolved, setResolved] = useState('dark');
 
   // Determine resolved theme whenever mode or system preference changes
-  const computeResolved = useCallback((explicitMode) => {
+  const computeResolved = useCallback(explicitMode => {
     if (explicitMode === 'light' || explicitMode === 'dark') return explicitMode;
     // auto
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark =
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     return prefersDark ? 'dark' : 'light';
   }, []);
 
@@ -57,10 +58,12 @@ export function ThemeProvider({ children }) {
 
   // Persist explicit mode (not resolved)
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) {}
+    try {
+      localStorage.setItem(STORAGE_KEY, mode);
+    } catch (_) {}
   }, [mode]);
 
-  const setModeSafe = useCallback((next) => {
+  const setModeSafe = useCallback(next => {
     setMode(next);
   }, []);
 
@@ -68,4 +71,6 @@ export function ThemeProvider({ children }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme() { return useContext(ThemeContext); }
+export function useTheme() {
+  return useContext(ThemeContext);
+}

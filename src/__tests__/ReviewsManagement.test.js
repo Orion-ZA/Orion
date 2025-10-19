@@ -21,17 +21,19 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock Lucide React icons
 jest.mock('lucide-react', () => ({
-  Trash2: ({ className, title }) => <div data-testid="trash-icon" className={className} title={title} />,
-  Star: ({ className }) => <div data-testid="star-icon" className={className} />,
-  MessageSquare: ({ className }) => <div data-testid="message-icon" className={className} />,
-  Calendar: ({ className }) => <div data-testid="calendar-icon" className={className} />,
-  User: ({ className }) => <div data-testid="user-icon" className={className} />,
-  MapPin: ({ className }) => <div data-testid="map-pin-icon" className={className} />,
+  Trash2: ({ className, title }) => (
+    <div data-testid='trash-icon' className={className} title={title} />
+  ),
+  Star: ({ className }) => <div data-testid='star-icon' className={className} />,
+  MessageSquare: ({ className }) => <div data-testid='message-icon' className={className} />,
+  Calendar: ({ className }) => <div data-testid='calendar-icon' className={className} />,
+  User: ({ className }) => <div data-testid='user-icon' className={className} />,
+  MapPin: ({ className }) => <div data-testid='map-pin-icon' className={className} />,
 }));
 
 // Mock console methods
@@ -89,9 +91,7 @@ describe('ReviewsManagement', () => {
     it('retry button refetches reviews', async () => {
       const error = new Error('Network error');
       mockCollection.mockReturnValue('trailsRef');
-      mockGetDocs
-        .mockRejectedValueOnce(error)
-        .mockResolvedValueOnce({ docs: [] });
+      mockGetDocs.mockRejectedValueOnce(error).mockResolvedValueOnce({ docs: [] });
 
       render(<ReviewsManagement />);
 
@@ -104,7 +104,9 @@ describe('ReviewsManagement', () => {
 
       // Wait for the retry to complete
       await waitFor(() => {
-        expect(screen.queryByText('Failed to fetch reviews: Network error')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Failed to fetch reviews: Network error')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -156,12 +158,12 @@ describe('ReviewsManagement', () => {
     const mockTrails = [
       {
         id: 'trail1',
-        data: () => ({ name: 'Mountain Peak Trail' })
+        data: () => ({ name: 'Mountain Peak Trail' }),
       },
       {
         id: 'trail2',
-        data: () => ({ name: 'Forest Walk' })
-      }
+        data: () => ({ name: 'Forest Walk' }),
+      },
     ];
 
     const mockReviews = [
@@ -172,8 +174,8 @@ describe('ReviewsManagement', () => {
           rating: 4,
           comment: 'Great trail with amazing views!',
           timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
-          photos: ['photo1.jpg', 'photo2.jpg']
-        })
+          photos: ['photo1.jpg', 'photo2.jpg'],
+        }),
       },
       {
         id: 'review2',
@@ -182,9 +184,9 @@ describe('ReviewsManagement', () => {
           rating: 5,
           comment: 'Perfect hiking experience',
           timestamp: { toDate: () => new Date('2024-01-16T14:20:00Z') },
-          photos: []
-        })
-      }
+          photos: [],
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -264,8 +266,8 @@ describe('ReviewsManagement', () => {
       const mockTrailsNoComment = [
         {
           id: 'trail1',
-          data: () => ({ name: 'Mountain Peak Trail' })
-        }
+          data: () => ({ name: 'Mountain Peak Trail' }),
+        },
       ];
 
       const mockReviewsNoComment = [
@@ -275,9 +277,9 @@ describe('ReviewsManagement', () => {
             userId: 'user123',
             rating: 4,
             comment: null,
-            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-          })
-        }
+            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+          }),
+        },
       ];
 
       mockGetDocs
@@ -324,8 +326,8 @@ describe('ReviewsManagement', () => {
     const mockTrails = [
       {
         id: 'trail1',
-        data: () => ({ name: 'Mountain Peak Trail' })
-      }
+        data: () => ({ name: 'Mountain Peak Trail' }),
+      },
     ];
 
     const mockReviews = [
@@ -335,9 +337,9 @@ describe('ReviewsManagement', () => {
           userId: 'user123',
           rating: 4,
           comment: 'Great trail!',
-          timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-        })
-      }
+          timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -457,8 +459,8 @@ describe('ReviewsManagement', () => {
     const mockTrails = [
       {
         id: 'trail1',
-        data: () => ({ name: 'Mountain Peak Trail' })
-      }
+        data: () => ({ name: 'Mountain Peak Trail' }),
+      },
     ];
 
     const mockReviews = [
@@ -468,9 +470,9 @@ describe('ReviewsManagement', () => {
           userId: 'user123',
           rating: 4,
           comment: 'Great trail!',
-          timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-        })
-      }
+          timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -502,8 +504,8 @@ describe('ReviewsManagement', () => {
       const mockTrailsNoTimestamp = [
         {
           id: 'trail1',
-          data: () => ({ name: 'Mountain Peak Trail' })
-        }
+          data: () => ({ name: 'Mountain Peak Trail' }),
+        },
       ];
 
       const mockReviewsNoTimestamp = [
@@ -513,9 +515,9 @@ describe('ReviewsManagement', () => {
             userId: 'user123',
             rating: 4,
             comment: 'Great trail!',
-            timestamp: null
-          })
-        }
+            timestamp: null,
+          }),
+        },
       ];
 
       mockCollection.mockImplementation((db, collection, trailId) => {
@@ -548,9 +550,9 @@ describe('ReviewsManagement', () => {
             userId: 'user123',
             rating: 4,
             comment: 'Great trail!',
-            timestamp: '2024-01-15T10:30:00Z'
-          })
-        }
+            timestamp: '2024-01-15T10:30:00Z',
+          }),
+        },
       ];
 
       mockGetDocs
@@ -573,8 +575,8 @@ describe('ReviewsManagement', () => {
       const mockTrailsNoName = [
         {
           id: 'trail1',
-          data: () => ({ name: null })
-        }
+          data: () => ({ name: null }),
+        },
       ];
 
       const mockReviews = [
@@ -584,9 +586,9 @@ describe('ReviewsManagement', () => {
             userId: 'user123',
             rating: 4,
             comment: 'Great trail!',
-            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-          })
-        }
+            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+          }),
+        },
       ];
 
       mockCollection.mockImplementation((db, collection, trailId) => {
@@ -612,8 +614,8 @@ describe('ReviewsManagement', () => {
       const mockTrails = [
         {
           id: 'trail1',
-          data: () => ({ name: 'Mountain Peak Trail' })
-        }
+          data: () => ({ name: 'Mountain Peak Trail' }),
+        },
       ];
 
       const mockReviewsMissingData = [
@@ -623,9 +625,9 @@ describe('ReviewsManagement', () => {
             userId: null,
             rating: null,
             comment: null,
-            timestamp: null
-          })
-        }
+            timestamp: null,
+          }),
+        },
       ];
 
       mockCollection.mockImplementation((db, collection, trailId) => {
@@ -665,8 +667,8 @@ describe('ReviewsManagement', () => {
       const mockTrails = [
         {
           id: 'trail1',
-          data: () => ({ name: 'Mountain Peak Trail' })
-        }
+          data: () => ({ name: 'Mountain Peak Trail' }),
+        },
       ];
 
       mockCollection.mockImplementation((db, collection, trailId) => {
@@ -677,9 +679,7 @@ describe('ReviewsManagement', () => {
       });
       mockOrderBy.mockReturnValue('orderByClause');
       mockQuery.mockReturnValue('query');
-      mockGetDocs
-        .mockResolvedValueOnce({ docs: mockTrails })
-        .mockResolvedValueOnce({ docs: [] }); // Empty reviews
+      mockGetDocs.mockResolvedValueOnce({ docs: mockTrails }).mockResolvedValueOnce({ docs: [] }); // Empty reviews
 
       render(<ReviewsManagement />);
 
@@ -736,8 +736,8 @@ describe('ReviewsManagement', () => {
       const mockTrails = [
         {
           id: 'trail1',
-          data: () => ({ name: 'Mountain Peak Trail' })
-        }
+          data: () => ({ name: 'Mountain Peak Trail' }),
+        },
       ];
 
       const mockReviews = [
@@ -747,9 +747,9 @@ describe('ReviewsManagement', () => {
             userId: 'user123',
             rating: 4,
             comment: 'Great trail!',
-            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-          })
-        }
+            timestamp: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+          }),
+        },
       ];
 
       mockCollection.mockImplementation((db, collection, trailId) => {

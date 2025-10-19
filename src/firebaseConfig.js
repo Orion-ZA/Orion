@@ -1,15 +1,15 @@
-import {initializeApp} from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import {getAuth, GoogleAuthProvider} from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBbeISEUfpjyrUSOGoLJuXv-xDWB1c1GMQ",
-    authDomain: "orion-sdp.firebaseapp.com",
-    projectId: "orion-sdp",
-    storageBucket: "orion-sdp.firebasestorage.app",
-    messagingSenderId: "707988253653",
-    appId: "1:707988253653:web:dfce6814839b345403ab5c"
+  apiKey: 'AIzaSyBbeISEUfpjyrUSOGoLJuXv-xDWB1c1GMQ',
+  authDomain: 'orion-sdp.firebaseapp.com',
+  projectId: 'orion-sdp',
+  storageBucket: 'orion-sdp.firebasestorage.app',
+  messagingSenderId: '707988253653',
+  appId: '1:707988253653:web:dfce6814839b345403ab5c',
 };
 
 const app = initializeApp(firebaseConfig);

@@ -5,15 +5,17 @@
   right: 1rem;
   width: 420px;
   height: calc(100vh - 6rem);
-  background: linear-gradient(135deg, 
-    rgba(28, 37, 65, 0.75) 0%, 
-    rgba(28, 37, 65, 0.65) 50%, 
-    rgba(28, 37, 65, 0.75) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(28, 37, 65, 0.75) 0%,
+    rgba(28, 37, 65, 0.65) 50%,
+    rgba(28, 37, 65, 0.75) 100%
+  );
   border-radius: 16px;
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -91,7 +93,7 @@ html[data-theme='light'] .submission-panel-side {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 0.9rem;
   font-weight: 500;
   padding: 0.75rem;
@@ -148,7 +150,7 @@ html[data-theme='light'] .submission-panel-side {
 }
 
 .route-distance {
-  color: #4CAF50;
+  color: #4caf50;
   background: rgba(76, 175, 80, 0.1);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -178,7 +180,7 @@ html[data-theme='light'] .submission-panel-side {
 
 .drawing-btn.start {
   background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
+  color: #4caf50;
   border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
@@ -189,7 +191,7 @@ html[data-theme='light'] .submission-panel-side {
 
 .drawing-btn.stop {
   background: rgba(244, 67, 54, 0.2);
-  color: #F44336;
+  color: #f44336;
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
@@ -245,10 +247,12 @@ html[data-theme='light'] .submission-panel-side {
 }
 
 .submission-form::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    rgba(255, 255, 255, 0.2) 50%, 
-    rgba(255, 255, 255, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -257,19 +261,23 @@ html[data-theme='light'] .submission-panel-side {
 }
 
 .submission-form::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.4) 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.4) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
 }
 
 .submission-form::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.5) 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    rgba(255, 255, 255, 0.5) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
 }
 
 /* Firefox scrollbar */
@@ -722,13 +730,13 @@ html[data-theme='light'] .submission-panel-side {
 .submit-status.success {
   background: rgba(76, 175, 80, 0.1);
   border: 1px solid rgba(76, 175, 80, 0.3);
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .submit-status.error {
   background: rgba(244, 67, 54, 0.1);
   border: 1px solid rgba(244, 67, 54, 0.3);
-  color: #F44336;
+  color: #f44336;
 }
 
 /* Animations */
@@ -756,44 +764,46 @@ html[data-theme='light'] .submission-panel-side {
     bottom: 0;
     top: auto;
     border-radius: 16px 16px 0 0;
-    background: linear-gradient(135deg, 
-      rgba(28, 37, 65, 0.75) 0%, 
-      rgba(28, 37, 65, 0.65) 50%, 
-      rgba(28, 37, 65, 0.75) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(28, 37, 65, 0.75) 0%,
+      rgba(28, 37, 65, 0.65) 50%,
+      rgba(28, 37, 65, 0.75) 100%
+    );
   }
-  
+
   /* Light mode mobile submission panel positioning */
   html[data-theme='light'] .submission-panel-side {
     top: 5rem; /* More space in light mode on mobile */
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .image-previews {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 0.75rem;
   }
-  
+
   .image-preview {
     aspect-ratio: 1;
   }
-  
+
   .remove-image-btn {
     width: 20px;
     height: 20px;
   }
-  
+
   .remove-image-btn svg {
     width: 12px;
     height: 12px;
   }
-  
+
   .image-name {
     font-size: 0.7rem;
   }
-  
+
   .image-size {
     font-size: 0.65rem;
   }

@@ -4,36 +4,36 @@ import '../pages/Dashboard.css';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
   const tabs = [
-    { 
-      id: 'home', 
-      label: 'Home', 
+    {
+      id: 'home',
+      label: 'Home',
       icon: <Home size={20} />,
-      activeIcon: <Home size={20} fill="#4CAF50" />
+      activeIcon: <Home size={20} fill='#4CAF50' />,
     },
-    { 
-      id: 'stats', 
-      label: 'Stats', 
+    {
+      id: 'stats',
+      label: 'Stats',
       icon: <BarChart size={20} />,
-      activeIcon: <BarChart size={20} fill="#4CAF50" />
+      activeIcon: <BarChart size={20} fill='#4CAF50' />,
     },
-    { 
-      id: 'challenges', 
-      label: 'Challenges', 
+    {
+      id: 'challenges',
+      label: 'Challenges',
       icon: <Trophy size={20} />,
-      activeIcon: <Trophy size={20} fill="#4CAF50" />
+      activeIcon: <Trophy size={20} fill='#4CAF50' />,
     },
-    { 
-      id: 'account', 
-      label: 'Account', 
+    {
+      id: 'account',
+      label: 'Account',
       icon: <User size={20} />,
-      activeIcon: <User size={20} fill="#4CAF50" />
-    }
+      activeIcon: <User size={20} fill='#4CAF50' />,
+    },
   ];
 
   return (
-    <nav className="bottom-nav">
-      <div className="nav-grid">
-        {tabs.map((tab) => (
+    <nav className='bottom-nav'>
+      <div className='nav-grid'>
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -41,7 +41,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
             aria-label={tab.label}
           >
             {activeTab === tab.id ? tab.activeIcon : tab.icon}
-            <span className="nav-label">{tab.label}</span>
+            <span className='nav-label'>{tab.label}</span>
           </button>
         ))}
       </div>

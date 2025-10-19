@@ -92,11 +92,11 @@ jest.mock('lucide-react', () => {
   const original = jest.requireActual('lucide-react');
   return {
     ...original,
-    User: (props) => <svg data-testid="user-icon" {...props} />,
-    Loader2: (props) => <svg data-testid="loader-icon" {...props} />,
-    Plus: (props) => <svg {...props} />,
-    Minus: (props) => <svg {...props} />,
-    Compass: (props) => <svg {...props} />,
-    MapPin: (props) => <svg {...props} />,
+    User: props => <svg data-testid='user-icon' {...props} />,
+    Loader2: props => <svg data-testid='loader-icon' {...props} />,
+    Plus: props => <svg {...props} />,
+    Minus: props => <svg {...props} />,
+    Compass: props => <svg {...props} />,
+    MapPin: props => <svg {...props} />,
   };
 });

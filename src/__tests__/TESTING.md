@@ -29,6 +29,7 @@ src/
 ## Current Test Status
 
 ### ✅ Passing Tests
+
 - **TrailExplorer.test.js**: All tests passing (15/15)
   - Component rendering
   - Filter panel toggle functionality
@@ -38,6 +39,7 @@ src/
   - Error handling
 
 ### ⚠️ Tests with Issues
+
 - **useTrails.test.js**: 2 failing tests (93/95 passing)
   - Distance filtering test (data changes affecting expected results)
   - Memoization test (data changes affecting expected results)
@@ -55,26 +57,31 @@ src/
 ## Running Tests
 
 ### Run All Tests
+
 ```bash
 npm test
 ```
 
 ### Run Tests in Watch Mode
+
 ```bash
 npm test -- --watch
 ```
 
 ### Run Specific Test File
+
 ```bash
 npm test -- TrailExplorer.test.js
 ```
 
 ### Run Tests with Coverage
+
 ```bash
 npm test -- --coverage
 ```
 
 ### Run Tests in CI Mode
+
 ```bash
 npm test -- --ci --coverage --watchAll=false
 ```
@@ -82,6 +89,7 @@ npm test -- --ci --coverage --watchAll=false
 ## Test Coverage
 
 ### TrailExplorer Page (`TrailExplorer.test.js`) ✅
+
 - **Rendering**: Component renders correctly with all elements
 - **Filter Panel Toggle**: Show/hide filter panel functionality
 - **Location Services**: Geolocation API integration and error handling
@@ -93,6 +101,7 @@ npm test -- --ci --coverage --watchAll=false
 - **Error Handling**: Location errors and missing geolocation support
 
 ### useTrails Hook (`useTrails.test.js`) ⚠️
+
 - **Initial State**: Default values and state initialization
 - **Filtering**: Difficulty, tags, distance, and combined filters
 - **Location Services**: Geolocation API calls and state management
@@ -103,6 +112,7 @@ npm test -- --ci --coverage --watchAll=false
 - **Edge Cases**: Empty data, case sensitivity, partial matching
 
 ### TrailList Component (`TrailList.test.js`) ⚠️
+
 - **Rendering**: Trail list display and information
 - **User Location**: Distance display and calculations
 - **Trail Selection**: Click handling and selection state
@@ -114,6 +124,7 @@ npm test -- --ci --coverage --watchAll=false
 - **Accessibility**: Readable format and clickable elements
 
 ### FilterPanel Component (`FilterPanel.test.js`) ⚠️
+
 - **Rendering**: All filter controls and current values
 - **Difficulty Filter**: Dropdown options and selection
 - **Tags Filter**: Text input and search functionality
@@ -124,6 +135,7 @@ npm test -- --ci --coverage --watchAll=false
 - **Styling and Layout**: CSS classes and responsive design
 
 ### TrailMap Component (`TrailMap.test.js`) ⏸️
+
 - **Status**: Currently skipped due to map library dependency issues
 - **Rendering**: Map container and controls
 - **Trail Markers**: Marker rendering and coordinates
@@ -140,11 +152,13 @@ npm test -- --ci --coverage --watchAll=false
 The test utilities file provides:
 
 ### Mock Data
+
 - `mockTrails`: Sample trail data for testing
 - `mockUserLocation`: Sample user location coordinates
 - `mockFilters`: Default filter state
 
 ### Helper Functions
+
 - `simulateGeolocationSuccess()`: Mock successful geolocation
 - `simulateGeolocationError()`: Mock geolocation errors
 - `resetGeolocationMocks()`: Reset geolocation mocks
@@ -152,6 +166,7 @@ The test utilities file provides:
 - `createMockFilters()`: Create custom filter objects
 
 ### Global Mocks
+
 - Geolocation API mocking
 - Environment variables setup
 - Custom render function with providers
@@ -159,48 +174,58 @@ The test utilities file provides:
 ## Known Issues and Solutions
 
 ### 1. TrailMap Test Issues
+
 **Problem**: `react-map-gl/mapbox` module not found in test environment
 **Solution**: Currently skipped. To fix, would need to:
+
 - Install map library dependencies for testing
 - Create proper mocks for map components
 - Or use a different testing approach for map components
 
 ### 2. calculateDistance Function Issues
+
 **Problem**: Function returning undefined in TrailList tests
 **Solution**: Mock function needs to be properly configured to return a number
 
 ### 3. Data Consistency Issues
+
 **Problem**: useTrails tests failing due to data changes
 **Solution**: Update test expectations to match current data structure
 
 ### 4. FilterPanel Empty Tags Issue
+
 **Problem**: Empty tags input not triggering expected callback
 **Solution**: Check component implementation for proper event handling
 
 ## Testing Best Practices
 
 ### 1. Test Organization
+
 - Group related tests using `describe` blocks
 - Use descriptive test names that explain the behavior
 - Test both success and failure scenarios
 
 ### 2. Mocking Strategy
+
 - Mock external dependencies (geolocation, map libraries)
 - Use consistent mock data across tests
 - Reset mocks between tests to avoid interference
 
 ### 3. User Interaction Testing
+
 - Use `fireEvent` for reliable event simulation
 - Test keyboard and mouse interactions
 - Verify accessibility features
 
 ### 4. Component Testing
+
 - Test component rendering and props
 - Verify event handlers are called correctly
 - Test component state changes
 - Check for proper error handling
 
 ### 5. Hook Testing
+
 - Use `renderHook` for custom hook testing
 - Test all hook return values
 - Verify state updates and side effects
@@ -209,7 +234,9 @@ The test utilities file provides:
 ## Adding New Tests
 
 ### 1. Create Test File
+
 Create a new test file in the `src/__tests__` directory:
+
 ```javascript
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -222,7 +249,9 @@ describe('YourComponent', () => {
 ```
 
 ### 2. Test Structure
+
 Follow this structure for new tests:
+
 ```javascript
 describe('YourComponent', () => {
   beforeEach(() => {
@@ -248,25 +277,23 @@ describe('YourComponent', () => {
 ```
 
 ### 3. Use Test Utilities
+
 Import and use the test utilities for consistent mocking:
+
 ```javascript
-import { 
-  render, 
-  mockTrails, 
-  mockUserLocation, 
-  simulateGeolocationSuccess 
-} from '../test-utils';
+import { render, mockTrails, mockUserLocation, simulateGeolocationSuccess } from '../test-utils';
 ```
 
 ## Common Testing Patterns
 
 ### Testing Async Operations
+
 ```javascript
 test('handles async operation', async () => {
   render(<Component />);
-  
+
   fireEvent.click(screen.getByText('Submit'));
-  
+
   await waitFor(() => {
     expect(screen.getByText('Success')).toBeInTheDocument();
   });
@@ -274,26 +301,28 @@ test('handles async operation', async () => {
 ```
 
 ### Testing Event Handlers
+
 ```javascript
 test('calls event handler', () => {
   const mockHandler = jest.fn();
-  
+
   render(<Component onAction={mockHandler} />);
   fireEvent.click(screen.getByText('Action'));
-  
+
   expect(mockHandler).toHaveBeenCalledWith(expectedValue);
 });
 ```
 
 ### Testing State Changes
+
 ```javascript
 test('updates state correctly', () => {
   const { result } = renderHook(() => useCustomHook());
-  
+
   act(() => {
     result.current.updateState(newValue);
   });
-  
+
   expect(result.current.state).toBe(newValue);
 });
 ```
@@ -301,13 +330,17 @@ test('updates state correctly', () => {
 ## Debugging Tests
 
 ### 1. Debug Mode
+
 Run tests in debug mode to step through code:
+
 ```bash
 npm test -- --debug
 ```
 
 ### 2. Console Logging
+
 Add console.log statements in tests for debugging:
+
 ```javascript
 test('debug test', () => {
   console.log('Debug info:', someValue);
@@ -316,7 +349,9 @@ test('debug test', () => {
 ```
 
 ### 3. Screen Debug
+
 Use screen.debug() to see the rendered output:
+
 ```javascript
 test('debug rendering', () => {
   render(<Component />);
@@ -327,13 +362,17 @@ test('debug rendering', () => {
 ## Performance Testing
 
 ### 1. Test Execution Time
+
 Monitor test execution time to ensure tests run efficiently:
+
 ```bash
 npm test -- --verbose
 ```
 
 ### 2. Memory Usage
+
 Watch for memory leaks in tests, especially with large datasets:
+
 ```bash
 npm test -- --detectLeaks
 ```
@@ -343,12 +382,14 @@ npm test -- --detectLeaks
 The testing suite is designed to work with CI/CD pipelines:
 
 ### GitHub Actions Example
+
 ```yaml
 - name: Run Tests
   run: npm test -- --ci --coverage --watchAll=false
 ```
 
 ### Coverage Requirements
+
 - Aim for >80% code coverage
 - Focus on critical user paths
 - Test error handling and edge cases

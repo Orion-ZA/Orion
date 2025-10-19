@@ -5,23 +5,29 @@ import '@testing-library/jest-dom';
 import MyTrails from '../pages/MyTrails';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useTrailAlerts } from '../hooks/useTrailAlerts';
 
 // Mock Firebase modules
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn()
+  getAuth: jest.fn(),
 }));
 
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   getDoc: jest.fn(),
-  updateDoc: jest.fn()
+  updateDoc: jest.fn(),
+}));
+
+// Mock the useTrailAlerts hook
+jest.mock('../hooks/useTrailAlerts', () => ({
+  useTrailAlerts: jest.fn(),
 }));
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
   db: {},
   auth: {},
-  storage: {}
+  storage: {},
 }));
 
 // Mock child components
@@ -29,13 +35,13 @@ jest.mock('../components/modals/ReviewModal', () => {
   return function MockReviewModal({ isOpen, trailName, onClose, onSubmit }) {
     if (!isOpen) return null;
     return (
-      <div data-testid="review-modal" className="modal-overlay">
-        <div className="modal-content">
+      <div data-testid='review-modal' className='modal-overlay'>
+        <div className='modal-content'>
           <h2>Review: {trailName}</h2>
           <div>
             <label>Rating (1-5)</label>
             <div>
-              {[1, 2, 3, 4, 5].map((rating) => (
+              {[1, 2, 3, 4, 5].map(rating => (
                 <button key={rating} onClick={() => onSubmit(rating, 'Test comment')}>
                   ★
                 </button>
@@ -44,7 +50,7 @@ jest.mock('../components/modals/ReviewModal', () => {
           </div>
           <div>
             <label>Comment</label>
-            <textarea placeholder="Share your experience..." />
+            <textarea placeholder='Share your experience...' />
           </div>
           <button onClick={() => onSubmit(5, 'Test comment')}>Submit Review</button>
           <button onClick={onClose}>Cancel</button>
@@ -58,10 +64,12 @@ jest.mock('../components/modals/StatusConfirmModal', () => {
   return function MockStatusConfirmModal({ isOpen, trailName, currentStatus, onClose, onConfirm }) {
     if (!isOpen) return null;
     return (
-      <div data-testid="status-confirm-modal" className="modal-overlay">
-        <div className="modal-content">
+      <div data-testid='status-confirm-modal' className='modal-overlay'>
+        <div className='modal-content'>
           <h2>Confirm Status Change</h2>
-          <p>Are you sure you want to {currentStatus === 'open' ? 'close' : 'reopen'} {trailName}?</p>
+          <p>
+            Are you sure you want to {currentStatus === 'open' ? 'close' : 'reopen'} {trailName}?
+          </p>
           <button onClick={onConfirm}>Confirm</button>
           <button onClick={onClose}>Cancel</button>
         </div>
@@ -74,7 +82,10 @@ jest.mock('../components/AlertsPopup', () => {
   return function MockAlertsPopup({ isVisible, position, alerts, onMouseLeave }) {
     if (!isVisible) return null;
     return (
-      <div data-testid="alerts-popup" style={{ position: 'fixed', left: position.x, top: position.y }}>
+      <div
+        data-testid='alerts-popup'
+        style={{ position: 'fixed', left: position.x, top: position.y }}
+      >
         {alerts.map((alert, index) => (
           <div key={index}>{alert.message}</div>
         ))}
@@ -84,41 +95,52 @@ jest.mock('../components/AlertsPopup', () => {
 });
 
 jest.mock('../components/trails/TrailCard', () => {
-  return function MockTrailCard({ trail, activeTab, alerts, loadingStates, onShowAlertsPopup, onHideAlertsPopup, onOpenStatusConfirmModal, onOpenReviewModal }) {
+  return function MockTrailCard({
+    trail,
+    activeTab,
+    alerts,
+    loadingStates,
+    onShowAlertsPopup,
+    onHideAlertsPopup,
+    onOpenStatusConfirmModal,
+    onOpenReviewModal,
+  }) {
     const trailAlerts = alerts[trail.id] || [];
+    const activeAlerts = trailAlerts.filter(alert => !alert.isExpired);
+
     return (
-      <li data-testid={`trail-card-${trail.id}`} className="trail-card">
-        <div className="trail-header">
+      <li data-testid={`trail-card-${trail.id}`} className='trail-card'>
+        <div className='trail-header'>
           <h3>{trail.name}</h3>
-          {trailAlerts.length > 0 && (
-            <div 
-              className="trail-alerts-count-header"
-              onMouseEnter={(e) => onShowAlertsPopup(e, trailAlerts)}
+          {activeAlerts.length > 0 && (
+            <div
+              className='trail-alerts-count-header'
+              onMouseEnter={e => onShowAlertsPopup(e, activeAlerts)}
               onMouseLeave={onHideAlertsPopup}
             >
-              <span className="trail-alert-count">{trailAlerts.length}</span>
+              <span className='trail-alert-count'>{activeAlerts.length}</span>
             </div>
           )}
         </div>
-        <div className="trail-info">
-          <div className="trail-details-grid">
-            <div className="detail-item">
-              <span className="detail-label">Difficulty:</span>
-              <span className="detail-value">{trail.difficulty}</span>
+        <div className='trail-info'>
+          <div className='trail-details-grid'>
+            <div className='detail-item'>
+              <span className='detail-label'>Difficulty:</span>
+              <span className='detail-value'>{trail.difficulty}</span>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Distance:</span>
-              <span className="detail-value">{trail.distance} km</span>
+            <div className='detail-item'>
+              <span className='detail-label'>Distance:</span>
+              <span className='detail-value'>{trail.distance} km</span>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Elevation:</span>
-              <span className="detail-value">{trail.elevationGain} m</span>
+            <div className='detail-item'>
+              <span className='detail-label'>Elevation:</span>
+              <span className='detail-value'>{trail.elevationGain} m</span>
             </div>
           </div>
         </div>
-        <div className="trail-actions">
+        <div className='trail-actions'>
           {activeTab === 'favourites' && (
-            <button 
+            <button
               onClick={() => onOpenReviewModal(trail.id, trail.name)}
               aria-label={`Mark ${trail.name} as completed`}
               data-testid={`mark-completed-${trail.id}`}
@@ -127,7 +149,7 @@ jest.mock('../components/trails/TrailCard', () => {
             </button>
           )}
           {activeTab === 'wishlist' && (
-            <button 
+            <button
               onClick={() => onOpenReviewModal(trail.id, trail.name)}
               aria-label={`Mark ${trail.name} as completed`}
               data-testid={`mark-completed-${trail.id}`}
@@ -136,12 +158,13 @@ jest.mock('../components/trails/TrailCard', () => {
             </button>
           )}
           {activeTab === 'submitted' && (
-            <div className="submitted-actions">
-              <div className="submitted-info">
-                <span className="submitted-date">
-                  Submitted: {new Date(trail.createdAt?.toDate?.() || trail.createdAt).toLocaleDateString()}
+            <div className='submitted-actions'>
+              <div className='submitted-info'>
+                <span className='submitted-date'>
+                  Submitted:{' '}
+                  {new Date(trail.createdAt?.toDate?.() || trail.createdAt).toLocaleDateString()}
                 </span>
-                <span 
+                <span
                   className={`status-badge ${trail.status === 'open' ? 'status-open' : 'status-closed'}`}
                   onClick={() => onOpenStatusConfirmModal(trail.id, trail.name, trail.status)}
                   data-testid={`status-badge-${trail.id}`}
@@ -153,8 +176,8 @@ jest.mock('../components/trails/TrailCard', () => {
           )}
           {/* Add remove button for all tabs except submitted */}
           {activeTab !== 'submitted' && (
-            <button 
-              className="remove-btn"
+            <button
+              className='remove-btn'
               onClick={() => {
                 // Mock removal logic - will be handled by the test
                 console.log('Removing trail:', trail.id);
@@ -171,72 +194,83 @@ jest.mock('../components/trails/TrailCard', () => {
 });
 
 jest.mock('../components/MyTrailsFilter', () => {
-  return function MockMyTrailsFilter({ searchQuery, onSearchChange, filters, onFilterChange, onClearFilters, sorting, onSortChange, activeTab }) {
+  return function MockMyTrailsFilter({
+    searchQuery,
+    onSearchChange,
+    filters,
+    onFilterChange,
+    onClearFilters,
+    sorting,
+    onSortChange,
+    activeTab,
+  }) {
     return (
-      <div data-testid="mytrails-filter">
+      <div data-testid='mytrails-filter'>
         <input
-          data-testid="search-input"
+          data-testid='search-input'
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={e => onSearchChange(e.target.value)}
           placeholder={`Search ${activeTab}...`}
         />
         <select
-          data-testid="difficulty-filter"
+          data-testid='difficulty-filter'
           value={filters.difficulty}
-          onChange={(e) => onFilterChange('difficulty', e.target.value)}
+          onChange={e => onFilterChange('difficulty', e.target.value)}
         >
-          <option value="all">All Difficulties</option>
-          <option value="Easy">Easy</option>
-          <option value="Moderate">Moderate</option>
-          <option value="Hard">Hard</option>
+          <option value='all'>All Difficulties</option>
+          <option value='Easy'>Easy</option>
+          <option value='Moderate'>Moderate</option>
+          <option value='Hard'>Hard</option>
         </select>
-        <div data-testid="distance-slider">
-          <span>Distance: {filters.minDistance} - {filters.maxDistance} km</span>
+        <div data-testid='distance-slider'>
+          <span>
+            Distance: {filters.minDistance} - {filters.maxDistance} km
+          </span>
           <input
-            type="range"
-            min="0"
-            max="50"
+            type='range'
+            min='0'
+            max='50'
             value={filters.minDistance}
-            onChange={(e) => onFilterChange('minDistance', parseFloat(e.target.value))}
-            data-testid="min-distance-slider"
+            onChange={e => onFilterChange('minDistance', parseFloat(e.target.value))}
+            data-testid='min-distance-slider'
           />
           <input
-            type="range"
-            min="0"
-            max="50"
+            type='range'
+            min='0'
+            max='50'
             value={filters.maxDistance}
-            onChange={(e) => onFilterChange('maxDistance', parseFloat(e.target.value))}
-            data-testid="max-distance-slider"
+            onChange={e => onFilterChange('maxDistance', parseFloat(e.target.value))}
+            data-testid='max-distance-slider'
           />
         </div>
         {activeTab === 'submitted' && (
           <select
-            data-testid="status-filter"
+            data-testid='status-filter'
             value={filters.status}
-            onChange={(e) => onFilterChange('status', e.target.value)}
+            onChange={e => onFilterChange('status', e.target.value)}
           >
-            <option value="all">All Status</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
+            <option value='all'>All Status</option>
+            <option value='open'>Open</option>
+            <option value='closed'>Closed</option>
           </select>
         )}
         <select
-          data-testid="sort-by-filter"
+          data-testid='sort-by-filter'
           value={sorting.sortBy}
-          onChange={(e) => onSortChange(e.target.value, sorting.sortOrder)}
+          onChange={e => onSortChange(e.target.value, sorting.sortOrder)}
         >
-          <option value="name">Sort by Name</option>
-          <option value="distance">Sort by Distance</option>
-          <option value="difficulty">Sort by Difficulty</option>
-          {activeTab === 'submitted' && <option value="date">Sort by Date</option>}
+          <option value='name'>Sort by Name</option>
+          <option value='distance'>Sort by Distance</option>
+          <option value='difficulty'>Sort by Difficulty</option>
+          {activeTab === 'submitted' && <option value='date'>Sort by Date</option>}
         </select>
         <button
-          data-testid="sort-order-button"
+          data-testid='sort-order-button'
           onClick={() => onSortChange(sorting.sortBy, sorting.sortOrder === 'asc' ? 'desc' : 'asc')}
         >
           {sorting.sortOrder === 'asc' ? '↑' : '↓'}
         </button>
-        <button onClick={onClearFilters} data-testid="clear-filters">
+        <button onClick={onClearFilters} data-testid='clear-filters'>
           Clear Filters
         </button>
       </div>
@@ -251,14 +285,14 @@ global.fetch = jest.fn();
 const mockAlert = jest.fn();
 Object.defineProperty(window, 'alert', {
   value: mockAlert,
-  writable: true
+  writable: true,
 });
 
 // Mock window.confirm
 const mockConfirm = jest.fn();
 Object.defineProperty(window, 'confirm', {
   value: mockConfirm,
-  writable: true
+  writable: true,
 });
 
 // Mock console methods to avoid noise in tests
@@ -282,50 +316,50 @@ describe('MyTrails Component', () => {
   const mockUser = {
     uid: 'test-user-id',
     email: 'test@example.com',
-    displayName: 'Test User'
+    displayName: 'Test User',
   };
 
   const mockSavedTrails = {
     favourites: [
-      { 
-        id: 'trail-1', 
+      {
+        id: 'trail-1',
         name: 'Favourite Trail 1',
         difficulty: 'Easy',
         distance: 5.2,
-        elevationGain: 200
+        elevationGain: 200,
       },
-      { 
-        id: 'trail-2', 
+      {
+        id: 'trail-2',
         name: 'Favourite Trail 2',
         difficulty: 'Moderate',
         distance: 8.5,
-        elevationGain: 450
-      }
+        elevationGain: 450,
+      },
     ],
     completed: [
-      { 
-        id: 'trail-3', 
+      {
+        id: 'trail-3',
         name: 'Completed Trail 1',
         difficulty: 'Hard',
         distance: 12.3,
-        elevationGain: 800
-      }
+        elevationGain: 800,
+      },
     ],
     wishlist: [
-      { 
-        id: 'trail-4', 
+      {
+        id: 'trail-4',
         name: 'Wishlist Trail 1',
         difficulty: 'Easy',
         distance: 3.1,
-        elevationGain: 150
+        elevationGain: 150,
       },
-      { 
-        id: 'trail-5', 
+      {
+        id: 'trail-5',
         name: 'Wishlist Trail 2',
         difficulty: 'Moderate',
         distance: 7.8,
-        elevationGain: 350
-      }
+        elevationGain: 350,
+      },
     ],
     submitted: [
       {
@@ -335,7 +369,7 @@ describe('MyTrails Component', () => {
         distance: 4.5,
         elevationGain: 180,
         status: 'open',
-        createdAt: new Date('2024-01-15')
+        createdAt: new Date('2024-01-15'),
       },
       {
         id: 'trail-7',
@@ -344,25 +378,19 @@ describe('MyTrails Component', () => {
         distance: 15.2,
         elevationGain: 1200,
         status: 'closed',
-        createdAt: new Date('2024-01-10')
-      }
-    ]
+        createdAt: new Date('2024-01-10'),
+      },
+    ],
   };
 
   const mockAlerts = {
-    'trail-1': [
-      { id: 'alert-1', type: 'warning', message: 'Trail conditions poor' }
-    ],
+    'trail-1': [{ id: 'alert-1', type: 'warning', message: 'Trail conditions poor' }],
     'trail-2': [],
-    'trail-3': [
-      { id: 'alert-2', type: 'closure', message: 'Trail closed for maintenance' }
-    ],
+    'trail-3': [{ id: 'alert-2', type: 'closure', message: 'Trail closed for maintenance' }],
     'trail-4': [],
     'trail-5': [],
-    'trail-6': [
-      { id: 'alert-3', type: 'info', message: 'Trail maintenance scheduled' }
-    ],
-    'trail-7': []
+    'trail-6': [{ id: 'alert-3', type: 'info', message: 'Trail maintenance scheduled' }],
+    'trail-7': [],
   };
 
   const mockUserDoc = {
@@ -370,9 +398,9 @@ describe('MyTrails Component', () => {
     data: () => ({
       submittedTrails: [
         { _path: { segments: ['Trails', 'trail-6'] } },
-        { _path: { segments: ['Trails', 'trail-7'] } }
-      ]
-    })
+        { _path: { segments: ['Trails', 'trail-7'] } },
+      ],
+    }),
   };
 
   const mockTrailDocs = [
@@ -385,8 +413,8 @@ describe('MyTrails Component', () => {
         distance: 4.5,
         elevationGain: 180,
         status: 'open',
-        createdAt: new Date('2024-01-15')
-      })
+        createdAt: new Date('2024-01-15'),
+      }),
     },
     {
       id: 'trail-7',
@@ -397,25 +425,35 @@ describe('MyTrails Component', () => {
         distance: 15.2,
         elevationGain: 1200,
         status: 'closed',
-        createdAt: new Date('2024-01-10')
-      })
-    }
+        createdAt: new Date('2024-01-10'),
+      }),
+    },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Set default return values
     mockConfirm.mockReturnValue(true);
-    
+
     // Mock getAuth to return user
     getAuth.mockReturnValue({
-      currentUser: mockUser
+      currentUser: mockUser,
+    });
+
+    // Mock useTrailAlerts hook
+    useTrailAlerts.mockReturnValue({
+      trailAlerts: mockAlerts,
+      loadingStates: {},
+      fetchTrailAlerts: jest.fn(),
+      fetchMultipleTrailAlerts: jest.fn(),
+      isAlertExpired: jest.fn(alert => false),
+      getTimeRemaining: jest.fn(),
     });
 
     // Mock Firestore functions
     doc.mockImplementation((db, collection, id) => ({ path: `/${collection}/${id}` }));
-    getDoc.mockImplementation((docRef) => {
+    getDoc.mockImplementation(docRef => {
       if (docRef.path.includes('Users')) {
         return Promise.resolve(mockUserDoc);
       }
@@ -430,16 +468,17 @@ describe('MyTrails Component', () => {
     updateDoc.mockResolvedValue();
 
     // Mock successful fetch responses
-    global.fetch.mockImplementation((url) => {
+    global.fetch.mockImplementation(url => {
       if (url.includes('getsavedtrails')) {
         return Promise.resolve({
           ok: true,
-        json: () => Promise.resolve({
-          favourites: mockSavedTrails.favourites,
-          completed: mockSavedTrails.completed,
-          wishlist: mockSavedTrails.wishlist,
-          submitted: mockSavedTrails.submitted
-        })
+          json: () =>
+            Promise.resolve({
+              favourites: mockSavedTrails.favourites,
+              completed: mockSavedTrails.completed,
+              wishlist: mockSavedTrails.wishlist,
+              submitted: mockSavedTrails.submitted,
+            }),
         });
       }
       if (url.includes('getAlerts')) {
@@ -447,14 +486,14 @@ describe('MyTrails Component', () => {
           // Batch alerts endpoint
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ alerts: mockAlerts })
+            json: () => Promise.resolve({ alerts: mockAlerts }),
           });
         } else {
           // Individual alerts endpoint
           const trailId = url.split('trailId=')[1];
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ alerts: mockAlerts[trailId] || [] })
+            json: () => Promise.resolve({ alerts: mockAlerts[trailId] || [] }),
           });
         }
       }
@@ -477,7 +516,6 @@ describe('MyTrails Component', () => {
       expect(screen.getByText('My Trails')).toBeInTheDocument();
     });
 
-
     it('renders tabs for different trail categories', async () => {
       await act(async () => {
         render(<MyTrails />);
@@ -490,7 +528,6 @@ describe('MyTrails Component', () => {
         expect(screen.getByText('Submitted')).toBeInTheDocument();
       });
     });
-
 
     it('shows favourites tab as active by default', async () => {
       await act(async () => {
@@ -643,8 +680,6 @@ describe('MyTrails Component', () => {
       });
     });
 
-
-
     it('shows empty state when no trails match filters', async () => {
       await act(async () => {
         render(<MyTrails />);
@@ -659,7 +694,9 @@ describe('MyTrails Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('No trails match your current filters.')).toBeInTheDocument();
-        expect(screen.getByText('Try adjusting your search or filter criteria.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Try adjusting your search or filter criteria.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -677,11 +714,11 @@ describe('MyTrails Component', () => {
     });
 
     it('shows empty state when no trails', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ favourites: [], completed: [], wishlist: [] })
+            json: () => Promise.resolve({ favourites: [], completed: [], wishlist: [] }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -693,16 +730,12 @@ describe('MyTrails Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('No trails in your favourites yet.')).toBeInTheDocument();
-        expect(screen.getByText('Start exploring to add trails to your collection!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Start exploring to add trails to your collection!')
+        ).toBeInTheDocument();
       });
     });
-
-
-
   });
-
-
-
 
   describe('Mark as Completed', () => {
     it('opens review modal when mark as completed is clicked', async () => {
@@ -791,7 +824,7 @@ describe('MyTrails Component', () => {
           expect.objectContaining({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: 'test-user-id', trailId: 'trail-1' })
+            body: JSON.stringify({ uid: 'test-user-id', trailId: 'trail-1' }),
           })
         );
       });
@@ -802,7 +835,7 @@ describe('MyTrails Component', () => {
           expect.objectContaining({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: expect.stringContaining('"rating":5')
+            body: expect.stringContaining('"rating":5'),
           })
         );
       });
@@ -837,16 +870,17 @@ describe('MyTrails Component', () => {
     });
 
     it('handles submission error', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-        json: () => Promise.resolve({
-          favourites: mockSavedTrails.favourites,
-          completed: mockSavedTrails.completed,
-          wishlist: mockSavedTrails.wishlist,
-          submitted: mockSavedTrails.submitted
-        })
+            json: () =>
+              Promise.resolve({
+                favourites: mockSavedTrails.favourites,
+                completed: mockSavedTrails.completed,
+                wishlist: mockSavedTrails.wishlist,
+                submitted: mockSavedTrails.submitted,
+              }),
           });
         }
         if (url.includes('markCompleted')) {
@@ -894,32 +928,16 @@ describe('MyTrails Component', () => {
       });
     });
 
-
     it('tries batch alerts API first, then falls back to individual calls', async () => {
-      // Mock batch API to fail
-      global.fetch.mockImplementation((url) => {
-        if (url.includes('getsavedtrails')) {
-          return Promise.resolve({
-            ok: true,
-        json: () => Promise.resolve({
-          favourites: mockSavedTrails.favourites,
-          completed: mockSavedTrails.completed,
-          wishlist: mockSavedTrails.wishlist,
-          submitted: mockSavedTrails.submitted
-        })
-          });
-        }
-        if (url.includes('getAlerts') && url.includes('trailIds=')) {
-          return Promise.reject(new Error('Batch API not available'));
-        }
-        if (url.includes('getAlerts')) {
-          const trailId = url.split('trailId=')[1];
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ alerts: mockAlerts[trailId] || [] })
-          });
-        }
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      // Mock the hook to simulate batch loading
+      const mockFetchMultipleTrailAlerts = jest.fn();
+      useTrailAlerts.mockReturnValue({
+        trailAlerts: mockAlerts,
+        loadingStates: {},
+        fetchTrailAlerts: jest.fn(),
+        fetchMultipleTrailAlerts: mockFetchMultipleTrailAlerts,
+        isAlertExpired: jest.fn(alert => false),
+        getTimeRemaining: jest.fn(),
       });
 
       await act(async () => {
@@ -927,26 +945,36 @@ describe('MyTrails Component', () => {
       });
 
       await waitFor(() => {
-        // Should try batch API first
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('getAlerts?trailIds=')
-        );
-        // Then fall back to individual calls
-        expect(global.fetch).toHaveBeenCalledWith(
-          'https://us-central1-orion-sdp.cloudfunctions.net/getAlerts?trailId=trail-1'
-        );
+        // Should call the batch function
+        expect(mockFetchMultipleTrailAlerts).toHaveBeenCalledWith([
+          'trail-1',
+          'trail-2',
+          'trail-3',
+          'trail-4',
+          'trail-5',
+          'trail-6',
+          'trail-7',
+        ]);
       });
     });
 
     it('uses batch alerts API when available', async () => {
+      const mockFetchMultipleTrailAlerts = jest.fn();
+      useTrailAlerts.mockReturnValue({
+        trailAlerts: mockAlerts,
+        loadingStates: {},
+        fetchTrailAlerts: jest.fn(),
+        fetchMultipleTrailAlerts: mockFetchMultipleTrailAlerts,
+        isAlertExpired: jest.fn(alert => false),
+        getTimeRemaining: jest.fn(),
+      });
+
       await act(async () => {
         render(<MyTrails />);
       });
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('getAlerts?trailIds=')
-        );
+        expect(mockFetchMultipleTrailAlerts).toHaveBeenCalled();
       });
     });
 
@@ -964,7 +992,7 @@ describe('MyTrails Component', () => {
 
     it('handles unauthenticated user', async () => {
       getAuth.mockReturnValue({
-        currentUser: null
+        currentUser: null,
       });
 
       await act(async () => {
@@ -974,7 +1002,6 @@ describe('MyTrails Component', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
   });
-
 
   describe('Modal Functionality', () => {
     it('prevents body scrolling when modal is open', async () => {
@@ -1011,16 +1038,15 @@ describe('MyTrails Component', () => {
       // Modal should be closed
       expect(screen.queryByText('Review: Favourite Trail 1')).not.toBeInTheDocument();
     });
-
   });
 
   describe('Edge Cases', () => {
     it('handles empty trail arrays', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ favourites: [], completed: [], wishlist: [] })
+            json: () => Promise.resolve({ favourites: [], completed: [], wishlist: [] }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -1034,9 +1060,6 @@ describe('MyTrails Component', () => {
         expect(screen.getByText('No trails in your favourites yet.')).toBeInTheDocument();
       });
     });
-
-
-
   });
 
   describe('Sorting Functionality', () => {
@@ -1157,7 +1180,9 @@ describe('MyTrails Component', () => {
 
       // Verify modal opens
       expect(screen.getByText('Confirm Status Change')).toBeInTheDocument();
-      expect(screen.getByText('Are you sure you want to close Submitted Trail 1?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to close Submitted Trail 1?')
+      ).toBeInTheDocument();
     });
 
     it('changes trail status from open to closed', async () => {
@@ -1190,7 +1215,7 @@ describe('MyTrails Component', () => {
           expect.objectContaining({ path: '/Trails/trail-6' }),
           expect.objectContaining({
             status: 'closed',
-            lastUpdated: expect.any(String)
+            lastUpdated: expect.any(String),
           })
         );
       });
@@ -1228,7 +1253,7 @@ describe('MyTrails Component', () => {
           expect.objectContaining({ path: '/Trails/trail-7' }),
           expect.objectContaining({
             status: 'open',
-            lastUpdated: expect.any(String)
+            lastUpdated: expect.any(String),
           })
         );
       });
@@ -1273,26 +1298,27 @@ describe('MyTrails Component', () => {
   describe('Review Submission Error Handling', () => {
     it('handles review submission server error', async () => {
       // Mock review submission to return error
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: mockSavedTrails.favourites,
-              completed: mockSavedTrails.completed,
-              wishlist: mockSavedTrails.wishlist,
-              submitted: mockSavedTrails.submitted
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: mockSavedTrails.favourites,
+                completed: mockSavedTrails.completed,
+                wishlist: mockSavedTrails.wishlist,
+                submitted: mockSavedTrails.submitted,
+              }),
           });
         }
         if (url.includes('markCompleted')) {
           return Promise.resolve({ ok: true });
         }
         if (url.includes('addTrailReview')) {
-          return Promise.resolve({ 
-            ok: false, 
+          return Promise.resolve({
+            ok: false,
             status: 500,
-            json: () => Promise.resolve({ error: 'Server error' })
+            json: () => Promise.resolve({ error: 'Server error' }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -1399,11 +1425,11 @@ describe('MyTrails Component', () => {
 
       // Test with invalid sort field (this would trigger the default case)
       const sortBySelect = screen.getByTestId('sort-by-filter');
-      
+
       // Since we can't directly set an invalid value, we'll test the sorting logic
       // by ensuring the component handles the default case properly
       fireEvent.change(sortBySelect, { target: { value: 'name' } });
-      
+
       // Verify trails are still displayed (no crash)
       expect(screen.getByText('Favourite Trail 1')).toBeInTheDocument();
     });
@@ -1412,31 +1438,31 @@ describe('MyTrails Component', () => {
       // Create mock data with trails that have equal values
       const mockEqualTrails = {
         favourites: [
-          { 
-            id: 'trail-1', 
+          {
+            id: 'trail-1',
             name: 'Same Name Trail',
             difficulty: 'Easy',
             distance: 5.0,
-            elevationGain: 200
+            elevationGain: 200,
           },
-          { 
-            id: 'trail-2', 
+          {
+            id: 'trail-2',
             name: 'Same Name Trail',
-            difficulty: 'Easy', 
+            difficulty: 'Easy',
             distance: 5.0,
-            elevationGain: 200
-          }
+            elevationGain: 200,
+          },
         ],
         completed: [],
         wishlist: [],
-        submitted: []
+        submitted: [],
       };
 
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getsavedtrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve(mockEqualTrails)
+            json: () => Promise.resolve(mockEqualTrails),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -1491,7 +1517,7 @@ describe('MyTrails Component', () => {
           expect.objectContaining({ path: '/Trails/trail-6' }),
           expect.objectContaining({
             status: 'closed',
-            lastUpdated: expect.any(String)
+            lastUpdated: expect.any(String),
           })
         );
       });
@@ -1524,7 +1550,7 @@ describe('MyTrails Component', () => {
         width: 20,
         height: 20,
         bottom: 70,
-        right: 120
+        right: 120,
       };
       alertsCount.getBoundingClientRect = jest.fn(() => mockRect);
 
@@ -1552,7 +1578,7 @@ describe('MyTrails Component', () => {
       // Find the alerts count within the trail card
       const trailCard = screen.getByTestId('trail-card-trail-1');
       const alertsCount = trailCard.querySelector('.trail-alert-count');
-      
+
       // Mock getBoundingClientRect
       const mockRect = {
         left: 100,
@@ -1560,7 +1586,7 @@ describe('MyTrails Component', () => {
         width: 20,
         height: 20,
         bottom: 70,
-        right: 120
+        right: 120,
       };
       alertsCount.getBoundingClientRect = jest.fn(() => mockRect);
 
@@ -1596,14 +1622,14 @@ describe('MyTrails Component', () => {
       // Test that the component doesn't crash when sorting is applied
       // The default case returns 0, which means no change in order
       const sortBySelect = screen.getByTestId('sort-by-filter');
-      
+
       // Test all valid sort options to ensure the switch statement works
       fireEvent.change(sortBySelect, { target: { value: 'name' } });
       expect(screen.getByText('Favourite Trail 1')).toBeInTheDocument();
-      
+
       fireEvent.change(sortBySelect, { target: { value: 'distance' } });
       expect(screen.getByText('Favourite Trail 1')).toBeInTheDocument();
-      
+
       fireEvent.change(sortBySelect, { target: { value: 'difficulty' } });
       expect(screen.getByText('Favourite Trail 1')).toBeInTheDocument();
     });
@@ -1630,6 +1656,5 @@ describe('MyTrails Component', () => {
 
       expect(screen.getByRole('heading', { level: 1, name: 'My Trails' })).toBeInTheDocument();
     });
-
   });
 });

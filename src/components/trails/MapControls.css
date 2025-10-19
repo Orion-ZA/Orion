@@ -10,6 +10,11 @@
   pointer-events: auto;
 }
 
+/* Light mode map controls positioning */
+html[data-theme='light'] .trails-map-controls {
+  top: 6rem; /* Slightly more space in light mode */
+}
+
 .map-control-btn {
   width: 40px;
   height: 40px;
@@ -29,7 +34,7 @@
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(25, 118, 210, 0.6);
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(25, 118, 210, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -85,5 +90,10 @@
   .trails-map-controls {
     top: 7.5rem; /* Position below search bar: 4.5rem (navbar) + 2.25rem (search bar) + 0.75rem (margin) */
     right: 1rem;
+  }
+
+  /* Light mode mobile map controls positioning */
+  html[data-theme='light'] .trails-map-controls {
+    top: 8.5rem; /* More space in light mode on mobile */
   }
 }

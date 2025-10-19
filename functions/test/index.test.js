@@ -1,7 +1,10 @@
 const admin = require('firebase-admin');
-const test = require('firebase-functions-test')({
-  projectId: 'orion-sdp', // Your actual project ID
-}, 'path/to/service-account-key.json'); // Optional: path to service account key
+const test = require('firebase-functions-test')(
+  {
+    projectId: 'orion-sdp', // Your actual project ID
+  },
+  'path/to/service-account-key.json'
+); // Optional: path to service account key
 
 const myFunctions = require('../index');
 
@@ -12,17 +15,17 @@ jest.mock('firebase-admin', () => ({
     collection: jest.fn(() => ({
       add: jest.fn().mockResolvedValue({ id: 'test-trail-id' }),
       doc: jest.fn(() => ({
-        get: jest.fn().mockResolvedValue({ data: () => ({ name: 'Test User' }) })
-      }))
+        get: jest.fn().mockResolvedValue({ data: () => ({ name: 'Test User' }) }),
+      })),
     })),
     GeoPoint: jest.fn((lat, lng) => ({ _latitude: lat, _longitude: lng })),
     Timestamp: {
-      now: jest.fn(() => ({ _seconds: 1234567890, _nanoseconds: 123000000 }))
-    }
+      now: jest.fn(() => ({ _seconds: 1234567890, _nanoseconds: 123000000 })),
+    },
   })),
   auth: jest.fn(() => ({
-    verifyIdToken: jest.fn()
-  }))
+    verifyIdToken: jest.fn(),
+  })),
 }));
 
 describe('Firebase Functions Tests', () => {
@@ -41,7 +44,7 @@ describe('Firebase Functions Tests', () => {
     it('should return hello message', async () => {
       const req = {};
       const res = {
-        json: jest.fn()
+        json: jest.fn(),
       };
 
       await myFunctions.helloWorld(req, res);
@@ -53,12 +56,12 @@ describe('Firebase Functions Tests', () => {
   describe('getUserData (Callable Function)', () => {
     it('should return user data for authenticated user', async () => {
       const wrapped = test.wrap(myFunctions.getUserData);
-      
+
       const data = {};
       const context = {
         auth: {
-          uid: 'test-user-id'
-        }
+          uid: 'test-user-id',
+        },
       };
 
       const result = await wrapped(data, context);
@@ -68,10 +71,10 @@ describe('Firebase Functions Tests', () => {
 
     it('should throw error for unauthenticated user', async () => {
       const wrapped = test.wrap(myFunctions.getUserData);
-      
+
       const data = {};
       const context = {
-        auth: null
+        auth: null,
       };
 
       await expect(wrapped(data, context)).rejects.toThrow('User not authenticated');

@@ -69,6 +69,13 @@
   animation: slideInUp 0.3s ease-out;
 }
 
+.admin-management-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: slideInUp 0.3s ease-out;
+}
+
 .admin-section {
   margin-bottom: 2rem;
 }
@@ -134,16 +141,16 @@
     max-width: 100%;
     padding: 0 1rem;
   }
-  
+
   .admin-analytics-section {
     gap: 0.5rem;
   }
-  
+
   .admin-main-panel {
     padding: 1rem;
     max-width: 100%;
   }
-  
+
   .admin-section-title {
     font-size: 1.25rem;
   }

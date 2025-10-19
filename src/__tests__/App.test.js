@@ -14,12 +14,12 @@ jest.mock('../components/LoaderContext.js', () => ({
     triggerLoader: mockTriggerLoader,
   }),
 }));
-jest.mock('../components/FullScreenLoader.js', () => () => <div data-testid="loader" />);
+jest.mock('../components/FullScreenLoader.js', () => () => <div data-testid='loader' />);
 jest.mock('../components/ToastContext', () => ({
   ToastProvider: ({ children }) => <>{children}</>,
 }));
-jest.mock('../components/Navbar', () => () => <nav data-testid="navbar" />);
-jest.mock('../components/Footer', () => () => <footer data-testid="footer" />);
+jest.mock('../components/Navbar', () => () => <nav data-testid='navbar' />);
+jest.mock('../components/Footer', () => () => <footer data-testid='footer' />);
 jest.mock('../components/ProtectedRoute', () => ({ children }) => <>{children}</>);
 
 jest.mock('../pages/Welcome', () => () => <div>Welcome Page</div>);
@@ -35,6 +35,10 @@ jest.mock('../pages/ProfilePage', () => () => <div>Profile Page</div>);
 jest.mock('../pages/Settings', () => () => <div>Settings Page</div>);
 jest.mock('../pages/Feedback', () => () => <div>Feedback Page</div>);
 jest.mock('../pages/HelpCenter', () => () => <div>HelpCenter Page</div>);
+jest.mock('../pages/AchievementsPage', () => () => <div>Achievements Page</div>);
+jest.mock('../pages/TrailDetail', () => () => <div>TrailDetail Page</div>);
+jest.mock('../pages/admin/AdminDashboard', () => () => <div>AdminDashboard Page</div>);
+jest.mock('../components/admin/AdminRoute', () => ({ children }) => <>{children}</>);
 
 describe('App', () => {
   it('renders Welcome page and shows Navbar/Footer', () => {
@@ -82,6 +86,7 @@ describe('App', () => {
       ['/mytrails', 'MyTrails Page'],
       ['/alerts', 'AlertsUpdates Page'],
       ['/profile', 'Profile Page'],
+      ['/achievements', 'Achievements Page'],
       ['/settings', 'Settings Page'],
       ['/feedback', 'Feedback Page'],
       ['/help', 'HelpCenter Page'],
@@ -91,6 +96,24 @@ describe('App', () => {
       render(<App />);
       expect(screen.getByText(text)).toBeInTheDocument();
     }
+  });
+
+  it('renders TrailDetail page for trail ID route', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/trails/123'];
+    render(<App />);
+    expect(screen.getByText('TrailDetail Page')).toBeInTheDocument();
+  });
+
+  it('renders Achievements page', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/achievements'];
+    render(<App />);
+    expect(screen.getByText('Achievements Page')).toBeInTheDocument();
+  });
+
+  it('renders AdminDashboard page inside AdminRoute', () => {
+    global.__TEST_ROUTER_ENTRIES__ = ['/admin'];
+    render(<App />);
+    expect(screen.getByText('AdminDashboard Page')).toBeInTheDocument();
   });
 
   it('renders Welcome page for unknown route', () => {
@@ -129,15 +152,15 @@ describe('App', () => {
       mockIntersectionObserver = jest.fn();
       observeSpy = jest.fn();
       disconnectSpy = jest.fn();
-      
+
       mockIntersectionObserver.mockImplementation((callback, options) => ({
         observe: observeSpy,
         disconnect: disconnectSpy,
         unobserve: jest.fn(),
       }));
-      
+
       window.IntersectionObserver = mockIntersectionObserver;
-      
+
       // Mock document.querySelectorAll to return empty array by default
       document.querySelectorAll = jest.fn().mockReturnValue([]);
     });
@@ -152,16 +175,16 @@ describe('App', () => {
       mockElement1.className = 'reveal';
       const mockElement2 = document.createElement('div');
       mockElement2.className = 'reveal';
-      
+
       document.querySelectorAll = jest.fn().mockReturnValue([mockElement1, mockElement2]);
-      
+
       global.__TEST_ROUTER_ENTRIES__ = ['/'];
       render(<App />);
-      
-      expect(mockIntersectionObserver).toHaveBeenCalledWith(
-        expect.any(Function),
-        { rootMargin: '0px 0px -10% 0px', threshold: 0.05 }
-      );
+
+      expect(mockIntersectionObserver).toHaveBeenCalledWith(expect.any(Function), {
+        rootMargin: '0px 0px -10% 0px',
+        threshold: 0.08,
+      });
       expect(observeSpy).toHaveBeenCalledTimes(2);
       expect(observeSpy).toHaveBeenCalledWith(mockElement1);
       expect(observeSpy).toHaveBeenCalledWith(mockElement2);
@@ -169,14 +192,14 @@ describe('App', () => {
 
     it('handles missing IntersectionObserver gracefully', () => {
       delete window.IntersectionObserver;
-      
+
       const mockElement = document.createElement('div');
       mockElement.className = 'reveal';
       document.querySelectorAll = jest.fn().mockReturnValue([mockElement]);
-      
+
       global.__TEST_ROUTER_ENTRIES__ = ['/'];
       render(<App />);
-      
+
       expect(mockElement.classList.contains('is-visible')).toBe(true);
     });
 
@@ -194,31 +217,30 @@ describe('App', () => {
       const mockElement = document.createElement('div');
       mockElement.className = 'reveal';
       document.querySelectorAll = jest.fn().mockReturnValue([mockElement]);
-      
+
       global.__TEST_ROUTER_ENTRIES__ = ['/'];
       render(<App />);
-      
+
       // Simulate intersection
       const mockEntry = {
         isIntersecting: true,
         target: mockElement,
       };
-      
+
       observerCallback([mockEntry]);
-      
+
       expect(mockElement.classList.contains('is-visible')).toBe(true);
     });
 
     it('cleans up intersection observer on unmount', () => {
       global.__TEST_ROUTER_ENTRIES__ = ['/'];
       const { unmount } = render(<App />);
-      
+
       unmount();
-      
+
       expect(disconnectSpy).toHaveBeenCalled();
     });
   });
-
 
   describe('Conditional styling', () => {
     beforeEach(() => {
@@ -229,7 +251,7 @@ describe('App', () => {
     it('applies correct padding for landing page', () => {
       global.__TEST_ROUTER_ENTRIES__ = ['/'];
       render(<App />);
-      
+
       const main = document.querySelector('main.page-fade');
       expect(main).toHaveStyle({ paddingTop: '0px' });
     });
@@ -237,7 +259,7 @@ describe('App', () => {
     it('applies correct padding for trails page', () => {
       global.__TEST_ROUTER_ENTRIES__ = ['/trails'];
       render(<App />);
-      
+
       const main = document.querySelector('main.page-fade');
       expect(main).toHaveStyle({ paddingTop: '0px' });
     });
@@ -245,7 +267,7 @@ describe('App', () => {
     it('applies default padding for other pages', () => {
       global.__TEST_ROUTER_ENTRIES__ = ['/dashboard'];
       render(<App />);
-      
+
       const main = document.querySelector('main.page-fade');
       expect(main).toHaveStyle({ paddingTop: undefined });
     });

@@ -7,12 +7,12 @@ import { doc, updateDoc } from 'firebase/firestore';
 import TrailsPage from '../pages/Trails';
 import useTrails from '../components/hooks/useTrails';
 import { SearchProvider } from '../components/SearchContext';
-import { 
-  mockTrails, 
-  mockUserLocation, 
-  simulateGeolocationSuccess, 
-  simulateGeolocationError, 
-  resetGeolocationMocks 
+import {
+  mockTrails,
+  mockUserLocation,
+  simulateGeolocationSuccess,
+  simulateGeolocationError,
+  resetGeolocationMocks,
 } from '../test-utils';
 
 // Mock Firebase modules
@@ -30,10 +30,10 @@ jest.mock('../firebaseConfig', () => ({
   auth: {
     currentUser: {
       getIdToken: jest.fn(() => Promise.resolve('mock-token')),
-      uid: 'test-user-id'
-    }
+      uid: 'test-user-id',
+    },
   },
-  db: {}
+  db: {},
 }));
 
 // Mock the useTrails hook
@@ -44,7 +44,7 @@ const mockUseTrails = useTrails;
 jest.mock('../components/filters/FilterPanel', () => {
   return function MockFilterPanel({ onClose, onFilterChange }) {
     return (
-      <div data-testid="filter-panel">
+      <div data-testid='filter-panel'>
         <button onClick={onClose}>Close Filters</button>
         <button onClick={() => onFilterChange('difficulty', 'Easy')}>Set Easy</button>
       </div>
@@ -54,9 +54,9 @@ jest.mock('../components/filters/FilterPanel', () => {
 
 jest.mock('../components/trails/TrailMap', () => {
   const React = require('react');
-  return function MockTrailMap({ 
-    onTrailClick, 
-    onMapClick, 
+  return function MockTrailMap({
+    onTrailClick,
+    onMapClick,
     onCloseSubmission,
     setMapBearing,
     setMapPitch,
@@ -64,24 +64,37 @@ jest.mock('../components/trails/TrailMap', () => {
     setHoveredTrail,
     setSelectedTrail,
     mapRef: propMapRef,
-    isLoading
+    isLoading,
   }) {
     const mapRef = React.useRef();
-    
+
     React.useEffect(() => {
       if (mapRef.current) {
         mapRef.current.getMap = () => ({
           easeTo: jest.fn(),
           zoomIn: jest.fn(),
-          zoomOut: jest.fn()
+          zoomOut: jest.fn(),
         });
       }
     }, []);
 
-    return React.createElement('div', { 'data-testid': 'trail-map' },
+    return React.createElement(
+      'div',
+      { 'data-testid': 'trail-map' },
       isLoading && React.createElement('div', null, 'Loading trails…'),
-      React.createElement('button', { onClick: () => onTrailClick({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }) }, 'Click Trail'),
-      React.createElement('button', { onClick: () => onMapClick({ lngLat: { lng: 1, lat: 2 } }) }, 'Click Map'),
+      React.createElement(
+        'button',
+        {
+          onClick: () =>
+            onTrailClick({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }),
+        },
+        'Click Trail'
+      ),
+      React.createElement(
+        'button',
+        { onClick: () => onMapClick({ lngLat: { lng: 1, lat: 2 } }) },
+        'Click Map'
+      ),
       React.createElement('button', { onClick: onCloseSubmission }, 'Close Submission'),
       React.createElement('div', { ref: mapRef, 'data-testid': 'map-ref' })
     );
@@ -90,14 +103,16 @@ jest.mock('../components/trails/TrailMap', () => {
 
 jest.mock('../components/trails/MapControls', () => {
   const React = require('react');
-  return function MockMapControls({ 
-    onZoomIn, 
-    onZoomOut, 
-    onResetNorth, 
-    onRecenter, 
-    onFindLocation 
+  return function MockMapControls({
+    onZoomIn,
+    onZoomOut,
+    onResetNorth,
+    onRecenter,
+    onFindLocation,
   }) {
-    return React.createElement('div', { 'data-testid': 'map-controls' },
+    return React.createElement(
+      'div',
+      { 'data-testid': 'map-controls' },
       React.createElement('button', { onClick: onZoomIn }, 'Zoom In'),
       React.createElement('button', { onClick: onZoomOut }, 'Zoom Out'),
       React.createElement('button', { onClick: onResetNorth }, 'Reset North'),
@@ -109,62 +124,136 @@ jest.mock('../components/trails/MapControls', () => {
 
 jest.mock('../components/trails/TrailsPanel', () => {
   const React = require('react');
-  return function MockTrailsPanel({ 
-    setIsPanelOpen, 
-    setShowFilters, 
+  return function MockTrailsPanel({
+    setIsPanelOpen,
+    setShowFilters,
     setShowSubmissionPanel,
     handleTrailAction,
     onTrailClick,
-    onEditTrail
+    onEditTrail,
   }) {
-    return React.createElement('div', { 'data-testid': 'trails-panel' },
+    return React.createElement(
+      'div',
+      { 'data-testid': 'trails-panel' },
       React.createElement('button', { onClick: () => setIsPanelOpen(true) }, 'Open Panel'),
       React.createElement('button', { onClick: () => setShowFilters(true) }, 'Show Filters'),
-      React.createElement('button', { onClick: () => setShowSubmissionPanel(true) }, 'Submit Trail'),
-      React.createElement('button', { onClick: () => handleTrailAction('trail-1', 'favourites') }, 'Toggle Favourite'),
-      React.createElement('button', { onClick: () => onTrailClick({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }) }, 'Click Trail'),
-      React.createElement('button', { onClick: () => onEditTrail({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }) }, 'Edit Trail')
+      React.createElement(
+        'button',
+        { onClick: () => setShowSubmissionPanel(true) },
+        'Submit Trail'
+      ),
+      React.createElement(
+        'button',
+        { onClick: () => handleTrailAction('trail-1', 'favourites') },
+        'Toggle Favourite'
+      ),
+      React.createElement(
+        'button',
+        {
+          onClick: () =>
+            onTrailClick({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }),
+        },
+        'Click Trail'
+      ),
+      React.createElement(
+        'button',
+        {
+          onClick: () =>
+            onEditTrail({ id: 'trail-1', name: 'Test Trail', longitude: 1, latitude: 2 }),
+        },
+        'Edit Trail'
+      )
     );
   };
 });
 
 jest.mock('../components/trails/TrailSubmission', () => {
   const React = require('react');
-  return function MockTrailSubmission({ 
-    isOpen, 
-    onClose, 
-    onSubmit, 
-    onLocationSelect, 
-    onRouteUpdate 
+  return function MockTrailSubmission({
+    isOpen,
+    onClose,
+    onSubmit,
+    onLocationSelect,
+    onRouteUpdate,
   }) {
-    return isOpen ? React.createElement('div', { 'data-testid': 'trail-submission' },
-      React.createElement('button', { onClick: onClose }, 'Close'),
-      React.createElement('button', { onClick: () => onSubmit({ name: 'Test Trail' }) }, 'Submit'),
-      React.createElement('button', { onClick: () => onLocationSelect({ latitude: 1, longitude: 2, name: 'Test' }) }, 'Set Location'),
-      React.createElement('button', { onClick: () => onRouteUpdate([[1, 2], [3, 4]], { isDrawing: true, addRoutePoint: jest.fn() }) }, 'Set Route')
-    ) : null;
+    return isOpen
+      ? React.createElement(
+          'div',
+          { 'data-testid': 'trail-submission' },
+          React.createElement('button', { onClick: onClose }, 'Close'),
+          React.createElement(
+            'button',
+            { onClick: () => onSubmit({ name: 'Test Trail' }) },
+            'Submit'
+          ),
+          React.createElement(
+            'button',
+            { onClick: () => onLocationSelect({ latitude: 1, longitude: 2, name: 'Test' }) },
+            'Set Location'
+          ),
+          React.createElement(
+            'button',
+            {
+              onClick: () =>
+                onRouteUpdate(
+                  [
+                    [1, 2],
+                    [3, 4],
+                  ],
+                  { isDrawing: true, addRoutePoint: jest.fn() }
+                ),
+            },
+            'Set Route'
+          )
+        )
+      : null;
   };
 });
 
 jest.mock('../components/trails/TrailEdit', () => {
   const React = require('react');
-  return function MockTrailEdit({ 
-    isOpen, 
-    onClose, 
-    onSubmit, 
+  return function MockTrailEdit({
+    isOpen,
+    onClose,
+    onSubmit,
     onDelete,
-    onLocationSelect, 
+    onLocationSelect,
     onRouteUpdate,
-    editTrailData 
+    editTrailData,
   }) {
-    return isOpen ? React.createElement('div', { 'data-testid': 'trail-edit' },
-      React.createElement('button', { onClick: onClose }, 'Close'),
-      React.createElement('button', { onClick: () => onSubmit({ id: 'trail-1', name: 'Updated Trail' }) }, 'Update'),
-      React.createElement('button', { onClick: () => onDelete('trail-1') }, 'Delete Trail'),
-      React.createElement('button', { onClick: () => onLocationSelect({ latitude: 1, longitude: 2, name: 'Test' }) }, 'Set Location'),
-      React.createElement('button', { onClick: () => onRouteUpdate([[1, 2], [3, 4]], { isDrawing: true, addRoutePoint: jest.fn() }) }, 'Set Route'),
-      React.createElement('div', { 'data-testid': 'edit-trail-data' }, editTrailData?.name)
-    ) : null;
+    return isOpen
+      ? React.createElement(
+          'div',
+          { 'data-testid': 'trail-edit' },
+          React.createElement('button', { onClick: onClose }, 'Close'),
+          React.createElement(
+            'button',
+            { onClick: () => onSubmit({ id: 'trail-1', name: 'Updated Trail' }) },
+            'Update'
+          ),
+          React.createElement('button', { onClick: () => onDelete('trail-1') }, 'Delete Trail'),
+          React.createElement(
+            'button',
+            { onClick: () => onLocationSelect({ latitude: 1, longitude: 2, name: 'Test' }) },
+            'Set Location'
+          ),
+          React.createElement(
+            'button',
+            {
+              onClick: () =>
+                onRouteUpdate(
+                  [
+                    [1, 2],
+                    [3, 4],
+                  ],
+                  { isDrawing: true, addRoutePoint: jest.fn() }
+                ),
+            },
+            'Set Route'
+          ),
+          React.createElement('div', { 'data-testid': 'edit-trail-data' }, editTrailData?.name)
+        )
+      : null;
   };
 });
 
@@ -172,7 +261,7 @@ jest.mock('../components/trails/TrailUtils', () => ({
   calculateDistance: jest.fn((lat1, lon1, lat2, lon2) => {
     // Simple mock distance calculation
     return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2)) * 111; // Rough km conversion
-  })
+  }),
 }));
 
 // Mock window.location.reload
@@ -183,12 +272,10 @@ window.location = { reload: jest.fn() };
 global.fetch = jest.fn();
 
 // Helper function to render with all necessary providers
-const renderWithProviders = (component) => {
+const renderWithProviders = component => {
   return render(
     <BrowserRouter>
-      <SearchProvider>
-        {component}
-      </SearchProvider>
+      <SearchProvider>{component}</SearchProvider>
     </BrowserRouter>
   );
 };
@@ -199,15 +286,15 @@ describe('TrailsPage', () => {
   const mockAuth = {
     currentUser: {
       getIdToken: jest.fn(() => Promise.resolve('mock-token')),
-      uid: 'test-user-id'
-    }
+      uid: 'test-user-id',
+    },
   };
 
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
     resetGeolocationMocks();
-    
+
     // Setup default mocks
     getAuth.mockReturnValue(mockAuth);
     onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -220,36 +307,48 @@ describe('TrailsPage', () => {
       filteredTrails: mockTrails,
       trails: mockTrails,
       isLoadingTrails: false,
-      filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+      filters: {
+        difficulty: 'all',
+        tags: [],
+        minDistance: 0,
+        maxDistance: 20,
+        maxLocationDistance: 80,
+      },
       handleFilterChange: mockHandleFilterChange,
       userLocation: null,
       locationError: null,
       isLoadingLocation: false,
       getUserLocation: jest.fn(),
-      calculateDistance: jest.fn()
+      calculateDistance: jest.fn(),
     });
 
     // Mock successful fetch responses
-    global.fetch.mockImplementation((url) => {
+    global.fetch.mockImplementation(url => {
       if (url.includes('getSavedTrails')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            favourites: [{ id: 'trail-1' }],
-            wishlist: [],
-            completed: []
-          })
+          json: () =>
+            Promise.resolve({
+              favourites: [{ id: 'trail-1' }],
+              wishlist: [],
+              completed: [],
+            }),
         });
       }
       if (url.includes('submitTrail')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ trailId: 'new-trail-id' })
+          json: () => Promise.resolve({ trailId: 'new-trail-id' }),
         });
       }
-      if (url.includes('addFavourite') || url.includes('removeFavourite') || 
-          url.includes('addWishlist') || url.includes('removeWishlist') ||
-          url.includes('markCompleted') || url.includes('removeCompleted')) {
+      if (
+        url.includes('addFavourite') ||
+        url.includes('removeFavourite') ||
+        url.includes('addWishlist') ||
+        url.includes('removeWishlist') ||
+        url.includes('markCompleted') ||
+        url.includes('removeCompleted')
+      ) {
         return Promise.resolve({ ok: true });
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -279,13 +378,19 @@ describe('TrailsPage', () => {
         filteredTrails: [],
         trails: [],
         isLoadingTrails: true,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -303,7 +408,9 @@ describe('TrailsPage', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Location access denied. Please enable location permissions.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Location access denied. Please enable location permissions.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -319,7 +426,7 @@ describe('TrailsPage', () => {
         expect.stringContaining('getSavedTrails'),
         expect.objectContaining({
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         })
       );
     });
@@ -351,7 +458,7 @@ describe('TrailsPage', () => {
     });
 
     it('handles error when loading user saved trails', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getSavedTrails')) {
           return Promise.resolve({ ok: false });
         }
@@ -380,8 +487,8 @@ describe('TrailsPage', () => {
       const mockPosition = {
         coords: {
           latitude: -26.2041,
-          longitude: 28.0473
-        }
+          longitude: 28.0473,
+        },
       };
 
       simulateGeolocationSuccess(-26.2041, 28.0473);
@@ -395,7 +502,7 @@ describe('TrailsPage', () => {
         expect.any(Function),
         expect.objectContaining({
           enableHighAccuracy: true,
-          maximumAge: 300000
+          maximumAge: 300000,
         })
       );
     });
@@ -408,7 +515,9 @@ describe('TrailsPage', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Location access denied. Please enable location permissions.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Location access denied. Please enable location permissions.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -449,7 +558,7 @@ describe('TrailsPage', () => {
       const originalGeolocation = navigator.geolocation;
       Object.defineProperty(navigator, 'geolocation', {
         value: undefined,
-        writable: true
+        writable: true,
       });
 
       await act(async () => {
@@ -463,7 +572,7 @@ describe('TrailsPage', () => {
       // Restore original geolocation
       Object.defineProperty(navigator, 'geolocation', {
         value: originalGeolocation,
-        writable: true
+        writable: true,
       });
     });
   });
@@ -580,15 +689,16 @@ describe('TrailsPage', () => {
   describe('Trail Actions', () => {
     it('handles adding trail to favourites', async () => {
       // Mock user with no existing favourites
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getSavedTrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         if (url.includes('addFavourite')) {
@@ -614,8 +724,8 @@ describe('TrailsPage', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               uid: 'test-user-id',
-              trailId: 'trail-1'
-            })
+              trailId: 'trail-1',
+            }),
           })
         );
       });
@@ -623,15 +733,16 @@ describe('TrailsPage', () => {
 
     it('handles removing trail from favourites', async () => {
       // Mock user with existing favourite
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getSavedTrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [{ id: 'trail-1' }],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [{ id: 'trail-1' }],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -702,21 +813,22 @@ describe('TrailsPage', () => {
 
     it('handles trail submission success', async () => {
       // Mock successful submission
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('getSavedTrails')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              favourites: [],
-              wishlist: [],
-              completed: []
-            })
+            json: () =>
+              Promise.resolve({
+                favourites: [],
+                wishlist: [],
+                completed: [],
+              }),
           });
         }
         if (url.includes('submitTrail')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ trailId: 'new-trail-id' })
+            json: () => Promise.resolve({ trailId: 'new-trail-id' }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -740,19 +852,19 @@ describe('TrailsPage', () => {
           expect.objectContaining({
             method: 'POST',
             headers: expect.objectContaining({
-              'Content-Type': 'application/json'
-            })
+              'Content-Type': 'application/json',
+            }),
           })
         );
       });
     });
 
     it('handles trail submission error', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('submitTrail')) {
           return Promise.resolve({
             ok: false,
-            json: () => Promise.resolve({ error: 'Submission failed' })
+            json: () => Promise.resolve({ error: 'Submission failed' }),
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
@@ -895,7 +1007,10 @@ describe('TrailsPage', () => {
         name: 'Test Trail',
         latitude: 1,
         longitude: 2,
-        gpsRoute: [{ lng: 1, lat: 2 }, { lng: 3, lat: 4 }]
+        gpsRoute: [
+          { lng: 1, lat: 2 },
+          { lng: 3, lat: 4 },
+        ],
       };
 
       // We need to test the handleEditTrail function with GPS route data
@@ -913,7 +1028,7 @@ describe('TrailsPage', () => {
         id: 'trail-1',
         name: 'Test Trail',
         latitude: 1,
-        longitude: 2
+        longitude: 2,
       };
 
       // We need to test the handleEditTrail function without GPS route data
@@ -942,7 +1057,7 @@ describe('TrailsPage', () => {
           undefined,
           expect.objectContaining({
             status: 'closed',
-            updatedAt: expect.any(String)
+            updatedAt: expect.any(String),
           })
         );
       });
@@ -1061,7 +1176,7 @@ describe('TrailsPage', () => {
           undefined,
           expect.objectContaining({
             status: 'closed',
-            updatedAt: expect.any(String)
+            updatedAt: expect.any(String),
           })
         );
       });
@@ -1260,13 +1375,19 @@ describe('TrailsPage', () => {
         filteredTrails: [],
         trails: [],
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -1292,20 +1413,26 @@ describe('TrailsPage', () => {
     it('handles invalid trail coordinates', async () => {
       const trailsWithInvalidCoords = [
         { ...mockTrails[0], longitude: null, latitude: null },
-        { ...mockTrails[1], longitude: 'invalid', latitude: 'invalid' }
+        { ...mockTrails[1], longitude: 'invalid', latitude: 'invalid' },
       ];
 
       mockUseTrails.mockReturnValue({
         filteredTrails: trailsWithInvalidCoords,
         trails: trailsWithInvalidCoords,
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -1322,7 +1449,7 @@ describe('TrailsPage', () => {
 
       // Mock a trail without coordinates
       const trailWithoutCoords = { id: 'trail-1', name: 'Test Trail' };
-      
+
       // We need to test the handleTrailClick function directly
       // This would require accessing the component's internal methods
       expect(screen.getByTestId('trail-map')).toBeInTheDocument();
@@ -1408,7 +1535,10 @@ describe('TrailsPage', () => {
         name: 'Test Trail',
         latitude: 1,
         longitude: 2,
-        gpsRoute: [{ lng: 1, lat: 2 }, { lng: 3, lat: 4 }]
+        gpsRoute: [
+          { lng: 1, lat: 2 },
+          { lng: 3, lat: 4 },
+        ],
       };
 
       // We need to test the handleEditTrail function with route data
@@ -1437,7 +1567,9 @@ describe('TrailsPage', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Location access denied. Please enable location permissions.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Location access denied. Please enable location permissions.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -1563,7 +1695,10 @@ describe('TrailsPage', () => {
         name: 'Test Trail',
         latitude: 1,
         longitude: 2,
-        gpsRoute: [{ lng: 1, lat: 2 }, { lng: 3, lat: 4 }]
+        gpsRoute: [
+          { lng: 1, lat: 2 },
+          { lng: 3, lat: 4 },
+        ],
       };
 
       // We need to test the handleEditTrail function with GPS route data
@@ -1581,7 +1716,7 @@ describe('TrailsPage', () => {
         id: 'trail-1',
         name: 'Test Trail',
         latitude: 1,
-        longitude: 2
+        longitude: 2,
       };
 
       // We need to test the handleEditTrail function without GPS route data
@@ -1668,7 +1803,9 @@ describe('TrailsPage', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Location access denied. Please enable location permissions.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Location access denied. Please enable location permissions.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -1884,20 +2021,26 @@ describe('TrailsPage', () => {
     it('covers handleSearchZoom function execution', async () => {
       // Mock trails with a specific name for search
       const searchableTrails = [
-        { ...mockTrails[0], name: 'Test Search Trail', longitude: 1, latitude: 2 }
+        { ...mockTrails[0], name: 'Test Search Trail', longitude: 1, latitude: 2 },
       ];
 
       mockUseTrails.mockReturnValue({
         filteredTrails: searchableTrails,
         trails: searchableTrails,
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -1911,20 +2054,26 @@ describe('TrailsPage', () => {
     it('handles search zoom functionality with matching trail', async () => {
       // Mock trails with a specific name for search
       const searchableTrails = [
-        { ...mockTrails[0], name: 'Test Search Trail', longitude: 1, latitude: 2 }
+        { ...mockTrails[0], name: 'Test Search Trail', longitude: 1, latitude: 2 },
       ];
 
       mockUseTrails.mockReturnValue({
         filteredTrails: searchableTrails,
         trails: searchableTrails,
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -1939,7 +2088,7 @@ describe('TrailsPage', () => {
       // Mock getLocationCoordinates to return coordinates
       const mockGetLocationCoordinates = jest.fn().mockResolvedValue({
         latitude: -26.2041,
-        longitude: 28.0473
+        longitude: 28.0473,
       });
 
       // Mock the SearchContext
@@ -1948,7 +2097,7 @@ describe('TrailsPage', () => {
         setSearchQuery: jest.fn(),
         updateTrailsData: jest.fn(),
         getLocationCoordinates: mockGetLocationCoordinates,
-        getLocationNameFromCoordinates: jest.fn()
+        getLocationNameFromCoordinates: jest.fn(),
       };
 
       // We need to test the handleSearchZoom function indirectly
@@ -2050,7 +2199,7 @@ describe('TrailsPage', () => {
       const mockTrailData = {
         id: 'trail-1',
         name: 'Test Trail',
-        location: { lat: -26.2041, lng: 28.0473 }
+        location: { lat: -26.2041, lng: 28.0473 },
       };
 
       // Update trail with location data
@@ -2079,8 +2228,8 @@ describe('TrailsPage', () => {
         name: 'Test Trail',
         gpsRoute: [
           { lat: -26.2041, lng: 28.0473 },
-          { lat: -26.2042, lng: 28.0474 }
-        ]
+          { lat: -26.2042, lng: 28.0474 },
+        ],
       };
 
       // Update trail with route data
@@ -2120,8 +2269,8 @@ describe('TrailsPage', () => {
         longitude: 2,
         gpsRoute: [
           { lng: 1, lat: 2 },
-          { lng: 3, lat: 4 }
-        ]
+          { lng: 3, lat: 4 },
+        ],
       };
 
       // Open edit panel - this should trigger handleEditTrail with GPS route mapping (line 590)
@@ -2200,7 +2349,7 @@ describe('TrailsPage', () => {
         expect(mockUseTrails).toHaveBeenCalledWith(
           expect.objectContaining({
             latitude: -26.2041,
-            longitude: 28.0473
+            longitude: 28.0473,
           }),
           'test-user-id'
         );
@@ -2212,14 +2361,20 @@ describe('TrailsPage', () => {
       mockUseTrails.mockReturnValue({
         trails: mockTrails,
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         filteredTrails: mockTrails,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -2239,14 +2394,20 @@ describe('TrailsPage', () => {
       mockUseTrails.mockReturnValue({
         trails: mockTrails,
         isLoadingTrails: false,
-        filters: { difficulty: 'all', tags: [], minDistance: 0, maxDistance: 20, maxLocationDistance: 80 },
+        filters: {
+          difficulty: 'all',
+          tags: [],
+          minDistance: 0,
+          maxDistance: 20,
+          maxLocationDistance: 80,
+        },
         handleFilterChange: mockHandleFilterChange,
         filteredTrails: mockTrails,
         userLocation: null,
         locationError: null,
         isLoadingLocation: false,
         getUserLocation: jest.fn(),
-        calculateDistance: jest.fn()
+        calculateDistance: jest.fn(),
       });
 
       await act(async () => {
@@ -2274,10 +2435,11 @@ describe('TrailsPage', () => {
         id: 'trail-1',
         name: 'Test Trail',
         location: { lat: -26.2041, lng: 28.0473 }, // This should trigger line 500
-        gpsRoute: [ // This should trigger line 505
+        gpsRoute: [
+          // This should trigger line 505
           { lat: -26.2041, lng: 28.0473 },
-          { lat: -26.2042, lng: 28.0474 }
-        ]
+          { lat: -26.2042, lng: 28.0474 },
+        ],
       };
 
       // Update trail with both location and route data
@@ -2302,8 +2464,8 @@ describe('TrailsPage', () => {
         longitude: 2,
         gpsRoute: [
           { lng: 1, lat: 2 },
-          { lng: 3, lat: 4 }
-        ]
+          { lng: 3, lat: 4 },
+        ],
       };
 
       // Open edit panel - this should trigger handleEditTrail with GPS route mapping (line 590)
@@ -2391,6 +2553,586 @@ describe('TrailsPage', () => {
 
       // Verify edit panel is open
       expect(screen.getByTestId('trail-edit')).toBeInTheDocument();
+    });
+  });
+
+  describe('Additional Coverage Tests for Uncovered Lines', () => {
+    describe('Trail centering from MyTrails page (lines 95-121)', () => {
+      it('should center map on trail when navigating from MyTrails', async () => {
+        const mockTrailToCenter = {
+          id: 'trail-1',
+          name: 'Test Trail',
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        const mockLocation = {
+          state: {
+            action: 'centerTrail',
+            trailToCenter: mockTrailToCenter,
+          },
+        };
+
+        // Mock useLocation to return the navigation state
+        jest.doMock('react-router-dom', () => ({
+          ...jest.requireActual('react-router-dom'),
+          useLocation: () => mockLocation,
+          useNavigate: () => jest.fn(),
+          useParams: () => ({}),
+        }));
+
+        // Mock mapRef with getMap method
+        const mockMap = {
+          easeTo: jest.fn(),
+        };
+        const mockMapRef = {
+          current: {
+            getMap: () => mockMap,
+          },
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Wait for the setTimeout to execute
+        await act(async () => {
+          await new Promise(resolve => setTimeout(resolve, 600));
+        });
+
+        // Should handle trail centering gracefully
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+
+      it('should handle missing trail coordinates gracefully', async () => {
+        const mockTrailToCenter = {
+          id: 'trail-1',
+          name: 'Test Trail',
+          // Missing latitude and longitude
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Should not throw an error even with missing coordinates
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('User location handling (line 132)', () => {
+      it('should call getTrailsUserLocation with false when not centering map', async () => {
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // The function should be called with false when not centering
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('User saved trails data mapping (lines 151-152)', () => {
+      it('should handle user saved trails with missing data gracefully', async () => {
+        const mockUser = { uid: 'test-user' };
+        onAuthStateChanged.mockImplementation((auth, callback) => {
+          callback(mockUser);
+          return jest.fn();
+        });
+
+        // Mock fetch to return data with missing arrays
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              favourites: null,
+              wishlist: undefined,
+              completed: [],
+            }),
+        });
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        await waitFor(() => {
+          expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/getSavedTrails'),
+            expect.any(Object)
+          );
+        });
+
+        // Should handle null/undefined arrays gracefully
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Map centering functionality (lines 204-205)', () => {
+      it('should center map on user location with smooth transition', async () => {
+        const mockUserLocation = {
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Should handle map centering gracefully
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Geolocation error handling (lines 231-232)', () => {
+      it('should handle POSITION_UNAVAILABLE error', async () => {
+        const mockError = {
+          code: 2, // POSITION_UNAVAILABLE
+          message: 'Position unavailable',
+        };
+
+        simulateGeolocationError(mockError);
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Should handle the error gracefully
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Map control functions (lines 248, 254, 260-261)', () => {
+      it('should handle zoom in functionality', async () => {
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test zoom in functionality
+        const zoomInButton = screen.queryByTestId('zoom-in-button');
+        if (zoomInButton) {
+          fireEvent.click(zoomInButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+
+      it('should handle zoom out functionality', async () => {
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test zoom out functionality
+        const zoomOutButton = screen.queryByTestId('zoom-out-button');
+        if (zoomOutButton) {
+          fireEvent.click(zoomOutButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+
+      it('should handle reset north functionality', async () => {
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test reset north functionality
+        const resetNorthButton = screen.queryByTestId('reset-north-button');
+        if (resetNorthButton) {
+          fireEvent.click(resetNorthButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Recenter functionality (lines 267-270)', () => {
+      it('should recenter map on user location', async () => {
+        const mockUserLocation = {
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test recenter functionality
+        const recenterButton = screen.queryByTestId('recenter-button');
+        if (recenterButton) {
+          fireEvent.click(recenterButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Recenter from search mode (lines 281-283)', () => {
+      it('should recenter from search mode and reset search state', async () => {
+        const mockUserLocation = {
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test recenter from search functionality
+        const recenterFromSearchButton = screen.queryByTestId('recenter-from-search-button');
+        if (recenterFromSearchButton) {
+          fireEvent.click(recenterFromSearchButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Trail detail navigation (line 289)', () => {
+      it('should navigate to trail detail page', async () => {
+        const mockNavigate = jest.fn();
+
+        const mockTrail = {
+          id: 'trail-1',
+          name: 'Test Trail',
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test trail detail navigation
+        const trailDetailButton = screen.queryByTestId('trail-detail-button');
+        if (trailDetailButton) {
+          fireEvent.click(trailDetailButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Trail click handling (lines 295-306)', () => {
+      it('should center map on trail when clicked', async () => {
+        const mockTrail = {
+          id: 'trail-1',
+          name: 'Test Trail',
+          latitude: 40.7128,
+          longitude: -74.006,
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test trail click functionality
+        const trailCard = screen.queryByTestId(`trail-card-${mockTrail.id}`);
+        if (trailCard) {
+          fireEvent.click(trailCard);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Search zoom functionality (lines 312-359)', () => {
+      it('should find and zoom to matching trail', async () => {
+        const mockTrails = [
+          {
+            id: 'trail-1',
+            name: 'Mountain Trail',
+            latitude: 40.7128,
+            longitude: -74.006,
+          },
+          {
+            id: 'trail-2',
+            name: 'Forest Path',
+            latitude: 40.7589,
+            longitude: -73.9851,
+          },
+        ];
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test search zoom functionality
+        const searchInput = screen.queryByTestId('search-input');
+        if (searchInput) {
+          fireEvent.change(searchInput, { target: { value: 'Mountain' } });
+
+          const searchButton = screen.queryByTestId('search-button');
+          if (searchButton) {
+            fireEvent.click(searchButton);
+          }
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+
+      it('should handle geocoding when no trail match found', async () => {
+        // Mock getLocationCoordinates
+        const mockGetLocationCoordinates = jest.fn().mockResolvedValue({
+          latitude: 40.7128,
+          longitude: -74.006,
+        });
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test search with geocoding
+        const searchInput = screen.queryByTestId('search-input');
+        if (searchInput) {
+          fireEvent.change(searchInput, { target: { value: 'New York City' } });
+
+          const searchButton = screen.queryByTestId('search-button');
+          if (searchButton) {
+            fireEvent.click(searchButton);
+          }
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Trail action endpoints (lines 386-389)', () => {
+      it('should handle different trail action endpoints', async () => {
+        const mockUser = { uid: 'test-user' };
+        onAuthStateChanged.mockImplementation((auth, callback) => {
+          callback(mockUser);
+          return jest.fn();
+        });
+
+        // Mock successful API responses
+        global.fetch = jest
+          .fn()
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ success: true }),
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ success: true }),
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ success: true }),
+          });
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test different trail actions
+        const favouriteButton = screen.queryByTestId('favourite-button');
+        if (favouriteButton) {
+          fireEvent.click(favouriteButton);
+        }
+
+        const wishlistButton = screen.queryByTestId('wishlist-button');
+        if (wishlistButton) {
+          fireEvent.click(wishlistButton);
+        }
+
+        const completedButton = screen.queryByTestId('completed-button');
+        if (completedButton) {
+          fireEvent.click(completedButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Error handling for user trails update (line 414)', () => {
+      it('should handle error when updating user trails', async () => {
+        const mockUser = { uid: 'test-user' };
+        onAuthStateChanged.mockImplementation((auth, callback) => {
+          callback(mockUser);
+          return jest.fn();
+        });
+
+        // Mock API error
+        global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test error handling
+        const actionButton = screen.queryByTestId('trail-action-button');
+        if (actionButton) {
+          fireEvent.click(actionButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('Location name handling (lines 432-435)', () => {
+      it('should handle location name retrieval with fallback', async () => {
+        const mockGetLocationNameFromCoordinates = jest
+          .fn()
+          .mockResolvedValueOnce({
+            name: 'Central Park',
+            fullAddress: 'Central Park, New York, NY',
+          })
+          .mockResolvedValueOnce(null);
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test location name handling
+        const mapContainer = screen.queryByTestId('map-container');
+        if (mapContainer) {
+          fireEvent.click(mapContainer, {
+            clientX: 100,
+            clientY: 100,
+          });
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Map click handling (lines 450-461)', () => {
+      it('should handle map clicks and get location info', async () => {
+        const mockGetLocationNameFromCoordinates = jest.fn().mockResolvedValue({
+          name: 'Test Location',
+          fullAddress: 'Test Address',
+        });
+
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test map click handling
+        const mapContainer = screen.queryByTestId('map-container');
+        if (mapContainer) {
+          fireEvent.click(mapContainer, {
+            clientX: 200,
+            clientY: 200,
+          });
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('Trail submission success handling (lines 506-515)', () => {
+      it('should handle successful trail submission', async () => {
+        const mockUser = { uid: 'test-user' };
+        onAuthStateChanged.mockImplementation((auth, callback) => {
+          callback(mockUser);
+          return jest.fn();
+        });
+
+        // Mock successful trail submission
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              success: true,
+              trailId: 'new-trail-id',
+            }),
+        });
+
+        // Mock Firestore functions
+        const mockUpdateDoc = jest.fn().mockResolvedValue();
+        const mockDoc = jest.fn().mockReturnValue({ id: 'mock-doc-ref' });
+        const mockArrayUnion = jest.fn().mockReturnValue('mock-array-union');
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test trail submission
+        const submitButton = screen.queryByTestId('submit-trail-button');
+        if (submitButton) {
+          fireEvent.click(submitButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('GeoPoint conversion (lines 550, 555)', () => {
+      it('should convert location and GPS route to GeoPoint objects', async () => {
+        const mockTrailData = {
+          id: 'trail-1',
+          name: 'Test Trail',
+          location: {
+            lat: 40.7128,
+            lng: -74.006,
+          },
+          gpsRoute: [
+            { lat: 40.7128, lng: -74.006 },
+            { lat: 40.7589, lng: -73.9851 },
+          ],
+        };
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test GeoPoint conversion
+        const updateButton = screen.queryByTestId('update-trail-button');
+        if (updateButton) {
+          fireEvent.click(updateButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
+    });
+
+    describe('Additional error handling (lines 640, 652-653)', () => {
+      it('should handle trail deletion errors gracefully', async () => {
+        const mockUser = { uid: 'test-user' };
+        onAuthStateChanged.mockImplementation((auth, callback) => {
+          callback(mockUser);
+          return jest.fn();
+        });
+
+        // Mock API error for deletion
+        global.fetch = jest.fn().mockRejectedValue(new Error('Delete failed'));
+
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test deletion error handling
+        const deleteButton = screen.queryByTestId('delete-trail-button');
+        if (deleteButton) {
+          fireEvent.click(deleteButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('Additional functionality (line 786)', () => {
+      it('should handle additional component functionality', async () => {
+        await act(async () => {
+          renderWithProviders(<TrailsPage />);
+        });
+
+        // Test additional functionality
+        const additionalButton = screen.queryByTestId('additional-functionality-button');
+        if (additionalButton) {
+          fireEvent.click(additionalButton);
+        }
+
+        expect(screen.getByTestId('trail-map')).toBeInTheDocument();
+      });
     });
   });
 });

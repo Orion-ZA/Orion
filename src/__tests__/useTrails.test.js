@@ -23,9 +23,9 @@ describe('useTrails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default geolocation mock
-    const geoSuccess = (cb) => cb({ coords: { latitude: -33.9249, longitude: 18.4241 } });
+    const geoSuccess = cb => cb({ coords: { latitude: -33.9249, longitude: 18.4241 } });
     navigator.geolocation = {
-      getCurrentPosition: jest.fn((success) => success && geoSuccess(success)),
+      getCurrentPosition: jest.fn(success => success && geoSuccess(success)),
     };
     mockCollection.mockReturnValue({});
   });
@@ -38,11 +38,19 @@ describe('useTrails', () => {
     mockGetDocs.mockResolvedValueOnce({
       docs: [
         // valid: location with latitude/longitude
-        makeDoc('t1', { name: 'Valid', location: { latitude: -33.92, longitude: 18.42 }, distance: 5 }),
+        makeDoc('t1', {
+          name: 'Valid',
+          location: { latitude: -33.92, longitude: 18.42 },
+          distance: 5,
+        }),
         // invalid: out of range
         makeDoc('t2', { name: 'Bad', location: { latitude: 1000, longitude: 0 }, distance: 3 }),
         // valid: GeoPoint-like with _latitude/_longitude
-        makeDoc('t3', { name: 'GeoPoint', location: { _latitude: -33.93, _longitude: 18.43 }, distance: 7 }),
+        makeDoc('t3', {
+          name: 'GeoPoint',
+          location: { _latitude: -33.93, _longitude: 18.43 },
+          distance: 7,
+        }),
       ],
     });
 
@@ -57,83 +65,144 @@ describe('useTrails', () => {
     expect(result.current.isLoadingTrails).toBe(false);
     const names = result.current.filteredTrails.map(t => t.name);
     expect(names).toEqual(['Valid', 'GeoPoint']);
-    expect(result.current.filteredTrails.every(t => typeof t.latitude === 'number' && typeof t.longitude === 'number')).toBe(true);
+    expect(
+      result.current.filteredTrails.every(
+        t => typeof t.latitude === 'number' && typeof t.longitude === 'number'
+      )
+    ).toBe(true);
   });
 
   test('falls back to sample trails when none valid', async () => {
     mockGetDocs.mockResolvedValueOnce({ docs: [makeDoc('x', { name: 'NoLoc' })] });
 
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     expect(result.current.filteredTrails.length).toBe(2);
     const names = result.current.filteredTrails.map(t => t.name);
-    expect(names).toContain("Table Mountain Trail");
+    expect(names).toContain('Table Mountain Trail');
     expect(names).toContain("Lion's Head Trail");
   });
 
   test('filters by difficulty, tags, distance range, search, and location radius', async () => {
     mockGetDocs.mockResolvedValueOnce({
       docs: [
-        makeDoc('a', { name: 'Easy Loop', difficulty: 'Easy', distance: 4, tags: ['loop'], location: { latitude: -33.92, longitude: 18.42 } }),
-        makeDoc('b', { name: 'Hard Peak', difficulty: 'Hard', distance: 12, tags: ['peak'], location: { latitude: -33.95, longitude: 18.5 } }),
+        makeDoc('a', {
+          name: 'Easy Loop',
+          difficulty: 'Easy',
+          distance: 4,
+          tags: ['loop'],
+          location: { latitude: -33.92, longitude: 18.42 },
+        }),
+        makeDoc('b', {
+          name: 'Hard Peak',
+          difficulty: 'Hard',
+          distance: 12,
+          tags: ['peak'],
+          location: { latitude: -33.95, longitude: 18.5 },
+        }),
       ],
     });
 
     const { result } = renderHook(() => useTrails({ latitude: -33.9249, longitude: 18.4241 }));
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     // Set filters step by step
-    await act(async () => { result.current.handleFilterChange('difficulty', 'Easy'); });
+    await act(async () => {
+      result.current.handleFilterChange('difficulty', 'Easy');
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Easy Loop']);
 
-    await act(async () => { result.current.handleFilterChange('tags', ['loop']); });
+    await act(async () => {
+      result.current.handleFilterChange('tags', ['loop']);
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Easy Loop']);
 
     // Case-insensitive tags
-    await act(async () => { result.current.handleFilterChange('tags', ['LOOP']); });
+    await act(async () => {
+      result.current.handleFilterChange('tags', ['LOOP']);
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Easy Loop']);
 
-    await act(async () => { result.current.handleFilterChange('minDistance', 3); result.current.handleFilterChange('maxDistance', 5); });
+    await act(async () => {
+      result.current.handleFilterChange('minDistance', 3);
+      result.current.handleFilterChange('maxDistance', 5);
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Easy Loop']);
 
-    await act(async () => { result.current.handleFilterChange('searchQuery', 'easy'); });
+    await act(async () => {
+      result.current.handleFilterChange('searchQuery', 'easy');
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Easy Loop']);
 
     // Tighten location radius to exclude both, then widen to include nearby
-    await act(async () => { result.current.handleFilterChange('maxLocationDistance', 0.1); });
+    await act(async () => {
+      result.current.handleFilterChange('maxLocationDistance', 0.1);
+    });
     expect(result.current.filteredTrails).toEqual([]);
-    await act(async () => { result.current.handleFilterChange('maxLocationDistance', 80); });
+    await act(async () => {
+      result.current.handleFilterChange('maxLocationDistance', 80);
+    });
     expect(result.current.filteredTrails.length).toBeGreaterThan(0);
   });
 
   test('myTrails filters by createdBy user id reference/path/string', async () => {
     mockGetDocs.mockResolvedValueOnce({
       docs: [
-        makeDoc('m1', { name: 'Mine', createdBy: 'Users/u123', location: { latitude: -33.92, longitude: 18.42 } }),
-        makeDoc('o1', { name: 'Others', createdBy: 'Users/zzz', location: { latitude: -33.93, longitude: 18.43 } }),
+        makeDoc('m1', {
+          name: 'Mine',
+          createdBy: 'Users/u123',
+          location: { latitude: -33.92, longitude: 18.42 },
+        }),
+        makeDoc('o1', {
+          name: 'Others',
+          createdBy: 'Users/zzz',
+          location: { latitude: -33.93, longitude: 18.43 },
+        }),
       ],
     });
 
     const { result } = renderHook(() => useTrails(null, 'u123'));
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
-    await act(async () => { result.current.handleFilterChange('myTrails', true); });
+    await act(async () => {
+      result.current.handleFilterChange('myTrails', true);
+    });
     expect(result.current.filteredTrails.map(t => t.name)).toEqual(['Mine']);
   });
 
   test('myTrails enabled but no currentUserId does not filter', async () => {
     mockGetDocs.mockResolvedValueOnce({
       docs: [
-        makeDoc('m1', { name: 'Mine', createdBy: 'Users/u123', location: { latitude: -33.92, longitude: 18.42 } }),
-        makeDoc('o1', { name: 'Others', createdBy: 'Users/zzz', location: { latitude: -33.93, longitude: 18.43 } }),
+        makeDoc('m1', {
+          name: 'Mine',
+          createdBy: 'Users/u123',
+          location: { latitude: -33.92, longitude: 18.42 },
+        }),
+        makeDoc('o1', {
+          name: 'Others',
+          createdBy: 'Users/zzz',
+          location: { latitude: -33.93, longitude: 18.43 },
+        }),
       ],
     });
 
     const { result } = renderHook(() => useTrails(null, null));
-    await act(async () => { await Promise.resolve(); });
-    await act(async () => { result.current.handleFilterChange('myTrails', true); });
-    expect(result.current.filteredTrails.map(t => t.name).sort()).toEqual(['Mine', 'Others'].sort());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await act(async () => {
+      result.current.handleFilterChange('myTrails', true);
+    });
+    expect(result.current.filteredTrails.map(t => t.name).sort()).toEqual(
+      ['Mine', 'Others'].sort()
+    );
   });
 
   test('external user location takes precedence over internal geolocation', async () => {
@@ -145,10 +214,14 @@ describe('useTrails', () => {
 
     const external = { latitude: 10.001, longitude: 10.001 };
     const { result } = renderHook(() => useTrails(external));
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     // Set a very small radius; since external equals trail, it should pass
-    await act(async () => { result.current.handleFilterChange('maxLocationDistance', 1); });
+    await act(async () => {
+      result.current.handleFilterChange('maxLocationDistance', 1);
+    });
     expect(result.current.filteredTrails.length).toBe(1);
   });
 
@@ -157,7 +230,9 @@ describe('useTrails', () => {
     mockGetDocs.mockRejectedValueOnce(new Error('fs error'));
 
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     expect(result.current.isLoadingTrails).toBe(false);
     expect(result.current.filteredTrails).toEqual([]);
@@ -168,9 +243,13 @@ describe('useTrails', () => {
   test('getUserLocation updates userLocation and flags', async () => {
     mockGetDocs.mockResolvedValueOnce({ docs: [] });
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
 
-    await act(async () => { result.current.getUserLocation(); });
+    await act(async () => {
+      result.current.getUserLocation();
+    });
     expect(result.current.userLocation).toEqual({ latitude: -33.9249, longitude: 18.4241 });
     expect(result.current.isLoadingLocation).toBe(false);
   });
@@ -181,8 +260,12 @@ describe('useTrails', () => {
     // @ts-ignore
     navigator.geolocation = undefined;
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
-    await act(async () => { result.current.getUserLocation(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await act(async () => {
+      result.current.getUserLocation();
+    });
     expect(result.current.locationError).toBe('Geolocation is not supported');
     expect(result.current.isLoadingLocation).toBe(false);
     navigator.geolocation = original;
@@ -205,7 +288,9 @@ describe('useTrails', () => {
     });
 
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
     const trail = result.current.filteredTrails[0];
     expect(Array.isArray(trail.route)).toBe(true);
     expect(Array.isArray(trail.gpsRoute)).toBe(true);
@@ -220,26 +305,40 @@ describe('useTrails', () => {
   test('showAll bypasses filtering and returns all trails', async () => {
     mockGetDocs.mockResolvedValueOnce({
       docs: [
-        makeDoc('a', { name: 'Far Trail', difficulty: 'Hard', distance: 100, location: { latitude: 10, longitude: 10 } }),
-        makeDoc('b', { name: 'Near Trail', difficulty: 'Easy', distance: 1, location: { latitude: 0.01, longitude: 0.01 } }),
+        makeDoc('a', {
+          name: 'Far Trail',
+          difficulty: 'Hard',
+          distance: 100,
+          location: { latitude: 10, longitude: 10 },
+        }),
+        makeDoc('b', {
+          name: 'Near Trail',
+          difficulty: 'Easy',
+          distance: 1,
+          location: { latitude: 0.01, longitude: 0.01 },
+        }),
       ],
     });
     const { result } = renderHook(() => useTrails({ latitude: 0, longitude: 0 }));
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
     await act(async () => {
       result.current.handleFilterChange('difficulty', 'Easy');
       result.current.handleFilterChange('maxLocationDistance', 1);
       result.current.handleFilterChange('showAll', true);
     });
-    expect(result.current.filteredTrails.map(t => t.name).sort()).toEqual(['Far Trail', 'Near Trail'].sort());
+    expect(result.current.filteredTrails.map(t => t.name).sort()).toEqual(
+      ['Far Trail', 'Near Trail'].sort()
+    );
   });
 
   test('exposes calculateDistance function from hook', async () => {
     mockGetDocs.mockResolvedValueOnce({ docs: [] });
     const { result } = renderHook(() => useTrails());
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(result.current.calculateDistance(0, 0, 0, 0)).toBeCloseTo(0, 6);
   });
 });
-
-

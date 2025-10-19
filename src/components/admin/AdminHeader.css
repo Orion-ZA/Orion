@@ -24,6 +24,50 @@
   width: 100%;
 }
 
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.admin-back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  color: #007aff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.admin-back-button:hover {
+  background: rgba(0, 122, 255, 0.2);
+  border-color: rgba(0, 122, 255, 0.5);
+  transform: translateX(-2px);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+}
+
+.admin-back-icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.admin-back-button:hover .admin-back-icon {
+  transform: translateX(-2px);
+}
+
+.admin-back-text {
+  font-weight: 500;
+}
+
 .admin-header-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -96,6 +140,35 @@
   border-radius: 50%;
   background: #34c759;
   box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+  transition: all 0.3s ease;
+}
+
+.admin-header-status-indicator.online {
+  background: #34c759;
+  box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+}
+
+.admin-header-status-indicator.offline {
+  background: #ff3b30;
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+}
+
+.admin-header-status-indicator.checking {
+  background: #ff9500;
+  box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 @keyframes slideInDown {
@@ -139,18 +212,33 @@
     padding: 1rem;
     max-width: 100%;
   }
-  
+
+  .admin-header-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .admin-header-title {
     font-size: 1.25rem;
     text-align: center;
+    flex: 1;
   }
-  
+
+  .admin-back-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-back-text {
+    display: none; /* Hide text on mobile, keep only icon */
+  }
+
   .admin-header-tabs {
     order: 2;
     width: 100%;
     justify-content: center;
   }
-  
+
   .admin-header-status {
     order: 3;
     justify-content: center;
@@ -159,11 +247,25 @@
 
 @media (max-width: 480px) {
   .admin-header-tab {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
   }
-  
+
   .admin-header-tab-icon {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+
+  .admin-header-tabs {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .admin-back-button {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .admin-back-icon {
     width: 0.875rem;
     height: 0.875rem;
   }

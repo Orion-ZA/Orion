@@ -12,20 +12,20 @@ import { useLoader } from '../components/LoaderContext';
 // Mock Firebase modules
 jest.mock('firebase/auth', () => ({
   signInWithEmailAndPassword: jest.fn(),
-  signInWithPopup: jest.fn()
+  signInWithPopup: jest.fn(),
 }));
 
 jest.mock('firebase/firestore', () => ({
   setDoc: jest.fn(),
   doc: jest.fn(),
   serverTimestamp: jest.fn(() => 'mock-timestamp'),
-  getDoc: jest.fn()
+  getDoc: jest.fn(),
 }));
 
 jest.mock('../firebaseConfig', () => ({
   auth: {},
   googleProvider: {},
-  db: {}
+  db: {},
 }));
 
 // Mock react-router-dom
@@ -35,19 +35,19 @@ jest.mock('react-router-dom', () => ({
     <a href={to} {...props}>
       {children}
     </a>
-  )
+  ),
 }));
 
 // Mock LoaderContext
 jest.mock('../components/LoaderContext.js', () => ({
-  useLoader: jest.fn()
+  useLoader: jest.fn(),
 }));
 
 // Mock AuthLayout component
 jest.mock('../components/AuthLayout', () => {
   return function MockAuthLayout({ title, children }) {
     return (
-      <div data-testid="auth-layout">
+      <div data-testid='auth-layout'>
         <h1>{title}</h1>
         {children}
       </div>
@@ -139,7 +139,11 @@ describe('Login Component', () => {
       await userEvent.type(passwordInput, 'password123');
       await userEvent.click(submitButton);
 
-      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
+      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        'password123'
+      );
       expect(mockTriggerLoader).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
     });
@@ -162,9 +166,11 @@ describe('Login Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: errorMessage
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: errorMessage,
+          })
+        );
       });
 
       expect(mockNavigate).not.toHaveBeenCalled();
@@ -187,7 +193,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -203,21 +209,18 @@ describe('Login Component', () => {
       });
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              email: mockUser.email,
-              joinedDate: 'mock-timestamp',
-              name: mockUser.displayName,
-              userId: mockUser.uid
-            },
-            completedHikes: [],
-            favourites: [],
-            wishlist: [],
-            submittedTrails: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            email: mockUser.email,
+            joinedDate: 'mock-timestamp',
+            name: mockUser.displayName,
+            userId: mockUser.uid,
+          },
+          completedHikes: [],
+          favourites: [],
+          wishlist: [],
+          submittedTrails: [],
+        });
       });
 
       expect(mockTriggerLoader).toHaveBeenCalled();
@@ -228,7 +231,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -261,9 +264,11 @@ describe('Login Component', () => {
       await userEvent.click(googleButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: errorMessage
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: errorMessage,
+          })
+        );
       });
 
       expect(mockNavigate).not.toHaveBeenCalled();
@@ -326,7 +331,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -338,21 +343,18 @@ describe('Login Component', () => {
       await userEvent.click(googleButton);
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              email: mockUser.email,
-              joinedDate: 'mock-timestamp',
-              name: mockUser.displayName,
-              userId: mockUser.uid
-            },
-            completedHikes: [],
-            favourites: [],
-            wishlist: [],
-            submittedTrails: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            email: mockUser.email,
+            joinedDate: 'mock-timestamp',
+            name: mockUser.displayName,
+            userId: mockUser.uid,
+          },
+          completedHikes: [],
+          favourites: [],
+          wishlist: [],
+          submittedTrails: [],
+        });
       });
     });
 
@@ -360,7 +362,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: null
+        displayName: null,
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -376,8 +378,8 @@ describe('Login Component', () => {
           expect.any(Object),
           expect.objectContaining({
             profileInfo: expect.objectContaining({
-              name: 'User'
-            })
+              name: 'User',
+            }),
           })
         );
       });
@@ -387,7 +389,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -421,9 +423,11 @@ describe('Login Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: 'Network error'
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Network error',
+          })
+        );
       });
 
       alertSpy.mockRestore();
@@ -433,7 +437,7 @@ describe('Login Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -448,9 +452,11 @@ describe('Login Component', () => {
       await userEvent.click(googleButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: 'Firestore error'
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Firestore error',
+          })
+        );
       });
 
       alertSpy.mockRestore();
@@ -526,7 +532,11 @@ describe('Login Component', () => {
       await userEvent.type(passwordInput, specialPassword);
       await userEvent.click(submitButton);
 
-      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', specialPassword);
+      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        specialPassword
+      );
     });
   });
 
@@ -566,8 +576,8 @@ describe('Login Component', () => {
 
   describe('Component Cleanup', () => {
     it('handles component unmount during login', async () => {
-      mockSignInWithEmailAndPassword.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 100))
+      mockSignInWithEmailAndPassword.mockImplementation(
+        () => new Promise(resolve => setTimeout(resolve, 100))
       );
 
       const { unmount } = render(<Login />);

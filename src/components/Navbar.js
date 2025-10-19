@@ -2,18 +2,26 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import LogoutButton from './LogoutButton.js';
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+} from 'firebase/auth';
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 import { useToast } from './ToastContext';
 import ProfileIcon from './ProfileIcon';
 import SettingsIcon from './SettingsIcon';
 import FeedbackIcon from './FeedbackIcon';
 import HelpCenterIcon from './HelpCenterIcon';
 import OrionLogo from '../assets/orion_logo_clear.png';
+import AdminIcon from './admin/AdminIcon';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // new state for admin status
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -23,9 +31,55 @@ export default function Navbar() {
   const isLanding = location.pathname === '/';
   const isTrails = location.pathname === '/trails';
   const { show } = useToast();
-  
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   // Login via route; Google sign-in available on Login page
 
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    const checkAdminRole = async user => {
+      if (!user) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userDocRef = doc(db, 'Users', user.uid);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          // Check multiple possible role fields for flexibility
+          const userRole = userData.profileInfo?.role || userData.role;
+          setIsAdmin(userRole === 'admin');
+        } else {
+          console.warn('User document not found for:', user.uid);
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error('Error checking admin role:', err);
+        setError('Failed to verify admin privileges');
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Listen for auth state changes
+    unsubscribe = onAuthStateChanged(auth, user => {
+      setError(null);
+      checkAdminRole(user);
+    });
+
+    // Cleanup function
+    return () => unsubscribe();
+  }, []);
+
+  // normal users
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, setUser);
     return () => unsub();
@@ -33,7 +87,7 @@ export default function Navbar() {
 
   // Close mobile menu when clicking outside and prevent body scroll
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (open && !event.target.closest('.navbar')) {
         setOpen(false);
         setMobileProfileOpen(false);
@@ -92,96 +146,117 @@ export default function Navbar() {
 
   return (
     <header className={`navbar ${isLanding || isTrails ? 'landing' : ''}`}>
-    <div className="nav-inner">
-      <Link className="brand" to="/" onClick={() => setOpen(false)} aria-label="Orion Home">
-        <img src={OrionLogo} alt="Orion" className="brand-logo" draggable="false" />
-      </Link>
+      <div className='nav-inner'>
+        <Link className='brand' to='/' onClick={() => setOpen(false)} aria-label='Orion Home'>
+          <img src={OrionLogo} alt='Orion' className='brand-logo' draggable='false' />
+        </Link>
 
-      {/* Desktop nav links */}
-      <nav className="nav-links desktop-nav">
-        <button
-          type="button"
-          className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-          onClick={()=>{ navigate('/trails'); }}
-        >Trails</button>
+        {/* Desktop nav links */}
+        <nav className='nav-links desktop-nav'>
           <button
-            type="button"
+            type='button'
+            className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
+            onClick={() => {
+              navigate('/trails');
+            }}
+          >
+            Trails
+          </button>
+          <button
+            type='button'
             className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); } }}
-          >Reviews & Media</button>
+            onClick={() => {
+              if (!user) {
+                show('Please log in first', { type: 'warn' });
+              } else {
+                navigate('/reviews');
+              }
+            }}
+          >
+            Reviews & Media
+          </button>
           <button
-            type="button"
+            type='button'
             className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); } }}
-          >MyTrails</button>
+            onClick={() => {
+              if (!user) {
+                show('Please log in first', { type: 'warn' });
+              } else {
+                navigate('/mytrails');
+              }
+            }}
+          >
+            MyTrails
+          </button>
           <button
-            type="button"
+            type='button'
             className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
-            onClick={()=>{ if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); } }}
-          >Alerts & Updates</button>
+            onClick={() => {
+              if (!user) {
+                show('Please log in first', { type: 'warn' });
+              } else {
+                navigate('/alerts');
+              }
+            }}
+          >
+            Alerts & Updates
+          </button>
         </nav>
 
         {/* Desktop login/logout */}
-        <div className="nav-actions desktop-actions">
+        <div className='nav-actions desktop-actions'>
           {user ? (
             <div
-              className="profile-container"
+              className='profile-container'
               onMouseEnter={openProfileDropdown}
               onMouseLeave={scheduleProfileClose}
             >
-              <button className="profile-trigger">
+              <button className='profile-trigger'>
                 {user?.photoURL ? (
-                  <img
-                    src={user.photoURL} alt="User Avatar" className="profile-avatar"
-                  />
-                ):(
-                  <ProfileIcon className="profile-icon" />
+                  <img src={user.photoURL} alt='User Avatar' className='profile-avatar' />
+                ) : (
+                  <ProfileIcon className='profile-icon' />
                 )}
-                <span className="profile-chevron">{profileOpen ? '▲' : '▼'}</span>
+                <span className='profile-chevron'>{profileOpen ? '▲' : '▼'}</span>
               </button>
-              
+
               {profileOpen && (
-                <div className="profile-dropdown">
-                  <div className="profile-header">
-                    <p className="profile-name">{user.displayName || user.email}</p>
-                    <p className="profile-email">{user.email}</p>
+                <div className='profile-dropdown'>
+                  <div className='profile-header'>
+                    <p className='profile-name'>{user.displayName || user.email}</p>
+                    <p className='profile-email'>{user.email}</p>
                   </div>
-                  
-                  <div className="profile-menu">
-                    <button
-                      className="profile-menu-item"
-                      onClick={() => navigate('/profile')}
-                    >
-                      <ProfileIcon className="menu-icon" />
+
+                  <div className='profile-menu'>
+                    <button className='profile-menu-item' onClick={() => navigate('/profile')}>
+                      <ProfileIcon className='menu-icon' />
                       Profile
                     </button>
-                    <button 
-                      className="profile-menu-item"
-                      onClick={() => navigate('/help')}
-                    >
-                      <HelpCenterIcon className="menu-icon" />
+                    <button className='profile-menu-item' onClick={() => navigate('/help')}>
+                      <HelpCenterIcon className='menu-icon' />
                       Help Center
                     </button>
-                    
-                    <button 
-                      className="profile-menu-item"
-                      onClick={() => navigate('/settings')}
-                    >
-                      <SettingsIcon className="menu-icon" />
+
+                    <button className='profile-menu-item' onClick={() => navigate('/settings')}>
+                      <SettingsIcon className='menu-icon' />
                       Settings
                     </button>
-                    
-                    <button 
-                      className="profile-menu-item"
-                      onClick={() => navigate('/feedback')}
-                    >
-                      <FeedbackIcon className="menu-icon" />
+
+                    <button className='profile-menu-item' onClick={() => navigate('/feedback')}>
+                      <FeedbackIcon className='menu-icon' />
                       Feedback
                     </button>
-                    
-                    <hr className="profile-divider" />
-                    
-                    <div className="profile-menu-item logout-item">
+
+                    {/* Admin button only available for admins */}
+                    {isAdmin && (
+                      <button className='profile-menu-item' onClick={() => navigate('/admin')}>
+                        <AdminIcon className='menu-item' />
+                        Admin
+                      </button>
+                    )}
+                    <hr className='profile-divider' />
+
+                    <div className='profile-menu-item logout-item'>
                       <LogoutButton />
                     </div>
                   </div>
@@ -189,7 +264,7 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <button className="nav-login-btn" onClick={handleGoogleLogin} disabled={isAuthLoading}>
+            <button className='nav-login-btn' onClick={handleGoogleLogin} disabled={isAuthLoading}>
               {isAuthLoading ? 'Connecting…' : 'Login'}
             </button>
           )}
@@ -197,96 +272,153 @@ export default function Navbar() {
 
         {/* Mobile burger toggle */}
         <input
-          type="checkbox"
-          id="checkbox"
+          type='checkbox'
+          id='checkbox'
           checked={open}
           onChange={() => setOpen(o => !o)}
           aria-hidden
         />
-        <label htmlFor="checkbox" className="toggle" aria-label="Toggle menu" aria-expanded={open}>
-          <div className="bars" id="bar1"></div>
-          <div className="bars" id="bar2"></div>
-          <div className="bars" id="bar3"></div>
+        <label htmlFor='checkbox' className='toggle' aria-label='Toggle menu' aria-expanded={open}>
+          <div className='bars' id='bar1'></div>
+          <div className='bars' id='bar2'></div>
+          <div className='bars' id='bar3'></div>
         </label>
 
         {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''}`}>
-          <div className="mobile-nav-links">
+          <div className='mobile-nav-links'>
             <button
-              type="button"
+              type='button'
               className={`as-link ${location.pathname === '/trails' ? 'active' : ''}`}
-              onClick={() => { navigate('/trails'); setOpen(false); }}
-            >Trails</button>
+              onClick={() => {
+                navigate('/trails');
+                setOpen(false);
+              }}
+            >
+              Trails
+            </button>
             <button
-              type="button"
+              type='button'
               className={`as-link ${location.pathname === '/reviews' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/reviews'); setOpen(false); } }}
-            >Reviews & Media</button>
+              onClick={() => {
+                if (!user) {
+                  show('Please log in first', { type: 'warn' });
+                } else {
+                  navigate('/reviews');
+                  setOpen(false);
+                }
+              }}
+            >
+              Reviews & Media
+            </button>
             <button
-              type="button"
+              type='button'
               className={`as-link ${location.pathname === '/mytrails' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/mytrails'); setOpen(false); } }}
-            >MyTrails</button>
+              onClick={() => {
+                if (!user) {
+                  show('Please log in first', { type: 'warn' });
+                } else {
+                  navigate('/mytrails');
+                  setOpen(false);
+                }
+              }}
+            >
+              MyTrails
+            </button>
             <button
-              type="button"
+              type='button'
               className={`as-link ${location.pathname === '/alerts' ? 'active' : ''}`}
-              onClick={() => { if(!user){ show('Please log in first', { type: 'warn' }); } else { navigate('/alerts'); setOpen(false); } }}
-            >Alerts & Updates</button>
+              onClick={() => {
+                if (!user) {
+                  show('Please log in first', { type: 'warn' });
+                } else {
+                  navigate('/alerts');
+                  setOpen(false);
+                }
+              }}
+            >
+              Alerts & Updates
+            </button>
           </div>
-          <div className="mobile-actions">
+          <div className='mobile-actions'>
             {user ? (
-              <div className="mobile-profile">
-                <div 
-                  className="mobile-profile-header"
+              <div className='mobile-profile'>
+                <div
+                  className='mobile-profile-header'
                   onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
                 >
-                  <div className="mobile-profile-info">
+                  <div className='mobile-profile-info'>
                     {user?.photoURL && (
-                      <img 
-                        src={user.photoURL} 
-                        alt="User avatar" 
-                        className="mobile-avatar" 
-                      />
+                      <img src={user.photoURL} alt='User avatar' className='mobile-avatar' />
                     )}
-                    
-                    <div className="mobile-profile-text">
-                      <p className="mobile-profile-name">{user.displayName || user.email}</p>
-                      <p className="mobile-profile-email">{user.email}</p>
+
+                    <div className='mobile-profile-text'>
+                      <p className='mobile-profile-name'>{user.displayName || user.email}</p>
+                      <p className='mobile-profile-email'>{user.email}</p>
                     </div>
                   </div>
-                  <span className="mobile-profile-chevron">
-                    {mobileProfileOpen ? '▲' : '▼'}
-                  </span>
+                  <span className='mobile-profile-chevron'>{mobileProfileOpen ? '▲' : '▼'}</span>
                 </div>
-                
+
                 {mobileProfileOpen && (
-                  <div className="mobile-profile-menu">
-                    <button className="mobile-profile-item" onClick={() => { navigate('/profile'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <ProfileIcon className="mobile-menu-icon" />
+                  <div className='mobile-profile-menu'>
+                    <button
+                      className='mobile-profile-item'
+                      onClick={() => {
+                        navigate('/profile');
+                        setOpen(false);
+                        setMobileProfileOpen(false);
+                      }}
+                    >
+                      <ProfileIcon className='mobile-menu-icon' />
                       Profile
                     </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/help'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <HelpCenterIcon className="mobile-menu-icon" />
+                    <button
+                      className='mobile-profile-item'
+                      onClick={() => {
+                        navigate('/help');
+                        setOpen(false);
+                        setMobileProfileOpen(false);
+                      }}
+                    >
+                      <HelpCenterIcon className='mobile-menu-icon' />
                       Help Center
                     </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/settings'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <SettingsIcon className="mobile-menu-icon" />
+                    <button
+                      className='mobile-profile-item'
+                      onClick={() => {
+                        navigate('/settings');
+                        setOpen(false);
+                        setMobileProfileOpen(false);
+                      }}
+                    >
+                      <SettingsIcon className='mobile-menu-icon' />
                       Settings
                     </button>
-                    <button className="mobile-profile-item" onClick={() => { navigate('/feedback'); setOpen(false); setMobileProfileOpen(false); }}>
-                      <FeedbackIcon className="mobile-menu-icon" />
+                    <button
+                      className='mobile-profile-item'
+                      onClick={() => {
+                        navigate('/feedback');
+                        setOpen(false);
+                        setMobileProfileOpen(false);
+                      }}
+                    >
+                      <FeedbackIcon className='mobile-menu-icon' />
                       Feedback
                     </button>
-                    <div className="mobile-logout">
+                    <div className='mobile-logout'>
                       <LogoutButton />
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <button 
-                className="nav-login-btn mobile-login" 
-                onClick={() => { handleGoogleLogin(); setOpen(false); }}
+              <button
+                className='nav-login-btn mobile-login'
+                onClick={() => {
+                  handleGoogleLogin();
+                  setOpen(false);
+                }}
                 disabled={isAuthLoading}
               >
                 {isAuthLoading ? 'Connecting…' : 'Login'}

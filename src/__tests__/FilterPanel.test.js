@@ -16,11 +16,7 @@ const defaultFilters = {
 describe('FilterPanel', () => {
   it('renders filter controls', () => {
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={jest.fn()}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={jest.fn()} currentUserId='user1' />
     );
     expect(screen.getByRole('heading', { name: /Filters/i })).toBeInTheDocument();
     expect(screen.getByText(/Show All Trails/i)).toBeInTheDocument();
@@ -35,11 +31,7 @@ describe('FilterPanel', () => {
   it('calls onFilterChange when difficulty changes', () => {
     const onFilterChange = jest.fn();
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={onFilterChange}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={onFilterChange} currentUserId='user1' />
     );
     fireEvent.change(screen.getByLabelText(/Difficulty/i), { target: { value: 'Easy' } });
     expect(onFilterChange).toHaveBeenCalledWith('difficulty', 'Easy');
@@ -48,11 +40,7 @@ describe('FilterPanel', () => {
   it('calls onFilterChange when search query changes', () => {
     const onFilterChange = jest.fn();
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={onFilterChange}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={onFilterChange} currentUserId='user1' />
     );
     fireEvent.change(screen.getByLabelText(/Search Trails/i), { target: { value: 'mountain' } });
     expect(onFilterChange).toHaveBeenCalledWith('searchQuery', 'mountain');
@@ -64,7 +52,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: [] }}
         onFilterChange={onFilterChange}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     const tagInput = screen.getByPlaceholderText(/Search tags/i);
@@ -80,7 +68,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: ['forest'] }}
         onFilterChange={onFilterChange}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     const removeBtn = screen.getByText('×');
@@ -91,11 +79,7 @@ describe('FilterPanel', () => {
   it('calls clearAllFilters when Clear is clicked', () => {
     const onFilterChange = jest.fn();
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={onFilterChange}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={onFilterChange} currentUserId='user1' />
     );
     fireEvent.click(screen.getByText('Clear'));
     expect(onFilterChange).toHaveBeenCalledWith('difficulty', 'all');
@@ -115,7 +99,7 @@ describe('FilterPanel', () => {
         filters={defaultFilters}
         onFilterChange={jest.fn()}
         onClose={onClose}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     const closeBtn = screen.getByTitle(/Close Filters/i);
@@ -130,7 +114,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: ['forest', 'waterfall'] }}
         onFilterChange={onFilterChange}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     // Find the remove button for the 'forest' tag
@@ -142,11 +126,7 @@ describe('FilterPanel', () => {
 
   it('changes Clear button style on hover', () => {
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={jest.fn()}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={jest.fn()} currentUserId='user1' />
     );
     const clearBtn = screen.getByTitle('Clear All Filters');
     expect(clearBtn).toBeInTheDocument();
@@ -164,7 +144,7 @@ describe('FilterPanel', () => {
         filters={defaultFilters}
         onFilterChange={jest.fn()}
         onClose={jest.fn()}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     const closeBtn = screen.getByTitle('Close Filters');
@@ -179,11 +159,7 @@ describe('FilterPanel', () => {
 
   it('does not render Close button if onClose is not provided', () => {
     render(
-      <FilterPanel
-        filters={defaultFilters}
-        onFilterChange={jest.fn()}
-        currentUserId="user1"
-      />
+      <FilterPanel filters={defaultFilters} onFilterChange={jest.fn()} currentUserId='user1' />
     );
     expect(screen.queryByTitle('Close Filters')).not.toBeInTheDocument();
   });
@@ -193,7 +169,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: ['forest', 'waterfall'] }}
         onFilterChange={jest.fn()}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     // Check that both tags are rendered
@@ -213,7 +189,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: [] }}
         onFilterChange={jest.fn()}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     // The tags container should not be in the document
@@ -225,7 +201,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: ['forest'] }}
         onFilterChange={jest.fn()}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     // The tags container should be in the document
@@ -239,7 +215,7 @@ describe('FilterPanel', () => {
       <FilterPanel
         filters={{ ...defaultFilters, tags: ['forest'] }}
         onFilterChange={onFilterChange}
-        currentUserId="user1"
+        currentUserId='user1'
       />
     );
     const removeBtn = screen.getByText('×');

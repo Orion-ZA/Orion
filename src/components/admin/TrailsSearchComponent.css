@@ -1,0 +1,116 @@
+/* Trails Management Search Component Styles */
+
+.trails-management-search {
+  margin-bottom: 2rem;
+}
+
+.trails-management-search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.trails-management-search-input-container:focus-within {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.trails-management-search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a0a0a0;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.trails-management-search-input-container:focus-within .trails-management-search-icon {
+  color: #007aff;
+}
+
+.trails-management-search-input {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  outline: none;
+  color: #ffffff !important;
+  font-size: 1rem !important;
+  font-weight: 500;
+  padding: 0 !important;
+  width: auto !important;
+  box-sizing: border-box;
+}
+
+.trails-management-search-input::placeholder {
+  color: #a0a0a0 !important;
+  font-weight: 400;
+}
+
+.trails-management-search-clear-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a0a0a0;
+  padding: 0.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.trails-management-search-clear-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Search Results Counter */
+.trails-management-search-results-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  border-radius: 8px;
+  color: #007aff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.trails-management-search-results-info.hidden {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trails-management-search {
+    margin-bottom: 1.5rem;
+  }
+
+  .trails-management-search-input-container {
+    padding: 1rem 1rem;
+  }
+
+  .trails-management-search-input {
+    font-size: 0.9rem;
+  }
+
+  .trails-management-search-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-right: 0.625rem;
+  }
+}

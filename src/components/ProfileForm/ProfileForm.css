@@ -25,10 +25,10 @@
   font-size: 16px;
 }
 
-.profile-form button[type="submit"] {
+.profile-form button[type='submit'] {
   width: 100%;
   padding: 12px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 4px;
@@ -36,7 +36,7 @@
   font-size: 16px;
 }
 
-.profile-form button[type="submit"]:disabled {
+.profile-form button[type='submit']:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }

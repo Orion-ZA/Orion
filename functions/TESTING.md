@@ -7,6 +7,7 @@ This guide covers multiple ways to test your Firebase functions.
 ### 1. Local Testing with Firebase Emulator
 
 Start the Firebase emulator:
+
 ```bash
 npm run serve
 ```
@@ -18,11 +19,13 @@ The emulator will start on `http://localhost:5001` by default.
 Once the emulator is running, you can test your functions:
 
 #### Test helloWorld function:
+
 ```bash
 curl http://localhost:5001/your-project-id/us-central1/helloWorld
 ```
 
 #### Test getTrails function:
+
 ```bash
 # Get all trails
 curl http://localhost:5001/your-project-id/us-central1/getTrails
@@ -34,21 +37,22 @@ curl "http://localhost:5001/your-project-id/us-central1/getTrails?difficulty=eas
 curl "http://localhost:5001/your-project-id/us-central1/getTrails?location=Yosemite"
 ```
 
-
-
 ### 3. Automated Testing with Jest
 
 Run unit tests:
+
 ```bash
 npm test
 ```
 
 Run tests in watch mode:
+
 ```bash
 npm run test:watch
 ```
 
 Run tests with coverage:
+
 ```bash
 npm run test:coverage
 ```
@@ -56,6 +60,7 @@ npm run test:coverage
 ### 4. Integration Testing
 
 Use the provided test script:
+
 ```bash
 node test-functions.js
 ```
@@ -65,6 +70,7 @@ node test-functions.js
 ## 📋 Testing Checklist
 
 ### Before Testing:
+
 - [ ] Firebase emulator is running
 - [ ] Your project ID is correctly set in test files
 - [ ] Firestore database has test data (for getTrails function)
@@ -72,6 +78,7 @@ node test-functions.js
 ### Test Cases to Cover:
 
 #### getTrails Function:
+
 - [ ] GET request returns all trails
 - [ ] GET request with difficulty filter works
 - [ ] GET request with location filter works
@@ -81,12 +88,12 @@ node test-functions.js
 - [ ] CORS headers are set correctly
 
 #### helloWorld Function:
+
 - [ ] Returns correct message
 - [ ] Response format is correct
 
-
-
 #### getUserData Function (Callable):
+
 - [ ] Authenticated user can access data
 - [ ] Unauthenticated user gets error
 - [ ] Invalid user ID handled properly
@@ -94,12 +101,16 @@ node test-functions.js
 ## 🔧 Configuration
 
 ### Update Project ID
+
 Replace `your-project-id` in:
+
 - `test-functions.js` (line 4)
 - `test/index.test.js` (line 3)
 
 ### Service Account Key (Optional)
+
 For production-like testing, you can add a service account key:
+
 1. Go to Firebase Console → Project Settings → Service Accounts
 2. Generate new private key
 3. Update the path in `test/index.test.js`
@@ -114,7 +125,9 @@ For production-like testing, you can add a service account key:
 4. **Database errors**: Ensure Firestore emulator is running
 
 ### Debug Mode:
+
 Add `--debug` flag to see detailed logs:
+
 ```bash
 firebase emulators:start --only functions --debug
 ```
@@ -122,6 +135,7 @@ firebase emulators:start --only functions --debug
 ## 📊 Test Results
 
 After running tests, check:
+
 - Console output for test results
 - `coverage/` directory for coverage reports
 - Firebase emulator logs for function execution details
@@ -129,6 +143,7 @@ After running tests, check:
 ## 🚀 Production Testing
 
 For production testing:
+
 1. Deploy functions: `npm run deploy`
 2. Test against live URLs
 3. Monitor Firebase Console logs

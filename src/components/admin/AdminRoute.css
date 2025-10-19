@@ -99,10 +99,19 @@
 }
 
 @keyframes backgroundShift {
-  0%, 100% { transform: translateX(0) translateY(0); }
-  25% { transform: translateX(-10px) translateY(-5px); }
-  50% { transform: translateX(5px) translateY(-10px); }
-  75% { transform: translateX(-5px) translateY(5px); }
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(-10px) translateY(-5px);
+  }
+  50% {
+    transform: translateX(5px) translateY(-10px);
+  }
+  75% {
+    transform: translateX(-5px) translateY(5px);
+  }
 }
 
 @keyframes fadeInUp {

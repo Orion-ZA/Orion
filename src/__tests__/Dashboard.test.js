@@ -8,29 +8,37 @@ import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 
 // Mock Firebase modules
 jest.mock('firebase/auth', () => ({
-  signOut: jest.fn()
+  signOut: jest.fn(),
 }));
 
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   onSnapshot: jest.fn(),
-  getDoc: jest.fn()
+  getDoc: jest.fn(),
 }));
 
 jest.mock('../firebaseConfig', () => ({
   auth: {},
-  db: {}
+  db: {},
 }));
 
 // Mock child components
 jest.mock('../components/BottomNav', () => {
   return function MockBottomNav({ activeTab, setActiveTab }) {
     return (
-      <div data-testid="bottom-nav">
-        <button onClick={() => setActiveTab('home')} data-testid="home-tab">Home</button>
-        <button onClick={() => setActiveTab('stats')} data-testid="stats-tab">Stats</button>
-        <button onClick={() => setActiveTab('challenges')} data-testid="challenges-tab">Challenges</button>
-        <button onClick={() => setActiveTab('account')} data-testid="account-tab">Account</button>
+      <div data-testid='bottom-nav'>
+        <button onClick={() => setActiveTab('home')} data-testid='home-tab'>
+          Home
+        </button>
+        <button onClick={() => setActiveTab('stats')} data-testid='stats-tab'>
+          Stats
+        </button>
+        <button onClick={() => setActiveTab('challenges')} data-testid='challenges-tab'>
+          Challenges
+        </button>
+        <button onClick={() => setActiveTab('account')} data-testid='account-tab'>
+          Account
+        </button>
       </div>
     );
   };
@@ -39,7 +47,7 @@ jest.mock('../components/BottomNav', () => {
 jest.mock('../pages/Dashboard/Home', () => {
   return function MockHome({ userData, trailDetails }) {
     return (
-      <div data-testid="home-component">
+      <div data-testid='home-component'>
         <h2>Home Dashboard</h2>
         <p>User: {userData?.profileInfo?.name || 'Unknown'}</p>
         <p>Favourites: {trailDetails?.favourites?.length || 0}</p>
@@ -54,7 +62,7 @@ jest.mock('../pages/Dashboard/Home', () => {
 jest.mock('../pages/Dashboard/Stats', () => {
   return function MockStats({ userData }) {
     return (
-      <div data-testid="stats-component">
+      <div data-testid='stats-component'>
         <h2>Stats Dashboard</h2>
         <p>User: {userData?.profileInfo?.name || 'Unknown'}</p>
       </div>
@@ -65,7 +73,7 @@ jest.mock('../pages/Dashboard/Stats', () => {
 jest.mock('../pages/Dashboard/Challenges', () => {
   return function MockChallenges({ userData }) {
     return (
-      <div data-testid="challenges-component">
+      <div data-testid='challenges-component'>
         <h2>Challenges Dashboard</h2>
         <p>User: {userData?.profileInfo?.name || 'Unknown'}</p>
       </div>
@@ -76,11 +84,13 @@ jest.mock('../pages/Dashboard/Challenges', () => {
 jest.mock('../pages/Dashboard/Account', () => {
   return function MockAccount({ user, userData, handleLogout }) {
     return (
-      <div data-testid="account-component">
+      <div data-testid='account-component'>
         <h2>Account Dashboard</h2>
         <p>User: {user?.email || 'Unknown'}</p>
         <p>Profile: {userData?.profileInfo?.name || 'Unknown'}</p>
-        <button onClick={handleLogout} data-testid="logout-button">Logout</button>
+        <button onClick={handleLogout} data-testid='logout-button'>
+          Logout
+        </button>
       </div>
     );
   };
@@ -90,7 +100,7 @@ describe('Dashboard Component', () => {
   const mockUser = {
     uid: 'test-user-id',
     email: 'test@example.com',
-    displayName: 'Test User'
+    displayName: 'Test User',
   };
 
   const mockUserData = {
@@ -98,12 +108,12 @@ describe('Dashboard Component', () => {
       name: 'Test User',
       email: 'test@example.com',
       userId: 'test-user-id',
-      joinedDate: '2024-01-01T00:00:00Z'
+      joinedDate: '2024-01-01T00:00:00Z',
     },
     completedHikes: ['/Trails/trail-1', '/Trails/trail-2'],
     favourites: ['/Trails/trail-3'],
     wishlist: ['/Trails/trail-4'],
-    submittedTrails: ['/Trails/trail-5']
+    submittedTrails: ['/Trails/trail-5'],
   };
 
   const mockTrailData = {
@@ -111,7 +121,7 @@ describe('Dashboard Component', () => {
     'trail-2': { id: 'trail-2', name: 'Test Trail 2', difficulty: 'Medium' },
     'trail-3': { id: 'trail-3', name: 'Test Trail 3', difficulty: 'Hard' },
     'trail-4': { id: 'trail-4', name: 'Test Trail 4', difficulty: 'Easy' },
-    'trail-5': { id: 'trail-5', name: 'Test Trail 5', difficulty: 'Medium' }
+    'trail-5': { id: 'trail-5', name: 'Test Trail 5', difficulty: 'Medium' },
   };
 
   const mockUnsubscribe = jest.fn();
@@ -128,20 +138,20 @@ describe('Dashboard Component', () => {
       setTimeout(() => {
         callback({
           exists: () => true,
-          data: () => mockUserData
+          data: () => mockUserData,
         });
       }, 100);
       return mockUnsubscribe;
     });
-    mockGetDoc.mockImplementation((docRef) => {
+    mockGetDoc.mockImplementation(docRef => {
       const trailId = docRef.path.split('/')[1];
       return Promise.resolve({
         exists: () => true,
-        data: () => mockTrailData[trailId]
+        data: () => mockTrailData[trailId],
       });
     });
     mockDoc.mockImplementation((db, collection, id) => ({
-      path: `${collection}/${id}`
+      path: `${collection}/${id}`,
     }));
   });
 
@@ -159,7 +169,7 @@ describe('Dashboard Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Welcome back!')).toBeInTheDocument();
-        expect(screen.getByText('Explorer\'s Dashboard')).toBeInTheDocument();
+        expect(screen.getByText("Explorer's Dashboard")).toBeInTheDocument();
         expect(screen.getByText('Track your hiking adventures')).toBeInTheDocument();
       });
     });
@@ -220,7 +230,7 @@ describe('Dashboard Component', () => {
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           callback({
-            exists: () => false
+            exists: () => false,
           });
         }, 100);
         return mockUnsubscribe;
@@ -237,7 +247,7 @@ describe('Dashboard Component', () => {
 
     it('handles Firestore error', async () => {
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
+
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           errorCallback(new Error('Firestore error'));
@@ -390,9 +400,11 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: errorMessage
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: errorMessage,
+          })
+        );
       });
 
       alertSpy.mockRestore();
@@ -419,14 +431,14 @@ describe('Dashboard Component', () => {
         completedHikes: [],
         favourites: [],
         wishlist: [],
-        submittedTrails: []
+        submittedTrails: [],
       };
 
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           callback({
             exists: () => true,
-            data: () => emptyUserData
+            data: () => emptyUserData,
           });
         }, 100);
         return mockUnsubscribe;
@@ -448,14 +460,14 @@ describe('Dashboard Component', () => {
       const invalidUserData = {
         ...mockUserData,
         completedHikes: ['invalid-ref', '/Trails/trail-1'],
-        favourites: ['not-a-trail-ref']
+        favourites: ['not-a-trail-ref'],
       };
 
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           callback({
             exists: () => true,
-            data: () => invalidUserData
+            data: () => invalidUserData,
           });
         }, 100);
         return mockUnsubscribe;
@@ -472,11 +484,11 @@ describe('Dashboard Component', () => {
     });
 
     it('handles missing trail documents', async () => {
-      mockGetDoc.mockImplementation((docRef) => {
+      mockGetDoc.mockImplementation(docRef => {
         const trailId = docRef.path.split('/')[1];
         return Promise.resolve({
           exists: () => false,
-          data: () => null
+          data: () => null,
         });
       });
 
@@ -550,14 +562,14 @@ describe('Dashboard Component', () => {
       const malformedUserData = {
         profileInfo: null,
         completedHikes: 'not-an-array',
-        favourites: undefined
+        favourites: undefined,
       };
 
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           callback({
             exists: () => true,
-            data: () => malformedUserData
+            data: () => malformedUserData,
           });
         }, 100);
         return mockUnsubscribe;
@@ -592,21 +604,21 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Test User\'s Dashboard')).toBeInTheDocument();
+        expect(screen.getByText("Test User's Dashboard")).toBeInTheDocument();
       });
     });
 
     it('displays default name when profile info is missing', async () => {
       const userDataWithoutProfile = {
         ...mockUserData,
-        profileInfo: null
+        profileInfo: null,
       };
 
       mockOnSnapshot.mockImplementation((docRef, callback, errorCallback) => {
         setTimeout(() => {
           callback({
             exists: () => true,
-            data: () => userDataWithoutProfile
+            data: () => userDataWithoutProfile,
           });
         }, 100);
         return mockUnsubscribe;
@@ -617,7 +629,7 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Explorer\'s Dashboard')).toBeInTheDocument();
+        expect(screen.getByText("Explorer's Dashboard")).toBeInTheDocument();
       });
     });
 

@@ -7,7 +7,7 @@ import { fetchTrailData } from '../utils/trailApi';
 export const useTrailData = () => {
   const { trailId } = useParams();
   const location = useLocation();
-  
+
   const [trail, setTrail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ export const useTrailData = () => {
     const loadTrailData = async () => {
       try {
         setLoading(true);
-        
+
         // First check if trail data was passed via navigation state
         if (location.state?.trail) {
           setTrail(location.state.trail);
@@ -55,7 +55,7 @@ export const useTrailData = () => {
       try {
         const createdByRaw = trail.createdBy;
         let uid;
-        
+
         if (typeof createdByRaw === 'string') {
           uid = createdByRaw.includes('/') ? createdByRaw.split('/').pop() : createdByRaw;
         } else if (createdByRaw && typeof createdByRaw === 'object') {
@@ -84,7 +84,9 @@ export const useTrailData = () => {
         const userDoc = await getDoc(doc(db, 'Users', uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setAuthorName(userData.profileInfo?.displayName || userData.displayName || userData.name || 'Unknown');
+          setAuthorName(
+            userData.profileInfo?.displayName || userData.displayName || userData.name || 'Unknown'
+          );
         } else {
           setAuthorName('Unknown');
         }
@@ -102,6 +104,6 @@ export const useTrailData = () => {
     loading,
     error,
     authorName,
-    setTrail
+    setTrail,
   };
 };

@@ -21,18 +21,20 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock Lucide React icons
 jest.mock('lucide-react', () => ({
-  Trash2: ({ className, title }) => <div data-testid="trash-icon" className={className} title={title} />,
-  Users: ({ className }) => <div data-testid="users-icon" className={className} />,
-  Calendar: ({ className }) => <div data-testid="calendar-icon" className={className} />,
-  MapPin: ({ className }) => <div data-testid="map-pin-icon" className={className} />,
-  Heart: ({ className }) => <div data-testid="heart-icon" className={className} />,
-  CheckCircle: ({ className }) => <div data-testid="check-circle-icon" className={className} />,
-  Star: ({ className }) => <div data-testid="star-icon" className={className} />,
+  Trash2: ({ className, title }) => (
+    <div data-testid='trash-icon' className={className} title={title} />
+  ),
+  Users: ({ className }) => <div data-testid='users-icon' className={className} />,
+  Calendar: ({ className }) => <div data-testid='calendar-icon' className={className} />,
+  MapPin: ({ className }) => <div data-testid='map-pin-icon' className={className} />,
+  Heart: ({ className }) => <div data-testid='heart-icon' className={className} />,
+  CheckCircle: ({ className }) => <div data-testid='check-circle-icon' className={className} />,
+  Star: ({ className }) => <div data-testid='star-icon' className={className} />,
 }));
 
 // Mock console methods
@@ -98,9 +100,7 @@ describe('UsersManagement', () => {
       mockCollection.mockReturnValue('usersRef');
       mockOrderBy.mockReturnValue('orderByClause');
       mockQuery.mockReturnValue('query');
-      mockGetDocs
-        .mockRejectedValueOnce(error)
-        .mockResolvedValueOnce({ docs: [] });
+      mockGetDocs.mockRejectedValueOnce(error).mockResolvedValueOnce({ docs: [] });
 
       render(<UsersManagement />);
 
@@ -175,13 +175,13 @@ describe('UsersManagement', () => {
           profileInfo: {
             name: 'John Doe',
             email: 'john@example.com',
-            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
           },
           submittedTrails: ['trail1', 'trail2'],
           favourites: ['trail3', 'trail4', 'trail5'],
           completed: ['trail6'],
-          wishlist: ['trail7', 'trail8']
-        })
+          wishlist: ['trail7', 'trail8'],
+        }),
       },
       {
         id: 'user2',
@@ -189,14 +189,14 @@ describe('UsersManagement', () => {
           profileInfo: {
             name: 'Jane Smith',
             email: 'jane@example.com',
-            joinedDate: { toDate: () => new Date('2024-01-16T14:20:00Z') }
+            joinedDate: { toDate: () => new Date('2024-01-16T14:20:00Z') },
           },
           submittedTrails: ['trail9'],
           favourites: ['trail10'],
           completed: ['trail11', 'trail12'],
-          wishlist: []
-        })
-      }
+          wishlist: [],
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -278,9 +278,9 @@ describe('UsersManagement', () => {
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockGetDocs.mockResolvedValue({ docs: mockUsersNoProfile });
@@ -301,14 +301,14 @@ describe('UsersManagement', () => {
           data: () => ({
             profileInfo: {
               email: 'test@example.com',
-              joinedDate: null
+              joinedDate: null,
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockGetDocs.mockResolvedValue({ docs: mockUsersPartialProfile });
@@ -331,11 +331,11 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: 'Test User',
               email: 'test@example.com',
-              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
-            }
+              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
+            },
             // Missing submittedTrails, favourites, completed, wishlist
-          })
-        }
+          }),
+        },
       ];
 
       mockGetDocs.mockResolvedValue({ docs: mockUsersNoArrays });
@@ -358,14 +358,14 @@ describe('UsersManagement', () => {
           profileInfo: {
             name: 'John Doe',
             email: 'john@example.com',
-            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
           },
           submittedTrails: ['trail1'],
           favourites: ['trail2'],
           completed: ['trail3'],
-          wishlist: ['trail4']
-        })
-      }
+          wishlist: ['trail4'],
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -386,8 +386,14 @@ describe('UsersManagement', () => {
       fireEvent.click(deleteButton);
 
       expect(screen.getByText('Confirm Deletion')).toBeInTheDocument();
-      expect(screen.getByText('Are you sure you want to delete the user "John Doe"?')).toBeInTheDocument();
-      expect(screen.getByText('This action cannot be undone and will remove all user data including submitted trails and reviews.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete the user "John Doe"?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This action cannot be undone and will remove all user data including submitted trails and reviews.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('cancels delete confirmation', async () => {
@@ -478,14 +484,14 @@ describe('UsersManagement', () => {
           profileInfo: {
             name: 'John Doe',
             email: 'john@example.com',
-            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+            joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
           },
           submittedTrails: [],
           favourites: [],
           completed: [],
-          wishlist: []
-        })
-      }
+          wishlist: [],
+        }),
+      },
     ];
 
     beforeEach(() => {
@@ -514,14 +520,14 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: 'John Doe',
               email: 'john@example.com',
-              joinedDate: null
+              joinedDate: null,
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockGetDocs.mockResolvedValue({ docs: mockUsersNoDate });
@@ -543,14 +549,14 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: 'John Doe',
               email: 'john@example.com',
-              joinedDate: '2024-01-15T10:30:00Z'
+              joinedDate: '2024-01-15T10:30:00Z',
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockGetDocs.mockResolvedValue({ docs: mockUsersStringDate });
@@ -575,14 +581,14 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: 'John Doe',
               email: 'john@example.com',
-              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');
@@ -606,14 +612,14 @@ describe('UsersManagement', () => {
           data: () => ({
             profileInfo: {
               email: 'jane@example.com',
-              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');
@@ -639,9 +645,9 @@ describe('UsersManagement', () => {
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');
@@ -679,8 +685,8 @@ describe('UsersManagement', () => {
           id: 'user1',
           data: () => {
             throw new Error('Malformed data');
-          }
-        }
+          },
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');
@@ -703,14 +709,14 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: undefined,
               email: undefined,
-              joinedDate: undefined
+              joinedDate: undefined,
             },
             submittedTrails: undefined,
             favourites: undefined,
             completed: undefined,
-            wishlist: undefined
-          })
-        }
+            wishlist: undefined,
+          }),
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');
@@ -786,14 +792,14 @@ describe('UsersManagement', () => {
             profileInfo: {
               name: 'John Doe',
               email: 'john@example.com',
-              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') }
+              joinedDate: { toDate: () => new Date('2024-01-15T10:30:00Z') },
             },
             submittedTrails: [],
             favourites: [],
             completed: [],
-            wishlist: []
-          })
-        }
+            wishlist: [],
+          }),
+        },
       ];
 
       mockCollection.mockReturnValue('usersRef');

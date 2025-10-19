@@ -16,8 +16,18 @@ import './AdminUtilities.css';
 export default function TrailsManagement() {
   // Custom hooks for data management
   const { trails, loading, error, deleteTrail, updateTrail, setError } = useTrailsData();
-  const { trailReviews, loadingStates: reviewsLoading, fetchTrailReviews, deleteReview } = useTrailReviews();
-  const { trailAlerts, loadingStates: alertsLoading, fetchTrailAlerts, deleteAlert } = useTrailAlerts();
+  const {
+    trailReviews,
+    loadingStates: reviewsLoading,
+    fetchTrailReviews,
+    deleteReview,
+  } = useTrailReviews();
+  const {
+    trailAlerts,
+    loadingStates: alertsLoading,
+    fetchTrailAlerts,
+    deleteAlert,
+  } = useTrailAlerts();
 
   // Local state
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -28,16 +38,16 @@ export default function TrailsManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [successPopup, setSuccessPopup] = useState({
     isVisible: false,
-    message: ''
+    message: '',
   });
-  
+
   // Reports state
   const [showReportsDropdown, setShowReportsDropdown] = useState(false);
   const [reports, setReports] = useState([]);
   const [loadingReports, setLoadingReports] = useState(false);
 
   // Success popup helpers
-  const showSuccessPopup = (message) => {
+  const showSuccessPopup = message => {
     setSuccessPopup({ isVisible: true, message });
   };
 
@@ -55,36 +65,36 @@ export default function TrailsManagement() {
   const fetchAllTrailCounts = async () => {
     const counts = {};
     const batchSize = 10;
-    
+
     for (let i = 0; i < trails.length; i += batchSize) {
       const batch = trails.slice(i, i + batchSize);
-      
+
       await Promise.all(
-        batch.map(async (trail) => {
-      try {
-        // Fetch reviews count
-        const reviewsRef = collection(db, 'Trails', String(trail.id), 'reviews');
-        const reviewsSnapshot = await getDocs(reviewsRef);
-        const reviewsCount = reviewsSnapshot.size;
-        
-        // Fetch alerts count
-        const alertsRef = collection(db, 'Alerts');
-        const alertsQuery = query(alertsRef, where('trailId', '==', String(trail.id)));
-        const alertsSnapshot = await getDocs(alertsQuery);
-        const alertsCount = alertsSnapshot.size;
-        
-        counts[String(trail.id)] = {
-          reviews: reviewsCount,
-          alerts: alertsCount
-        };
-      } catch (err) {
-        console.error(`Error fetching counts for trail ${String(trail.id)}:`, err);
+        batch.map(async trail => {
+          try {
+            // Fetch reviews count
+            const reviewsRef = collection(db, 'Trails', String(trail.id), 'reviews');
+            const reviewsSnapshot = await getDocs(reviewsRef);
+            const reviewsCount = reviewsSnapshot.size;
+
+            // Fetch alerts count
+            const alertsRef = collection(db, 'Alerts');
+            const alertsQuery = query(alertsRef, where('trailId', '==', String(trail.id)));
+            const alertsSnapshot = await getDocs(alertsQuery);
+            const alertsCount = alertsSnapshot.size;
+
+            counts[String(trail.id)] = {
+              reviews: reviewsCount,
+              alerts: alertsCount,
+            };
+          } catch (err) {
+            console.error(`Error fetching counts for trail ${String(trail.id)}:`, err);
             counts[String(trail.id)] = { reviews: 0, alerts: 0 };
-      }
+          }
         })
       );
     }
-    
+
     setTrailCounts(counts);
   };
 
@@ -94,13 +104,13 @@ export default function TrailsManagement() {
       const reportsRef = collection(db, 'Reports');
       const q = query(reportsRef, orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      
+
       const reportsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().timestamp)
+        createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().timestamp),
       }));
-      
+
       setReports(reportsData);
     } catch (err) {
       console.error('Error fetching reports:', err);
@@ -109,18 +119,15 @@ export default function TrailsManagement() {
     }
   };
 
-  const toggleTrailExpansion = async (trailId) => {
+  const toggleTrailExpansion = async trailId => {
     const isExpanded = expandedTrails[trailId];
     setExpandedTrails(prev => ({
       ...prev,
-      [trailId]: !isExpanded
+      [trailId]: !isExpanded,
     }));
 
     if (!isExpanded) {
-      await Promise.all([
-        fetchTrailReviews(trailId),
-        fetchTrailAlerts(trailId)
-      ]);
+      await Promise.all([fetchTrailReviews(trailId), fetchTrailAlerts(trailId)]);
     }
   };
 
@@ -152,15 +159,15 @@ export default function TrailsManagement() {
         ...prev,
         [trailId]: {
           ...prev[trailId],
-          reviews: Math.max(0, (prev[trailId]?.reviews || 0) - 1)
-        }
+          reviews: Math.max(0, (prev[trailId]?.reviews || 0) - 1),
+        },
       }));
       setDeleteConfirm(null);
       showSuccessPopup('Review has been deleted successfully!');
     }
   };
 
-  const handleDeleteAlert = async (alertId) => {
+  const handleDeleteAlert = async alertId => {
     const result = await deleteAlert(alertId);
     if (result.success) {
       // Update trail counts
@@ -168,8 +175,8 @@ export default function TrailsManagement() {
         ...prev,
         [result.trailId]: {
           ...prev[result.trailId],
-          alerts: Math.max(0, (prev[result.trailId]?.alerts || 0) - 1)
-        }
+          alerts: Math.max(0, (prev[result.trailId]?.alerts || 0) - 1),
+        },
       }));
       setDeleteConfirm(null);
       showSuccessPopup('Alert has been deleted successfully!');
@@ -177,7 +184,7 @@ export default function TrailsManagement() {
   };
 
   // Edit handlers
-  const handleEditTrail = (trail) => {
+  const handleEditTrail = trail => {
     console.log('handleEditTrail called with:', trail);
     setEditTrail(trail);
     setEditForm({
@@ -187,7 +194,7 @@ export default function TrailsManagement() {
       distance: trail.distance || 0,
       elevationGain: trail.elevationGain || 0,
       tags: Array.isArray(trail.tags) ? trail.tags.join(', ') : '',
-      status: trail.status || 'open'
+      status: trail.status || 'open',
     });
     console.log('Edit trail state set:', trail);
   };
@@ -196,25 +203,30 @@ export default function TrailsManagement() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleRemoveImage = (imageIndex) => {
+  const handleRemoveImage = imageIndex => {
     if (!editTrail || !editTrail.photos) return;
-    
+
     const updatedPhotos = editTrail.photos.filter((_, index) => index !== imageIndex);
     setEditTrail(prev => ({
       ...prev,
-      photos: updatedPhotos
+      photos: updatedPhotos,
     }));
   };
 
   const handleSaveTrail = async () => {
     if (!editTrail) return;
-    
+
     // Process the form data
     const processedData = {
       ...editForm,
-      tags: editForm.tags ? editForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+      tags: editForm.tags
+        ? editForm.tags
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag)
+        : [],
       photos: editTrail.photos || [], // Include the updated photos array
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     const success = await updateTrail(editTrail.id, processedData);
@@ -240,9 +252,9 @@ export default function TrailsManagement() {
 
   if (loading) {
     return (
-      <div className="trails-management">
-        <div className="trails-loading">
-          <div className="loading-spinner"></div>
+      <div className='trails-management'>
+        <div className='trails-loading'>
+          <div className='loading-spinner'></div>
           <p>Loading trails...</p>
         </div>
       </div>
@@ -251,11 +263,11 @@ export default function TrailsManagement() {
 
   if (error) {
     return (
-      <div className="trails-management">
-        <div className="trails-error">
+      <div className='trails-management'>
+        <div className='trails-error'>
           <h2>Error</h2>
           <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="btn-primary">
+          <button onClick={() => window.location.reload()} className='btn-primary'>
             Retry
           </button>
         </div>
@@ -266,7 +278,7 @@ export default function TrailsManagement() {
   // Search filtering logic
   const filteredTrails = trails.filter(trail => {
     if (!searchTerm) return true;
-    
+
     const searchLower = searchTerm.toLowerCase();
     return (
       trail.name?.toLowerCase().includes(searchLower) ||
@@ -279,7 +291,7 @@ export default function TrailsManagement() {
   });
 
   // Search handler
-  const handleSearch = (term) => {
+  const handleSearch = term => {
     setSearchTerm(term);
   };
 
@@ -287,30 +299,36 @@ export default function TrailsManagement() {
   console.log('TrailsManagement render - deleteConfirm:', deleteConfirm, 'editTrail:', editTrail);
 
   return (
-    <div className="trails-management">
+    <div className='trails-management'>
       {/* Header */}
-      <div className="trails-header">
+      <div className='trails-header'>
         <h2>Trails Management</h2>
-        <div className="trails-header-actions">
-          <div className="trails-stats">
-            <div className="stat-item">
-              <MapPin className="stat-icon" />
+        <div className='trails-header-actions'>
+          <div className='trails-stats'>
+            <div className='stat-item'>
+              <MapPin className='stat-icon' />
               <span>{trails.length} Trails</span>
             </div>
-            <div className="stat-item">
-              <MessageSquare className="stat-icon" />
-              <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.reviews || 0), 0)} Reviews</span>
+            <div className='stat-item'>
+              <MessageSquare className='stat-icon' />
+              <span>
+                {Object.values(trailCounts).reduce((sum, counts) => sum + (counts.reviews || 0), 0)}{' '}
+                Reviews
+              </span>
             </div>
-            <div className="stat-item">
-              <AlertTriangle className="stat-icon" />
-              <span>{Object.values(trailCounts).reduce((sum, counts) => sum + (counts.alerts || 0), 0)} Alerts</span>
+            <div className='stat-item'>
+              <AlertTriangle className='stat-icon' />
+              <span>
+                {Object.values(trailCounts).reduce((sum, counts) => sum + (counts.alerts || 0), 0)}{' '}
+                Alerts
+              </span>
             </div>
           </div>
-          
+
           {/* Reports Dropdown */}
-          <div className="reports-dropdown-container">
+          <div className='reports-dropdown-container'>
             <button
-              className="reports-dropdown-btn"
+              className='reports-dropdown-btn'
               onClick={() => {
                 setShowReportsDropdown(!showReportsDropdown);
                 if (!showReportsDropdown) {
@@ -322,45 +340,45 @@ export default function TrailsManagement() {
               <span>Reports ({reports.length})</span>
               {showReportsDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
-            
+
             {showReportsDropdown && (
-              <div className="reports-dropdown">
-                <div className="reports-dropdown-header">
+              <div className='reports-dropdown'>
+                <div className='reports-dropdown-header'>
                   <h4>Recent Reports</h4>
                   <button
                     onClick={() => setShowReportsDropdown(false)}
-                    className="close-reports-btn"
+                    className='close-reports-btn'
                   >
                     ×
                   </button>
                 </div>
-                <div className="reports-dropdown-content">
+                <div className='reports-dropdown-content'>
                   {loadingReports ? (
-                    <div className="reports-loading">
-                      <div className="loading-spinner"></div>
+                    <div className='reports-loading'>
+                      <div className='loading-spinner'></div>
                       <p>Loading reports...</p>
                     </div>
                   ) : reports.length === 0 ? (
-                    <p className="no-reports">No reports found</p>
+                    <p className='no-reports'>No reports found</p>
                   ) : (
-                    <div className="reports-list-compact">
-                      {reports.slice(0, 10).map((report) => (
-                        <div key={report.id} className="report-item-compact">
-                          <div className="report-item-header">
-                            <span className="report-type-badge">{report.type?.toUpperCase()}</span>
+                    <div className='reports-list-compact'>
+                      {reports.slice(0, 10).map(report => (
+                        <div key={report.id} className='report-item-compact'>
+                          <div className='report-item-header'>
+                            <span className='report-type-badge'>{report.type?.toUpperCase()}</span>
                             <span className={`report-status-badge status-${report.status}`}>
                               {report.status?.toUpperCase() || 'PENDING'}
                             </span>
                           </div>
-                          <p className="report-description-compact">{report.description}</p>
-                          <div className="report-meta-compact">
+                          <p className='report-description-compact'>{report.description}</p>
+                          <div className='report-meta-compact'>
                             <span>{new Date(report.createdAt).toLocaleDateString()}</span>
                             {report.trailName && <span>• {report.trailName}</span>}
                           </div>
                         </div>
                       ))}
                       {reports.length > 10 && (
-                        <div className="reports-more">
+                        <div className='reports-more'>
                           <p>... and {reports.length - 10} more reports</p>
                         </div>
                       )}
@@ -374,26 +392,29 @@ export default function TrailsManagement() {
       </div>
 
       {/* Search Component */}
-      <TrailsManagementSearch 
+      <TrailsManagementSearch
         onSearch={handleSearch}
-        placeholder="Search trails by name, description, difficulty, status, creator, or tags..."
+        placeholder='Search trails by name, description, difficulty, status, creator, or tags...'
       />
 
       {/* Search Results Info */}
       {searchTerm && (
-        <div className="trails-management-search-results-info">
-          <span>Found {filteredTrails.length} trail{filteredTrails.length !== 1 ? 's' : ''} matching "{searchTerm}"</span>
+        <div className='trails-management-search-results-info'>
+          <span>
+            Found {filteredTrails.length} trail{filteredTrails.length !== 1 ? 's' : ''} matching "
+            {searchTerm}"
+          </span>
         </div>
       )}
 
       {/* Trails List */}
-      <div className="trails-list">
+      <div className='trails-list'>
         {filteredTrails.length === 0 ? (
-          <div className="empty-state">
+          <div className='empty-state'>
             <p>{searchTerm ? `No trails found matching "${searchTerm}"` : 'No trails found'}</p>
           </div>
         ) : (
-          filteredTrails.map((trail) => (
+          filteredTrails.map(trail => (
             <TrailCard
               key={String(trail.id)}
               trail={{
@@ -410,7 +431,7 @@ export default function TrailsManagement() {
                 location: trail.location,
                 gpsRoute: trail.gpsRoute,
                 createdAt: trail.createdAt,
-                lastUpdated: trail.lastUpdated
+                lastUpdated: trail.lastUpdated,
               }}
               isExpanded={expandedTrails[String(trail.id)]}
               onToggleExpansion={toggleTrailExpansion}
@@ -425,10 +446,12 @@ export default function TrailsManagement() {
               trailCounts={trailCounts}
               loadingStates={{
                 reviews: reviewsLoading,
-                alerts: alertsLoading
+                alerts: alertsLoading,
               }}
-              onDeleteReview={(reviewId, trailId, trailName) => setDeleteConfirm({ id: reviewId, trailId, trailName, type: 'review' })}
-              onDeleteAlert={(alertId) => setDeleteConfirm({ id: alertId, type: 'alert' })}
+              onDeleteReview={(reviewId, trailId, trailName) =>
+                setDeleteConfirm({ id: reviewId, trailId, trailName, type: 'review' })
+              }
+              onDeleteAlert={alertId => setDeleteConfirm({ id: alertId, type: 'alert' })}
             />
           ))
         )}
@@ -447,9 +470,9 @@ export default function TrailsManagement() {
         editTrail={editTrail}
         editForm={editForm}
         onClose={() => {
-                  setEditTrail(null);
-                  setEditForm({});
-                }}
+          setEditTrail(null);
+          setEditForm({});
+        }}
         onSave={handleSaveTrail}
         onFormChange={handleFormChange}
         onRemoveImage={handleRemoveImage}

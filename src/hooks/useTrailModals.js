@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useToast } from '../components/ToastContext';
-import { addTrailReview, uploadTrailImages, updateTrailImages, addTrailAlert, submitTrailReport } from '../utils/trailApi';
+import {
+  addTrailReview,
+  uploadTrailImages,
+  updateTrailImages,
+  addTrailAlert,
+  submitTrailReport,
+} from '../utils/trailApi';
 
 export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailReviews) => {
   const { show: showToast } = useToast();
@@ -29,17 +35,17 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
   const [uploading, setUploading] = useState(false);
 
   // Contribution functions
-  const openContributionModal = (type) => {
+  const openContributionModal = type => {
     if (!user) {
       showToast('Please log in to contribute', 'error');
       return;
     }
-    
+
     if (type === 'alert') {
       setShowAlertModal(true);
       return;
     }
-    
+
     setContributionType(type);
     setShowContributionModal(true);
   };
@@ -54,7 +60,7 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
     setUploading(false);
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = event => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
       setNewImages(files);
@@ -69,14 +75,14 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
 
     try {
       setUploading(true);
-      const userDisplayName = isAnonymous ? "Anonymous" : (user.displayName || user.email || "User");
-      
+      const userDisplayName = isAnonymous ? 'Anonymous' : user.displayName || user.email || 'User';
+
       await addTrailReview(trailId, {
         comment: newReview,
         rating: newRating,
         userId: user.uid,
         userName: userDisplayName,
-        userEmail: user.email
+        userEmail: user.email,
       });
 
       await fetchTrailReviews();
@@ -103,7 +109,7 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
 
       setTrail(prev => ({
         ...prev,
-        photos: [...(prev.photos || []), ...uploadedUrls]
+        photos: [...(prev.photos || []), ...uploadedUrls],
       }));
 
       closeContributionModal();
@@ -116,12 +122,12 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
     }
   };
 
-  const handleAddAlert = async (alertData) => {
+  const handleAddAlert = async alertData => {
     try {
       setUploading(true);
       await addTrailAlert({
         trailId: trailId,
-        ...alertData
+        ...alertData,
       });
 
       setShowAlertModal(false);
@@ -141,7 +147,7 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
     setShowReportModal(true);
   };
 
-  const handleSubmitReport = async (reportData) => {
+  const handleSubmitReport = async reportData => {
     try {
       setUploading(true);
       await submitTrailReport({
@@ -149,11 +155,13 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
         reporterId: user?.uid || 'anonymous',
         reporterEmail: user?.email || null,
         trailId: trailId,
-        trailName: trailName
+        trailName: trailName,
       });
 
       setShowReportModal(false);
-      setSuccessMessage('Your report has been submitted successfully. Thank you for helping improve our community!');
+      setSuccessMessage(
+        'Your report has been submitted successfully. Thank you for helping improve our community!'
+      );
       setShowSuccessPopup(true);
     } catch (err) {
       console.error('Failed to submit report:', err);
@@ -196,6 +204,6 @@ export const useTrailModals = (user, trailId, trailName, setTrail, fetchTrailRev
     openReportModal,
     handleSubmitReport,
     setShowAlertModal,
-    setShowReportModal
+    setShowReportModal,
   };
 };

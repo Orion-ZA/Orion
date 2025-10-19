@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 const StatusConfirmModal = ({ isOpen, onClose, onConfirm, trailName, currentStatus }) => {
   const newStatus = currentStatus === 'open' ? 'closed' : 'open';
   const actionText = newStatus === 'closed' ? 'close' : 'reopen';
-  
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -13,44 +13,34 @@ const StatusConfirmModal = ({ isOpen, onClose, onConfirm, trailName, currentStat
       document.body.style.overflow = 'unset';
       document.body.style.position = 'static';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
       document.body.style.position = 'static';
     };
   }, [isOpen]);
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div 
-      className={`status-confirm-overlay ${isOpen ? 'open' : ''}`} 
-      onClick={handleOverlayClick}
-    >
-      <div className="status-confirm-content">
+    <div className={`status-confirm-overlay ${isOpen ? 'open' : ''}`} onClick={handleOverlayClick}>
+      <div className='status-confirm-content'>
         <h3>Confirm Status Change</h3>
         <p>
-          Are you sure you want to {actionText} the trail "{trailName}"? 
-          {newStatus === 'closed' 
-            ? ' This will make it unavailable to other users.' 
-            : ' This will make it available to other users again.'
-          }
+          Are you sure you want to {actionText} the trail "{trailName}"?
+          {newStatus === 'closed'
+            ? ' This will make it unavailable to other users.'
+            : ' This will make it available to other users again.'}
         </p>
-        <div className="status-confirm-actions">
-          <button 
-            className="status-confirm-btn cancel" 
-            onClick={onClose}
-          >
+        <div className='status-confirm-actions'>
+          <button className='status-confirm-btn cancel' onClick={onClose}>
             Cancel
           </button>
-          <button 
-            className="status-confirm-btn confirm" 
-            onClick={onConfirm}
-          >
+          <button className='status-confirm-btn confirm' onClick={onConfirm}>
             {newStatus === 'closed' ? 'Close Trail' : 'Reopen Trail'}
           </button>
         </div>

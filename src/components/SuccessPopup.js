@@ -20,15 +20,15 @@ const SuccessPopup = ({ isVisible, message, onClose }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="success-popup-overlay">
+    <div className='success-popup-overlay'>
       <div className={`success-popup ${showAnimation ? 'show' : ''}`}>
-        <div className="success-icon">
+        <div className='success-icon'>
           <CheckCircle size={48} />
         </div>
-        <h3 className="success-title">Success!</h3>
-        <p className="success-message">{message}</p>
-        <div className="success-progress">
-          <div className="success-progress-bar"></div>
+        <h3 className='success-title'>Success!</h3>
+        <p className='success-message'>{message}</p>
+        <div className='success-progress'>
+          <div className='success-progress-bar'></div>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { auth, db } from "../../firebaseConfig"; 
-import { doc, getDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { useToast } from "../ToastContext";
-import "./AdminRoute.css";
+import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { auth, db } from '../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useToast } from '../ToastContext';
+import './AdminRoute.css';
 
 export default function AdminRoute({ children }) {
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ export default function AdminRoute({ children }) {
   useEffect(() => {
     let unsubscribe = () => {};
 
-    const checkAdminRole = async (user) => {
+    const checkAdminRole = async user => {
       if (!user) {
         setIsAdmin(false);
         setLoading(false);
@@ -23,21 +23,21 @@ export default function AdminRoute({ children }) {
       }
 
       try {
-        const userDocRef = doc(db, "Users", user.uid);
+        const userDocRef = doc(db, 'Users', user.uid);
         const userSnapshot = await getDoc(userDocRef);
-        
+
         if (userSnapshot.exists()) {
           const userData = userSnapshot.data();
           // Check multiple possible role fields for flexibility
           const userRole = userData.profileInfo?.role || userData.role;
-          setIsAdmin(userRole === "admin");
+          setIsAdmin(userRole === 'admin');
         } else {
-          console.warn("User document not found for:", user.uid);
+          console.warn('User document not found for:', user.uid);
           setIsAdmin(false);
         }
       } catch (err) {
-        console.error("Error checking admin role:", err);
-        setError("Failed to verify admin privileges");
+        console.error('Error checking admin role:', err);
+        setError('Failed to verify admin privileges');
         setIsAdmin(false);
       } finally {
         setLoading(false);
@@ -45,7 +45,7 @@ export default function AdminRoute({ children }) {
     };
 
     // Listen for auth state changes
-    unsubscribe = onAuthStateChanged(auth, (user) => {
+    unsubscribe = onAuthStateChanged(auth, user => {
       setError(null);
       checkAdminRole(user);
     });
@@ -57,10 +57,10 @@ export default function AdminRoute({ children }) {
   // Show loading state
   if (loading) {
     return (
-      <div className="admin-route-loading">
-        <div className="admin-route-loading-content">
-          <div className="admin-route-spinner"></div>
-          <p className="admin-route-loading-text">Verifying access...</p>
+      <div className='admin-route-loading'>
+        <div className='admin-route-loading-content'>
+          <div className='admin-route-spinner'></div>
+          <p className='admin-route-loading-text'>Verifying access...</p>
         </div>
       </div>
     );
@@ -69,13 +69,10 @@ export default function AdminRoute({ children }) {
   // Show error state (optional - you might want to handle this differently)
   if (error) {
     return (
-      <div className="admin-route-error">
-        <div className="admin-route-error-content">
+      <div className='admin-route-error'>
+        <div className='admin-route-error-content'>
           <p>Access verification failed</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="admin-route-error-button"
-          >
+          <button onClick={() => window.location.reload()} className='admin-route-error-button'>
             Retry
           </button>
         </div>
@@ -86,7 +83,7 @@ export default function AdminRoute({ children }) {
   // Redirect non-admin users
   if (!isAdmin) {
     setTimeout(() => show('Please go away. You are not admin !!! ', { type: 'warn' }), 0);
-    return <Navigate to="/" replace />;
+    return <Navigate to='/' replace />;
   }
 
   // Render protected content for admin users

@@ -10,14 +10,14 @@ export const fetchBadges = async () => {
     const response = await fetch(BADGES_API_URL, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Badges service not found');
@@ -27,22 +27,22 @@ export const fetchBadges = async () => {
         throw new Error(`Unable to fetch badges (${response.status})`);
       }
     }
-    
+
     const data = await response.json();
-    
+
     if (!data.success) {
       throw new Error('Badges service returned an error');
     }
-    
+
     return {
       badges: data.data || [],
       totalBadges: data.totalBadges || 0,
       categories: data.categories || [],
-      note: data.note || ''
+      note: data.note || '',
     };
   } catch (error) {
     console.error('Error fetching badges:', error);
-    
+
     // Provide more user-friendly error messages
     if (error.name === 'AbortError') {
       throw new Error('Request timed out. Please check your connection.');
@@ -51,7 +51,7 @@ export const fetchBadges = async () => {
     } else if (error.message.includes('Failed to fetch')) {
       throw new Error('Unable to connect to badges service.');
     }
-    
+
     throw error;
   }
 };

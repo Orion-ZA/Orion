@@ -4,12 +4,12 @@ import { useTrailContent } from '../hooks/useTrailContent';
 // Mock the trail API functions
 jest.mock('../utils/trailApi', () => ({
   fetchTrailReviews: jest.fn(),
-  fetchWeatherData: jest.fn()
+  fetchWeatherData: jest.fn(),
 }));
 
 // Mock the trail alerts hook
 jest.mock('../hooks/useTrailAlerts', () => ({
-  useTrailAlerts: jest.fn()
+  useTrailAlerts: jest.fn(),
 }));
 
 import { fetchTrailReviews, fetchWeatherData } from '../utils/trailApi';
@@ -21,18 +21,16 @@ describe('useTrailContent', () => {
     name: 'Test Trail',
     location: {
       latitude: 40.7128,
-      longitude: -74.0060
-    }
+      longitude: -74.006,
+    },
   };
 
   const mockReviews = [
     { id: '1', comment: 'Great trail!', rating: 5, timestamp: '2023-01-01' },
-    { id: '2', comment: 'Nice views', rating: 4, timestamp: '2023-01-02' }
+    { id: '2', comment: 'Nice views', rating: 4, timestamp: '2023-01-02' },
   ];
 
-  const mockWeatherData = [
-    { date: '2023-01-01', minTemp: 10, maxTemp: 20, condition: 'Clear' }
-  ];
+  const mockWeatherData = [{ date: '2023-01-01', minTemp: 10, maxTemp: 20, condition: 'Clear' }];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +39,7 @@ describe('useTrailContent', () => {
     useTrailAlerts.mockReturnValue({
       trailAlerts: {},
       loadingStates: {},
-      fetchTrailAlerts: jest.fn()
+      fetchTrailAlerts: jest.fn(),
     });
   });
 
@@ -143,7 +141,7 @@ describe('useTrailContent', () => {
     it('handles reviews without ratings', () => {
       const reviewsWithoutRatings = [
         { id: '1', comment: 'No rating', timestamp: '2023-01-01' },
-        { id: '2', comment: 'With rating', rating: 3, timestamp: '2023-01-02' }
+        { id: '2', comment: 'With rating', rating: 3, timestamp: '2023-01-02' },
       ];
 
       const { result } = renderHook(() => useTrailContent(mockTrail));
@@ -167,7 +165,7 @@ describe('useTrailContent', () => {
         await new Promise(resolve => setTimeout(resolve, 0));
       });
 
-      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.0060);
+      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.006);
       expect(result.current.weatherData).toEqual(mockWeatherData);
     });
 
@@ -188,8 +186,8 @@ describe('useTrailContent', () => {
         ...mockTrail,
         location: {
           _latitude: 40.7128,
-          _longitude: -74.0060
-        }
+          _longitude: -74.006,
+        },
       };
 
       const { result } = renderHook(() => useTrailContent(trailWithUnderscoreCoords));
@@ -198,7 +196,7 @@ describe('useTrailContent', () => {
         await new Promise(resolve => setTimeout(resolve, 0));
       });
 
-      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.0060);
+      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.006);
     });
 
     it('handles trail without location', async () => {
@@ -216,7 +214,7 @@ describe('useTrailContent', () => {
     it('handles invalid location data', async () => {
       const trailWithInvalidLocation = {
         ...mockTrail,
-        location: { invalid: 'data' }
+        location: { invalid: 'data' },
       };
 
       const { result } = renderHook(() => useTrailContent(trailWithInvalidLocation));
@@ -235,7 +233,7 @@ describe('useTrailContent', () => {
       useTrailAlerts.mockReturnValue({
         trailAlerts: { 'test-trail-id': [{ id: 'alert-1', message: 'Test alert' }] },
         loadingStates: { 'test-trail-id': false },
-        fetchTrailAlerts: mockFetchTrailAlerts
+        fetchTrailAlerts: mockFetchTrailAlerts,
       });
 
       const { result } = renderHook(() => useTrailContent(mockTrail));
@@ -248,7 +246,7 @@ describe('useTrailContent', () => {
       useTrailAlerts.mockReturnValue({
         trailAlerts: { 'other-trail-id': [{ id: 'alert-2', message: 'Other alert' }] },
         loadingStates: { 'other-trail-id': true },
-        fetchTrailAlerts: jest.fn()
+        fetchTrailAlerts: jest.fn(),
       });
 
       const { result } = renderHook(() => useTrailContent(mockTrail));
@@ -260,10 +258,9 @@ describe('useTrailContent', () => {
 
   describe('Effect Dependencies', () => {
     it('refetches data when trail ID changes', async () => {
-      const { result, rerender } = renderHook(
-        ({ trail }) => useTrailContent(trail),
-        { initialProps: { trail: mockTrail } }
-      );
+      const { result, rerender } = renderHook(({ trail }) => useTrailContent(trail), {
+        initialProps: { trail: mockTrail },
+      });
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -282,20 +279,19 @@ describe('useTrailContent', () => {
     });
 
     it('refetches weather when trail location changes', async () => {
-      const { result, rerender } = renderHook(
-        ({ trail }) => useTrailContent(trail),
-        { initialProps: { trail: mockTrail } }
-      );
+      const { result, rerender } = renderHook(({ trail }) => useTrailContent(trail), {
+        initialProps: { trail: mockTrail },
+      });
 
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0));
       });
 
-      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.0060);
+      expect(fetchWeatherData).toHaveBeenCalledWith(40.7128, -74.006);
 
       const newTrail = {
         ...mockTrail,
-        location: { latitude: 50.0, longitude: -100.0 }
+        location: { latitude: 50.0, longitude: -100.0 },
       };
       rerender({ trail: newTrail });
 

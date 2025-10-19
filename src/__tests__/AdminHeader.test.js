@@ -5,12 +5,12 @@ import AdminHeader from '../components/admin/AdminHeader';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  BarChart2: () => <div data-testid="bar-chart-icon" />,
-  FileText: () => <div data-testid="file-text-icon" />,
-  MapPin: () => <div data-testid="map-pin-icon" />,
-  Users: () => <div data-testid="users-icon" />,
-  ArrowLeft: () => <div data-testid="arrow-left-icon" />,
-  Flag: () => <div data-testid="flag-icon" />,
+  BarChart2: () => <div data-testid='bar-chart-icon' />,
+  FileText: () => <div data-testid='file-text-icon' />,
+  MapPin: () => <div data-testid='map-pin-icon' />,
+  Users: () => <div data-testid='users-icon' />,
+  ArrowLeft: () => <div data-testid='arrow-left-icon' />,
+  Flag: () => <div data-testid='flag-icon' />,
 }));
 
 // Mock react-router-dom
@@ -29,19 +29,19 @@ describe('AdminHeader', () => {
     mockSetActiveTab.mockClear();
     mockNavigate.mockClear();
     fetch.mockClear();
-    
+
     // Mock AbortSignal.timeout
     global.AbortSignal = {
-      timeout: jest.fn(() => new AbortController().signal)
+      timeout: jest.fn(() => new AbortController().signal),
     };
-    
+
     // Reset console.error to avoid noise in tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     // Default mock for fetch - resolves with successful response
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
     });
   });
 
@@ -50,13 +50,13 @@ describe('AdminHeader', () => {
   });
 
   it('renders admin dashboard title', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
   });
 
   it('renders all tab buttons with correct labels', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Feedback')).toBeInTheDocument();
@@ -66,8 +66,8 @@ describe('AdminHeader', () => {
   });
 
   it('renders tab icons', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     expect(screen.getAllByTestId('bar-chart-icon')).toHaveLength(1);
     expect(screen.getAllByTestId('file-text-icon')).toHaveLength(1);
     expect(screen.getAllByTestId('map-pin-icon')).toHaveLength(1);
@@ -76,26 +76,26 @@ describe('AdminHeader', () => {
   });
 
   it('applies active class to the correct tab', () => {
-    render(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='feedback' setActiveTab={mockSetActiveTab} />);
+
     const dashboardTab = screen.getByText('Dashboard').closest('button');
     const feedbackTab = screen.getByText('Feedback').closest('button');
-    
+
     expect(dashboardTab).not.toHaveClass('active');
     expect(feedbackTab).toHaveClass('active');
   });
 
   it('calls setActiveTab when tab is clicked', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const feedbackTab = screen.getByText('Feedback');
     fireEvent.click(feedbackTab);
-    
+
     expect(mockSetActiveTab).toHaveBeenCalledWith('feedback');
   });
 
-  it('calls setActiveTab with correct tab id for dashboard', () => { 
-    render(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
+  it('calls setActiveTab with correct tab id for dashboard', () => {
+    render(<AdminHeader activeTab='feedback' setActiveTab={mockSetActiveTab} />);
 
     const dashboardTab = screen.getByText('Dashboard');
     fireEvent.click(dashboardTab);
@@ -103,8 +103,8 @@ describe('AdminHeader', () => {
     expect(mockSetActiveTab).toHaveBeenCalledWith('dashboard');
   });
 
-  it('calls setActiveTab with correct tab id for reports', () => { 
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+  it('calls setActiveTab with correct tab id for reports', () => {
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
     const reportsTab = screen.getByText('Reports');
     fireEvent.click(reportsTab);
@@ -113,8 +113,8 @@ describe('AdminHeader', () => {
   });
 
   it('renders back button', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     expect(screen.getByText('Back')).toBeInTheDocument();
     expect(screen.getByTestId('arrow-left-icon')).toBeInTheDocument();
   });
@@ -123,14 +123,14 @@ describe('AdminHeader', () => {
     // Mock window.history.length to be greater than 1
     Object.defineProperty(window, 'history', {
       value: { length: 2 },
-      writable: true
+      writable: true,
     });
 
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const backButton = screen.getByText('Back');
     fireEvent.click(backButton);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 
@@ -138,14 +138,14 @@ describe('AdminHeader', () => {
     // Mock window.history.length to be 1 or less
     Object.defineProperty(window, 'history', {
       value: { length: 1 },
-      writable: true
+      writable: true,
     });
 
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const backButton = screen.getByText('Back');
     fireEvent.click(backButton);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 
@@ -153,55 +153,58 @@ describe('AdminHeader', () => {
     // Mock successful API response
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+      json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
     });
 
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     // Initially shows checking status
     expect(screen.getByText('API Checking...')).toBeInTheDocument();
-    
+
     // Wait for API call to complete
     await waitFor(() => {
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
-    
-    const statusIndicator = screen.getByText('API Online').closest('div').querySelector('.admin-header-status-indicator');
+
+    const statusIndicator = screen
+      .getByText('API Online')
+      .closest('div')
+      .querySelector('.admin-header-status-indicator');
     expect(statusIndicator).toBeInTheDocument();
     expect(statusIndicator).toHaveClass('online');
   });
 
   it('has correct CSS classes applied', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const header = screen.getByRole('banner');
     expect(header).toHaveClass('admin-header');
-    
+
     const content = header.querySelector('.admin-header-content');
     expect(content).toBeInTheDocument();
-    
+
     const tabs = header.querySelector('.admin-header-tabs');
     expect(tabs).toBeInTheDocument();
-    
+
     const status = header.querySelector('.admin-header-status');
     expect(status).toBeInTheDocument();
   });
 
   it('renders tab buttons with correct structure', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const dashboardTab = screen.getByText('Dashboard').closest('button');
     const feedbackTab = screen.getByText('Feedback').closest('button');
     const trailsTab = screen.getByText('Trails').closest('button');
     const usersTab = screen.getByText('Users').closest('button');
     const reportsTab = screen.getByText('Reports').closest('button');
-    
+
     expect(dashboardTab).toHaveClass('admin-header-tab');
     expect(feedbackTab).toHaveClass('admin-header-tab');
     expect(trailsTab).toHaveClass('admin-header-tab');
     expect(usersTab).toHaveClass('admin-header-tab');
     expect(reportsTab).toHaveClass('admin-header-tab');
-    
+
     // Check for icon elements (they have the class but are rendered as components)
     expect(dashboardTab.querySelector('[data-testid="bar-chart-icon"]')).toBeInTheDocument();
     expect(feedbackTab.querySelector('[data-testid="file-text-icon"]')).toBeInTheDocument();
@@ -211,15 +214,15 @@ describe('AdminHeader', () => {
   });
 
   it('handles multiple tab clicks correctly', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const dashboardTab = screen.getByText('Dashboard');
     const feedbackTab = screen.getByText('Feedback');
-    
+
     fireEvent.click(feedbackTab);
     fireEvent.click(dashboardTab);
     fireEvent.click(feedbackTab);
-    
+
     expect(mockSetActiveTab).toHaveBeenCalledTimes(3);
     expect(mockSetActiveTab).toHaveBeenNthCalledWith(1, 'feedback');
     expect(mockSetActiveTab).toHaveBeenNthCalledWith(2, 'dashboard');
@@ -227,19 +230,19 @@ describe('AdminHeader', () => {
   });
 
   it('maintains accessibility attributes', () => {
-    render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
     const dashboardTab = screen.getByText('Dashboard').closest('button');
     const feedbackTab = screen.getByText('Feedback').closest('button');
     const trailsTab = screen.getByText('Trails').closest('button');
     const usersTab = screen.getByText('Users').closest('button');
-    
+
     // Buttons are accessible by default, check they are clickable
     expect(dashboardTab).toBeInTheDocument();
     expect(feedbackTab).toBeInTheDocument();
     expect(trailsTab).toBeInTheDocument();
     expect(usersTab).toBeInTheDocument();
-    
+
     // Check that buttons are properly structured
     expect(dashboardTab.tagName).toBe('BUTTON');
     expect(feedbackTab.tagName).toBe('BUTTON');
@@ -248,42 +251,44 @@ describe('AdminHeader', () => {
   });
 
   it('renders with different activeTab values', () => {
-    const { rerender } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-    
+    const { rerender } = render(
+      <AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />
+    );
+
     let dashboardTab = screen.getByText('Dashboard').closest('button');
     let feedbackTab = screen.getByText('Feedback').closest('button');
     let trailsTab = screen.getByText('Trails').closest('button');
     let usersTab = screen.getByText('Users').closest('button');
     let reportsTab = screen.getByText('Reports').closest('button');
-    
+
     expect(dashboardTab).toHaveClass('active');
     expect(feedbackTab).not.toHaveClass('active');
     expect(trailsTab).not.toHaveClass('active');
     expect(usersTab).not.toHaveClass('active');
     expect(reportsTab).not.toHaveClass('active');
-    
-    rerender(<AdminHeader activeTab="feedback" setActiveTab={mockSetActiveTab} />);
-    
+
+    rerender(<AdminHeader activeTab='feedback' setActiveTab={mockSetActiveTab} />);
+
     dashboardTab = screen.getByText('Dashboard').closest('button');
     feedbackTab = screen.getByText('Feedback').closest('button');
     trailsTab = screen.getByText('Trails').closest('button');
     usersTab = screen.getByText('Users').closest('button');
     reportsTab = screen.getByText('Reports').closest('button');
-    
+
     expect(dashboardTab).not.toHaveClass('active');
     expect(feedbackTab).toHaveClass('active');
     expect(trailsTab).not.toHaveClass('active');
     expect(usersTab).not.toHaveClass('active');
     expect(reportsTab).not.toHaveClass('active');
-    
-    rerender(<AdminHeader activeTab="reports" setActiveTab={mockSetActiveTab} />);
-    
+
+    rerender(<AdminHeader activeTab='reports' setActiveTab={mockSetActiveTab} />);
+
     dashboardTab = screen.getByText('Dashboard').closest('button');
     feedbackTab = screen.getByText('Feedback').closest('button');
     trailsTab = screen.getByText('Trails').closest('button');
     usersTab = screen.getByText('Users').closest('button');
     reportsTab = screen.getByText('Reports').closest('button');
-    
+
     expect(dashboardTab).not.toHaveClass('active');
     expect(feedbackTab).not.toHaveClass('active');
     expect(trailsTab).not.toHaveClass('active');
@@ -296,10 +301,10 @@ describe('AdminHeader', () => {
     it('calls health API on component mount', async () => {
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
       });
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith(
@@ -309,7 +314,7 @@ describe('AdminHeader', () => {
             headers: {
               'Content-Type': 'application/json',
             },
-            signal: expect.any(Object)
+            signal: expect.any(Object),
           })
         );
       });
@@ -318,42 +323,51 @@ describe('AdminHeader', () => {
     it('shows offline status when API call fails', async () => {
       fetch.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       await waitFor(() => {
         expect(screen.getByText('API Offline')).toBeInTheDocument();
       });
 
-      const statusIndicator = screen.getByText('API Offline').closest('div').querySelector('.admin-header-status-indicator');
+      const statusIndicator = screen
+        .getByText('API Offline')
+        .closest('div')
+        .querySelector('.admin-header-status-indicator');
       expect(statusIndicator).toHaveClass('offline');
     });
 
     it('shows offline status when API returns non-ok response', async () => {
       fetch.mockResolvedValueOnce({
         ok: false,
-        status: 500
+        status: 500,
       });
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       await waitFor(() => {
         expect(screen.getByText('API Offline')).toBeInTheDocument();
       });
 
-      const statusIndicator = screen.getByText('API Offline').closest('div').querySelector('.admin-header-status-indicator');
+      const statusIndicator = screen
+        .getByText('API Offline')
+        .closest('div')
+        .querySelector('.admin-header-status-indicator');
       expect(statusIndicator).toHaveClass('offline');
     });
 
     it('shows checking status initially', () => {
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
       });
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       expect(screen.getByText('API Checking...')).toBeInTheDocument();
-      const statusIndicator = screen.getByText('API Checking...').closest('div').querySelector('.admin-header-status-indicator');
+      const statusIndicator = screen
+        .getByText('API Checking...')
+        .closest('div')
+        .querySelector('.admin-header-status-indicator');
       expect(statusIndicator).toHaveClass('checking');
     });
 
@@ -363,7 +377,7 @@ describe('AdminHeader', () => {
         throw new Error('Timeout');
       });
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       await waitFor(() => {
         expect(screen.getByText('API Offline')).toBeInTheDocument();
@@ -372,13 +386,13 @@ describe('AdminHeader', () => {
 
     it('sets up periodic health checks', async () => {
       jest.useFakeTimers();
-      
+
       fetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
       });
 
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
 
       // Wait for initial call
       await waitFor(() => {
@@ -400,14 +414,16 @@ describe('AdminHeader', () => {
 
     it('cleans up interval on component unmount', () => {
       jest.useFakeTimers();
-      
+
       fetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
       });
 
-      const { unmount } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-      
+      const { unmount } = render(
+        <AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />
+      );
+
       unmount();
 
       // Fast-forward time
@@ -424,18 +440,22 @@ describe('AdminHeader', () => {
     it('displays correct status text for all states', async () => {
       // Test checking state - mock a promise that never resolves
       fetch.mockImplementationOnce(() => new Promise(() => {}));
-      
-      const { rerender } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
+
+      const { rerender } = render(
+        <AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />
+      );
       expect(screen.getByText('API Checking...')).toBeInTheDocument();
 
       // Test online state - create a new component instance
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 })
+        json: async () => ({ status: 'OK', timestamp: '2024-01-01T00:00:00.000Z', uptime: 123 }),
       });
 
-      const { unmount } = render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-      
+      const { unmount } = render(
+        <AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />
+      );
+
       await waitFor(() => {
         expect(screen.getByText('API Online')).toBeInTheDocument();
       });
@@ -444,9 +464,9 @@ describe('AdminHeader', () => {
 
       // Test offline state - create another new component instance
       fetch.mockRejectedValueOnce(new Error('Network error'));
-      
-      render(<AdminHeader activeTab="dashboard" setActiveTab={mockSetActiveTab} />);
-      
+
+      render(<AdminHeader activeTab='dashboard' setActiveTab={mockSetActiveTab} />);
+
       await waitFor(() => {
         expect(screen.getByText('API Offline')).toBeInTheDocument();
       });

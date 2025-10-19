@@ -17,7 +17,7 @@ describe('useReverseGeocoding', () => {
 
   it('initializes with correct default state', () => {
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     expect(result.current.reverseGeocodingLoading).toBe(false);
     expect(typeof result.current.reverseGeocode).toBe('function');
   });
@@ -33,22 +33,22 @@ describe('useReverseGeocoding', () => {
             { id: 'neighborhood.456', text: 'City Bowl' },
             { id: 'locality.789', text: 'Cape Town' },
             { id: 'region.101', text: 'Western Cape' },
-            { id: 'country.102', text: 'South Africa' }
+            { id: 'country.102', text: 'South Africa' },
           ],
           place_type: ['address'],
           properties: { name: 'Main St' },
-          text: 'Main St'
-        }
-      ]
+          text: 'Main St',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let promise;
     act(() => {
       promise = result.current.reverseGeocode([18.4241, -33.9249]);
@@ -76,22 +76,22 @@ describe('useReverseGeocoding', () => {
             { id: 'neighborhood.456', text: 'City Bowl' },
             { id: 'locality.789', text: 'Cape Town' },
             { id: 'region.101', text: 'Western Cape' },
-            { id: 'country.102', text: 'South Africa' }
+            { id: 'country.102', text: 'South Africa' },
           ],
           place_type: ['address'],
           properties: { name: 'Main St' },
-          text: 'Main St'
-        }
-      ]
+          text: 'Main St',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -109,7 +109,7 @@ describe('useReverseGeocoding', () => {
       displayName: '123 Main St, Cape Town, Western Cape, South Africa',
       name: 'Main St',
       type: 'address',
-      coordinates: [18.4241, -33.9249]
+      coordinates: [18.4241, -33.9249],
     });
 
     expect(fetch).toHaveBeenCalledWith(
@@ -119,9 +119,9 @@ describe('useReverseGeocoding', () => {
 
   it('handles missing Mapbox token', async () => {
     delete process.env.REACT_APP_MAPBOX_TOKEN;
-    
+
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -134,11 +134,11 @@ describe('useReverseGeocoding', () => {
   it('handles API error response', async () => {
     fetch.mockResolvedValueOnce({
       ok: false,
-      status: 401
+      status: 401,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -151,7 +151,7 @@ describe('useReverseGeocoding', () => {
     fetch.mockRejectedValueOnce(new Error('Network error'));
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -162,16 +162,16 @@ describe('useReverseGeocoding', () => {
 
   it('handles empty features response', async () => {
     const mockResponse = {
-      features: []
+      features: [],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -189,18 +189,18 @@ describe('useReverseGeocoding', () => {
           context: [],
           place_type: ['place'],
           properties: { name: 'Cape Town' },
-          text: 'Cape Town'
-        }
-      ]
+          text: 'Cape Town',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -218,7 +218,7 @@ describe('useReverseGeocoding', () => {
       displayName: 'Cape Town, South Africa',
       name: 'Cape Town',
       type: 'place',
-      coordinates: [18.4241, -33.9249]
+      coordinates: [18.4241, -33.9249],
     });
   });
 
@@ -234,28 +234,30 @@ describe('useReverseGeocoding', () => {
             { id: 'locality.101', text: 'Cape Town' },
             { id: 'region.102', text: 'Western Cape' },
             { id: 'postcode.103', text: '8001' },
-            { id: 'country.104', text: 'South Africa' }
+            { id: 'country.104', text: 'South Africa' },
           ],
           place_type: ['address'],
           properties: { name: 'Oak Avenue' },
-          text: 'Oak Avenue'
-        }
-      ]
+          text: 'Oak Avenue',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
     });
 
-    expect(geocodeResult.fullAddress).toBe('456 Oak Avenue, Gardens, Cape Town, Western Cape, 8001, South Africa');
+    expect(geocodeResult.fullAddress).toBe(
+      '456 Oak Avenue, Gardens, Cape Town, Western Cape, 8001, South Africa'
+    );
     expect(geocodeResult.houseNumber).toBe('456');
     expect(geocodeResult.address).toBe('456 Oak Avenue');
     expect(geocodeResult.city).toBe('Cape Town');
@@ -273,22 +275,22 @@ describe('useReverseGeocoding', () => {
           context: [
             { id: 'locality.101', text: 'Cape Town' },
             { id: 'region.102', text: 'Western Cape' },
-            { id: 'country.103', text: 'South Africa' }
+            { id: 'country.103', text: 'South Africa' },
           ],
           place_type: ['poi'],
           properties: { name: 'Table Mountain' },
-          text: 'Table Mountain'
-        }
-      ]
+          text: 'Table Mountain',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);
@@ -304,23 +306,21 @@ describe('useReverseGeocoding', () => {
       features: [
         {
           center: [18.4241, -33.9249],
-          context: [
-            { id: 'locality.101', text: 'Cape Town' }
-          ],
+          context: [{ id: 'locality.101', text: 'Cape Town' }],
           place_type: ['place'],
           properties: { name: 'Unknown Location' },
-          text: 'Unknown'
-        }
-      ]
+          text: 'Unknown',
+        },
+      ],
     };
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const { result } = renderHook(() => useReverseGeocoding());
-    
+
     let geocodeResult;
     await act(async () => {
       geocodeResult = await result.current.reverseGeocode([18.4241, -33.9249]);

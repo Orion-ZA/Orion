@@ -304,8 +304,12 @@
 }
 
 @keyframes trail-card-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Expanded Content Section */
@@ -693,34 +697,34 @@
     padding: 1.5rem;
     margin-bottom: 1rem;
   }
-  
+
   .trail-card-header {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .trail-card-actions {
     align-self: stretch;
     justify-content: space-between;
   }
-  
+
   .trail-card-meta {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .trail-card-counters-bottom {
     justify-content: center;
     flex-wrap: wrap;
   }
-  
+
   .trail-card-review-header,
   .trail-card-alert-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
   }
-  
+
   .trail-card-review-meta {
     flex-direction: column;
     align-items: flex-start;
@@ -732,15 +736,15 @@
   .trail-card-item {
     padding: 1rem;
   }
-  
+
   .trail-card-name {
     font-size: 1.25rem;
   }
-  
+
   .trail-card-actions {
     gap: 0.5rem;
   }
-  
+
   .trail-card-edit-button,
   .trail-card-delete-button,
   .trail-card-expand-button {

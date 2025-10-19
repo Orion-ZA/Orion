@@ -17,11 +17,11 @@ jobs:
 
       - name: Run tests with coverage
         run: npm test -- --coverage
-        continue-on-error: true   # ✅ never fail on tests
+        continue-on-error: true # ✅ never fail on tests
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: Orion-ZA/Orion
-        continue-on-error: true   # ✅ never fail on Codecov
+        continue-on-error: true # ✅ never fail on Codecov

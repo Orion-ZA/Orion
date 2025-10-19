@@ -14,7 +14,7 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
       document.body.style.overflow = 'unset';
       document.body.style.position = 'static';
     }
-    
+
     // Cleanup function
     return () => {
       document.body.style.overflow = 'unset';
@@ -24,7 +24,7 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = () => {
     if (rating < 1 || rating > 5) {
-      alert("Please enter a rating between 1 and 5");
+      alert('Please enter a rating between 1 and 5');
       return;
     }
     onSubmit(rating, comment);
@@ -39,32 +39,31 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
   };
 
   // Handle overlay click (close modal when clicking outside content)
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
       handleClose();
     }
   };
 
   return (
-    <div 
-      className={`my-trails-modal-overlay ${isOpen ? 'open' : ''}`} 
-      onClick={handleOverlayClick}
-    >
-      <div className="my-trails-modal-content">
-        <button className="my-trails-modal-close-btn" onClick={handleClose} aria-label="Close modal">
+    <div className={`my-trails-modal-overlay ${isOpen ? 'open' : ''}`} onClick={handleOverlayClick}>
+      <div className='my-trails-modal-content'>
+        <button
+          className='my-trails-modal-close-btn'
+          onClick={handleClose}
+          aria-label='Close modal'
+        >
           ×
         </button>
         <h3>Review: {trailName}</h3>
-        
-        <div className="my-trails-input-group">
-          <label>
-            Rating (1-5)
-          </label>
-          <div className="my-trails-rating-input">
-            {[1, 2, 3, 4, 5].map((star) => (
+
+        <div className='my-trails-input-group'>
+          <label>Rating (1-5)</label>
+          <div className='my-trails-rating-input'>
+            {[1, 2, 3, 4, 5].map(star => (
               <button
                 key={star}
-                type="button"
+                type='button'
                 className={`my-trails-star ${rating >= star ? 'active' : ''}`}
                 onClick={() => setRating(star)}
                 aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
@@ -75,23 +74,21 @@ const ReviewModal = ({ trailName, isOpen, onClose, onSubmit }) => {
           </div>
         </div>
 
-        <div className="my-trails-input-group">
-          <label>
-            Comment
-          </label>
+        <div className='my-trails-input-group'>
+          <label>Comment</label>
           <textarea
             value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Share your experience..."
-            rows="4"
+            onChange={e => setComment(e.target.value)}
+            placeholder='Share your experience...'
+            rows='4'
           />
         </div>
 
-        <div className="my-trails-modal-actions">
-          <button className="my-trails-btn-secondary" onClick={handleClose}>
+        <div className='my-trails-modal-actions'>
+          <button className='my-trails-btn-secondary' onClick={handleClose}>
             Cancel
           </button>
-          <button className="my-trails-btn-primary" onClick={handleSubmit}>
+          <button className='my-trails-btn-primary' onClick={handleSubmit}>
             Submit Review
           </button>
         </div>

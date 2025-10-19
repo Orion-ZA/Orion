@@ -4,31 +4,31 @@ import { useTrailUserActions } from '../hooks/useTrailUserActions';
 // Mock Firebase Auth
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => ({})),
-  onAuthStateChanged: jest.fn()
+  onAuthStateChanged: jest.fn(),
 }));
 
 // Mock Firebase Firestore
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   getDoc: jest.fn(),
-  updateDoc: jest.fn()
+  updateDoc: jest.fn(),
 }));
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 // Mock Toast context
 jest.mock('../components/ToastContext', () => ({
   useToast: jest.fn(() => ({
-    show: jest.fn()
-  }))
+    show: jest.fn(),
+  })),
 }));
 
 // Mock trail API
 jest.mock('../utils/trailApi', () => ({
-  updateUserTrailAction: jest.fn()
+  updateUserTrailAction: jest.fn(),
 }));
 
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -40,7 +40,7 @@ describe('useTrailUserActions', () => {
   const mockUser = {
     uid: 'user-123',
     displayName: 'Test User',
-    email: 'test@example.com'
+    email: 'test@example.com',
   };
 
   const mockUserDoc = {
@@ -48,8 +48,8 @@ describe('useTrailUserActions', () => {
     data: () => ({
       favourites: ['trail-1', 'trail-2'],
       wishlist: ['trail-3'],
-      completed: ['trail-4']
-    })
+      completed: ['trail-4'],
+    }),
   };
 
   const mockShowToast = jest.fn();
@@ -57,14 +57,14 @@ describe('useTrailUserActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useToast.mockReturnValue({ show: mockShowToast });
-    
+
     // Default mock implementation that simulates authenticated user
     onAuthStateChanged.mockImplementation((auth, callback) => {
       // Simulate authenticated user
       callback(mockUser);
       return jest.fn(); // unsubscribe function
     });
-    
+
     getDoc.mockResolvedValue(mockUserDoc);
     updateUserTrailAction.mockResolvedValue({ action: 'add', trailId: 'trail-5' });
   });
@@ -83,7 +83,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
   });
@@ -115,7 +115,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
   });
@@ -131,7 +131,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: ['trail-1', 'trail-2'],
         wishlist: ['trail-3'],
-        completed: ['trail-4']
+        completed: ['trail-4'],
       });
     });
 
@@ -141,8 +141,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: ['trail-1', 'trail-2'],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithStrings);
 
@@ -161,8 +161,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: [{ id: 'trail-1' }, { id: 'trail-2' }],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithObjects);
 
@@ -179,16 +179,18 @@ describe('useTrailUserActions', () => {
       const userDocWithKeyPath = {
         exists: () => true,
         data: () => ({
-          favourites: [{
-            _key: {
-              path: {
-                segments: ['Trails', 'trail-key-path']
-              }
-            }
-          }],
+          favourites: [
+            {
+              _key: {
+                path: {
+                  segments: ['Trails', 'trail-key-path'],
+                },
+              },
+            },
+          ],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithKeyPath);
 
@@ -207,8 +209,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: [{ path: 'Trails/trail-path-string' }],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithPathString);
 
@@ -227,8 +229,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: [{ unknown: 'format' }],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithUnknownFormat);
 
@@ -247,8 +249,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: 'not-an-array',
           wishlist: null,
-          completed: undefined
-        })
+          completed: undefined,
+        }),
       };
       getDoc.mockResolvedValue(userDocWithNonArray);
 
@@ -261,7 +263,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
 
@@ -277,7 +279,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
 
@@ -293,7 +295,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
   });
@@ -330,12 +332,10 @@ describe('useTrailUserActions', () => {
         await result.current.handleTrailAction('favourites', 'trail-5');
       });
 
-      expect(updateUserTrailAction).toHaveBeenCalledWith(
-        'user-123',
-        'favourites',
-        'trail-5',
-        ['trail-1', 'trail-2']
-      );
+      expect(updateUserTrailAction).toHaveBeenCalledWith('user-123', 'favourites', 'trail-5', [
+        'trail-1',
+        'trail-2',
+      ]);
       expect(result.current.userSaved.favourites).toContain('trail-5');
       expect(mockShowToast).toHaveBeenCalledWith('Added to favourites', 'success');
     });
@@ -368,12 +368,9 @@ describe('useTrailUserActions', () => {
         await result.current.handleTrailAction('wishlist', 'trail-6');
       });
 
-      expect(updateUserTrailAction).toHaveBeenCalledWith(
-        'user-123',
-        'wishlist',
-        'trail-6',
-        ['trail-3']
-      );
+      expect(updateUserTrailAction).toHaveBeenCalledWith('user-123', 'wishlist', 'trail-6', [
+        'trail-3',
+      ]);
       expect(result.current.userSaved.wishlist).toContain('trail-6');
       expect(mockShowToast).toHaveBeenCalledWith('Added to wishlist', 'success');
     });
@@ -389,12 +386,9 @@ describe('useTrailUserActions', () => {
         await result.current.handleTrailAction('completed', 'trail-7');
       });
 
-      expect(updateUserTrailAction).toHaveBeenCalledWith(
-        'user-123',
-        'completed',
-        'trail-7',
-        ['trail-4']
-      );
+      expect(updateUserTrailAction).toHaveBeenCalledWith('user-123', 'completed', 'trail-7', [
+        'trail-4',
+      ]);
       expect(result.current.userSaved.completed).toContain('trail-7');
       expect(mockShowToast).toHaveBeenCalledWith('Added to completed', 'success');
     });
@@ -421,8 +415,8 @@ describe('useTrailUserActions', () => {
         data: () => ({
           favourites: [],
           wishlist: [],
-          completed: []
-        })
+          completed: [],
+        }),
       };
       getDoc.mockResolvedValue(userDocWithEmptyArrays);
 
@@ -436,12 +430,7 @@ describe('useTrailUserActions', () => {
         await result.current.handleTrailAction('favourites', 'trail-8');
       });
 
-      expect(updateUserTrailAction).toHaveBeenCalledWith(
-        'user-123',
-        'favourites',
-        'trail-8',
-        []
-      );
+      expect(updateUserTrailAction).toHaveBeenCalledWith('user-123', 'favourites', 'trail-8', []);
     });
   });
 
@@ -462,7 +451,7 @@ describe('useTrailUserActions', () => {
     it('handles missing user data fields', async () => {
       const userDocWithMissingFields = {
         exists: () => true,
-        data: () => ({})
+        data: () => ({}),
       };
       getDoc.mockResolvedValue(userDocWithMissingFields);
 
@@ -475,14 +464,14 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
 
     it('handles empty user data object', async () => {
       const userDocWithEmptyData = {
         exists: () => true,
-        data: () => ({})
+        data: () => ({}),
       };
       getDoc.mockResolvedValue(userDocWithEmptyData);
 
@@ -495,7 +484,7 @@ describe('useTrailUserActions', () => {
       expect(result.current.userSaved).toEqual({
         favourites: [],
         wishlist: [],
-        completed: []
+        completed: [],
       });
     });
   });

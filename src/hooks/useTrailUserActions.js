@@ -12,38 +12,40 @@ export const useTrailUserActions = () => {
 
   // Fetch user data
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
+    const unsubscribe = onAuthStateChanged(getAuth(), async user => {
       if (user) {
         setUser(user);
         try {
           const userDoc = await getDoc(doc(db, 'Users', user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            
-            const extractTrailIds = (array) => {
+
+            const extractTrailIds = array => {
               if (!Array.isArray(array)) return [];
-              return array.map(item => {
-                if (typeof item === 'string') return item;
-                if (item && item.id) return item.id;
-                if (item && item._key && item._key.path) {
-                  const pathParts = item._key.path.segments;
-                  return pathParts[pathParts.length - 1];
-                }
-                if (item && typeof item === 'object' && item.path) {
-                  const pathParts = item.path.split('/');
-                  return pathParts[pathParts.length - 1];
-                }
-                console.warn('Unknown item format in user saved array:', item);
-                return null;
-              }).filter(Boolean);
+              return array
+                .map(item => {
+                  if (typeof item === 'string') return item;
+                  if (item && item.id) return item.id;
+                  if (item && item._key && item._key.path) {
+                    const pathParts = item._key.path.segments;
+                    return pathParts[pathParts.length - 1];
+                  }
+                  if (item && typeof item === 'object' && item.path) {
+                    const pathParts = item.path.split('/');
+                    return pathParts[pathParts.length - 1];
+                  }
+                  console.warn('Unknown item format in user saved array:', item);
+                  return null;
+                })
+                .filter(Boolean);
             };
-            
+
             const processedUserSaved = {
               favourites: extractTrailIds(userData.favourites),
               wishlist: extractTrailIds(userData.wishlist),
-              completed: extractTrailIds(userData.completed)
+              completed: extractTrailIds(userData.completed),
             };
-            
+
             setUserSaved(processedUserSaved);
           }
         } catch (error) {
@@ -67,17 +69,17 @@ export const useTrailUserActions = () => {
     try {
       const currentArray = userSaved[action] || [];
       const result = await updateUserTrailAction(user.uid, action, trailId, currentArray);
-      
+
       if (result.action === 'remove') {
         setUserSaved(prev => ({
           ...prev,
-          [action]: prev[action].filter(id => id !== trailId)
+          [action]: prev[action].filter(id => id !== trailId),
         }));
         showToast(`Removed from ${action}`, 'success');
       } else {
         setUserSaved(prev => ({
           ...prev,
-          [action]: [...prev[action], trailId]
+          [action]: [...prev[action], trailId],
         }));
         showToast(`Added to ${action}`, 'success');
       }
@@ -90,6 +92,6 @@ export const useTrailUserActions = () => {
   return {
     user,
     userSaved,
-    handleTrailAction
+    handleTrailAction,
   };
 };

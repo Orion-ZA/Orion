@@ -83,12 +83,8 @@ afterAll(() => {
 });
 
 // Helper function to render component with Router context
-const renderWithRouter = (component) => {
-  return render(
-    <BrowserRouter>
-      {component}
-    </BrowserRouter>
-  );
+const renderWithRouter = component => {
+  return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
 describe('ReviewsMedia Component', () => {
@@ -107,7 +103,7 @@ describe('ReviewsMedia Component', () => {
       city: 'Test City',
       state: 'Test State',
       description: 'A beautiful test trail with great views',
-      location: 'Test City, Test State'
+      location: 'Test City, Test State',
     },
     {
       id: 'trail-2',
@@ -123,7 +119,7 @@ describe('ReviewsMedia Component', () => {
       city: 'Test City',
       state: 'Test State',
       description: 'An easy test trail for beginners',
-      location: 'Test City, Test State'
+      location: 'Test City, Test State',
     },
     {
       id: 'trail-3',
@@ -139,7 +135,7 @@ describe('ReviewsMedia Component', () => {
       city: 'Test City',
       state: 'Test State',
       description: 'A challenging test trail with amazing views',
-      location: 'Test City, Test State'
+      location: 'Test City, Test State',
     },
   ];
 
@@ -155,9 +151,7 @@ describe('ReviewsMedia Component', () => {
   };
 
   const mockAlerts = {
-    'trail-1': [
-      { id: 'alert-1', type: 'warning', message: 'Trail closed due to weather' },
-    ],
+    'trail-1': [{ id: 'alert-1', type: 'warning', message: 'Trail closed due to weather' }],
     'trail-2': [],
     'trail-3': [
       { id: 'alert-2', type: 'general', message: 'Maintenance scheduled' },
@@ -236,8 +230,10 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Check for search input
-      expect(screen.getByPlaceholderText('Search trails by name, location, or description...')).toBeInTheDocument();
-      
+      expect(
+        screen.getByPlaceholderText('Search trails by name, location, or description...')
+      ).toBeInTheDocument();
+
       // Check for filter controls
       expect(screen.getByText('Filters:')).toBeInTheDocument();
       expect(screen.getByText('Difficulty:')).toBeInTheDocument();
@@ -265,7 +261,9 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
 
-      const searchInput = screen.getByPlaceholderText('Search trails by name, location, or description...');
+      const searchInput = screen.getByPlaceholderText(
+        'Search trails by name, location, or description...'
+      );
       fireEvent.change(searchInput, { target: { value: 'Test Trail 1' } });
 
       expect(searchInput.value).toBe('Test Trail 1');
@@ -380,7 +378,7 @@ describe('ReviewsMedia Component', () => {
 
       // Check if tags section is rendered
       expect(screen.getByText('Tags:')).toBeInTheDocument();
-      
+
       // Check if tag buttons are rendered (scenic, family-friendly, beginner, challenging, views)
       expect(screen.getByText('scenic')).toBeInTheDocument();
       expect(screen.getByText('family-friendly')).toBeInTheDocument();
@@ -420,13 +418,12 @@ describe('ReviewsMedia Component', () => {
       renderWithRouter(<ReviewsMedia />);
       // The component shows "Authenticating..." when auth is loading
       expect(screen.getByText('Authenticating...')).toBeInTheDocument();
-      
+
       // Wait for auth to complete
       await waitFor(() => {
         expect(screen.queryByText('Authenticating...')).not.toBeInTheDocument();
       });
     });
-
 
     test('renders action buttons', async () => {
       fetch
@@ -537,10 +534,11 @@ describe('ReviewsMedia Component', () => {
       renderWithRouter(<ReviewsMedia />);
 
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('https://us-central1-orion-sdp.cloudfunctions.net/getTrails');
+        expect(fetch).toHaveBeenCalledWith(
+          'https://us-central1-orion-sdp.cloudfunctions.net/getTrails'
+        );
       });
     });
-
 
     test('fetchTrailReviews handles successful response', async () => {
       fetch
@@ -766,13 +764,6 @@ describe('ReviewsMedia Component', () => {
     });
   });
 
-
-
-
-
-
-
-
   describe('Form Submissions', () => {
     beforeEach(async () => {
       fetch
@@ -795,9 +786,6 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
     });
-
-
-
 
     test('submits alert successfully', async () => {
       // Mock initial data loading
@@ -836,7 +824,9 @@ describe('ReviewsMedia Component', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ alerts: [{ id: 'new-alert', type: 'warning', message: 'Test alert' }] }),
+          json: async () => ({
+            alerts: [{ id: 'new-alert', type: 'warning', message: 'Test alert' }],
+          }),
         });
 
       window.alert = jest.fn();
@@ -912,7 +902,6 @@ describe('ReviewsMedia Component', () => {
     });
   });
 
-
   describe('Responsive Behavior', () => {
     test('shows buttons on mobile without hover', async () => {
       // Set mobile width
@@ -943,8 +932,8 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Buttons should be visible on mobile without hover (now icon-only)
-      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
-      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);
       expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
@@ -977,8 +966,8 @@ describe('ReviewsMedia Component', () => {
       });
 
       // Buttons should be visible on desktop (current implementation shows them always)
-      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);       
-      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);       
+      expect(screen.getAllByTitle('Add Review')).toHaveLength(3);
+      expect(screen.getAllByTitle('Add Images')).toHaveLength(3);
       expect(screen.getAllByTitle('Add Alert')).toHaveLength(3);
     });
 
@@ -1013,10 +1002,8 @@ describe('ReviewsMedia Component', () => {
         value: 500,
       });
 
-      const resizeHandler = mockAddEventListener.mock.calls.find(
-        call => call[0] === 'resize'
-      )[1];
-      
+      const resizeHandler = mockAddEventListener.mock.calls.find(call => call[0] === 'resize')[1];
+
       act(() => {
         resizeHandler();
       });
@@ -1105,10 +1092,13 @@ describe('ReviewsMedia Component', () => {
 
       renderWithRouter(<ReviewsMedia />);
 
-      await waitFor(() => {
-        // Wait for trails to load and show "No reviews available" text
-        expect(screen.getAllByText('No reviews available')).toHaveLength(3);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          // Wait for trails to load and show "No reviews available" text
+          expect(screen.getAllByText('No reviews available')).toHaveLength(3);
+        },
+        { timeout: 5000 }
+      );
     });
 
     test('displays alerts correctly', async () => {
@@ -1151,27 +1141,28 @@ describe('ReviewsMedia Component', () => {
 
       // Find the trail card with alerts and hover over it
       const trailCards = screen.getAllByText(/Test Trail/);
-      const trail3Card = trailCards.find(card => 
-        card.textContent.includes('Test Trail 3')
-      )?.closest('.trail-card');
-      
+      const trail3Card = trailCards
+        .find(card => card.textContent.includes('Test Trail 3'))
+        ?.closest('.trail-card');
+
       if (trail3Card) {
         fireEvent.mouseEnter(trail3Card);
-        
-        await waitFor(() => {
-          // Check if alerts popup is visible
-          const alertsPopup = document.querySelector('.alerts-popup');
-          if (alertsPopup) {
-            expect(screen.getByText('[general]')).toBeInTheDocument();
-            expect(screen.getByText('Maintenance scheduled')).toBeInTheDocument();
-            expect(screen.getByText('[closure]')).toBeInTheDocument();
-            expect(screen.getByText('Bridge out')).toBeInTheDocument();
-          }
-        }, { timeout: 5000 });
+
+        await waitFor(
+          () => {
+            // Check if alerts popup is visible
+            const alertsPopup = document.querySelector('.alerts-popup');
+            if (alertsPopup) {
+              expect(screen.getByText('[general]')).toBeInTheDocument();
+              expect(screen.getByText('Maintenance scheduled')).toBeInTheDocument();
+              expect(screen.getByText('[closure]')).toBeInTheDocument();
+              expect(screen.getByText('Bridge out')).toBeInTheDocument();
+            }
+          },
+          { timeout: 5000 }
+        );
       }
     });
-
-
   });
 
   describe('Error Handling and Edge Cases', () => {
@@ -1269,7 +1260,6 @@ describe('ReviewsMedia Component', () => {
       // Should not cause errors
       expect(true).toBe(true);
     });
-
   });
 
   describe('Modal State Management', () => {
@@ -1294,7 +1284,6 @@ describe('ReviewsMedia Component', () => {
         expect(screen.getByText('Test Trail 1')).toBeInTheDocument();
       });
     });
-
 
     test('resets alert form state when opening modal', async () => {
       // Open alert modal
@@ -1328,7 +1317,7 @@ describe('ReviewsMedia Component', () => {
 
       const fileInput = screen.getByRole('button', { name: 'Upload' }).previousElementSibling;
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      
+
       Object.defineProperty(fileInput, 'files', {
         value: [mockFile],
         writable: false,
@@ -1354,9 +1343,9 @@ describe('ReviewsMedia Component', () => {
   describe('Component Cleanup', () => {
     test('removes event listeners on unmount', () => {
       const { unmount } = renderWithRouter(<ReviewsMedia />);
-      
+
       unmount();
-      
+
       expect(mockRemoveEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
     });
   });
@@ -1400,7 +1389,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       // Mock authenticated user
@@ -1471,7 +1460,7 @@ describe('ReviewsMedia Component', () => {
       reviewButtons.forEach(button => {
         expect(button).toBeDisabled();
       });
-      
+
       // Try to click review button (should not trigger modal since it's disabled)
       const reviewButton = reviewButtons[0];
       fireEvent.click(reviewButton);
@@ -1514,10 +1503,13 @@ describe('ReviewsMedia Component', () => {
         expect(screen.queryByText('Authenticating...')).not.toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Could not load trails or reviews')).toBeInTheDocument();
-        expect(screen.getByText('Retry')).toBeInTheDocument();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Could not load trails or reviews')).toBeInTheDocument();
+          expect(screen.getByText('Retry')).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
     });
 
     test('handles fetchTrails non-ok response', async () => {
@@ -1540,18 +1532,23 @@ describe('ReviewsMedia Component', () => {
         expect(screen.queryByText('Authenticating...')).not.toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Could not load trails or reviews')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Could not load trails or reviews')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     });
 
     test('handles photo processing timeout', async () => {
       // Mock a trail with photos that will timeout
-      const trailWithPhotos = [{
-        id: 'trail-1',
-        name: 'Test Trail 1',
-        photos: ['firebase-storage-path/photo1.jpg'],
-      }];
+      const trailWithPhotos = [
+        {
+          id: 'trail-1',
+          name: 'Test Trail 1',
+          photos: ['firebase-storage-path/photo1.jpg'],
+        },
+      ];
 
       fetch
         .mockResolvedValueOnce({
@@ -1568,36 +1565,37 @@ describe('ReviewsMedia Component', () => {
         });
 
       // Mock getDownloadURL to take longer than timeout
-      getDownloadURL.mockImplementation(() => 
-        new Promise((resolve) => setTimeout(resolve, 15000))
-      );
+      getDownloadURL.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 15000)));
 
       renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
-      await waitFor(() => {
-        expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // The component should show skeleton loading or handle the timeout gracefully
       // We don't need to wait for the actual trail name since it's in a timeout state
     });
 
     test('handles review fetch timeout', async () => {
-      const trailWithReviews = [{
-        id: 'trail-1',
-        name: 'Test Trail 1',
-        photos: [],
-      }];
+      const trailWithReviews = [
+        {
+          id: 'trail-1',
+          name: 'Test Trail 1',
+          photos: [],
+        },
+      ];
 
       fetch
         .mockResolvedValueOnce({
           ok: true,
           json: async () => trailWithReviews,
         })
-        .mockImplementationOnce(() => 
-          new Promise((resolve) => setTimeout(resolve, 15000))
-        )
+        .mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 15000)))
         .mockResolvedValue({
           ok: true,
           json: async () => ({ alerts: [] }),
@@ -1606,19 +1604,24 @@ describe('ReviewsMedia Component', () => {
       renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
-      await waitFor(() => {
-        expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // The component should show skeleton loading or handle the timeout gracefully
     });
 
     test('handles alert fetch timeout', async () => {
-      const trailWithAlerts = [{
-        id: 'trail-1',
-        name: 'Test Trail 1',
-        photos: [],
-      }];
+      const trailWithAlerts = [
+        {
+          id: 'trail-1',
+          name: 'Test Trail 1',
+          photos: [],
+        },
+      ];
 
       fetch
         .mockResolvedValueOnce({
@@ -1629,26 +1632,29 @@ describe('ReviewsMedia Component', () => {
           ok: true,
           json: async () => ({ reviews: [] }),
         })
-        .mockImplementationOnce(() => 
-          new Promise((resolve) => setTimeout(resolve, 15000))
-        );
+        .mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 15000)));
 
       renderWithRouter(<ReviewsMedia />);
 
       // Wait for the component to show loading state, then verify it handles timeout gracefully
-      await waitFor(() => {
-        expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Trail Reviews & Media')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // The component should show skeleton loading or handle the timeout gracefully
     });
 
     test('handles trail processing errors gracefully', async () => {
-      const problematicTrail = [{
-        id: 'trail-1',
-        name: 'Test Trail 1',
-        photos: ['invalid-path'],
-      }];
+      const problematicTrail = [
+        {
+          id: 'trail-1',
+          name: 'Test Trail 1',
+          photos: ['invalid-path'],
+        },
+      ];
 
       fetch
         .mockResolvedValueOnce({
@@ -1713,7 +1719,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -1896,13 +1902,13 @@ describe('ReviewsMedia Component', () => {
 
       // Find trail card and hover over it
       const trailCards = screen.getAllByText(/Test Trail/);
-      const trail1Card = trailCards.find(card => 
-        card.textContent.includes('Test Trail 1')
-      )?.closest('.trail-card');
-      
+      const trail1Card = trailCards
+        .find(card => card.textContent.includes('Test Trail 1'))
+        ?.closest('.trail-card');
+
       if (trail1Card) {
         fireEvent.mouseEnter(trail1Card);
-        
+
         await waitFor(() => {
           // Check if alerts popup is visible
           const alertsPopup = document.querySelector('.alerts-popup');
@@ -1937,13 +1943,13 @@ describe('ReviewsMedia Component', () => {
 
       // Find trail card and hover over it
       const trailCards = screen.getAllByText(/Test Trail/);
-      const trail1Card = trailCards.find(card => 
-        card.textContent.includes('Test Trail 1')
-      )?.closest('.trail-card');
-      
+      const trail1Card = trailCards
+        .find(card => card.textContent.includes('Test Trail 1'))
+        ?.closest('.trail-card');
+
       if (trail1Card) {
         fireEvent.mouseEnter(trail1Card);
-        
+
         await waitFor(() => {
           const alertsPopup = document.querySelector('.alerts-popup');
           if (alertsPopup) {
@@ -1953,7 +1959,7 @@ describe('ReviewsMedia Component', () => {
 
         // Mouse leave
         fireEvent.mouseLeave(trail1Card);
-        
+
         await waitFor(() => {
           const alertsPopup = document.querySelector('.alerts-popup');
           if (alertsPopup) {
@@ -1986,13 +1992,13 @@ describe('ReviewsMedia Component', () => {
 
       // Find trail card and hover over it
       const trailCards = screen.getAllByText(/Test Trail/);
-      const trail1Card = trailCards.find(card => 
-        card.textContent.includes('Test Trail 1')
-      )?.closest('.trail-card');
-      
+      const trail1Card = trailCards
+        .find(card => card.textContent.includes('Test Trail 1'))
+        ?.closest('.trail-card');
+
       if (trail1Card) {
         fireEvent.mouseEnter(trail1Card);
-        
+
         // Should not show alerts popup
         const alertsPopup = document.querySelector('.alerts-popup');
         expect(alertsPopup).toBeNull();
@@ -2005,7 +2011,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2042,7 +2048,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2080,7 +2086,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2206,17 +2212,17 @@ describe('ReviewsMedia Component', () => {
       // Find the file input by its type attribute
       const fileInput = document.querySelector('input[type="file"]');
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      
+
       // Create a mock FileList
       const mockFileList = {
         0: mockFile,
         length: 1,
-        item: (index) => index === 0 ? mockFile : null,
+        item: index => (index === 0 ? mockFile : null),
         [Symbol.iterator]: function* () {
           yield mockFile;
-        }
+        },
       };
-      
+
       Object.defineProperty(fileInput, 'files', {
         value: mockFileList,
         writable: false,
@@ -2240,7 +2246,9 @@ describe('ReviewsMedia Component', () => {
             }),
           })
         );
-        expect(screen.getByText('Your images have been uploaded successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your images have been uploaded successfully!')
+        ).toBeInTheDocument();
       });
     });
 
@@ -2304,17 +2312,17 @@ describe('ReviewsMedia Component', () => {
       // Find the file input by its type attribute
       const fileInput = document.querySelector('input[type="file"]');
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      
+
       // Create a mock FileList
       const mockFileList = {
         0: mockFile,
         length: 1,
-        item: (index) => index === 0 ? mockFile : null,
+        item: index => (index === 0 ? mockFile : null),
         [Symbol.iterator]: function* () {
           yield mockFile;
-        }
+        },
       };
-      
+
       Object.defineProperty(fileInput, 'files', {
         value: mockFileList,
         writable: false,
@@ -2373,7 +2381,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2419,7 +2427,9 @@ describe('ReviewsMedia Component', () => {
         // Mock the review refetch after submission
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ reviews: [{ id: 'new-review', message: 'Anonymous review', rating: 5 }] }),
+          json: async () => ({
+            reviews: [{ id: 'new-review', message: 'Anonymous review', rating: 5 }],
+          }),
         });
 
       renderWithRouter(<ReviewsMedia />);
@@ -2452,13 +2462,15 @@ describe('ReviewsMedia Component', () => {
 
       await waitFor(() => {
         // Check that the review submission API was called with anonymous user
-        const reviewSubmissionCall = fetch.mock.calls.find(call => 
-          call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
+        const reviewSubmissionCall = fetch.mock.calls.find(
+          call => call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
         );
         expect(reviewSubmissionCall).toBeDefined();
         const requestBody = JSON.parse(reviewSubmissionCall[1].body);
         expect(requestBody.review.userName).toBe('Anonymous');
-        expect(screen.getByText('Your review has been submitted successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your review has been submitted successfully!')
+        ).toBeInTheDocument();
       });
     });
 
@@ -2466,7 +2478,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2512,7 +2524,9 @@ describe('ReviewsMedia Component', () => {
         // Mock the review refetch after submission
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ reviews: [{ id: 'new-review', message: 'User review', rating: 3 }] }),
+          json: async () => ({
+            reviews: [{ id: 'new-review', message: 'User review', rating: 3 }],
+          }),
         });
 
       renderWithRouter(<ReviewsMedia />);
@@ -2543,13 +2557,15 @@ describe('ReviewsMedia Component', () => {
 
       await waitFor(() => {
         // Check that the review submission API was called with user display name
-        const reviewSubmissionCall = fetch.mock.calls.find(call => 
-          call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
+        const reviewSubmissionCall = fetch.mock.calls.find(
+          call => call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
         );
         expect(reviewSubmissionCall).toBeDefined();
         const requestBody = JSON.parse(reviewSubmissionCall[1].body);
         expect(requestBody.review.userName).toBe('Test User');
-        expect(screen.getByText('Your review has been submitted successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your review has been submitted successfully!')
+        ).toBeInTheDocument();
       });
     });
 
@@ -2603,7 +2619,9 @@ describe('ReviewsMedia Component', () => {
         // Mock the review refetch after submission
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ reviews: [{ id: 'new-review', message: 'Email review', rating: 2 }] }),
+          json: async () => ({
+            reviews: [{ id: 'new-review', message: 'Email review', rating: 2 }],
+          }),
         });
 
       renderWithRouter(<ReviewsMedia />);
@@ -2632,13 +2650,15 @@ describe('ReviewsMedia Component', () => {
 
       await waitFor(() => {
         // Check that the review submission API was called with email as fallback
-        const reviewSubmissionCall = fetch.mock.calls.find(call => 
-          call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
+        const reviewSubmissionCall = fetch.mock.calls.find(
+          call => call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
         );
         expect(reviewSubmissionCall).toBeDefined();
         const requestBody = JSON.parse(reviewSubmissionCall[1].body);
         expect(requestBody.review.userName).toBe('test@example.com');
-        expect(screen.getByText('Your review has been submitted successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your review has been submitted successfully!')
+        ).toBeInTheDocument();
       });
     });
 
@@ -2646,7 +2666,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2722,7 +2742,7 @@ describe('ReviewsMedia Component', () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2769,12 +2789,11 @@ describe('ReviewsMedia Component', () => {
   });
 
   describe('Rating Functionality', () => {
-
     test('submits review with rating and user information', async () => {
       const mockUser = {
         uid: 'user123',
         email: 'test@example.com',
-        displayName: 'Test User'
+        displayName: 'Test User',
       };
 
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -2820,7 +2839,9 @@ describe('ReviewsMedia Component', () => {
         // Mock the review refetch after submission
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ reviews: [{ id: 'new-review', message: 'Great trail!', rating: 4 }] }),
+          json: async () => ({
+            reviews: [{ id: 'new-review', message: 'Great trail!', rating: 4 }],
+          }),
         });
 
       window.alert = jest.fn();
@@ -2857,8 +2878,8 @@ describe('ReviewsMedia Component', () => {
 
       await waitFor(() => {
         // Check that the review submission API was called
-        const reviewSubmissionCall = fetch.mock.calls.find(call => 
-          call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
+        const reviewSubmissionCall = fetch.mock.calls.find(
+          call => call[0] === 'https://us-central1-orion-sdp.cloudfunctions.net/addTrailReview'
         );
         expect(reviewSubmissionCall).toBeDefined();
         expect(reviewSubmissionCall[1]).toMatchObject({
@@ -2872,7 +2893,9 @@ describe('ReviewsMedia Component', () => {
             message: 'Great trail!',
           }),
         });
-        expect(screen.getByText('Your review has been submitted successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your review has been submitted successfully!')
+        ).toBeInTheDocument();
       });
     });
   });

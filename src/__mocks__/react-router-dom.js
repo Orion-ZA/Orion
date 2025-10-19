@@ -14,16 +14,13 @@ function getInitialEntries() {
 
 module.exports = {
   ...RR,
-  BrowserRouter: ({ children }) => (
-    React.createElement(RR.MemoryRouter, { initialEntries: getInitialEntries() }, children)
-  ),
-  Link: ({ to, children, ...rest }) => (
-    React.createElement('a', { href: typeof to === 'string' ? to : '#', ...rest }, children)
-  ),
-  NavLink: ({ to, children, ...rest }) => (
-    React.createElement('a', { href: typeof to === 'string' ? to : '#', ...rest }, children)
-  ),
+  BrowserRouter: ({ children }) =>
+    React.createElement(RR.MemoryRouter, { initialEntries: getInitialEntries() }, children),
+  Link: ({ to, children, ...rest }) =>
+    React.createElement('a', { href: typeof to === 'string' ? to : '#', ...rest }, children),
+  NavLink: ({ to, children, ...rest }) =>
+    React.createElement('a', { href: typeof to === 'string' ? to : '#', ...rest }, children),
   useNavigate: () => mockNavigate,
   // Export the mock function so tests can access it
-  __mockNavigate: mockNavigate
+  __mockNavigate: mockNavigate,
 };

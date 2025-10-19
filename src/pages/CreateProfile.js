@@ -11,55 +11,52 @@ function CreateProfile() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleProfileSubmit = async (profileData) => {
+  const handleProfileSubmit = async profileData => {
     setLoading(true);
     setError('');
-    
+
     try {
       const user = auth.currentUser;
-      
+
       // Update Firebase Auth profile
       await updateProfile(user, {
         displayName: profileData.name,
-        photoURL: profileData.avatar || null
+        photoURL: profileData.avatar || null,
       });
 
       // Create user document in Firestore
-      const userRef = doc(db, "Users", user.uid);
+      const userRef = doc(db, 'Users', user.uid);
       await setDoc(userRef, {
         profileInfo: {
           name: profileData.name,
           avatar: profileData.avatar || '',
           email: user.email,
           userId: user.uid,
-          joinedDate: new Date().toISOString()
+          joinedDate: new Date().toISOString(),
         },
         completedHikes: [],
         favourites: [],
         submittedTrails: [],
-        wishlist: []
+        wishlist: [],
       });
 
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
-      console.error("Error creating profile:", err);
+      console.error('Error creating profile:', err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="create-profile-container">
+    <div className='create-profile-container'>
       <h2>Complete Your Profile</h2>
       <p>Add some details to personalize your experience</p>
-      
-      {error && <div className="error-message">{error}</div>}
-      
-      <ProfileForm 
-        onSubmit={handleProfileSubmit} 
-        loading={loading}
-      />
+
+      {error && <div className='error-message'>{error}</div>}
+
+      <ProfileForm onSubmit={handleProfileSubmit} loading={loading} />
     </div>
   );
 }

@@ -24,7 +24,7 @@ jest.mock('firebase/firestore', () => ({
 
 // Mock Firebase config
 jest.mock('../firebaseConfig', () => ({
-  db: {}
+  db: {},
 }));
 
 describe('useTrailsData', () => {
@@ -80,10 +80,10 @@ describe('useTrailsData', () => {
           status: 'open',
           photos: ['photo1.jpg', 'photo2.jpg'],
           createdBy: 'user123',
-          location: { lat: 40.7128, lng: -74.0060 },
+          location: { lat: 40.7128, lng: -74.006 },
           gpsRoute: { coordinates: [] },
           createdAt: new Date('2024-01-15'),
-          lastUpdated: new Date('2024-01-16')
+          lastUpdated: new Date('2024-01-16'),
         },
         {
           id: 'trail2',
@@ -99,8 +99,8 @@ describe('useTrailsData', () => {
           location: { lat: 40.7589, lng: -73.9851 },
           gpsRoute: null,
           createdAt: new Date('2024-01-14'),
-          lastUpdated: new Date('2024-01-15')
-        }
+          lastUpdated: new Date('2024-01-15'),
+        },
       ];
 
       const mockQuerySnapshot = {
@@ -119,9 +119,9 @@ describe('useTrailsData', () => {
             location: trail.location,
             gpsRoute: trail.gpsRoute,
             createdAt: trail.createdAt,
-            lastUpdated: trail.lastUpdated
-          })
-        }))
+            lastUpdated: trail.lastUpdated,
+          }),
+        })),
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -148,10 +148,10 @@ describe('useTrailsData', () => {
             status: 'open',
             photos: ['photo1.jpg', 'photo2.jpg'],
             createdBy: 'user123',
-            location: { lat: 40.7128, lng: -74.0060 },
+            location: { lat: 40.7128, lng: -74.006 },
             gpsRoute: { coordinates: [] },
             createdAt: new Date('2024-01-15'),
-            lastUpdated: new Date('2024-01-16')
+            lastUpdated: new Date('2024-01-16'),
           }),
           expect.objectContaining({
             id: 'trail2',
@@ -167,8 +167,8 @@ describe('useTrailsData', () => {
             location: { lat: 40.7589, lng: -73.9851 },
             gpsRoute: null,
             createdAt: new Date('2024-01-14'),
-            lastUpdated: new Date('2024-01-15')
-          })
+            lastUpdated: new Date('2024-01-15'),
+          }),
         ])
       );
     });
@@ -251,10 +251,10 @@ describe('useTrailsData', () => {
               location: undefined,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: undefined
-            })
-          }
-        ]
+              lastUpdated: undefined,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -283,8 +283,8 @@ describe('useTrailsData', () => {
           location: undefined, // Should preserve undefined
           gpsRoute: null, // Should preserve null
           createdAt: null, // Should preserve null
-          lastUpdated: undefined // Should preserve undefined
-        })
+          lastUpdated: undefined, // Should preserve undefined
+        }),
       ]);
     });
 
@@ -306,10 +306,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -344,10 +344,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -382,10 +382,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -425,10 +425,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -509,10 +509,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -536,7 +536,7 @@ describe('useTrailsData', () => {
         elevationGain: 200,
         tags: ['updated', 'moderate'],
         status: 'closed',
-        lastUpdated: new Date('2024-01-20')
+        lastUpdated: new Date('2024-01-20'),
       };
 
       let updateResult;
@@ -557,7 +557,7 @@ describe('useTrailsData', () => {
           elevationGain: 200,
           tags: ['updated', 'moderate'],
           status: 'closed',
-          lastUpdated: new Date('2024-01-20')
+          lastUpdated: new Date('2024-01-20'),
         })
       );
     });
@@ -599,10 +599,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -633,7 +633,7 @@ describe('useTrailsData', () => {
           distance: 1.0, // Unchanged
           elevationGain: 10, // Unchanged
           tags: ['original'], // Unchanged
-          status: 'open' // Unchanged
+          status: 'open', // Unchanged
         })
       );
     });
@@ -688,7 +688,7 @@ describe('useTrailsData', () => {
 
       const initialState = result.current;
       rerender();
-      
+
       expect(result.current.trails).toBe(initialState.trails);
       expect(result.current.loading).toBe(initialState.loading);
       expect(result.current.error).toBe(initialState.error);
@@ -714,10 +714,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -765,10 +765,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -789,7 +789,7 @@ describe('useTrailsData', () => {
       await act(async () => {
         await Promise.all([
           result.current.updateTrail('trail1', { name: 'Updated' }),
-          result.current.deleteTrail('trail1')
+          result.current.deleteTrail('trail1'),
         ]);
       });
 
@@ -814,9 +814,9 @@ describe('useTrailsData', () => {
           createdBy: `user${i}`,
           location: { lat: 40 + i * 0.001, lng: -74 + i * 0.001 },
           gpsRoute: null,
-          createdAt: new Date(`2024-01-${String(i % 30 + 1).padStart(2, '0')}`),
-          lastUpdated: new Date(`2024-01-${String(i % 30 + 1).padStart(2, '0')}`)
-        })
+          createdAt: new Date(`2024-01-${String((i % 30) + 1).padStart(2, '0')}`),
+          lastUpdated: new Date(`2024-01-${String((i % 30) + 1).padStart(2, '0')}`),
+        }),
       }));
 
       const mockQuerySnapshot = { docs: largeDataset };
@@ -841,9 +841,9 @@ describe('useTrailsData', () => {
             id: 'trail1',
             data: () => {
               throw new Error('Malformed data');
-            }
-          }
-        ]
+            },
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');
@@ -899,10 +899,10 @@ describe('useTrailsData', () => {
               location: null,
               gpsRoute: null,
               createdAt: null,
-              lastUpdated: null
-            })
-          }
-        ]
+              lastUpdated: null,
+            }),
+          },
+        ],
       };
 
       mockCollection.mockReturnValue('trailsRef');

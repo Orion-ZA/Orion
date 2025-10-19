@@ -10,27 +10,27 @@ import { useNavigate } from 'react-router-dom';
 
 // Mock Firebase modules
 jest.mock('firebase/auth', () => ({
-  updateProfile: jest.fn()
+  updateProfile: jest.fn(),
 }));
 
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
-  setDoc: jest.fn()
+  setDoc: jest.fn(),
 }));
 
 jest.mock('../firebaseConfig', () => ({
   auth: {
     currentUser: {
       uid: 'test-user-id',
-      email: 'test@example.com'
-    }
+      email: 'test@example.com',
+    },
   },
-  db: {}
+  db: {},
 }));
 
 // Mock react-router-dom
 jest.mock('react-router-dom', () => ({
-  useNavigate: jest.fn()
+  useNavigate: jest.fn(),
 }));
 
 // Mock ProfileForm component
@@ -39,41 +39,47 @@ jest.mock('../components/ProfileForm/ProfileForm', () => {
   return function MockProfileForm({ onSubmit, loading }) {
     const [formData, setFormData] = React.useState({
       name: '',
-      avatar: ''
+      avatar: '',
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = e => {
       e.preventDefault();
       onSubmit(formData);
     };
 
-    const handleChange = (e) => {
+    const handleChange = e => {
       setFormData(prev => ({
         ...prev,
-        [e.target.name]: e.target.value
+        [e.target.name]: e.target.value,
       }));
     };
 
-    return React.createElement('form', { onSubmit: handleSubmit, 'data-testid': 'profile-form' },
+    return React.createElement(
+      'form',
+      { onSubmit: handleSubmit, 'data-testid': 'profile-form' },
       React.createElement('input', {
         name: 'name',
         value: formData.name,
         onChange: handleChange,
         placeholder: 'Enter your name',
-        'data-testid': 'name-input'
+        'data-testid': 'name-input',
       }),
       React.createElement('input', {
         name: 'avatar',
         value: formData.avatar,
         onChange: handleChange,
         placeholder: 'Enter avatar URL',
-        'data-testid': 'avatar-input'
+        'data-testid': 'avatar-input',
       }),
-      React.createElement('button', {
-        type: 'submit',
-        disabled: loading,
-        'data-testid': 'submit-button'
-      }, loading ? 'Creating Profile...' : 'Create Profile')
+      React.createElement(
+        'button',
+        {
+          type: 'submit',
+          disabled: loading,
+          'data-testid': 'submit-button',
+        },
+        loading ? 'Creating Profile...' : 'Create Profile'
+      )
     );
   };
 });
@@ -90,7 +96,7 @@ describe('CreateProfile Component', () => {
     mockUpdateProfile.mockResolvedValue();
     mockSetDoc.mockResolvedValue();
     mockDoc.mockReturnValue({ id: 'test-user-id' });
-    
+
     // Reset mockNavigate to ensure it's not called from previous tests
     mockNavigate.mockClear();
   });
@@ -100,7 +106,9 @@ describe('CreateProfile Component', () => {
       render(<CreateProfile />);
 
       expect(screen.getByText('Complete Your Profile')).toBeInTheDocument();
-      expect(screen.getByText('Add some details to personalize your experience')).toBeInTheDocument();
+      expect(
+        screen.getByText('Add some details to personalize your experience')
+      ).toBeInTheDocument();
       expect(screen.getByTestId('profile-form')).toBeInTheDocument();
     });
 
@@ -117,7 +125,7 @@ describe('CreateProfile Component', () => {
     it('creates profile successfully with all data', async () => {
       const profileData = {
         name: 'John Doe',
-        avatar: 'https://example.com/avatar.jpg'
+        avatar: 'https://example.com/avatar.jpg',
       };
 
       render(<CreateProfile />);
@@ -133,27 +141,24 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: profileData.name,
-          photoURL: profileData.avatar
+          photoURL: profileData.avatar,
         });
       });
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              name: profileData.name,
-              avatar: profileData.avatar,
-              email: auth.currentUser.email,
-              userId: auth.currentUser.uid,
-              joinedDate: expect.any(String)
-            },
-            completedHikes: [],
-            favourites: [],
-            submittedTrails: [],
-            wishlist: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            name: profileData.name,
+            avatar: profileData.avatar,
+            email: auth.currentUser.email,
+            userId: auth.currentUser.uid,
+            joinedDate: expect.any(String),
+          },
+          completedHikes: [],
+          favourites: [],
+          submittedTrails: [],
+          wishlist: [],
+        });
       });
 
       await waitFor(() => {
@@ -164,7 +169,7 @@ describe('CreateProfile Component', () => {
     it('creates profile successfully without avatar', async () => {
       const profileData = {
         name: 'Jane Smith',
-        avatar: ''
+        avatar: '',
       };
 
       render(<CreateProfile />);
@@ -178,40 +183,35 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: profileData.name,
-          photoURL: null
+          photoURL: null,
         });
       });
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              name: profileData.name,
-              avatar: '',
-              email: auth.currentUser.email,
-              userId: auth.currentUser.uid,
-              joinedDate: expect.any(String)
-            },
-            completedHikes: [],
-            favourites: [],
-            submittedTrails: [],
-            wishlist: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            name: profileData.name,
+            avatar: '',
+            email: auth.currentUser.email,
+            userId: auth.currentUser.uid,
+            joinedDate: expect.any(String),
+          },
+          completedHikes: [],
+          favourites: [],
+          submittedTrails: [],
+          wishlist: [],
+        });
       });
     });
 
     it('shows loading state during profile creation', async () => {
       const profileData = {
         name: 'Test User',
-        avatar: ''
+        avatar: '',
       };
 
       // Mock slow updateProfile
-      mockUpdateProfile.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 100))
-      );
+      mockUpdateProfile.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
       render(<CreateProfile />);
 
@@ -284,9 +284,7 @@ describe('CreateProfile Component', () => {
     });
 
     it('clears error when retrying', async () => {
-      mockUpdateProfile
-        .mockRejectedValueOnce(new Error('First error'))
-        .mockResolvedValueOnce();
+      mockUpdateProfile.mockRejectedValueOnce(new Error('First error')).mockResolvedValueOnce();
 
       render(<CreateProfile />);
 
@@ -325,7 +323,7 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: '',
-          photoURL: null
+          photoURL: null,
         });
       });
     });
@@ -343,7 +341,7 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: '   ',
-          photoURL: null
+          photoURL: null,
         });
       });
     });
@@ -353,7 +351,7 @@ describe('CreateProfile Component', () => {
     it('creates correct user document structure', async () => {
       const profileData = {
         name: 'Test User',
-        avatar: 'https://example.com/avatar.jpg'
+        avatar: 'https://example.com/avatar.jpg',
       };
 
       render(<CreateProfile />);
@@ -375,12 +373,12 @@ describe('CreateProfile Component', () => {
               avatar: profileData.avatar,
               email: auth.currentUser.email,
               userId: auth.currentUser.uid,
-              joinedDate: expect.any(String)
+              joinedDate: expect.any(String),
             }),
             completedHikes: [],
             favourites: [],
             submittedTrails: [],
-            wishlist: []
+            wishlist: [],
           })
         );
       });
@@ -448,7 +446,7 @@ describe('CreateProfile Component', () => {
       const longName = 'A'.repeat(1000);
       const profileData = {
         name: longName,
-        avatar: ''
+        avatar: '',
       };
 
       render(<CreateProfile />);
@@ -462,16 +460,16 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: longName,
-          photoURL: null
+          photoURL: null,
         });
       });
     });
 
     it('handles special characters in name', async () => {
-      const specialName = 'José María O\'Connor-Smith';
+      const specialName = "José María O'Connor-Smith";
       const profileData = {
         name: specialName,
-        avatar: ''
+        avatar: '',
       };
 
       render(<CreateProfile />);
@@ -485,7 +483,7 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: specialName,
-          photoURL: null
+          photoURL: null,
         });
       });
     });
@@ -493,7 +491,7 @@ describe('CreateProfile Component', () => {
     it('handles invalid avatar URL', async () => {
       const profileData = {
         name: 'Test User',
-        avatar: 'not-a-valid-url'
+        avatar: 'not-a-valid-url',
       };
 
       render(<CreateProfile />);
@@ -509,7 +507,7 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: profileData.name,
-          photoURL: profileData.avatar
+          photoURL: profileData.avatar,
         });
       });
     });
@@ -517,7 +515,7 @@ describe('CreateProfile Component', () => {
     it('handles null avatar', async () => {
       const profileData = {
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       render(<CreateProfile />);
@@ -531,7 +529,7 @@ describe('CreateProfile Component', () => {
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(auth.currentUser, {
           displayName: profileData.name,
-          photoURL: null
+          photoURL: null,
         });
       });
     });
@@ -539,9 +537,7 @@ describe('CreateProfile Component', () => {
 
   describe('Component Cleanup', () => {
     it('handles component unmount during profile creation', async () => {
-      mockUpdateProfile.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 100))
-      );
+      mockUpdateProfile.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
       const { unmount } = render(<CreateProfile />);
 

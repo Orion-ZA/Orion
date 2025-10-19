@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebaseConfig";
-import { useToast } from "./ToastContext";
+import React, { useEffect, useRef, useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import { useToast } from './ToastContext';
 
 function ProtectedRoute({ children }) {
   const [user, setUser] = useState(null);
@@ -12,7 +12,7 @@ function ProtectedRoute({ children }) {
   const notifiedRef = useRef(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser);
       setLoading(false);
     });
@@ -21,7 +21,7 @@ function ProtectedRoute({ children }) {
 
   // Blank screen while loading
   if (loading) {
-    return <div className="min-h-screen bg-white"></div>;
+    return <div className='min-h-screen bg-white'></div>;
   }
 
   if (!user) {
@@ -31,13 +31,11 @@ function ProtectedRoute({ children }) {
       // schedule toast after paint to avoid effects during render
       setTimeout(() => show('Please log in first', { type: 'warn' }), 0);
     }
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to='/login' replace state={{ from: location.pathname }} />;
   }
 
   // Inject user prop into child properly
-  return React.isValidElement(children)
-    ? React.cloneElement(children, { user })
-    : null;
+  return React.isValidElement(children) ? React.cloneElement(children, { user }) : null;
 }
 
 export default ProtectedRoute;

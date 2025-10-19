@@ -11,43 +11,43 @@ jest.mock('react-router-dom', () => ({
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  Lock: () => <div data-testid="lock-icon" />,
-  Unlock: () => <div data-testid="unlock-icon" />,
-  AlertTriangle: () => <div data-testid="alert-triangle-icon" />,
-  ChevronDown: () => <div data-testid="chevron-down-icon" />,
-  ChevronRight: () => <div data-testid="chevron-right-icon" />,
-  MapPin: () => <div data-testid="map-pin-icon" />,
-  Calendar: () => <div data-testid="calendar-icon" />,
-  User: () => <div data-testid="user-icon" />,
-  Eye: () => <div data-testid="eye-icon" />,
-  EyeOff: () => <div data-testid="eye-off-icon" />,
-  Map: () => <div data-testid="map-icon" />,
+  Lock: () => <div data-testid='lock-icon' />,
+  Unlock: () => <div data-testid='unlock-icon' />,
+  AlertTriangle: () => <div data-testid='alert-triangle-icon' />,
+  ChevronDown: () => <div data-testid='chevron-down-icon' />,
+  ChevronRight: () => <div data-testid='chevron-right-icon' />,
+  MapPin: () => <div data-testid='map-pin-icon' />,
+  Calendar: () => <div data-testid='calendar-icon' />,
+  User: () => <div data-testid='user-icon' />,
+  Eye: () => <div data-testid='eye-icon' />,
+  EyeOff: () => <div data-testid='eye-off-icon' />,
+  Map: () => <div data-testid='map-icon' />,
 }));
 
 // Mock TrailUtils
 jest.mock('../components/trails/TrailUtils', () => ({
-  getDifficultyColor: jest.fn((difficulty) => {
+  getDifficultyColor: jest.fn(difficulty => {
     const colors = {
-      'Easy': '#4CAF50',
-      'Moderate': '#FF9800',
-      'Hard': '#F44336',
-      'Expert': '#9C27B0'
+      Easy: '#4CAF50',
+      Moderate: '#FF9800',
+      Hard: '#F44336',
+      Expert: '#9C27B0',
     };
     return colors[difficulty] || '#757575';
   }),
-  getDifficultyIcon: jest.fn((difficulty) => {
+  getDifficultyIcon: jest.fn(difficulty => {
     const icons = {
-      'Easy': '🟢',
-      'Moderate': '🟡',
-      'Hard': '🔴',
-      'Expert': '🟣'
+      Easy: '🟢',
+      Moderate: '🟡',
+      Hard: '🔴',
+      Expert: '🟣',
     };
     return icons[difficulty] || '⚪';
-  })
+  }),
 }));
 
 // Helper function to render component
-const renderComponent = (component) => {
+const renderComponent = component => {
   return render(component);
 };
 
@@ -63,27 +63,27 @@ describe('TrailsTrailCard', () => {
     name: 'Mountain Peak Trail',
     description: 'A beautiful trail with scenic views',
     latitude: 40.7128,
-    longitude: -74.0060,
+    longitude: -74.006,
     location: {
       latitude: 40.7128,
-      longitude: -74.0060
+      longitude: -74.006,
     },
     distance: 5.2,
     difficulty: 'Moderate',
     elevationGain: 300,
     status: 'open',
     createdAt: {
-      toDate: () => new Date('2024-01-15T10:00:00Z')
+      toDate: () => new Date('2024-01-15T10:00:00Z'),
     },
     lastUpdated: {
-      toDate: () => new Date('2024-01-20T15:30:00Z')
+      toDate: () => new Date('2024-01-20T15:30:00Z'),
     },
     tags: ['scenic', 'forest', 'waterfall'],
     photos: ['photo1.jpg', 'photo2.jpg', 'photo3.jpg', 'photo4.jpg'],
     gpsRoute: [
-      { lat: 40.7128, lng: -74.0060 },
-      { lat: 40.7130, lng: -74.0058 }
-    ]
+      { lat: 40.7128, lng: -74.006 },
+      { lat: 40.713, lng: -74.0058 },
+    ],
   };
 
   const mockAlerts = {
@@ -94,7 +94,7 @@ describe('TrailsTrailCard', () => {
         message: 'Trail closed due to weather',
         isTimed: false,
         isActive: true,
-        timestamp: new Date('2024-01-18')
+        timestamp: new Date('2024-01-18'),
       },
       {
         id: 'alert2',
@@ -102,24 +102,22 @@ describe('TrailsTrailCard', () => {
         comment: 'Scheduled maintenance',
         isTimed: true,
         expiresAt: {
-          toDate: () => new Date(Date.now() + 3600000) // 1 hour from now
+          toDate: () => new Date(Date.now() + 3600000), // 1 hour from now
         },
         isActive: true,
-        timestamp: new Date('2024-01-19')
-      }
-    ]
+        timestamp: new Date('2024-01-19'),
+      },
+    ],
   };
 
   const mockLoadingStates = {
-    trail1: false
+    trail1: false,
   };
 
   const mockExpandedTrails = new Set(['trail1']);
 
   const mockTrails = {
-    completed: [
-      { id: 'completed1', name: 'Completed Trail' }
-    ]
+    completed: [{ id: 'completed1', name: 'Completed Trail' }],
   };
 
   const defaultProps = {
@@ -133,7 +131,7 @@ describe('TrailsTrailCard', () => {
     onShowAlertsPopup: mockOnShowAlertsPopup,
     onHideAlertsPopup: mockOnHideAlertsPopup,
     onOpenStatusConfirmModal: mockOnOpenStatusConfirmModal,
-    onOpenReviewModal: mockOnOpenReviewModal
+    onOpenReviewModal: mockOnOpenReviewModal,
   };
 
   beforeEach(() => {
@@ -186,7 +184,7 @@ describe('TrailsTrailCard', () => {
     it('does not display alert count when no alerts', () => {
       const propsWithoutAlerts = {
         ...defaultProps,
-        alerts: {}
+        alerts: {},
       };
       renderComponent(<TrailCard {...propsWithoutAlerts} />);
 
@@ -196,7 +194,7 @@ describe('TrailsTrailCard', () => {
     it('shows loading state for alerts', () => {
       const propsWithLoading = {
         ...defaultProps,
-        loadingStates: { trail1: true }
+        loadingStates: { trail1: true },
       };
       renderComponent(<TrailCard {...propsWithLoading} />);
 
@@ -213,7 +211,7 @@ describe('TrailsTrailCard', () => {
         expect.any(Object),
         expect.arrayContaining([
           expect.objectContaining({ id: 'alert1' }),
-          expect.objectContaining({ id: 'alert2' })
+          expect.objectContaining({ id: 'alert2' }),
         ])
       );
     });
@@ -236,7 +234,7 @@ describe('TrailsTrailCard', () => {
             message: 'Active alert',
             isTimed: false,
             isActive: true,
-            timestamp: new Date('2024-01-18')
+            timestamp: new Date('2024-01-18'),
           },
           {
             id: 'alert2',
@@ -244,17 +242,17 @@ describe('TrailsTrailCard', () => {
             message: 'Expired alert',
             isTimed: true,
             expiresAt: {
-              toDate: () => new Date(Date.now() - 3600000) // 1 hour ago
+              toDate: () => new Date(Date.now() - 3600000), // 1 hour ago
             },
             isActive: true,
-            timestamp: new Date('2024-01-19')
-          }
-        ]
+            timestamp: new Date('2024-01-19'),
+          },
+        ],
       };
 
       const propsWithExpiredAlerts = {
         ...defaultProps,
-        alerts: alertsWithExpired
+        alerts: alertsWithExpired,
       };
       renderComponent(<TrailCard {...propsWithExpiredAlerts} />);
 
@@ -270,14 +268,14 @@ describe('TrailsTrailCard', () => {
             type: 'safety',
             message: 'Alert without timed property',
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       const propsWithoutTimed = {
         ...defaultProps,
-        alerts: alertsWithoutTimed
+        alerts: alertsWithoutTimed,
       };
       renderComponent(<TrailCard {...propsWithoutTimed} />);
 
@@ -293,14 +291,14 @@ describe('TrailsTrailCard', () => {
             message: 'Alert without expiresAt',
             isTimed: true,
             isActive: true,
-            timestamp: new Date('2024-01-18')
-          }
-        ]
+            timestamp: new Date('2024-01-18'),
+          },
+        ],
       };
 
       const propsWithoutExpiresAt = {
         ...defaultProps,
-        alerts: alertsWithoutExpiresAt
+        alerts: alertsWithoutExpiresAt,
       };
       renderComponent(<TrailCard {...propsWithoutExpiresAt} />);
 
@@ -312,7 +310,7 @@ describe('TrailsTrailCard', () => {
     it('shows expand button for submitted tab', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
@@ -325,7 +323,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpanded = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpanded} />);
 
@@ -335,7 +333,7 @@ describe('TrailsTrailCard', () => {
     it('calls onToggleExpansion when expand button is clicked', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
@@ -349,7 +347,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpanded = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpanded} />);
 
@@ -362,7 +360,7 @@ describe('TrailsTrailCard', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set()
+        expandedTrails: new Set(),
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
@@ -374,7 +372,7 @@ describe('TrailsTrailCard', () => {
     const propsWithExpanded = {
       ...defaultProps,
       activeTab: 'submitted',
-      expandedTrails: new Set(['trail1'])
+      expandedTrails: new Set(['trail1']),
     };
 
     beforeEach(() => {
@@ -423,14 +421,14 @@ describe('TrailsTrailCard', () => {
         tags: null,
         photos: null,
         gpsRoute: null,
-        lastUpdated: null
+        lastUpdated: null,
       };
 
       const propsWithoutOptional = {
         ...defaultProps,
         trail: trailWithoutOptional,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
 
       renderComponent(<TrailCard {...propsWithoutOptional} />);
@@ -451,12 +449,12 @@ describe('TrailsTrailCard', () => {
     it('shows completed status for completed trails', () => {
       const completedTrail = {
         ...mockTrail,
-        id: 'completed1'
+        id: 'completed1',
       };
 
       const propsWithCompletedTrail = {
         ...defaultProps,
-        trail: completedTrail
+        trail: completedTrail,
       };
       renderComponent(<TrailCard {...propsWithCompletedTrail} />);
 
@@ -476,7 +474,7 @@ describe('TrailsTrailCard', () => {
     it('shows submitted actions for submitted tab', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
@@ -487,13 +485,13 @@ describe('TrailsTrailCard', () => {
     it('shows closed status for closed trails', () => {
       const closedTrail = {
         ...mockTrail,
-        status: 'closed'
+        status: 'closed',
       };
 
       const propsWithClosedTrail = {
         ...defaultProps,
         trail: closedTrail,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithClosedTrail} />);
 
@@ -504,14 +502,18 @@ describe('TrailsTrailCard', () => {
     it('calls onOpenStatusConfirmModal when status badge is clicked', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
       const statusBadge = document.querySelector('.status-badge');
       fireEvent.click(statusBadge);
 
-      expect(mockOnOpenStatusConfirmModal).toHaveBeenCalledWith('trail1', 'Mountain Peak Trail', 'open');
+      expect(mockOnOpenStatusConfirmModal).toHaveBeenCalledWith(
+        'trail1',
+        'Mountain Peak Trail',
+        'open'
+      );
     });
   });
 
@@ -520,7 +522,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpandedSubmitted = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpandedSubmitted} />);
 
@@ -532,7 +534,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpandedSubmitted = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpandedSubmitted} />);
 
@@ -545,10 +547,10 @@ describe('TrailsTrailCard', () => {
             id: 'trail1',
             name: 'Mountain Peak Trail',
             latitude: 40.7128,
-            longitude: -74.0060
+            longitude: -74.006,
           }),
-          action: 'centerTrail'
-        }
+          action: 'centerTrail',
+        },
       });
     });
 
@@ -557,14 +559,14 @@ describe('TrailsTrailCard', () => {
         ...mockTrail,
         latitude: null,
         longitude: null,
-        location: null
+        location: null,
       };
 
       const propsWithoutLocation = {
         ...defaultProps,
         trail: trailWithoutLocation,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithoutLocation} />);
 
@@ -577,10 +579,10 @@ describe('TrailsTrailCard', () => {
             id: 'trail1',
             name: 'Mountain Peak Trail',
             latitude: undefined,
-            longitude: undefined
+            longitude: undefined,
           }),
-          action: 'centerTrail'
-        }
+          action: 'centerTrail',
+        },
       });
     });
   });
@@ -590,7 +592,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpanded = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpanded} />);
 
@@ -601,14 +603,14 @@ describe('TrailsTrailCard', () => {
     it('handles regular Date objects', () => {
       const trailWithRegularDate = {
         ...mockTrail,
-        createdAt: new Date('2024-01-15T10:00:00Z')
+        createdAt: new Date('2024-01-15T10:00:00Z'),
       };
 
       const propsWithRegularDate = {
         ...defaultProps,
         trail: trailWithRegularDate,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithRegularDate} />);
 
@@ -618,14 +620,14 @@ describe('TrailsTrailCard', () => {
     it('handles null timestamp', () => {
       const trailWithNullDate = {
         ...mockTrail,
-        createdAt: null
+        createdAt: null,
       };
 
       const propsWithNullDate = {
         ...defaultProps,
         trail: trailWithNullDate,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithNullDate} />);
 
@@ -637,12 +639,12 @@ describe('TrailsTrailCard', () => {
     it('handles trail with minimal data', () => {
       const minimalTrail = {
         id: 'minimal',
-        name: 'Minimal Trail'
+        name: 'Minimal Trail',
       };
 
       const propsWithMinimalTrail = {
         ...defaultProps,
-        trail: minimalTrail
+        trail: minimalTrail,
       };
       renderComponent(<TrailCard {...propsWithMinimalTrail} />);
 
@@ -654,12 +656,12 @@ describe('TrailsTrailCard', () => {
     it('handles trail without elevation gain', () => {
       const trailWithoutElevation = {
         ...mockTrail,
-        elevationGain: null
+        elevationGain: null,
       };
 
       const propsWithoutElevation = {
         ...defaultProps,
-        trail: trailWithoutElevation
+        trail: trailWithoutElevation,
       };
       renderComponent(<TrailCard {...propsWithoutElevation} />);
 
@@ -670,14 +672,14 @@ describe('TrailsTrailCard', () => {
     it('handles empty tags array', () => {
       const trailWithEmptyTags = {
         ...mockTrail,
-        tags: []
+        tags: [],
       };
 
       const propsWithEmptyTags = {
         ...defaultProps,
         trail: trailWithEmptyTags,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithEmptyTags} />);
 
@@ -688,14 +690,14 @@ describe('TrailsTrailCard', () => {
     it('handles empty photos array', () => {
       const trailWithEmptyPhotos = {
         ...mockTrail,
-        photos: []
+        photos: [],
       };
 
       const propsWithEmptyPhotos = {
         ...defaultProps,
         trail: trailWithEmptyPhotos,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithEmptyPhotos} />);
 
@@ -707,7 +709,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpanded = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpanded} />);
 
@@ -722,7 +724,7 @@ describe('TrailsTrailCard', () => {
     it('has proper button titles for accessibility', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 
@@ -734,7 +736,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpanded = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpanded} />);
 
@@ -746,7 +748,7 @@ describe('TrailsTrailCard', () => {
       const propsWithExpandedSubmitted = {
         ...defaultProps,
         activeTab: 'submitted',
-        expandedTrails: new Set(['trail1'])
+        expandedTrails: new Set(['trail1']),
       };
       renderComponent(<TrailCard {...propsWithExpandedSubmitted} />);
 
@@ -757,7 +759,7 @@ describe('TrailsTrailCard', () => {
     it('has proper status badge title', () => {
       const propsWithSubmittedTab = {
         ...defaultProps,
-        activeTab: 'submitted'
+        activeTab: 'submitted',
       };
       renderComponent(<TrailCard {...propsWithSubmittedTab} />);
 

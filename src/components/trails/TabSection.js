@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Image, Bell, Plus, Upload, AlertTriangle, Star, Clock, Infinity, Flag } from 'lucide-react';
+import {
+  MessageSquare,
+  Image,
+  Bell,
+  Plus,
+  Upload,
+  AlertTriangle,
+  Star,
+  Clock,
+  Infinity,
+  Flag,
+} from 'lucide-react';
 
 // Alert Timer Component
 const AlertTimer = ({ expiresAt, isTimed }) => {
@@ -38,10 +49,10 @@ const AlertTimer = ({ expiresAt, isTimed }) => {
     return null;
   }
 
-  const formatTime = (value) => value.toString().padStart(2, '0');
+  const formatTime = value => value.toString().padStart(2, '0');
 
   return (
-    <div className="alert-timer">
+    <div className='alert-timer'>
       <Clock size={14} />
       <span>
         {timeRemaining.hours > 0 && `${formatTime(timeRemaining.hours)}h `}
@@ -54,33 +65,35 @@ const AlertTimer = ({ expiresAt, isTimed }) => {
 // Individual Alert Component
 const AlertItem = ({ alert, onReport }) => {
   return (
-    <div key={alert.id} className="trail-detail-alert-item">
-      <div className="trail-detail-alert-header">
+    <div key={alert.id} className='trail-detail-alert-item'>
+      <div className='trail-detail-alert-header'>
         <AlertTriangle size={20} />
         <h4>{alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert</h4>
-        <div className="alert-header-right">
-          <button 
-            className="report-item-btn"
+        <div className='alert-header-right'>
+          <button
+            className='report-item-btn'
             onClick={() => onReport('alert', alert.id)}
-            title="Report this alert"
+            title='Report this alert'
           >
             <Flag size={14} />
           </button>
           <AlertTimer expiresAt={alert.expiresAt} isTimed={alert.isTimed} />
-          <span className="alert-timestamp">
-            {new Date(alert.timestamp?.toDate ? alert.timestamp.toDate() : alert.timestamp).toLocaleDateString()}
+          <span className='alert-timestamp'>
+            {new Date(
+              alert.timestamp?.toDate ? alert.timestamp.toDate() : alert.timestamp
+            ).toLocaleDateString()}
           </span>
         </div>
       </div>
-      <div className="trail-detail-alert-content">
-        <div className="alert-type-indicator">
+      <div className='trail-detail-alert-content'>
+        <div className='alert-type-indicator'>
           {alert.isTimed ? (
-            <span className="alert-type timed">
+            <span className='alert-type timed'>
               <Clock size={12} />
               Timed Alert
             </span>
           ) : (
-            <span className="alert-type permanent">
+            <span className='alert-type permanent'>
               <Infinity size={12} />
               Permanent Alert
             </span>
@@ -88,9 +101,12 @@ const AlertItem = ({ alert, onReport }) => {
         </div>
         <p>{alert.message || alert.comment}</p>
         {alert.isTimed && alert.expiresAt && (
-          <div className="alert-expiry">
+          <div className='alert-expiry'>
             <small>
-              Expires: {new Date(alert.expiresAt?.toDate ? alert.expiresAt.toDate() : alert.expiresAt).toLocaleString()}
+              Expires:{' '}
+              {new Date(
+                alert.expiresAt?.toDate ? alert.expiresAt.toDate() : alert.expiresAt
+              ).toLocaleString()}
             </small>
           </div>
         )}
@@ -99,26 +115,26 @@ const AlertItem = ({ alert, onReport }) => {
   );
 };
 
-const TabSection = ({ 
-  activeTab, 
-  setActiveTab, 
-  reviews, 
-  trail, 
-  reviewSortBy, 
-  setReviewSortBy, 
-  loadingReviews, 
-  getSortedReviews, 
-  onOpenContributionModal, 
-  currentImageIndex, 
+const TabSection = ({
+  activeTab,
+  setActiveTab,
+  reviews,
+  trail,
+  reviewSortBy,
+  setReviewSortBy,
+  loadingReviews,
+  getSortedReviews,
+  onOpenContributionModal,
+  currentImageIndex,
   setCurrentImageIndex,
   alerts,
   loadingAlerts,
-  onReport
+  onReport,
 }) => {
   return (
-    <div className="trail-detail-tab-section">
+    <div className='trail-detail-tab-section'>
       {/* Tab Navigation */}
-      <div className="trail-detail-tab-nav">
+      <div className='trail-detail-tab-nav'>
         <button
           className={`trail-detail-tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
           onClick={() => setActiveTab('reviews')}
@@ -143,72 +159,74 @@ const TabSection = ({
       </div>
 
       {/* Tab Content */}
-      <div className="trail-detail-tab-content">
+      <div className='trail-detail-tab-content'>
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
-          <div className="trail-detail-tab-panel">
-            <div className="trail-detail-reviews-header">
+          <div className='trail-detail-tab-panel'>
+            <div className='trail-detail-reviews-header'>
               <button
-                className="trail-detail-contribute-btn"
+                className='trail-detail-contribute-btn'
                 onClick={() => onOpenContributionModal('review')}
-                title="Add a review"
+                title='Add a review'
               >
                 <Plus size={16} />
                 Add Review
               </button>
               {reviews.length > 0 && (
-                <div className="trail-detail-review-sort">
-                  <label htmlFor="review-sort">Sort by:</label>
+                <div className='trail-detail-review-sort'>
+                  <label htmlFor='review-sort'>Sort by:</label>
                   <select
-                    id="review-sort"
+                    id='review-sort'
                     value={reviewSortBy}
-                    onChange={(e) => setReviewSortBy(e.target.value)}
-                    className="trail-detail-sort-select"
+                    onChange={e => setReviewSortBy(e.target.value)}
+                    className='trail-detail-sort-select'
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="highest">Highest Rating</option>
-                    <option value="lowest">Lowest Rating</option>
+                    <option value='newest'>Newest First</option>
+                    <option value='oldest'>Oldest First</option>
+                    <option value='highest'>Highest Rating</option>
+                    <option value='lowest'>Lowest Rating</option>
                   </select>
                 </div>
               )}
             </div>
-            
+
             {loadingReviews ? (
-              <div className="trail-detail-loading">Loading reviews...</div>
+              <div className='trail-detail-loading'>Loading reviews...</div>
             ) : reviews.length > 0 ? (
-              <div className="trail-detail-reviews-container">
-                <div className="trail-detail-reviews-list">
-                  {getSortedReviews().map((review) => (
-                    <div key={review.id} className="trail-detail-review">
-                      <div className="trail-detail-review-header">
-                        <div className="trail-detail-review-author">
+              <div className='trail-detail-reviews-container'>
+                <div className='trail-detail-reviews-list'>
+                  {getSortedReviews().map(review => (
+                    <div key={review.id} className='trail-detail-review'>
+                      <div className='trail-detail-review-header'>
+                        <div className='trail-detail-review-author'>
                           <strong>{review.userName || 'Anonymous'}</strong>
                         </div>
-                        <div className="trail-detail-review-rating">
+                        <div className='trail-detail-review-rating'>
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               size={16}
-                              fill={i < (review.rating || 0) ? "currentColor" : "none"}
-                              color={i < (review.rating || 0) ? "#ffc107" : "rgba(255, 255, 255, 0.3)"}
+                              fill={i < (review.rating || 0) ? 'currentColor' : 'none'}
+                              color={
+                                i < (review.rating || 0) ? '#ffc107' : 'rgba(255, 255, 255, 0.3)'
+                              }
                             />
                           ))}
                         </div>
-                        <div className="trail-detail-review-actions">
-                          <button 
-                            className="report-item-btn"
+                        <div className='trail-detail-review-actions'>
+                          <button
+                            className='report-item-btn'
                             onClick={() => onReport('review', review.id)}
-                            title="Report this review"
+                            title='Report this review'
                           >
                             <Flag size={14} />
                           </button>
-                          <div className="trail-detail-review-date">
+                          <div className='trail-detail-review-date'>
                             {new Date(review.timestamp).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
-                      <div className="trail-detail-review-content">
+                      <div className='trail-detail-review-content'>
                         <p>{review.comment || review.message || 'No comment provided'}</p>
                       </div>
                     </div>
@@ -216,45 +234,44 @@ const TabSection = ({
                 </div>
               </div>
             ) : (
-              <p className="trail-detail-no-reviews">No reviews yet. Be the first to review this trail!</p>
+              <p className='trail-detail-no-reviews'>
+                No reviews yet. Be the first to review this trail!
+              </p>
             )}
           </div>
         )}
 
         {/* Media Tab */}
         {activeTab === 'media' && (
-          <div className="trail-detail-tab-panel">
-            <div className="trail-detail-media-header">
+          <div className='trail-detail-tab-panel'>
+            <div className='trail-detail-media-header'>
               <button
-                className="trail-detail-contribute-btn"
+                className='trail-detail-contribute-btn'
                 onClick={() => onOpenContributionModal('image')}
-                title="Upload images"
+                title='Upload images'
               >
                 <Upload size={16} />
                 Upload Images
               </button>
             </div>
-            <div className="trail-detail-media-gallery">
+            <div className='trail-detail-media-gallery'>
               {trail?.photos && trail.photos.length > 0 ? (
-                <div className="trail-detail-media-grid">
+                <div className='trail-detail-media-grid'>
                   {trail.photos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="trail-detail-media-item"
-                    >
+                    <div key={index} className='trail-detail-media-item'>
                       <img
                         src={photo}
                         alt={`Trail photo ${index + 1}`}
-                        className="trail-detail-media-thumbnail"
+                        className='trail-detail-media-thumbnail'
                         onClick={() => setCurrentImageIndex(index)}
                       />
-                      <button 
-                        className="report-media-btn"
-                        onClick={(e) => {
+                      <button
+                        className='report-media-btn'
+                        onClick={e => {
                           e.stopPropagation();
                           onReport('image', `photo_${index}`);
                         }}
-                        title="Report this image"
+                        title='Report this image'
                       >
                         <Flag size={12} />
                       </button>
@@ -262,7 +279,7 @@ const TabSection = ({
                   ))}
                 </div>
               ) : (
-                <p className="trail-detail-no-media">No photos available for this trail.</p>
+                <p className='trail-detail-no-media'>No photos available for this trail.</p>
               )}
             </div>
           </div>
@@ -270,62 +287,71 @@ const TabSection = ({
 
         {/* Alerts Tab */}
         {activeTab === 'alerts' && (
-          <div className="trail-detail-tab-panel">
-            <div className="trail-detail-alerts-header">
+          <div className='trail-detail-tab-panel'>
+            <div className='trail-detail-alerts-header'>
               <button
-                className="trail-detail-contribute-btn"
+                className='trail-detail-contribute-btn'
                 onClick={() => onOpenContributionModal('alert')}
-                title="Add an alert"
+                title='Add an alert'
               >
                 <AlertTriangle size={16} />
                 Add Alert
               </button>
             </div>
-            <div className="trail-detail-alerts-content">
+            <div className='trail-detail-alerts-content'>
               {loadingAlerts ? (
-                <div className="trail-detail-loading">Loading alerts...</div>
+                <div className='trail-detail-loading'>Loading alerts...</div>
               ) : (
                 <>
                   {/* Trail Status Alert */}
-                  <div className="trail-detail-alert-item">
-                    <div className="trail-detail-alert-header">
+                  <div className='trail-detail-alert-item'>
+                    <div className='trail-detail-alert-header'>
                       <Bell size={20} />
                       <h4>Trail Status</h4>
                     </div>
-                    <div className="trail-detail-status-info">
-                      <p>Status: <span className={`status-${trail?.status || 'unknown'}`}>{trail?.status || 'Unknown'}</span></p>
+                    <div className='trail-detail-status-info'>
+                      <p>
+                        Status:{' '}
+                        <span className={`status-${trail?.status || 'unknown'}`}>
+                          {trail?.status || 'Unknown'}
+                        </span>
+                      </p>
                       {trail?.status === 'closed' && (
-                        <p className="trail-detail-closure-notice">
-                          ⚠️ This trail is currently closed. Please check back later or contact local authorities for more information.
+                        <p className='trail-detail-closure-notice'>
+                          ⚠️ This trail is currently closed. Please check back later or contact
+                          local authorities for more information.
                         </p>
                       )}
                     </div>
                   </div>
 
-                {/* User-Generated Alerts */}
-                {alerts.length > 0 ? (
-                  alerts.map((alert) => (
-                    <AlertItem key={alert.id} alert={alert} onReport={onReport} />
-                  ))
-                ) : (
-                    <div className="trail-detail-alert-item">
-                      <div className="trail-detail-alert-header">
+                  {/* User-Generated Alerts */}
+                  {alerts.length > 0 ? (
+                    alerts.map(alert => (
+                      <AlertItem key={alert.id} alert={alert} onReport={onReport} />
+                    ))
+                  ) : (
+                    <div className='trail-detail-alert-item'>
+                      <div className='trail-detail-alert-header'>
                         <Bell size={20} />
                         <h4>No Recent Alerts</h4>
                       </div>
-                      <div className="trail-detail-alert-content">
-                        <p>No recent alerts for this trail. Check back later or add an alert if you notice something important.</p>
+                      <div className='trail-detail-alert-content'>
+                        <p>
+                          No recent alerts for this trail. Check back later or add an alert if you
+                          notice something important.
+                        </p>
                       </div>
                     </div>
                   )}
 
                   {/* Safety Tips */}
-                  <div className="trail-detail-alert-item">
-                    <div className="trail-detail-alert-header">
+                  <div className='trail-detail-alert-item'>
+                    <div className='trail-detail-alert-header'>
                       <Bell size={20} />
                       <h4>Safety Tips</h4>
                     </div>
-                    <div className="trail-detail-safety-tips">
+                    <div className='trail-detail-safety-tips'>
                       <ul>
                         <li>Always bring enough water and snacks</li>
                         <li>Check weather conditions before starting</li>

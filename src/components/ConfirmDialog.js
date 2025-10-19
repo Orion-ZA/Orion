@@ -6,12 +6,12 @@ const ConfirmDialog = ({
   isOpen,
   onClose,
   onConfirm,
-  title = "Confirm Action",
-  message = "Are you sure you want to proceed?",
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  type = "warning", // warning, danger, info
-  isLoading = false
+  title = 'Confirm Action',
+  message = 'Are you sure you want to proceed?',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  type = 'warning', // warning, danger, info
+  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
@@ -23,7 +23,7 @@ const ConfirmDialog = ({
     onClose();
   };
 
-  const handleBackdropClick = (e) => {
+  const handleBackdropClick = e => {
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -52,39 +52,27 @@ const ConfirmDialog = ({
   };
 
   return (
-    <div className="confirm-dialog-overlay" onClick={handleBackdropClick}>
-      <div className="confirm-dialog">
-        <div className="confirm-dialog-header">
-          <div className="confirm-dialog-icon">
+    <div className='confirm-dialog-overlay' onClick={handleBackdropClick}>
+      <div className='confirm-dialog'>
+        <div className='confirm-dialog-header'>
+          <div className='confirm-dialog-icon'>
             <AlertTriangle size={24} color={getIconColor()} />
           </div>
-          <button 
-            className="confirm-dialog-close" 
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
+          <button className='confirm-dialog-close' onClick={handleCancel} disabled={isLoading}>
             <X size={18} />
           </button>
         </div>
-        
-        <div className="confirm-dialog-content">
-          <h3 className="confirm-dialog-title">{title}</h3>
-          <p className="confirm-dialog-message">{message}</p>
+
+        <div className='confirm-dialog-content'>
+          <h3 className='confirm-dialog-title'>{title}</h3>
+          <p className='confirm-dialog-message'>{message}</p>
         </div>
-        
-        <div className="confirm-dialog-actions">
-          <button
-            className="confirm-btn cancel"
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
+
+        <div className='confirm-dialog-actions'>
+          <button className='confirm-btn cancel' onClick={handleCancel} disabled={isLoading}>
             {cancelText}
           </button>
-          <button
-            className={getConfirmButtonClass()}
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
+          <button className={getConfirmButtonClass()} onClick={handleConfirm} disabled={isLoading}>
             {isLoading ? 'Processing...' : confirmText}
           </button>
         </div>

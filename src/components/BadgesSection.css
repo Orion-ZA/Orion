@@ -133,22 +133,22 @@ html[data-theme='light'] .badge-card:hover {
     margin: 1rem 0;
     padding: 1rem;
   }
-  
+
   .badges-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
-  
+
   .badges-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .badge-card {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .badge-icon-container {
     margin-right: 0;
     margin-bottom: 0.75rem;

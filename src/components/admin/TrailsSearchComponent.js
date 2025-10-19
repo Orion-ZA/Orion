@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Search, X } from 'lucide-react';
 import './TrailsSearchComponent.css';
 
-const TrailsManagementSearch = ({ onSearch, placeholder = "Search trails..." }) => {
+const TrailsManagementSearch = ({ onSearch, placeholder = 'Search trails...' }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = (value) => {
+  const handleSearch = value => {
     setSearchTerm(value);
     onSearch(value);
   };
@@ -16,21 +16,21 @@ const TrailsManagementSearch = ({ onSearch, placeholder = "Search trails..." }) 
   };
 
   return (
-    <div className="trails-management-search">
-      <div className="trails-management-search-input-container">
-        <Search className="trails-management-search-icon" />
+    <div className='trails-management-search'>
+      <div className='trails-management-search-input-container'>
+        <Search className='trails-management-search-icon' />
         <input
-          type="text"
+          type='text'
           value={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={e => handleSearch(e.target.value)}
           placeholder={placeholder}
-          className="trails-management-search-input"
+          className='trails-management-search-input'
         />
         {searchTerm && (
           <button
             onClick={clearSearch}
-            className="trails-management-search-clear-button"
-            title="Clear search"
+            className='trails-management-search-clear-button'
+            title='Clear search'
           >
             <X size={16} />
           </button>

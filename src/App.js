@@ -9,7 +9,6 @@ import { ToastProvider } from './components/ToastContext';
 import { SearchProvider } from './components/SearchContext';
 import faviconAsset from './assets/orion_logo_clear.png';
 
-
 import Login from './pages/Login';
 import Welcome from './pages/Welcome';
 import Signup from './pages/Signup';
@@ -44,14 +43,14 @@ function AppContent() {
     const revealEls = () => Array.from(document.querySelectorAll('.reveal'));
 
     if (!('IntersectionObserver' in window)) {
-      revealEls().forEach((el) => el.classList.add('is-visible'));
+      revealEls().forEach(el => el.classList.add('is-visible'));
       return;
     }
 
     const seen = new WeakSet();
     const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
             io.unobserve(entry.target);
@@ -62,7 +61,7 @@ function AppContent() {
     );
 
     const register = () => {
-      revealEls().forEach((el) => {
+      revealEls().forEach(el => {
         if (!seen.has(el)) {
           seen.add(el);
           io.observe(el);
@@ -96,42 +95,46 @@ function AppContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
   return (
-    <div className="app-shell">
+    <div className='app-shell'>
       {show && <FullScreenLoader />}
       {!hideNavFooter && <Navbar />}
-  <main className="page-fade" key={location.pathname} style={isLanding || isTrails ? { paddingTop: 0 } : undefined}>
+      <main
+        className='page-fade'
+        key={location.pathname}
+        style={isLanding || isTrails ? { paddingTop: 0 } : undefined}
+      >
         <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/create-profile" element={<CreateProfile />} />
+          <Route path='/' element={<Welcome />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/create-profile' element={<CreateProfile />} />
           <Route
-            path="/dashboard"
+            path='/dashboard'
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
           />
-          <Route path="/trails" element={<Trails />} />
-          <Route path="/trails/:trailId" element={<TrailDetail />} />
-          <Route path="/reviews" element={<ReviewsMedia />} />
-          <Route path="/mytrails" element={<MyTrails />} />
-          <Route path="/alerts" element={<AlertsUpdates />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/achievements" element={<AchievementsPage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/help" element={<HelpCenter />} />
+          <Route path='/trails' element={<Trails />} />
+          <Route path='/trails/:trailId' element={<TrailDetail />} />
+          <Route path='/reviews' element={<ReviewsMedia />} />
+          <Route path='/mytrails' element={<MyTrails />} />
+          <Route path='/alerts' element={<AlertsUpdates />} />
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/achievements' element={<AchievementsPage />} />
+          <Route path='/settings' element={<Settings />} />
+          <Route path='/feedback' element={<Feedback />} />
+          <Route path='/help' element={<HelpCenter />} />
           <Route
-            path="/admin"
+            path='/admin'
             element={
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
             }
           />
-          <Route path="*" element={<Welcome />} />
+          <Route path='*' element={<Welcome />} />
         </Routes>
       </main>
       {!hideFooter && <Footer />}

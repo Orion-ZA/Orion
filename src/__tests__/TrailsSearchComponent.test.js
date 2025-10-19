@@ -5,14 +5,14 @@ import TrailsManagementSearch from '../components/admin/TrailsSearchComponent';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  Search: () => <div data-testid="search-icon" />,
-  X: () => <div data-testid="x-icon" />,
+  Search: () => <div data-testid='search-icon' />,
+  X: () => <div data-testid='x-icon' />,
 }));
 
 describe('TrailsManagementSearch', () => {
   const defaultProps = {
     onSearch: jest.fn(),
-    placeholder: 'Search trails...'
+    placeholder: 'Search trails...',
   };
 
   beforeEach(() => {
@@ -24,7 +24,9 @@ describe('TrailsManagementSearch', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
       expect(document.querySelector('.trails-management-search')).toBeInTheDocument();
-      expect(document.querySelector('.trails-management-search-input-container')).toBeInTheDocument();
+      expect(
+        document.querySelector('.trails-management-search-input-container')
+      ).toBeInTheDocument();
       expect(document.querySelector('.trails-management-search-input')).toBeInTheDocument();
     });
 
@@ -63,14 +65,16 @@ describe('TrailsManagementSearch', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
       expect(screen.queryByTestId('x-icon')).not.toBeInTheDocument();
-      expect(document.querySelector('.trails-management-search-clear-button')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('.trails-management-search-clear-button')
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('Search Functionality', () => {
     it('calls onSearch when input value changes', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'test search' } });
@@ -89,7 +93,7 @@ describe('TrailsManagementSearch', () => {
 
     it('calls onSearch with empty string when input is cleared', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -100,10 +104,10 @@ describe('TrailsManagementSearch', () => {
 
     it('calls onSearch multiple times as user types', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
-      
+
       fireEvent.change(input, { target: { value: 't' } });
       fireEvent.change(input, { target: { value: 'te' } });
       fireEvent.change(input, { target: { value: 'tes' } });
@@ -118,7 +122,7 @@ describe('TrailsManagementSearch', () => {
 
     it('handles special characters in search', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'trail@#$%' } });
@@ -130,7 +134,7 @@ describe('TrailsManagementSearch', () => {
     it('handles long search terms', () => {
       const mockOnSearch = jest.fn();
       const longSearchTerm = 'a'.repeat(100);
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: longSearchTerm } });
@@ -159,7 +163,9 @@ describe('TrailsManagementSearch', () => {
       fireEvent.change(input, { target: { value: '' } });
 
       expect(screen.queryByTestId('x-icon')).not.toBeInTheDocument();
-      expect(document.querySelector('.trails-management-search-clear-button')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('.trails-management-search-clear-button')
+      ).not.toBeInTheDocument();
     });
 
     it('clears input when clear button is clicked', () => {
@@ -176,7 +182,7 @@ describe('TrailsManagementSearch', () => {
 
     it('calls onSearch with empty string when clear button is clicked', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'test search' } });
@@ -212,14 +218,14 @@ describe('TrailsManagementSearch', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      
+
       // Initial state
       expect(input).toHaveValue('');
-      
+
       // After typing
       fireEvent.change(input, { target: { value: 'mountain' } });
       expect(input).toHaveValue('mountain');
-      
+
       // After clearing
       const clearButton = document.querySelector('.trails-management-search-clear-button');
       fireEvent.click(clearButton);
@@ -230,7 +236,7 @@ describe('TrailsManagementSearch', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      
+
       fireEvent.change(input, { target: { value: 'a' } });
       fireEvent.change(input, { target: { value: 'ab' } });
       fireEvent.change(input, { target: { value: 'abc' } });
@@ -257,7 +263,7 @@ describe('TrailsManagementSearch', () => {
     });
 
     it('handles empty string placeholder', () => {
-      render(<TrailsManagementSearch onSearch={jest.fn()} placeholder="" />);
+      render(<TrailsManagementSearch onSearch={jest.fn()} placeholder='' />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('placeholder', '');
@@ -273,7 +279,7 @@ describe('TrailsManagementSearch', () => {
 
     it('handles whitespace-only search terms', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: '   ' } });
@@ -284,7 +290,7 @@ describe('TrailsManagementSearch', () => {
 
     it('handles newline characters in search', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'test\nsearch' } });
@@ -336,7 +342,7 @@ describe('TrailsManagementSearch', () => {
 
       const input = screen.getByRole('textbox');
       input.focus();
-      
+
       expect(input).toHaveFocus();
     });
   });
@@ -346,7 +352,9 @@ describe('TrailsManagementSearch', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
       expect(document.querySelector('.trails-management-search')).toBeInTheDocument();
-      expect(document.querySelector('.trails-management-search-input-container')).toBeInTheDocument();
+      expect(
+        document.querySelector('.trails-management-search-input-container')
+      ).toBeInTheDocument();
       expect(document.querySelector('.trails-management-search-input')).toBeInTheDocument();
       expect(screen.getByTestId('search-icon')).toBeInTheDocument();
     });
@@ -363,14 +371,16 @@ describe('TrailsManagementSearch', () => {
     it('does not apply clear button CSS class when hidden', () => {
       render(<TrailsManagementSearch {...defaultProps} />);
 
-      expect(document.querySelector('.trails-management-search-clear-button')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('.trails-management-search-clear-button')
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('Component Integration', () => {
     it('works with different onSearch implementations', () => {
-      const consoleLogSearch = jest.fn((term) => console.log('Searching for:', term));
-      render(<TrailsManagementSearch onSearch={consoleLogSearch} placeholder="Search trails..." />);
+      const consoleLogSearch = jest.fn(term => console.log('Searching for:', term));
+      render(<TrailsManagementSearch onSearch={consoleLogSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       fireEvent.change(input, { target: { value: 'integration test' } });
@@ -397,7 +407,9 @@ describe('TrailsManagementSearch', () => {
       expect(input).toHaveAttribute('placeholder', 'Search trails...');
 
       // Change placeholder prop
-      rerender(<TrailsManagementSearch onSearch={defaultProps.onSearch} placeholder="New placeholder" />);
+      rerender(
+        <TrailsManagementSearch onSearch={defaultProps.onSearch} placeholder='New placeholder' />
+      );
 
       expect(input).toHaveAttribute('placeholder', 'New placeholder');
     });
@@ -406,10 +418,10 @@ describe('TrailsManagementSearch', () => {
   describe('Performance', () => {
     it('handles rapid input changes efficiently', () => {
       const mockOnSearch = jest.fn();
-      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
-      
+
       // Simulate rapid typing
       for (let i = 0; i < 10; i++) {
         fireEvent.change(input, { target: { value: `test${i}` } });
@@ -421,10 +433,12 @@ describe('TrailsManagementSearch', () => {
 
     it('does not cause unnecessary re-renders', () => {
       const mockOnSearch = jest.fn();
-      const { rerender } = render(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      const { rerender } = render(
+        <TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />
+      );
 
       // Re-render with same props should not cause issues
-      rerender(<TrailsManagementSearch onSearch={mockOnSearch} placeholder="Search trails..." />);
+      rerender(<TrailsManagementSearch onSearch={mockOnSearch} placeholder='Search trails...' />);
 
       const input = screen.getByRole('textbox');
       expect(input).toBeInTheDocument();

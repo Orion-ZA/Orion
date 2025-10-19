@@ -12,9 +12,7 @@ const ReviewsCarousel = ({ reviews, trailName }) => {
     if (!reviews || reviews.length <= 1 || !isAutoScrolling) return;
 
     intervalRef.current = setInterval(() => {
-      setCurrentReviewIndex((prevIndex) => 
-        (prevIndex + 1) % reviews.length
-      );
+      setCurrentReviewIndex(prevIndex => (prevIndex + 1) % reviews.length);
     }, autoScrollDelay);
 
     return () => {
@@ -38,27 +36,23 @@ const ReviewsCarousel = ({ reviews, trailName }) => {
 
   // Manual navigation
   const goToPrevious = () => {
-    setCurrentReviewIndex((prevIndex) => 
-      prevIndex === 0 ? reviews.length - 1 : prevIndex - 1
-    );
+    setCurrentReviewIndex(prevIndex => (prevIndex === 0 ? reviews.length - 1 : prevIndex - 1));
   };
 
   const goToNext = () => {
-    setCurrentReviewIndex((prevIndex) => 
-      (prevIndex + 1) % reviews.length
-    );
+    setCurrentReviewIndex(prevIndex => (prevIndex + 1) % reviews.length);
   };
 
   // Handle dot click
-  const goToReview = (index) => {
+  const goToReview = index => {
     setCurrentReviewIndex(index);
   };
 
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="reviews-carousel">
+      <div className='reviews-carousel'>
         <h5>Recent Reviews</h5>
-        <div className="no-reviews">
+        <div className='no-reviews'>
           <span>No reviews available</span>
         </div>
       </div>
@@ -68,37 +62,38 @@ const ReviewsCarousel = ({ reviews, trailName }) => {
   const currentReview = reviews[currentReviewIndex];
 
   return (
-    <div className="reviews-carousel">
+    <div className='reviews-carousel'>
       <h5>Recent Reviews</h5>
-      
-      <div 
-        className="reviews-carousel-container"
+
+      <div
+        className='reviews-carousel-container'
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Review Display */}
-        <div className="review-display">
-          <div className="review-content">
-            <div className="review-header">
-              <span className="review-author">{currentReview.userName || "Anonymous"}</span>
+        <div className='review-display'>
+          <div className='review-content'>
+            <div className='review-header'>
+              <span className='review-author'>{currentReview.userName || 'Anonymous'}</span>
               {currentReview.rating && (
-                <div className="review-stars">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star 
-                      key={star} 
-                      size={14} 
-                      fill={star <= currentReview.rating ? "currentColor" : "none"} 
-                      color={star <= currentReview.rating ? "#fbbf24" : "#6b7280"}
+                <div className='review-stars'>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <Star
+                      key={star}
+                      size={14}
+                      fill={star <= currentReview.rating ? 'currentColor' : 'none'}
+                      color={star <= currentReview.rating ? '#fbbf24' : '#6b7280'}
                     />
                   ))}
                 </div>
               )}
             </div>
-            <p className={`review-text ${!currentReview.message || currentReview.message.length === 0 ? 'no-text' : ''}`}>
-              {currentReview.message && currentReview.message.length > 0 
-                ? currentReview.message 
-                : "No review text available"
-              }
+            <p
+              className={`review-text ${!currentReview.message || currentReview.message.length === 0 ? 'no-text' : ''}`}
+            >
+              {currentReview.message && currentReview.message.length > 0
+                ? currentReview.message
+                : 'No review text available'}
             </p>
           </div>
         </div>
@@ -107,26 +102,26 @@ const ReviewsCarousel = ({ reviews, trailName }) => {
         {reviews.length > 1 && (
           <>
             {/* Arrow Navigation */}
-            <div className="review-navigation">
-              <button 
-                className="review-nav-btn review-nav-prev"
+            <div className='review-navigation'>
+              <button
+                className='review-nav-btn review-nav-prev'
                 onClick={goToPrevious}
-                aria-label="Previous review"
+                aria-label='Previous review'
               >
                 <ChevronLeft size={16} />
               </button>
-              
-              <button 
-                className="review-nav-btn review-nav-next"
+
+              <button
+                className='review-nav-btn review-nav-next'
                 onClick={goToNext}
-                aria-label="Next review"
+                aria-label='Next review'
               >
                 <ChevronRight size={16} />
               </button>
             </div>
 
             {/* Dot Indicators */}
-            <div className="review-dots">
+            <div className='review-dots'>
               {reviews.map((_, index) => (
                 <button
                   key={index}
@@ -138,7 +133,7 @@ const ReviewsCarousel = ({ reviews, trailName }) => {
             </div>
 
             {/* Review Counter */}
-            <div className="review-counter">
+            <div className='review-counter'>
               {currentReviewIndex + 1} of {reviews.length}
             </div>
           </>

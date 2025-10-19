@@ -163,7 +163,9 @@
   font-size: 14px;
   color: var(--text);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .calendar-day:hover {
@@ -190,7 +192,9 @@
   padding: 16px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
 .stat-card:hover {
@@ -287,7 +291,7 @@
 
 .activity-icon {
   padding: 8px;
-  background: #05240D;
+  background: #05240d;
   border-radius: 8px;
   color: white;
 }
@@ -521,58 +525,58 @@
   .mobile-header {
     display: none;
   }
-  
+
   .desktop-header {
     display: flex;
   }
-  
+
   .dashboard-content {
     padding: 32px;
   }
-  
+
   .mini-calendar {
     display: none;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
   }
-  
+
   .stat-card {
     padding: 24px;
   }
-  
+
   .stat-number {
     font-size: 48px;
   }
-  
+
   .stat-description {
     font-size: 14px;
   }
-  
+
   .activity-summary {
     display: none;
   }
-  
+
   .favourites-section {
     border-radius: 24px;
     padding: 32px;
   }
-  
+
   .favourites-title {
     font-size: 32px;
   }
-  
+
   .favourite-item {
     padding: 16px;
   }
-  
+
   .favourite-trail-icon {
     width: 40px;
     height: 40px;
   }
-  
+
   .bottom-nav {
     display: none;
   }
@@ -583,7 +587,7 @@
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .dashboard-content {
     padding: 24px;
   }
@@ -603,7 +607,9 @@
   padding: 16px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
 .stat-card:hover {
@@ -668,7 +674,9 @@
   padding: 16px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 .stat-card:hover {
   box-shadow: var(--shadow-hover);
@@ -685,14 +693,15 @@
   background: white;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 /* Challenges Page */
-.challenges-title, .achievements-title {
+.challenges-title,
+.achievements-title {
   padding: 0 20px;
 }
 
@@ -707,12 +716,12 @@
   background: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 .challenge-card.active {
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #4caf50;
 }
 
 .progress-bar {
@@ -725,7 +734,7 @@
 
 .progress {
   height: 100%;
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .achievements-grid {
@@ -739,7 +748,7 @@
   background: white;
   border-radius: 8px;
   padding: 10px 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -764,7 +773,7 @@
   margin: 20px;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .account-detail {
@@ -799,7 +808,7 @@
   background: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
@@ -820,14 +829,15 @@
   background: white;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 /* Challenges Page */
-.challenges-title, .achievements-title {
+.challenges-title,
+.achievements-title {
   padding: 0 20px;
 }
 
@@ -842,12 +852,12 @@
   background: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 .challenge-card.active {
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #4caf50;
 }
 
 .progress-bar {
@@ -860,7 +870,7 @@
 
 .progress {
   height: 100%;
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .achievements-grid {
@@ -874,7 +884,7 @@
   background: white;
   border-radius: 8px;
   padding: 10px 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -899,7 +909,7 @@
   margin: 20px;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .account-detail {
@@ -967,7 +977,7 @@
 }
 
 .nav-tab.active {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-icon {

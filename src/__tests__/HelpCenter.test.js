@@ -7,7 +7,7 @@ import { useToast } from '../components/ToastContext';
 
 // Mock ToastContext
 jest.mock('../components/ToastContext', () => ({
-  useToast: jest.fn()
+  useToast: jest.fn(),
 }));
 
 // Mock react-router-dom
@@ -16,13 +16,17 @@ jest.mock('react-router-dom', () => ({
     <a href={to} {...props}>
       {children}
     </a>
-  )
+  ),
 }));
 
 // Mock SettingsIcon component
 jest.mock('../components/SettingsIcon', () => {
   return function MockSettingsIcon({ size }) {
-    return <div data-testid="settings-icon" data-size={size}>Settings Icon</div>;
+    return (
+      <div data-testid='settings-icon' data-size={size}>
+        Settings Icon
+      </div>
+    );
   };
 });
 
@@ -39,12 +43,14 @@ describe('HelpCenterPage Component', () => {
       render(<HelpCenterPage />);
 
       expect(screen.getByText('How can we help you?')).toBeInTheDocument();
-      expect(screen.getByText('Find answers to common questions or contact our support team')).toBeInTheDocument();
+      expect(
+        screen.getByText('Find answers to common questions or contact our support team')
+      ).toBeInTheDocument();
     });
 
     it('renders search functionality', () => {
       render(<HelpCenterPage />);
-      
+
       expect(screen.getByPlaceholderText('Search for answers...')).toBeInTheDocument();
       // The search input should be present
       expect(screen.getByDisplayValue('')).toBeInTheDocument();
@@ -109,7 +115,9 @@ describe('HelpCenterPage Component', () => {
       await userEvent.click(technicalTab);
 
       expect(technicalTab.closest('button')).toHaveClass('active');
-      expect(screen.getByText('The app is crashing on my device. What should I do?')).toBeInTheDocument();
+      expect(
+        screen.getByText('The app is crashing on my device. What should I do?')
+      ).toBeInTheDocument();
     });
   });
 
@@ -120,21 +128,27 @@ describe('HelpCenterPage Component', () => {
       const firstQuestion = screen.getByText('How do I create an account?');
       await userEvent.click(firstQuestion);
 
-      expect(screen.getByText(/To create an account, click on the "Log in" button/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/To create an account, click on the "Log in" button/)
+      ).toBeInTheDocument();
     });
 
     it('collapses FAQ items when clicked again', async () => {
       render(<HelpCenterPage />);
 
       const firstQuestion = screen.getByText('How do I create an account?');
-      
+
       // Click to expand
       await userEvent.click(firstQuestion);
-      expect(screen.getByText(/To create an account, click on the "Log in" button/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/To create an account, click on the "Log in" button/)
+      ).toBeInTheDocument();
 
       // Click to collapse
       await userEvent.click(firstQuestion);
-      expect(screen.queryByText(/To create an account, click on the "Log in" button/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/To create an account, click on the "Log in" button/)
+      ).not.toBeInTheDocument();
     });
 
     it('shows chevron up when expanded', async () => {
@@ -166,7 +180,7 @@ describe('HelpCenterPage Component', () => {
       await waitFor(() => {
         expect(screen.getByText('How do I create an account?')).toBeInTheDocument();
       });
-      
+
       // The other account-related questions should also be visible
       expect(screen.getByText('How do I reset my password?')).toBeInTheDocument();
       expect(screen.getByText('Can I change my username?')).toBeInTheDocument();
@@ -183,7 +197,7 @@ describe('HelpCenterPage Component', () => {
       await waitFor(() => {
         expect(screen.getByText('How do I create an account?')).toBeInTheDocument();
       });
-      
+
       expect(screen.getByText('How do I reset my password?')).toBeInTheDocument();
     });
 
@@ -195,10 +209,12 @@ describe('HelpCenterPage Component', () => {
 
       // Wait for the no results message to appear
       await waitFor(() => {
-        expect(screen.getByText('No results found for "nonexistent" in this category.')).toBeInTheDocument();
+        expect(
+          screen.getByText('No results found for "nonexistent" in this category.')
+        ).toBeInTheDocument();
       });
-      
-      expect(screen.getByText('Clear search')).toBeInTheDocument(); 
+
+      expect(screen.getByText('Clear search')).toBeInTheDocument();
     });
 
     it('clears search when clear button is clicked', async () => {
@@ -230,7 +246,7 @@ describe('HelpCenterPage Component', () => {
       await waitFor(() => {
         expect(screen.getByText('How do I create an account?')).toBeInTheDocument();
       });
-      
+
       expect(screen.getByText('How do I reset my password?')).toBeInTheDocument();
     });
   });
@@ -280,7 +296,9 @@ describe('HelpCenterPage Component', () => {
       await userEvent.type(messageInput, 'Test Message');
       await userEvent.click(submitButton);
 
-      expect(mockShow).toHaveBeenCalledWith('Your message has been sent to our support team!', { type: 'success' });
+      expect(mockShow).toHaveBeenCalledWith('Your message has been sent to our support team!', {
+        type: 'success',
+      });
     });
 
     it('resets form after successful submission', async () => {
@@ -311,7 +329,9 @@ describe('HelpCenterPage Component', () => {
       await userEvent.click(submitButton);
 
       // Form should show validation error for required fields
-      expect(mockShow).toHaveBeenCalledWith('Please fill in all required fields.', { type: 'error' });
+      expect(mockShow).toHaveBeenCalledWith('Please fill in all required fields.', {
+        type: 'error',
+      });
     });
   });
 
@@ -344,7 +364,10 @@ describe('HelpCenterPage Component', () => {
       render(<HelpCenterPage />);
 
       const knowledgeBaseLink = screen.getByText('Explore guides');
-      expect(knowledgeBaseLink.closest('a')).toHaveAttribute('href', '//www.youtube.com/watch?v=Aq5WXmQQooo');
+      expect(knowledgeBaseLink.closest('a')).toHaveAttribute(
+        'href',
+        '//www.youtube.com/watch?v=Aq5WXmQQooo'
+      );
     });
 
     it('scrolls to contact section when email support is clicked', async () => {
@@ -378,7 +401,9 @@ describe('HelpCenterPage Component', () => {
 
       expect(screen.getByText('How do I save a trail to my wishlist?')).toBeInTheDocument();
       expect(screen.getByText('Can I download maps for offline use?')).toBeInTheDocument();
-      expect(screen.getByText('How accurate are the trail difficulty ratings?')).toBeInTheDocument();
+      expect(
+        screen.getByText('How accurate are the trail difficulty ratings?')
+      ).toBeInTheDocument();
     });
 
     it('displays all account questions', async () => {
@@ -398,7 +423,9 @@ describe('HelpCenterPage Component', () => {
       const technicalTab = screen.getByText('Technical Support');
       await userEvent.click(technicalTab);
 
-      expect(screen.getByText('The app is crashing on my device. What should I do?')).toBeInTheDocument();
+      expect(
+        screen.getByText('The app is crashing on my device. What should I do?')
+      ).toBeInTheDocument();
       expect(screen.getByText('How do I enable notifications?')).toBeInTheDocument();
       expect(screen.getByText('Why is my location not showing accurately?')).toBeInTheDocument();
     });
@@ -451,9 +478,14 @@ describe('HelpCenterPage Component', () => {
       await userEvent.type(searchInput, '!@#$%^&*()');
 
       // Wait for the no results message to appear
-      await waitFor(() => {
-        expect(screen.getByText('No results found for "!@#$%^&*()" in this category.')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText('No results found for "!@#$%^&*()" in this category.')
+          ).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     });
 
     it('handles very long search query', async () => {
@@ -464,9 +496,14 @@ describe('HelpCenterPage Component', () => {
       await userEvent.type(searchInput, longQuery);
 
       // Wait for the no results message to appear
-      await waitFor(() => {
-        expect(screen.getByText(`No results found for "${longQuery}" in this category.`)).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(`No results found for "${longQuery}" in this category.`)
+          ).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     });
 
     it('maintains search state when switching categories', async () => {
@@ -502,20 +539,31 @@ describe('HelpCenterPage Component', () => {
       // Test this by searching for something that won't match
       const searchInput = screen.getByPlaceholderText('Search for answers...');
       fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
-      
+
       // Wait for the no results message and clear button to appear
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Clear search' })).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'Clear search' })).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     });
 
     it('has proper heading structure', () => {
       render(<HelpCenterPage />);
 
-      expect(screen.getByRole('heading', { level: 1, name: 'How can we help you?' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 2, name: 'Get Help Quickly' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 2, name: 'Frequently Asked Questions' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 2, name: 'Still need help?' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 1, name: 'How can we help you?' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Get Help Quickly' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Frequently Asked Questions' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Still need help?' })
+      ).toBeInTheDocument();
     });
   });
 });

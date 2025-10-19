@@ -62,7 +62,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('Loading feedback...')).toBeInTheDocument();
   });
 
@@ -73,7 +73,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('User Feedback')).toBeInTheDocument();
   });
 
@@ -84,7 +84,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('All')).toBeInTheDocument();
     expect(screen.getByText('Praise')).toBeInTheDocument();
     expect(screen.getByText('Bug')).toBeInTheDocument();
@@ -99,7 +99,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Rating')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('Great app!')).toBeInTheDocument();
     expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
     expect(screen.getByText('Add more trail filters')).toBeInTheDocument();
@@ -126,10 +126,10 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     // Click on "Bug" filter
     fireEvent.click(screen.getByText('Bug'));
-    
+
     // Should only show bug feedback
     expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
     expect(screen.queryByText('Great app!')).not.toBeInTheDocument();
@@ -144,9 +144,9 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     fireEvent.click(screen.getByText('Praise'));
-    
+
     expect(screen.getByText('Great app!')).toBeInTheDocument();
     expect(screen.queryByText('Found a bug in the map')).not.toBeInTheDocument();
     expect(screen.queryByText('Add more trail filters')).not.toBeInTheDocument();
@@ -160,9 +160,9 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     fireEvent.click(screen.getByText('Suggestion'));
-    
+
     expect(screen.getByText('Add more trail filters')).toBeInTheDocument();
     expect(screen.queryByText('Great app!')).not.toBeInTheDocument();
     expect(screen.queryByText('Found a bug in the map')).not.toBeInTheDocument();
@@ -176,9 +176,9 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     fireEvent.click(screen.getByText('General'));
-    
+
     expect(screen.getByText('General feedback')).toBeInTheDocument();
     expect(screen.queryByText('Great app!')).not.toBeInTheDocument();
     expect(screen.queryByText('Found a bug in the map')).not.toBeInTheDocument();
@@ -192,7 +192,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('4')).toBeInTheDocument();
@@ -206,7 +206,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('user1@example.com')).toBeInTheDocument();
     expect(screen.getByText('user3@example.com')).toBeInTheDocument();
     expect(screen.getByText('user4@example.com')).toBeInTheDocument();
@@ -219,7 +219,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('hidden')).toBeInTheDocument();
   });
 
@@ -230,7 +230,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     // Verify that feedback messages are still displayed correctly
     expect(screen.getByText('Great app!')).toBeInTheDocument();
     expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
@@ -245,17 +245,17 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     const allButton = screen.getByText('All');
     const bugButton = screen.getByText('Bug');
-    
+
     // Initially "All" should be active
     expect(allButton).toHaveClass('active');
     expect(bugButton).not.toHaveClass('active');
-    
+
     // Click on "Bug" filter
     fireEvent.click(bugButton);
-    
+
     expect(bugButton).toHaveClass('active');
     expect(allButton).not.toHaveClass('active');
   });
@@ -267,19 +267,19 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     const panel = screen.getByText('User Feedback').closest('.feedback-panel');
     expect(panel).toBeInTheDocument();
-    
+
     const title = screen.getByText('User Feedback');
     expect(title).toHaveClass('feedback-panel-title');
-    
+
     const filterButtons = panel.querySelector('.feedback-filter-buttons');
     expect(filterButtons).toBeInTheDocument();
-    
+
     const tableContainer = panel.querySelector('.feedback-table-container');
     expect(tableContainer).toBeInTheDocument();
-    
+
     const table = panel.querySelector('.feedback-table');
     expect(table).toBeInTheDocument();
   });
@@ -291,10 +291,10 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('User Feedback')).toBeInTheDocument();
     expect(screen.getByText('All')).toBeInTheDocument();
-    
+
     // Table should still be rendered but with no data rows
     const tableBody = screen.getByRole('table').querySelector('tbody');
     expect(tableBody).toBeInTheDocument();
@@ -318,7 +318,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('Feedback without date')).toBeInTheDocument();
     // Should handle missing date gracefully
   });
@@ -339,7 +339,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     expect(screen.getByText('Feedback without rating')).toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument(); // Should show dash for missing rating
   });
@@ -351,16 +351,16 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     // Start with all feedback visible
     expect(screen.getByText('Great app!')).toBeInTheDocument();
     expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
-    
+
     // Switch to bug filter
     fireEvent.click(screen.getByText('Bug'));
     expect(screen.getByText('Found a bug in the map')).toBeInTheDocument();
     expect(screen.queryByText('Great app!')).not.toBeInTheDocument();
-    
+
     // Switch back to all
     fireEvent.click(screen.getByText('All'));
     expect(screen.getByText('Great app!')).toBeInTheDocument();
@@ -374,11 +374,11 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     const tableRows = screen.getAllByRole('row');
     // Should have header row + 4 data rows
     expect(tableRows).toHaveLength(5);
-    
+
     // Check that data rows have correct class
     const dataRows = tableRows.slice(1); // Skip header row
     dataRows.forEach(row => {
@@ -393,7 +393,7 @@ describe('FeedbackPanel', () => {
     });
 
     render(<FeedbackPanel />);
-    
+
     const cells = screen.getAllByRole('cell');
     // Should have 3 cells per row (Message, Rating, Email) - no Date column
     expect(cells).toHaveLength(3);

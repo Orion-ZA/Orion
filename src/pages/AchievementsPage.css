@@ -277,8 +277,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .retry-count {
@@ -330,34 +334,34 @@ html[data-theme='light'] .error-content {
   .achievements-page {
     padding: 1rem;
   }
-  
+
   .achievements-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
-  
+
   .achievements-header h1 {
     font-size: 2rem;
     text-align: center;
   }
-  
+
   .achievements-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .badges-grid-full {
     grid-template-columns: 1fr;
   }
-  
+
   .achievement-card {
     padding: 1.5rem;
   }
-  
+
   .badge-icon-container-large {
     padding: 1rem;
   }
-  
+
   .badge-icon-large {
     width: 36px;
     height: 36px;

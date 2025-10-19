@@ -8,25 +8,25 @@ describe('AlertsPopup', () => {
     {
       id: '1',
       type: 'Warning',
-      message: 'Trail is closed due to maintenance'
+      message: 'Trail is closed due to maintenance',
     },
     {
       id: '2',
       type: 'Info',
-      message: 'Weather conditions may affect visibility'
+      message: 'Weather conditions may affect visibility',
     },
     {
       id: '3',
       type: 'Alert',
-      message: 'Heavy rain expected in the area'
-    }
+      message: 'Heavy rain expected in the area',
+    },
   ];
 
   const defaultProps = {
     isVisible: true,
     position: { x: 100, y: 200 },
     alerts: mockAlerts,
-    onMouseLeave: jest.fn()
+    onMouseLeave: jest.fn(),
   };
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('AlertsPopup', () => {
   describe('Component Visibility', () => {
     it('should render when isVisible is true', () => {
       render(<AlertsPopup {...defaultProps} />);
-      
+
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('Trail is closed due to maintenance')).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('AlertsPopup', () => {
 
     it('should not render when isVisible is false', () => {
       render(<AlertsPopup {...defaultProps} isVisible={false} />);
-      
+
       expect(screen.queryByText('Trail Alerts')).not.toBeInTheDocument();
       expect(screen.queryByText('[Warning]')).not.toBeInTheDocument();
     });
@@ -52,13 +52,13 @@ describe('AlertsPopup', () => {
     it('should not render when isVisible is undefined', () => {
       const { isVisible, ...propsWithoutVisibility } = defaultProps;
       render(<AlertsPopup {...propsWithoutVisibility} />);
-      
+
       expect(screen.queryByText('Trail Alerts')).not.toBeInTheDocument();
     });
 
     it('should not render when isVisible is null', () => {
       render(<AlertsPopup {...defaultProps} isVisible={null} />);
-      
+
       expect(screen.queryByText('Trail Alerts')).not.toBeInTheDocument();
     });
   });
@@ -67,57 +67,57 @@ describe('AlertsPopup', () => {
     it('should apply correct positioning styles', () => {
       const position = { x: 150, y: 300 };
       render(<AlertsPopup {...defaultProps} position={position} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         position: 'fixed',
         left: '150px',
         top: '300px',
-        zIndex: '75'
+        zIndex: '75',
       });
     });
 
     it('should handle zero coordinates', () => {
       const position = { x: 0, y: 0 };
       render(<AlertsPopup {...defaultProps} position={position} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '0px',
-        top: '0px'
+        top: '0px',
       });
     });
 
     it('should handle negative coordinates', () => {
       const position = { x: -50, y: -100 };
       render(<AlertsPopup {...defaultProps} position={position} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '-50px',
-        top: '-100px'
+        top: '-100px',
       });
     });
 
     it('should handle decimal coordinates', () => {
-      const position = { x: 123.45, y: 678.90 };
+      const position = { x: 123.45, y: 678.9 };
       render(<AlertsPopup {...defaultProps} position={position} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '123.45px',
-        top: '678.9px' // Browser may round trailing zeros
+        top: '678.9px', // Browser may round trailing zeros
       });
     });
 
     it('should have correct CSS classes', () => {
       render(<AlertsPopup {...defaultProps} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       const content = popup.querySelector('.orion-alerts-popup-content');
       const header = popup.querySelector('.orion-alerts-popup-header');
       const body = popup.querySelector('.orion-alerts-popup-body');
-      
+
       expect(popup).toHaveClass('orion-alerts-popup');
       expect(content).toHaveClass('orion-alerts-popup-content');
       expect(header).toHaveClass('orion-alerts-popup-header');
@@ -128,30 +128,30 @@ describe('AlertsPopup', () => {
   describe('Alerts Rendering', () => {
     it('should render all alerts with correct content', () => {
       render(<AlertsPopup {...defaultProps} />);
-      
+
       // Check header
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
-      
+
       // Check all alert types and messages
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('Trail is closed due to maintenance')).toBeInTheDocument();
-      
+
       expect(screen.getByText('[Info]')).toBeInTheDocument();
       expect(screen.getByText('Weather conditions may affect visibility')).toBeInTheDocument();
-      
+
       expect(screen.getByText('[Alert]')).toBeInTheDocument();
       expect(screen.getByText('Heavy rain expected in the area')).toBeInTheDocument();
     });
 
     it('should render alerts with correct CSS classes', () => {
       render(<AlertsPopup {...defaultProps} />);
-      
+
       const alertItems = screen.getAllByText(/\[.*\]/);
       alertItems.forEach(item => {
         expect(item.closest('.orion-alerts-popup-item')).toHaveClass('orion-alerts-popup-item');
         expect(item).toHaveClass('orion-alerts-popup-type');
       });
-      
+
       const messages = screen.getAllByText(/Trail is closed|Weather conditions|Heavy rain/);
       messages.forEach(message => {
         expect(message).toHaveClass('orion-alerts-popup-message');
@@ -160,7 +160,7 @@ describe('AlertsPopup', () => {
 
     it('should handle empty alerts array', () => {
       render(<AlertsPopup {...defaultProps} alerts={[]} />);
-      
+
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
       expect(screen.queryByText(/\[.*\]/)).not.toBeInTheDocument();
     });
@@ -168,7 +168,7 @@ describe('AlertsPopup', () => {
     it('should handle single alert', () => {
       const singleAlert = [mockAlerts[0]];
       render(<AlertsPopup {...defaultProps} alerts={singleAlert} />);
-      
+
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('Trail is closed due to maintenance')).toBeInTheDocument();
       expect(screen.queryByText('[Info]')).not.toBeInTheDocument();
@@ -177,10 +177,10 @@ describe('AlertsPopup', () => {
     it('should handle alerts without id (fallback to index)', () => {
       const alertsWithoutId = [
         { type: 'Warning', message: 'No ID alert 1' },
-        { type: 'Info', message: 'No ID alert 2' }
+        { type: 'Info', message: 'No ID alert 2' },
       ];
       render(<AlertsPopup {...defaultProps} alerts={alertsWithoutId} />);
-      
+
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('No ID alert 1')).toBeInTheDocument();
       expect(screen.getByText('[Info]')).toBeInTheDocument();
@@ -191,10 +191,10 @@ describe('AlertsPopup', () => {
       const mixedAlerts = [
         { id: '1', type: 'Warning', message: 'Has ID' },
         { id: '2', type: 'Info', message: 'No ID' },
-        { id: '3', type: 'Alert', message: 'Has ID again' }
+        { id: '3', type: 'Alert', message: 'Has ID again' },
       ];
       render(<AlertsPopup {...defaultProps} alerts={mixedAlerts} />);
-      
+
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('Has ID')).toBeInTheDocument();
       expect(screen.getByText('[Info]')).toBeInTheDocument();
@@ -207,10 +207,10 @@ describe('AlertsPopup', () => {
       const alertsWithEmptyType = [
         { id: '1', type: '', message: 'Empty type' },
         { id: '2', type: undefined, message: 'Undefined type' },
-        { id: '3', message: 'No type property' }
+        { id: '3', message: 'No type property' },
       ];
       render(<AlertsPopup {...defaultProps} alerts={alertsWithEmptyType} />);
-      
+
       expect(screen.getAllByText('[]')).toHaveLength(3);
       expect(screen.getByText('Empty type')).toBeInTheDocument();
       expect(screen.getByText('Undefined type')).toBeInTheDocument();
@@ -221,20 +221,21 @@ describe('AlertsPopup', () => {
       const alertsWithEmptyMessage = [
         { id: '1', type: 'Warning', message: '' },
         { id: '2', type: 'Info', message: undefined },
-        { id: '3', type: 'Alert' }
+        { id: '3', type: 'Alert' },
       ];
       render(<AlertsPopup {...defaultProps} alerts={alertsWithEmptyMessage} />);
-      
+
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText('[Info]')).toBeInTheDocument();
       expect(screen.getByText('[Alert]')).toBeInTheDocument();
     });
 
     it('should handle very long alert messages', () => {
-      const longMessage = 'This is a very long alert message that might wrap to multiple lines and should be handled gracefully by the component without breaking the layout or causing any rendering issues.';
+      const longMessage =
+        'This is a very long alert message that might wrap to multiple lines and should be handled gracefully by the component without breaking the layout or causing any rendering issues.';
       const longAlert = [{ id: '1', type: 'Warning', message: longMessage }];
       render(<AlertsPopup {...defaultProps} alerts={longAlert} />);
-      
+
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.getByText(longMessage)).toBeInTheDocument();
     });
@@ -243,10 +244,10 @@ describe('AlertsPopup', () => {
       const specialAlerts = [
         { id: '1', type: 'Warning!', message: 'Alert with special chars: @#$%^&*()' },
         { id: '2', type: 'Info', message: 'Unicode: 🚨⚠️📢' },
-        { id: '3', type: 'Alert', message: 'HTML: <script>alert("test")</script>' }
+        { id: '3', type: 'Alert', message: 'HTML: <script>alert("test")</script>' },
       ];
       render(<AlertsPopup {...defaultProps} alerts={specialAlerts} />);
-      
+
       expect(screen.getByText('[Warning!]')).toBeInTheDocument();
       expect(screen.getByText('Alert with special chars: @#$%^&*()')).toBeInTheDocument();
       expect(screen.getByText('[Info]')).toBeInTheDocument();
@@ -260,21 +261,21 @@ describe('AlertsPopup', () => {
     it('should call onMouseLeave when mouse leaves the popup', () => {
       const mockOnMouseLeave = jest.fn();
       render(<AlertsPopup {...defaultProps} onMouseLeave={mockOnMouseLeave} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       fireEvent.mouseLeave(popup);
-      
+
       expect(mockOnMouseLeave).toHaveBeenCalledTimes(1);
     });
 
     it('should handle mouse events on child elements', () => {
       const mockOnMouseLeave = jest.fn();
       render(<AlertsPopup {...defaultProps} onMouseLeave={mockOnMouseLeave} />);
-      
+
       // Test that the component renders without errors when mouse events occur
       const alertItem = screen.getByText('[Warning]').closest('.orion-alerts-popup-item');
       expect(alertItem).toBeInTheDocument();
-      
+
       // The component should handle mouse events gracefully
       expect(mockOnMouseLeave).not.toHaveBeenCalled();
     });
@@ -282,14 +283,14 @@ describe('AlertsPopup', () => {
     it('should handle undefined onMouseLeave prop', () => {
       const { onMouseLeave, ...propsWithoutHandler } = defaultProps;
       render(<AlertsPopup {...propsWithoutHandler} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(() => fireEvent.mouseLeave(popup)).not.toThrow();
     });
 
     it('should handle null onMouseLeave prop', () => {
       render(<AlertsPopup {...defaultProps} onMouseLeave={null} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(() => fireEvent.mouseLeave(popup)).not.toThrow();
     });
@@ -312,8 +313,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Timed alert',
           isTimed: true,
-          expiresAt: futureDate
-        }
+          expiresAt: futureDate,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={timedAlerts} />);
@@ -328,8 +329,8 @@ describe('AlertsPopup', () => {
           id: 'permanent1',
           type: 'Info',
           message: 'Permanent alert',
-          isTimed: false
-        }
+          isTimed: false,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={permanentAlerts} />);
@@ -347,15 +348,15 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Timed alert',
           isTimed: true,
-          expiresAt: futureDate
-        }
+          expiresAt: futureDate,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={timedAlerts} />);
 
       // Check that the timer is displayed (it should show the countdown)
       expect(screen.getByText('Timed')).toBeInTheDocument();
-      
+
       // The timer should be present in the DOM
       const timerElement = screen.queryByText(/h.*m.*s/);
       expect(timerElement).toBeInTheDocument();
@@ -369,8 +370,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Expired alert',
           isTimed: true,
-          expiresAt: pastDate
-        }
+          expiresAt: pastDate,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={expiredAlerts} />);
@@ -382,7 +383,7 @@ describe('AlertsPopup', () => {
 
     it('should handle Firestore timestamp objects', () => {
       const mockFirestoreTimestamp = {
-        toDate: () => new Date(Date.now() + 2 * 60 * 60 * 1000)
+        toDate: () => new Date(Date.now() + 2 * 60 * 60 * 1000),
       };
 
       const timedAlerts = [
@@ -391,8 +392,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Firestore timed alert',
           isTimed: true,
-          expiresAt: mockFirestoreTimestamp
-        }
+          expiresAt: mockFirestoreTimestamp,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={timedAlerts} />);
@@ -408,8 +409,8 @@ describe('AlertsPopup', () => {
           type: 'Info',
           message: 'Primary message',
           comment: 'Additional comment',
-          isTimed: false
-        }
+          isTimed: false,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={alertsWithBoth} />);
@@ -425,8 +426,8 @@ describe('AlertsPopup', () => {
           id: 'comment1',
           type: 'Info',
           comment: 'Comment only',
-          isTimed: false
-        }
+          isTimed: false,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={alertsWithCommentOnly} />);
@@ -439,8 +440,8 @@ describe('AlertsPopup', () => {
         {
           id: 'nomessage1',
           type: 'Info',
-          isTimed: false
-        }
+          isTimed: false,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={alertsWithNoMessage} />);
@@ -456,14 +457,14 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Timed alert',
           isTimed: true,
-          expiresAt: futureDate
+          expiresAt: futureDate,
         },
         {
           id: 'permanent1',
           type: 'Info',
           message: 'Permanent alert',
-          isTimed: false
-        }
+          isTimed: false,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={mixedAlerts} />);
@@ -484,9 +485,9 @@ describe('AlertsPopup', () => {
           expiresAt: {
             toDate: () => {
               throw new Error('Invalid date conversion');
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       // Mock console.warn to avoid noise in test output
@@ -497,10 +498,13 @@ describe('AlertsPopup', () => {
       // Should still render the alert but without timer
       expect(screen.getByText('Invalid date alert')).toBeInTheDocument();
       expect(screen.getByText('Timed')).toBeInTheDocument();
-      
+
       // Should have called console.warn for the invalid date
-      expect(consoleSpy).toHaveBeenCalledWith('Error checking alert expiration:', expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error checking alert expiration:',
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
 
@@ -514,9 +518,9 @@ describe('AlertsPopup', () => {
           expiresAt: {
             toDate: () => {
               throw new Error('Firestore error');
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       // Mock console.warn to avoid noise in test output
@@ -527,10 +531,13 @@ describe('AlertsPopup', () => {
       // Should still render the alert
       expect(screen.getByText('Error alert')).toBeInTheDocument();
       expect(screen.getByText('Timed')).toBeInTheDocument();
-      
+
       // Should have called console.warn for the timer calculation error
-      expect(consoleSpy).toHaveBeenCalledWith('Error calculating initial time remaining:', expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error calculating initial time remaining:',
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
 
@@ -544,9 +551,9 @@ describe('AlertsPopup', () => {
           expiresAt: {
             toDate: () => {
               throw new Error('Interval calculation error');
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       // Mock console.warn to avoid noise in test output
@@ -558,7 +565,7 @@ describe('AlertsPopup', () => {
       act(() => {
         jest.advanceTimersByTime(1000);
       });
-      
+
       // Wait for the component to update
       await act(async () => {
         jest.runOnlyPendingTimers();
@@ -566,10 +573,13 @@ describe('AlertsPopup', () => {
 
       // Should still render the alert
       expect(screen.getByText('Interval error alert')).toBeInTheDocument();
-      
+
       // Should have called console.warn for the interval error
-      expect(consoleSpy).toHaveBeenCalledWith('Error calculating time remaining:', expect.any(Error));
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error calculating time remaining:',
+        expect.any(Error)
+      );
+
       consoleSpy.mockRestore();
     });
 
@@ -581,8 +591,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Timer test alert',
           isTimed: true,
-          expiresAt: futureDate
-        }
+          expiresAt: futureDate,
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={timedAlerts} />);
@@ -590,7 +600,7 @@ describe('AlertsPopup', () => {
       // Check that the timer is displayed
       expect(screen.getByText('Timer test alert')).toBeInTheDocument();
       expect(screen.getByText('Timed')).toBeInTheDocument();
-      
+
       // The timer should be present in the DOM
       const timerElement = screen.queryByText(/h.*m.*s/);
       expect(timerElement).toBeInTheDocument();
@@ -599,7 +609,7 @@ describe('AlertsPopup', () => {
       act(() => {
         jest.advanceTimersByTime(1000);
       });
-      
+
       // Wait for the component to update
       await act(async () => {
         jest.runOnlyPendingTimers();
@@ -617,8 +627,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Expired immediately',
           isTimed: true,
-          expiresAt: new Date(Date.now() - 1000) // 1 second ago
-        }
+          expiresAt: new Date(Date.now() - 1000), // 1 second ago
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={expiredAlerts} />);
@@ -635,8 +645,8 @@ describe('AlertsPopup', () => {
           type: 'Warning',
           message: 'Almost expired',
           isTimed: true,
-          expiresAt: new Date(Date.now() + 500) // 0.5 seconds from now
-        }
+          expiresAt: new Date(Date.now() + 500), // 0.5 seconds from now
+        },
       ];
 
       render(<AlertsPopup {...defaultProps} alerts={almostExpiredAlerts} />);
@@ -648,7 +658,7 @@ describe('AlertsPopup', () => {
       act(() => {
         jest.advanceTimersByTime(1000);
       });
-      
+
       // Wait for the component to update
       await act(async () => {
         jest.runOnlyPendingTimers();
@@ -665,57 +675,57 @@ describe('AlertsPopup', () => {
     it('should handle undefined position prop gracefully', () => {
       const { position, ...propsWithoutPosition } = defaultProps;
       render(<AlertsPopup {...propsWithoutPosition} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '0px',
-        top: '0px'
+        top: '0px',
       });
     });
 
     it('should handle null position prop gracefully', () => {
       render(<AlertsPopup {...defaultProps} position={null} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '0px',
-        top: '0px'
+        top: '0px',
       });
     });
 
     it('should handle position with missing x or y', () => {
       render(<AlertsPopup {...defaultProps} position={{ x: 100 }} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({
         left: '100px',
-        top: '0px'
+        top: '0px',
       });
     });
 
     it('should handle undefined alerts prop gracefully', () => {
       const { alerts, ...propsWithoutAlerts } = defaultProps;
       render(<AlertsPopup {...propsWithoutAlerts} />);
-      
+
       expect(screen.getByText('No active alerts')).toBeInTheDocument();
     });
 
     it('should handle null alerts prop gracefully', () => {
       render(<AlertsPopup {...defaultProps} alerts={null} />);
-      
+
       expect(screen.getByText('No active alerts')).toBeInTheDocument();
     });
 
     it('should handle alerts with non-array values gracefully', () => {
-      render(<AlertsPopup {...defaultProps} alerts="not an array" />);
-      
+      render(<AlertsPopup {...defaultProps} alerts='not an array' />);
+
       expect(screen.getByText('No active alerts')).toBeInTheDocument();
     });
 
     it('should handle alerts with non-object items gracefully', () => {
       const invalidAlerts = ['string', 123, true, null];
       render(<AlertsPopup {...defaultProps} alerts={invalidAlerts} />);
-      
+
       expect(screen.getByText('No active alerts')).toBeInTheDocument();
     });
 
@@ -723,11 +733,11 @@ describe('AlertsPopup', () => {
       const manyAlerts = Array.from({ length: 1000 }, (_, index) => ({
         id: `alert-${index}`,
         type: 'Info',
-        message: `Alert message number ${index}`
+        message: `Alert message number ${index}`,
       }));
-      
+
       render(<AlertsPopup {...defaultProps} alerts={manyAlerts} />);
-      
+
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
       expect(screen.getAllByText('[Info]')).toHaveLength(1000);
       expect(screen.getByText('Alert message number 0')).toBeInTheDocument();
@@ -737,10 +747,10 @@ describe('AlertsPopup', () => {
     it('should handle rapid visibility changes', () => {
       const { rerender } = render(<AlertsPopup {...defaultProps} isVisible={true} />);
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
-      
+
       rerender(<AlertsPopup {...defaultProps} isVisible={false} />);
       expect(screen.queryByText('Trail Alerts')).not.toBeInTheDocument();
-      
+
       rerender(<AlertsPopup {...defaultProps} isVisible={true} />);
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
     });
@@ -749,7 +759,7 @@ describe('AlertsPopup', () => {
       const { rerender } = render(<AlertsPopup {...defaultProps} position={{ x: 100, y: 200 }} />);
       let popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({ left: '100px', top: '200px' });
-      
+
       rerender(<AlertsPopup {...defaultProps} position={{ x: 300, y: 400 }} />);
       popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toHaveStyle({ left: '300px', top: '400px' });
@@ -759,7 +769,7 @@ describe('AlertsPopup', () => {
       const { rerender } = render(<AlertsPopup {...defaultProps} alerts={[mockAlerts[0]]} />);
       expect(screen.getByText('[Warning]')).toBeInTheDocument();
       expect(screen.queryByText('[Info]')).not.toBeInTheDocument();
-      
+
       rerender(<AlertsPopup {...defaultProps} alerts={[mockAlerts[1]]} />);
       expect(screen.queryByText('[Warning]')).not.toBeInTheDocument();
       expect(screen.getByText('[Info]')).toBeInTheDocument();
@@ -769,13 +779,13 @@ describe('AlertsPopup', () => {
   describe('Accessibility', () => {
     it('should have proper structure for screen readers', () => {
       render(<AlertsPopup {...defaultProps} />);
-      
+
       const popup = screen.getByText('Trail Alerts').closest('.orion-alerts-popup');
       expect(popup).toBeInTheDocument();
-      
+
       const header = screen.getByText('Trail Alerts');
       expect(header).toBeInTheDocument();
-      
+
       const alertItems = screen.getAllByText(/\[.*\]/);
       expect(alertItems.length).toBe(mockAlerts.length);
     });
@@ -783,10 +793,10 @@ describe('AlertsPopup', () => {
     it('should handle alerts with no content gracefully', () => {
       const emptyAlerts = [
         { id: '1', type: '', message: '' },
-        { id: '2', type: null, message: null }
+        { id: '2', type: null, message: null },
       ];
       render(<AlertsPopup {...defaultProps} alerts={emptyAlerts} />);
-      
+
       expect(screen.getByText('Trail Alerts')).toBeInTheDocument();
       expect(screen.getAllByText('[]')).toHaveLength(2);
     });
@@ -796,10 +806,10 @@ describe('AlertsPopup', () => {
     it('should not re-render unnecessarily when props are the same', () => {
       const { rerender } = render(<AlertsPopup {...defaultProps} />);
       const initialRender = screen.getByText('Trail Alerts');
-      
+
       rerender(<AlertsPopup {...defaultProps} />);
       const afterRerender = screen.getByText('Trail Alerts');
-      
+
       expect(initialRender).toBe(afterRerender);
     });
   });

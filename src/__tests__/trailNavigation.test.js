@@ -2,7 +2,7 @@ import { createTrailNavigationActions } from '../utils/trailNavigation';
 
 // Mock Toast context
 jest.mock('../components/ToastContext', () => ({
-  useToast: jest.fn()
+  useToast: jest.fn(),
 }));
 
 import { useToast } from '../components/ToastContext';
@@ -14,19 +14,19 @@ describe('trailNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useToast.mockReturnValue({ show: mockShowToast });
-    
+
     // Mock navigator.share
     Object.defineProperty(navigator, 'share', {
       value: jest.fn(),
-      writable: true
+      writable: true,
     });
 
     // Mock navigator.clipboard
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn()
+        writeText: jest.fn(),
       },
-      writable: true
+      writable: true,
     });
 
     // Mock window.open
@@ -35,9 +35,9 @@ describe('trailNavigation', () => {
     // Mock window.location
     Object.defineProperty(window, 'location', {
       value: {
-        href: 'https://example.com/trail/123'
+        href: 'https://example.com/trail/123',
       },
-      writable: true
+      writable: true,
     });
   });
 
@@ -65,7 +65,7 @@ describe('trailNavigation', () => {
       expect(mockShare).toHaveBeenCalledWith({
         title: 'Test Trail',
         text: 'Check out this trail: Test Trail',
-        url: 'https://example.com/trail/123'
+        url: 'https://example.com/trail/123',
       });
     });
 
@@ -89,7 +89,10 @@ describe('trailNavigation', () => {
       await actions.handleShare('Test Trail');
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/trail/123');
-      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', { type: 'success', position: 'share-button' });
+      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', {
+        type: 'success',
+        position: 'share-button',
+      });
     });
 
     it('handles null trail name', async () => {
@@ -99,7 +102,10 @@ describe('trailNavigation', () => {
       await actions.handleShare(null);
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/trail/123');
-      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', { type: 'success', position: 'share-button' });
+      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', {
+        type: 'success',
+        position: 'share-button',
+      });
     });
 
     it('handles undefined trail name', async () => {
@@ -109,7 +115,10 @@ describe('trailNavigation', () => {
       await actions.handleShare(undefined);
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/trail/123');
-      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', { type: 'success', position: 'share-button' });
+      expect(mockShowToast).toHaveBeenCalledWith('Link copied to clipboard!', {
+        type: 'success',
+        position: 'share-button',
+      });
     });
   });
 
@@ -118,8 +127,8 @@ describe('trailNavigation', () => {
       const trail = {
         location: {
           latitude: 40.7128,
-          longitude: -74.0060
-        }
+          longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -135,8 +144,8 @@ describe('trailNavigation', () => {
       const trail = {
         location: {
           _latitude: 40.7128,
-          _longitude: -74.0060
-        }
+          _longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -171,8 +180,8 @@ describe('trailNavigation', () => {
     it('shows error when location data is invalid', () => {
       const trail = {
         location: {
-          invalid: 'data'
-        }
+          invalid: 'data',
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -184,7 +193,7 @@ describe('trailNavigation', () => {
 
     it('shows error when location is not an object', () => {
       const trail = {
-        location: 'not-an-object'
+        location: 'not-an-object',
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -203,7 +212,7 @@ describe('trailNavigation', () => {
         description: 'A beautiful trail',
         location: {
           latitude: 40.7128,
-          longitude: -74.0060
+          longitude: -74.006,
         },
         distance: 5.2,
         difficulty: 'moderate',
@@ -213,7 +222,7 @@ describe('trailNavigation', () => {
         lastUpdated: '2023-01-02',
         tags: ['hiking', 'scenic'],
         photos: ['photo1.jpg', 'photo2.jpg'],
-        gpsRoute: 'gps-data'
+        gpsRoute: 'gps-data',
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -226,7 +235,7 @@ describe('trailNavigation', () => {
             name: 'Test Trail',
             description: 'A beautiful trail',
             latitude: 40.7128,
-            longitude: -74.0060,
+            longitude: -74.006,
             distance: 5.2,
             difficulty: 'moderate',
             elevationGain: 500,
@@ -236,10 +245,10 @@ describe('trailNavigation', () => {
             tags: ['hiking', 'scenic'],
             photos: ['photo1.jpg', 'photo2.jpg'],
             gpsRoute: 'gps-data',
-            location: trail.location
+            location: trail.location,
           },
-          action: 'centerTrail'
-        }
+          action: 'centerTrail',
+        },
       });
     });
 
@@ -249,8 +258,8 @@ describe('trailNavigation', () => {
         name: 'Test Trail',
         location: {
           _latitude: 40.7128,
-          _longitude: -74.0060
-        }
+          _longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -260,10 +269,10 @@ describe('trailNavigation', () => {
         state: {
           trailToCenter: expect.objectContaining({
             latitude: 40.7128,
-            longitude: -74.0060
+            longitude: -74.006,
           }),
-          action: 'centerTrail'
-        }
+          action: 'centerTrail',
+        },
       });
     });
 
@@ -292,8 +301,8 @@ describe('trailNavigation', () => {
         id: 'trail-123',
         name: 'Test Trail',
         location: {
-          invalid: 'data'
-        }
+          invalid: 'data',
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -307,7 +316,7 @@ describe('trailNavigation', () => {
       const trail = {
         id: 'trail-123',
         name: 'Test Trail',
-        location: 'not-an-object'
+        location: 'not-an-object',
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -323,8 +332,8 @@ describe('trailNavigation', () => {
         name: 'Test Trail',
         location: {
           latitude: 40.7128,
-          longitude: -74.0060
-        }
+          longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
@@ -337,7 +346,7 @@ describe('trailNavigation', () => {
             name: 'Test Trail',
             description: undefined,
             latitude: 40.7128,
-            longitude: -74.0060,
+            longitude: -74.006,
             distance: undefined,
             difficulty: undefined,
             elevationGain: undefined,
@@ -347,10 +356,10 @@ describe('trailNavigation', () => {
             tags: undefined,
             photos: undefined,
             gpsRoute: undefined,
-            location: trail.location
+            location: trail.location,
           },
-          action: 'centerTrail'
-        }
+          action: 'centerTrail',
+        },
       });
     });
   });
@@ -362,12 +371,12 @@ describe('trailNavigation', () => {
         name: 'Test Trail',
         location: {
           latitude: 40.7128,
-          longitude: -74.0060
-        }
+          longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(null, mockShowToast);
-      
+
       // The implementation doesn't handle null navigate, so it should throw
       expect(() => {
         actions.handleShowOnMap(trail, null);
@@ -380,12 +389,12 @@ describe('trailNavigation', () => {
         name: 'Test Trail',
         location: {
           latitude: 40.7128,
-          longitude: -74.0060
-        }
+          longitude: -74.006,
+        },
       };
 
       const actions = createTrailNavigationActions(mockNavigate, null);
-      
+
       expect(() => {
         actions.handleDirections(trail);
       }).not.toThrow();
@@ -393,7 +402,7 @@ describe('trailNavigation', () => {
 
     it('handles undefined trail', () => {
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
-      
+
       expect(() => {
         actions.handleDirections(undefined);
         actions.handleShowOnMap(undefined, mockNavigate);
@@ -402,7 +411,7 @@ describe('trailNavigation', () => {
 
     it('handles null trail', () => {
       const actions = createTrailNavigationActions(mockNavigate, mockShowToast);
-      
+
       expect(() => {
         actions.handleDirections(null);
         actions.handleShowOnMap(null, mockNavigate);

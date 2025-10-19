@@ -5,28 +5,28 @@ jest.mock('firebase-admin', () => {
       where: jest.fn().mockReturnThis(),
       get: jest.fn().mockResolvedValue({
         empty: false,
-        forEach: jest.fn((callback) => {
+        forEach: jest.fn(callback => {
           callback({
             id: 'test-id',
-            data: () => ({ name: 'Test Trail', difficulty: 'easy' })
+            data: () => ({ name: 'Test Trail', difficulty: 'easy' }),
           });
-        })
+        }),
       }),
       add: jest.fn().mockResolvedValue({ id: 'new-item-id' }),
       doc: jest.fn(() => ({
         get: jest.fn().mockResolvedValue({
-          data: () => ({ name: 'Test User' })
-        })
-      }))
+          data: () => ({ name: 'Test User' }),
+        }),
+      })),
     })),
     FieldValue: {
-      serverTimestamp: jest.fn(() => new Date())
-    }
+      serverTimestamp: jest.fn(() => new Date()),
+    },
   };
 
   return {
     initializeApp: jest.fn(),
-    firestore: jest.fn(() => mockFirestore)
+    firestore: jest.fn(() => mockFirestore),
   };
 });
 

@@ -59,8 +59,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .admin-reviews-error {
@@ -363,22 +367,22 @@
   .admin-reviews-management {
     padding: 1rem;
   }
-  
+
   .admin-reviews-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .admin-reviews-stats {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .admin-review-details {
     grid-template-columns: 1fr;
   }
-  
+
   .admin-modal-actions {
     flex-direction: column;
   }

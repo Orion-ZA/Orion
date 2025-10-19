@@ -1,6 +1,10 @@
 /* Styles for the expanding Logout button */
 
-.logout-wrapper { display: inline-flex; align-items: center; padding: 0 8px; }
+.logout-wrapper {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+}
 
 .Btn {
   display: flex;
@@ -13,7 +17,9 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: box-shadow .28s, filter .18s;
+  transition:
+    box-shadow 0.28s,
+    filter 0.18s;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
   background-color: var(--danger, #ef4444);
   padding: 0 22px;
@@ -30,7 +36,9 @@
   padding: 0;
 }
 
-.sign svg path { fill: white; }
+.sign svg path {
+  fill: white;
+}
 
 /* text */
 .text {
@@ -46,22 +54,39 @@
   transition: none;
 }
 
-.gicon svg { width: 18px; height: 18px; }
+.gicon svg {
+  width: 18px;
+  height: 18px;
+}
 
 /* hover effect on button width */
 .Btn:hover {
   filter: brightness(1.08);
-  box-shadow: 0 6px 18px rgba(239,68,68,0.18);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.18);
 }
 
-
-.gicon svg { width: 20px; height: 20px; }
+.gicon svg {
+  width: 20px;
+  height: 20px;
+}
 
 @media (max-width: 640px) {
-  .Btn { min-width: 90px; height: 38px; padding: 0 12px; gap: 8px; }
-  .sign { margin-right: 6px; }
-  .gicon svg { width: 16px; height: 16px; }
+  .Btn {
+    min-width: 90px;
+    height: 38px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .sign {
+    margin-right: 6px;
+  }
+  .gicon svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 /* button click effect*/
-.Btn:active { transform: translate(2px ,2px); }
+.Btn:active {
+  transform: translate(2px, 2px);
+}

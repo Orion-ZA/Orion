@@ -30,31 +30,31 @@ jest.mock('../firebaseConfig', () => ({
 // Mock child components
 jest.mock('../components/FavouritesIcon', () => {
   return function FavouritesIcon() {
-    return <div data-testid="favourites-icon">FavouritesIcon</div>;
+    return <div data-testid='favourites-icon'>FavouritesIcon</div>;
   };
 });
 
 jest.mock('../components/PyramidLoader', () => {
   return function PyramidLoader() {
-    return <div data-testid="pyramid-loader">Loading...</div>;
+    return <div data-testid='pyramid-loader'>Loading...</div>;
   };
 });
 
 jest.mock('../components/WishlistIcon', () => {
   return function WishlistIcon() {
-    return <div data-testid="wishlist-icon">WishlistIcon</div>;
+    return <div data-testid='wishlist-icon'>WishlistIcon</div>;
   };
 });
 
 jest.mock('../components/SubmittedIcon', () => {
   return function SubmittedIcon() {
-    return <div data-testid="submitted-icon">SubmittedIcon</div>;
+    return <div data-testid='submitted-icon'>SubmittedIcon</div>;
   };
 });
 
 jest.mock('../components/CompletedIcon', () => {
   return function CompletedIcon() {
-    return <div data-testid="completed-icon">CompletedIcon</div>;
+    return <div data-testid='completed-icon'>CompletedIcon</div>;
   };
 });
 
@@ -74,18 +74,18 @@ describe('ProfilePage', () => {
   it('renders loading state initially', () => {
     mockOnAuthStateChanged.mockReturnValue(jest.fn()); // Return unsubscribe function
     render(<ProfilePage />);
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders login prompt when no user data', async () => {
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(null);
       return jest.fn();
     });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Please log in to view your profile')).toBeInTheDocument();
     });
@@ -96,22 +96,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: 'https://example.com/photo.jpg'
+      photoURL: 'https://example.com/photo.jpg',
     };
 
     const mockUserData = {
       wishlist: ['/Trails/trail1', '/Trails/trail2'],
       favourites: ['/Trails/trail3'],
       completedHikes: ['/Trails/trail4'],
-      submittedTrails: ['/Trails/trail5']
+      submittedTrails: ['/Trails/trail5'],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'Test Trail 1'
+      name: 'Test Trail 1',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -121,7 +121,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('My Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Test User')).toBeInTheDocument();
@@ -134,10 +134,10 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: 'https://example.com/photo.jpg'
+      photoURL: 'https://example.com/photo.jpg',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -145,7 +145,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       const avatar = screen.getByAltText('User Avatar');
       expect(avatar).toHaveAttribute('src', 'https://example.com/photo.jpg');
@@ -157,10 +157,10 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -168,7 +168,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No Image')).toBeInTheDocument();
     });
@@ -179,10 +179,10 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: null,
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -190,7 +190,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No Name')).toBeInTheDocument();
     });
@@ -201,10 +201,10 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -212,7 +212,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       const editButton = screen.getByText('Edit Profile');
       fireEvent.click(editButton);
@@ -225,22 +225,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: ['/Trails/trail1'],
       favourites: [],
       completedHikes: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'Wishlist Trail 1'
+      name: 'Wishlist Trail 1',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -251,7 +251,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Wishlist Trail 1')).toBeInTheDocument();
     });
@@ -262,22 +262,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: [],
       favourites: ['/Trails/trail1'],
       completedHikes: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'Favourite Trail 1'
+      name: 'Favourite Trail 1',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -287,7 +287,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Favourite Trail 1')).toBeInTheDocument();
     });
@@ -298,22 +298,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: [],
       favourites: [],
       completed: ['/Trails/trail1'],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'Completed Trail 1'
+      name: 'Completed Trail 1',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -323,7 +323,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Completed Trail 1')).toBeInTheDocument();
     });
@@ -334,22 +334,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: [],
       favourites: [],
       completedHikes: [],
-      submittedTrails: ['/Trails/trail1']
+      submittedTrails: ['/Trails/trail1'],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'Submitted Trail 1'
+      name: 'Submitted Trail 1',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -359,7 +359,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Submitted Trail 1')).toBeInTheDocument();
     });
@@ -370,17 +370,17 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: [],
       favourites: [],
       completedHikes: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -388,7 +388,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => mockUserData });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No wishlist yet.')).toBeInTheDocument();
       expect(screen.getByText('No favourites yet.')).toBeInTheDocument();
@@ -402,22 +402,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: ['/Trails/trail1'],
       favourites: [],
       completedHikes: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'String Reference Trail'
+      name: 'String Reference Trail',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -427,7 +427,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('String Reference Trail')).toBeInTheDocument();
     });
@@ -438,28 +438,31 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: ['/Trails/trail1', '/Trails/trail2'],
       favourites: [],
       completedHikes: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
 
     mockGetDoc
       .mockResolvedValueOnce({ exists: () => true, data: () => mockUserData })
-      .mockResolvedValueOnce({ exists: () => true, data: () => ({ id: 'trail1', name: 'Valid Trail' }) })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ id: 'trail1', name: 'Valid Trail' }),
+      })
       .mockResolvedValueOnce({ exists: () => false });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Valid Trail')).toBeInTheDocument();
       expect(screen.queryByText('Invalid Trail')).not.toBeInTheDocument();
@@ -468,15 +471,15 @@ describe('ProfilePage', () => {
 
   it('handles errors during data fetching', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     const mockUser = {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -484,7 +487,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockRejectedValue(new Error('Firestore error'));
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith('Error fetching user/trails:', expect.any(Error));
     });
@@ -497,10 +500,10 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -508,7 +511,7 @@ describe('ProfilePage', () => {
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getAllByTestId('wishlist-icon')).toHaveLength(2);
       expect(screen.getAllByTestId('favourites-icon')).toHaveLength(2);
@@ -532,22 +535,22 @@ describe('ProfilePage', () => {
       uid: 'test-uid',
       displayName: 'Test User',
       email: 'test@example.com',
-      photoURL: null
+      photoURL: null,
     };
 
     const mockUserData = {
       wishlist: [{ path: 'Trails/trail1' }], // Mock DocumentReference object
       favourites: [],
       completed: [],
-      submittedTrails: []
+      submittedTrails: [],
     };
 
     const mockTrailData = {
       id: 'trail1',
-      name: 'DocumentReference Trail'
+      name: 'DocumentReference Trail',
     };
 
-    mockOnAuthStateChanged.mockImplementation((callback) => {
+    mockOnAuthStateChanged.mockImplementation(callback => {
       callback(mockUser);
       return jest.fn();
     });
@@ -557,7 +560,7 @@ describe('ProfilePage', () => {
       .mockResolvedValue({ exists: () => true, data: () => mockTrailData, id: 'trail1' });
 
     render(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('DocumentReference Trail')).toBeInTheDocument();
     });
@@ -565,25 +568,17 @@ describe('ProfilePage', () => {
 
   it('renders ProfileGlowCard component', () => {
     const { container } = render(
-      <ProfileGlowCard 
-        avatarUrl="https://example.com/avatar.jpg" 
-        email="test@example.com" 
-      />
+      <ProfileGlowCard avatarUrl='https://example.com/avatar.jpg' email='test@example.com' />
     );
-    
+
     expect(container.querySelector('.card')).toBeInTheDocument();
     expect(container.querySelector('img')).toHaveAttribute('src', 'https://example.com/avatar.jpg');
     expect(container.querySelector('.email')).toHaveTextContent('test@example.com');
   });
 
   it('renders ProfileGlowCard component without avatar', () => {
-    const { container } = render(
-      <ProfileGlowCard 
-        avatarUrl={null} 
-        email="test@example.com" 
-      />
-    );
-    
+    const { container } = render(<ProfileGlowCard avatarUrl={null} email='test@example.com' />);
+
     expect(container.querySelector('.card')).toBeInTheDocument();
     expect(container.querySelector('svg')).toBeInTheDocument(); // Should show SVG placeholder
     expect(container.querySelector('.email')).toHaveTextContent('test@example.com');

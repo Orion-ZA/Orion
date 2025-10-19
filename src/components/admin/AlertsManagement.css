@@ -59,8 +59,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .admin-alerts-error {
@@ -388,22 +392,22 @@
   .admin-alerts-management {
     padding: 1rem;
   }
-  
+
   .admin-alerts-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .admin-alerts-stats {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .admin-alert-details {
     grid-template-columns: 1fr;
   }
-  
+
   .admin-modal-actions {
     flex-direction: column;
   }

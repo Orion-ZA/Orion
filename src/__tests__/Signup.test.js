@@ -12,19 +12,19 @@ import { useNavigate } from 'react-router-dom';
 jest.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
   signInWithPopup: jest.fn(),
-  updateProfile: jest.fn()
+  updateProfile: jest.fn(),
 }));
 
 jest.mock('firebase/firestore', () => ({
   setDoc: jest.fn(),
   doc: jest.fn(),
-  serverTimestamp: jest.fn(() => 'mock-timestamp')
+  serverTimestamp: jest.fn(() => 'mock-timestamp'),
 }));
 
 jest.mock('../firebaseConfig', () => ({
   auth: {},
   googleProvider: {},
-  db: {}
+  db: {},
 }));
 
 // Mock react-router-dom
@@ -34,14 +34,14 @@ jest.mock('react-router-dom', () => ({
     <a href={to} {...props}>
       {children}
     </a>
-  )
+  ),
 }));
 
 // Mock AuthLayout component
 jest.mock('../components/AuthLayout', () => {
   return function MockAuthLayout({ title, children }) {
     return (
-      <div data-testid="auth-layout">
+      <div data-testid='auth-layout'>
         <h1>{title}</h1>
         {children}
       </div>
@@ -120,8 +120,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -140,23 +140,26 @@ describe('Signup Component', () => {
       await userEvent.type(confirmPasswordInput, 'password123');
       await userEvent.click(submitButton);
 
-      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
-      expect(mockUpdateProfile).toHaveBeenCalledWith(mockUserCredential.user, { displayName: 'testuser' });
-      expect(mockSetDoc).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          profileInfo: {
-            email: 'test@example.com',
-            joinedDate: 'mock-timestamp',
-            name: 'testuser',
-            userId: 'test-user-id'
-          },
-          completedHikes: [],
-          favourites: [],
-          wishlist: [],
-          submittedTrails: []
-        }
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        'password123'
       );
+      expect(mockUpdateProfile).toHaveBeenCalledWith(mockUserCredential.user, {
+        displayName: 'testuser',
+      });
+      expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+        profileInfo: {
+          email: 'test@example.com',
+          joinedDate: 'mock-timestamp',
+          name: 'testuser',
+          userId: 'test-user-id',
+        },
+        completedHikes: [],
+        favourites: [],
+        wishlist: [],
+        submittedTrails: [],
+      });
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
     });
 
@@ -205,9 +208,11 @@ describe('Signup Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: errorMessage
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: errorMessage,
+          })
+        );
       });
 
       expect(mockNavigate).not.toHaveBeenCalled();
@@ -230,7 +235,7 @@ describe('Signup Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: 'Google User'
+        displayName: 'Google User',
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -245,21 +250,18 @@ describe('Signup Component', () => {
       });
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              email: mockUser.email,
-              joinedDate: 'mock-timestamp',
-              name: mockUser.displayName,
-              userId: mockUser.uid
-            },
-            completedHikes: [],
-            favourites: [],
-            wishlist: [],
-            submittedTrails: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            email: mockUser.email,
+            joinedDate: 'mock-timestamp',
+            name: mockUser.displayName,
+            userId: mockUser.uid,
+          },
+          completedHikes: [],
+          favourites: [],
+          wishlist: [],
+          submittedTrails: [],
+        });
       });
 
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
@@ -269,7 +271,7 @@ describe('Signup Component', () => {
       const mockUser = {
         uid: 'google-user-id',
         email: 'google@example.com',
-        displayName: null
+        displayName: null,
       };
 
       mockSignInWithPopup.mockResolvedValue({ user: mockUser });
@@ -284,8 +286,8 @@ describe('Signup Component', () => {
           expect.any(Object),
           expect.objectContaining({
             profileInfo: expect.objectContaining({
-              name: 'User'
-            })
+              name: 'User',
+            }),
           })
         );
       });
@@ -304,9 +306,11 @@ describe('Signup Component', () => {
       await userEvent.click(googleButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: errorMessage
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: errorMessage,
+          })
+        );
       });
 
       expect(mockNavigate).not.toHaveBeenCalled();
@@ -389,8 +393,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -410,21 +414,18 @@ describe('Signup Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            profileInfo: {
-              email: 'test@example.com',
-              joinedDate: 'mock-timestamp',
-              name: 'testuser',
-              userId: 'test-user-id'
-            },
-            completedHikes: [],
-            favourites: [],
-            wishlist: [],
-            submittedTrails: []
-          }
-        );
+        expect(mockSetDoc).toHaveBeenCalledWith(expect.any(Object), {
+          profileInfo: {
+            email: 'test@example.com',
+            joinedDate: 'mock-timestamp',
+            name: 'testuser',
+            userId: 'test-user-id',
+          },
+          completedHikes: [],
+          favourites: [],
+          wishlist: [],
+          submittedTrails: [],
+        });
       });
     });
 
@@ -432,8 +433,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -479,9 +480,11 @@ describe('Signup Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: 'Network error'
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Network error',
+          })
+        );
       });
 
       alertSpy.mockRestore();
@@ -491,8 +494,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -515,9 +518,11 @@ describe('Signup Component', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(expect.objectContaining({
-          message: 'Firestore error'
-        }));
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Firestore error',
+          })
+        );
       });
 
       alertSpy.mockRestore();
@@ -614,8 +619,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -634,7 +639,11 @@ describe('Signup Component', () => {
       await userEvent.type(confirmPasswordInput, 'password123');
       await userEvent.click(submitButton);
 
-      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        'password123'
+      );
     });
 
     it('handles special characters in username', async () => {
@@ -643,8 +652,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -663,7 +672,11 @@ describe('Signup Component', () => {
       await userEvent.type(confirmPasswordInput, 'password123');
       await userEvent.click(submitButton);
 
-      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        'password123'
+      );
     });
 
     it('handles special characters in password', async () => {
@@ -672,8 +685,8 @@ describe('Signup Component', () => {
       const mockUserCredential = {
         user: {
           uid: 'test-user-id',
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       };
 
       mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
@@ -692,7 +705,11 @@ describe('Signup Component', () => {
       await userEvent.type(confirmPasswordInput, specialPassword);
       await userEvent.click(submitButton);
 
-      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', specialPassword);
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'test@example.com',
+        specialPassword
+      );
     });
   });
 
@@ -737,8 +754,8 @@ describe('Signup Component', () => {
 
   describe('Component Cleanup', () => {
     it('handles component unmount during signup', async () => {
-      mockCreateUserWithEmailAndPassword.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 100))
+      mockCreateUserWithEmailAndPassword.mockImplementation(
+        () => new Promise(resolve => setTimeout(resolve, 100))
       );
 
       const { unmount } = render(<Signup />);

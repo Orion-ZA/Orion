@@ -375,11 +375,21 @@ export default function ReviewsMedia() {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
-          trail.name?.toLowerCase().includes(query) ||
-          trail.description?.toLowerCase().includes(query) ||
-          trail.location?.toLowerCase().includes(query) ||
-          trail.city?.toLowerCase().includes(query) ||
-          trail.state?.toLowerCase().includes(query);
+          (trail.name &&
+            typeof trail.name === 'string' &&
+            trail.name.toLowerCase().includes(query)) ||
+          (trail.description &&
+            typeof trail.description === 'string' &&
+            trail.description.toLowerCase().includes(query)) ||
+          (trail.location &&
+            typeof trail.location === 'string' &&
+            trail.location.toLowerCase().includes(query)) ||
+          (trail.city &&
+            typeof trail.city === 'string' &&
+            trail.city.toLowerCase().includes(query)) ||
+          (trail.state &&
+            typeof trail.state === 'string' &&
+            trail.state.toLowerCase().includes(query));
         if (!matchesSearch) return false;
       }
 

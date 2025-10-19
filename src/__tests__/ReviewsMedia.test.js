@@ -6,6 +6,7 @@ import ReviewsMedia from '../pages/ReviewsMedia';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock Firebase Storage
@@ -13,6 +14,13 @@ jest.mock('firebase/storage', () => ({
   ref: jest.fn(),
   uploadBytes: jest.fn(),
   getDownloadURL: jest.fn(),
+}));
+
+// Mock Firebase Firestore
+jest.mock('firebase/firestore', () => ({
+  collection: jest.fn(),
+  addDoc: jest.fn(),
+  serverTimestamp: jest.fn(() => new Date()),
 }));
 
 // Mock Firebase Auth
@@ -26,6 +34,7 @@ jest.mock('firebase/auth', () => ({
 jest.mock('../firebaseConfig', () => ({
   storage: {},
   auth: {},
+  db: {},
 }));
 
 // Mock useTrailUserActions hook
@@ -844,25 +853,16 @@ describe('ReviewsMedia Component', () => {
       const select = screen.getByRole('combobox');
       fireEvent.change(select, { target: { value: 'warning' } });
 
-      const textarea = screen.getByPlaceholderText('Enter alert message...');
+      const textarea = screen.getByPlaceholderText(
+        'Describe the alert or important information...'
+      );
       fireEvent.change(textarea, { target: { value: 'Test alert' } });
 
       const submitButton = screen.getByRole('button', { name: 'Submit' });
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith(
-          'https://us-central1-orion-sdp.cloudfunctions.net/addAlert',
-          expect.objectContaining({
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              trailId: 'trail-1',
-              message: 'Test alert',
-              type: 'warning',
-            }),
-          })
-        );
+        // The component uses Firestore directly, not the API
         expect(screen.getByText('Your alert has been submitted successfully!')).toBeInTheDocument();
       });
     });
@@ -875,7 +875,9 @@ describe('ReviewsMedia Component', () => {
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
-      const textarea = screen.getByPlaceholderText('Enter alert message...');
+      const textarea = screen.getByPlaceholderText(
+        'Describe the alert or important information...'
+      );
       fireEvent.change(textarea, { target: { value: 'Test alert' } });
 
       const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -1291,7 +1293,9 @@ describe('ReviewsMedia Component', () => {
       const alertButton = alertButtons[0];
       fireEvent.click(alertButton);
 
-      const textarea = screen.getByPlaceholderText('Enter alert message...');
+      const textarea = screen.getByPlaceholderText(
+        'Describe the alert or important information...'
+      );
       fireEvent.change(textarea, { target: { value: 'Some alert' } });
 
       const select = screen.getByRole('combobox');
@@ -1704,8 +1708,10 @@ describe('ReviewsMedia Component', () => {
       const alertButtons = screen.getAllByTitle('Add Alert');
       fireEvent.click(alertButtons[0]);
 
-      expect(screen.getByText(/Add Alert/)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Enter alert message...')).toBeInTheDocument();
+      expect(screen.getByText('Add Alert')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Describe the alert or important information...')
+      ).toBeInTheDocument();
 
       // Close modal by clicking cancel
       fireEvent.click(screen.getByText('Cancel'));
@@ -2152,6 +2158,12 @@ describe('ReviewsMedia Component', () => {
         return jest.fn(); // Return unsubscribe function
       });
 
+      // Mock Firebase storage functions
+      const mockRef = { _path: { pieces_: ['test-path'] } };
+      ref.mockReturnValue(mockRef);
+      uploadBytes.mockResolvedValue();
+      getDownloadURL.mockResolvedValue('https://example.com/uploaded-image.jpg');
+
       fetch
         .mockResolvedValueOnce({
           ok: true,
@@ -2260,6 +2272,11 @@ describe('ReviewsMedia Component', () => {
         return jest.fn(); // Return unsubscribe function
       });
 
+      // Mock Firebase storage functions to fail
+      const mockRef = { _path: { pieces_: ['test-path'] } };
+      ref.mockReturnValue(mockRef);
+      uploadBytes.mockRejectedValue(new Error('Upload failed'));
+
       fetch
         .mockResolvedValueOnce({
           ok: true,
@@ -2288,9 +2305,7 @@ describe('ReviewsMedia Component', () => {
         .mockResolvedValueOnce({
           ok: true,
           json: async () => ({ alerts: [] }),
-        })
-        // Mock failed image upload
-        .mockRejectedValueOnce(new Error('Upload failed'));
+        });
 
       window.alert = jest.fn();
 

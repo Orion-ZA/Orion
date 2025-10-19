@@ -25,7 +25,11 @@
     "start": "react-scripts start",
     "build": "set CI=false && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "semantic-check": "node semantic-html-checker.js",
+    "semantic-check:verbose": "node semantic-html-checker.js --verbose --fix-suggestions",
+    "semantic-check:components": "node semantic-html-checker.js --path src/components --verbose --fix-suggestions",
+    "semantic-check:pages": "node semantic-html-checker.js --path src/pages --verbose --fix-suggestions"
   },
   "eslintConfig": {
     "extends": [

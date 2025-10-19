@@ -518,6 +518,22 @@ section + section {
   font-weight: 600;
 }
 
+.loading-placeholder {
+  color: #9be7e5;
+  opacity: 0.7;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @keyframes stat-in {
   from {
     opacity: 0;

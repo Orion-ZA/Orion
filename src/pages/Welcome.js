@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
+import { useStatsData } from '../hooks/useStatsData';
 import styles from './Welcome.module.css';
 
 const HERO_IMAGES = [
@@ -176,6 +177,7 @@ export default function Welcome() {
   const [idx, setIdx] = useState(0);
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
+  const { stats, loading: statsLoading, error: statsError } = useStatsData();
 
   useEffect(() => {
     const id = setInterval(() => setIdx(i => (i + 1) % HERO_IMAGES.length), 6000);
@@ -311,22 +313,36 @@ export default function Welcome() {
       >
         <div className={styles['stats-inner']}>
           <div className={styles['stats-grid']}>
-            <StatCard label='Trails mapped' end={1248} start={0} visible={statsVisible} />
+            <StatCard
+              label='Trails mapped'
+              end={stats.trailsMapped}
+              start={0}
+              visible={statsVisible}
+              loading={statsLoading}
+            />
             <StatCard
               label='Total distance'
-              end={8742}
+              end={stats.totalDistance}
               start={0}
               suffix=' km'
               visible={statsVisible}
+              loading={statsLoading}
             />
             <StatCard
               label='Elevation gain'
-              end={215000}
+              end={stats.elevationGain}
               start={0}
               suffix=' m'
               visible={statsVisible}
+              loading={statsLoading}
             />
-            <StatCard label='Active hikers' end={12430} start={0} visible={statsVisible} />
+            <StatCard
+              label='Active hikers'
+              end={stats.activeHikers}
+              start={0}
+              visible={statsVisible}
+              loading={statsLoading}
+            />
           </div>
         </div>
       </section>
@@ -377,7 +393,6 @@ export default function Welcome() {
     </div>
   );
 }
-
 function ActivitySection() {
   return (
     <section
@@ -527,12 +542,21 @@ function InteractiveActivityCard({ name, image, message, filters, index }) {
   );
 }
 
-function StatCard({ label, start = 0, end, duration = 1200, prefix = '', suffix = '', visible }) {
+function StatCard({
+  label,
+  start = 0,
+  end,
+  duration = 1200,
+  prefix = '',
+  suffix = '',
+  visible,
+  loading = false,
+}) {
   const [value, setValue] = useState(start);
   const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!visible || startedRef.current) return;
+    if (!visible || startedRef.current || loading) return;
     startedRef.current = true;
     let rafId;
     const startTime = performance.now();
@@ -550,14 +574,28 @@ function StatCard({ label, start = 0, end, duration = 1200, prefix = '', suffix 
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [visible, start, end, duration]);
+  }, [visible, start, end, duration, loading]);
+
+  // Reset animation when loading changes
+  useEffect(() => {
+    if (loading) {
+      startedRef.current = false;
+      setValue(start);
+    }
+  }, [loading, start]);
 
   return (
     <div className={styles['stat-card']} role='figure' aria-label={`${label} ${Math.round(value)}`}>
       <div className={styles['stat-value']}>
-        {prefix}
-        {new Intl.NumberFormat().format(Math.round(value))}
-        {suffix}
+        {loading ? (
+          <span className={styles['loading-placeholder']}>...</span>
+        ) : (
+          <>
+            {prefix}
+            {new Intl.NumberFormat().format(Math.round(value))}
+            {suffix}
+          </>
+        )}
       </div>
       <div className={styles['stat-label']}>{label}</div>
     </div>
